@@ -1,8 +1,8 @@
 // Erzeugt vorläufige App-Symbole (Katzenkopf auf orangem Grund) ohne Zusatzpakete.
 // Wird später durch das Logo nach Kitos Foto ersetzt.  Aufruf: node werkzeuge/erzeuge-icons.js
-const fs = require("fs");
-const path = require("path");
-const zlib = require("zlib");
+import fs from "node:fs";
+import path from "node:path";
+import zlib from "node:zlib";
 
 const HINTERGRUND = [0xc8, 0x64, 0x2d];
 const KOPF = [0xff, 0xf6, 0xee];
@@ -80,7 +80,7 @@ function crc32(daten) {
   return (crc ^ 0xffffffff) >>> 0;
 }
 
-const ziel = path.join(__dirname, "..", "icons");
+const ziel = path.join(import.meta.dirname, "..", "icons");
 fs.mkdirSync(ziel, { recursive: true });
 for (const groesse of [192, 512]) {
   fs.writeFileSync(path.join(ziel, `icon-${groesse}.png`), zeichne(groesse));

@@ -14,28 +14,142 @@
 <body>
   <header class="kopf">
     <h1>Kilossos</h1>
-    <p class="untertitel">Sicher abnehmen – Schritt für Schritt</p>
+    <p class="untertitel" id="tiername">Kito</p>
   </header>
 
   <main>
-    <section class="karte">
-      <h2>Kito</h2>
-      <dl class="werte">
-        <div><dt>Letztes Gewicht</dt><dd>9,32 kg <span class="hinweis">Tierarzt, Okt. 2026</span></dd></div>
-        <div><dt>Zielgewicht</dt><dd>wartet auf Freigabe vom Tierarzt</dd></div>
-      </dl>
+    <!-- Heute -->
+    <section class="ansicht" data-ansicht="heute">
+      <div class="tagwahl">
+        <button class="knopf-rund" data-aktion="tag-zurueck" aria-label="Vorheriger Tag">‹</button>
+        <h2 id="tag-titel">Heute</h2>
+        <button class="knopf-rund" data-aktion="tag-vor" aria-label="Nächster Tag">›</button>
+      </div>
+
+      <div class="karte summe">
+        <div><span class="gross" id="summe-kcal">0</span> kcal</div>
+        <div class="leise"><span id="summe-gramm">0</span> g Futter</div>
+        <p class="hinweis" id="summe-hinweis" hidden>ca. – enthält Futter ohne genau abgelesenen kcal-Wert</p>
+      </div>
+
+      <ul class="liste" id="mahlzeiten-liste"></ul>
+      <p class="leer" id="mahlzeiten-leer">Noch keine Mahlzeit an diesem Tag.</p>
+
+      <button class="knopf-haupt" data-aktion="mahlzeit-neu">+ Mahlzeit eintragen</button>
     </section>
 
-    <section class="karte leise">
-      <h2>Was hier bald passiert</h2>
-      <p>Diese Version prüft nur, dass Kilossos auf deinem Handy läuft. Als Nächstes kommen das Erfassen von Gewicht und Mahlzeiten und danach die Berechnung mit Sicherheitsgrenzen.</p>
+    <!-- Gewicht -->
+    <section class="ansicht" data-ansicht="gewicht" hidden>
+      <div class="karte summe">
+        <div><span class="gross" id="gewicht-aktuell">–</span> kg</div>
+        <div class="leise" id="gewicht-aenderung">Noch kein Gewicht eingetragen.</div>
+      </div>
+      <p class="tipp">Am besten 1× pro Woche wiegen: gleicher Wochentag, gleiche Uhrzeit, gleiche Waage.</p>
+      <ul class="liste" id="gewicht-liste"></ul>
+      <button class="knopf-haupt" data-aktion="gewicht-neu">+ Gewicht eintragen</button>
+    </section>
+
+    <!-- Futter -->
+    <section class="ansicht" data-ansicht="futter" hidden>
+      <p class="tipp">Tippe auf eine Sorte, um sie zu ändern – zum Beispiel, um den genauen kcal-Wert von der Packung einzutragen.</p>
+      <ul class="liste" id="futter-liste"></ul>
+      <button class="knopf-haupt" data-aktion="futter-neu">+ Eigene Sorte anlegen</button>
+    </section>
+
+    <!-- Mehr -->
+    <section class="ansicht" data-ansicht="mehr" hidden>
+      <div class="karte">
+        <h2>Sicherung</h2>
+        <p class="leise">Alle Einträge liegen nur auf diesem Handy. Speichere regelmäßig eine Sicherung, zum Beispiel in deinem Cloud-Ordner oder per Mail an dich selbst.</p>
+        <button class="knopf-haupt" data-aktion="export">Sicherung speichern</button>
+        <label class="knopf-zweit">
+          Sicherung einlesen
+          <input type="file" accept="application/json,.json" id="import-datei" hidden>
+        </label>
+        <p class="hinweis" id="speicher-status"></p>
+      </div>
+      <p class="fuss" id="version">Version 0.2</p>
     </section>
   </main>
 
-  <footer class="fuss">
-    <span id="status">Version 0.1</span>
-  </footer>
+  <nav class="leiste" aria-label="Bereiche">
+    <button data-ziel="heute" aria-current="page">Heute</button>
+    <button data-ziel="gewicht">Gewicht</button>
+    <button data-ziel="futter">Futter</button>
+    <button data-ziel="mehr">Mehr</button>
+  </nav>
 
-  <script src="app.js"></script>
+  <!-- Formular: Mahlzeit -->
+  <dialog id="dialog-mahlzeit">
+    <form method="dialog" id="form-mahlzeit">
+      <h2>Mahlzeit eintragen</h2>
+      <fieldset class="auswahl" id="mahlzeit-futter"><legend>Futter</legend></fieldset>
+      <label>Menge in Gramm
+        <input name="gramm" inputmode="decimal" autocomplete="off" required>
+      </label>
+      <label>Uhrzeit
+        <input name="uhrzeit" type="time" required>
+      </label>
+      <p class="vorschau" id="mahlzeit-vorschau"></p>
+      <p class="fehler" id="mahlzeit-fehler" hidden></p>
+      <div class="knoepfe">
+        <button value="abbrechen" formnovalidate class="knopf-zweit">Abbrechen</button>
+        <button value="speichern" class="knopf-haupt">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Formular: Gewicht -->
+  <dialog id="dialog-gewicht">
+    <form method="dialog" id="form-gewicht">
+      <h2>Gewicht eintragen</h2>
+      <label>Gewicht in kg
+        <input name="kg" inputmode="decimal" autocomplete="off" placeholder="z. B. 9,32" required>
+      </label>
+      <label>Datum
+        <input name="datum" type="date" required>
+      </label>
+      <label>Notiz (optional)
+        <input name="notiz" autocomplete="off" placeholder="z. B. Tierarzt">
+      </label>
+      <p class="fehler" id="gewicht-fehler" hidden></p>
+      <div class="knoepfe">
+        <button value="abbrechen" formnovalidate class="knopf-zweit">Abbrechen</button>
+        <button value="speichern" class="knopf-haupt">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Formular: Futtersorte -->
+  <dialog id="dialog-futter">
+    <form method="dialog" id="form-futter">
+      <h2 id="futter-titel">Eigene Sorte</h2>
+      <label>Name
+        <input name="name" autocomplete="off" required>
+      </label>
+      <fieldset class="auswahl">
+        <legend>Art</legend>
+        <label><input type="radio" name="typ" value="nass" required> Nassfutter</label>
+        <label><input type="radio" name="typ" value="trocken"> Trockenfutter</label>
+        <label><input type="radio" name="typ" value="leckerli"> Leckerli / Snack</label>
+      </fieldset>
+      <label>kcal pro 100 g
+        <input name="kcal" inputmode="decimal" autocomplete="off" required>
+      </label>
+      <fieldset class="auswahl">
+        <legend>Woher stammt der Wert?</legend>
+        <label><input type="radio" name="quelle" value="packung" required> Genau von der Packung</label>
+        <label><input type="radio" name="quelle" value="ungefaehr"> Ungefähr</label>
+      </fieldset>
+      <p class="fehler" id="futter-fehler" hidden></p>
+      <div class="knoepfe">
+        <button value="loeschen" formnovalidate class="knopf-gefahr" id="futter-loeschen" hidden>Löschen</button>
+        <button value="abbrechen" formnovalidate class="knopf-zweit">Abbrechen</button>
+        <button value="speichern" class="knopf-haupt">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
 </body>
 </html>

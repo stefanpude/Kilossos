@@ -1,11 +1,12 @@
 // Kleiner Testserver ohne Zusatzpakete: node server.js  →  http://localhost:8080
-const http = require("http");
-const fs = require("fs");
-const path = require("path");
+import http from "node:http";
+import fs from "node:fs";
+import path from "node:path";
 
 const PORT = 8080;
-const WURZEL = __dirname;
+const WURZEL = import.meta.dirname;
 const TYPEN = {
+  ".json": "application/json; charset=utf-8",
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
