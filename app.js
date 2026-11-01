@@ -11,8 +11,10 @@ import {
   abnahmeProWoche,
   leckerliKcal,
   aktuelleFreigabe,
+  gewichteBis,
   warnungen,
 } from "./js/rechnen.js";
+import { zeichneVerlauf } from "./js/verlauf.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
 if ("serviceWorker" in navigator) {
@@ -72,8 +74,9 @@ function zeichneHeute() {
   const futter = futterNachId(daten);
   const mahlzeiten = mahlzeitenAm(daten.mahlzeiten.filter((m) => m.tierId === tier.id), tag);
   const summe = tagesSumme(mahlzeiten, futter);
-  const freigabe = freigabeVonTier();
-  const gewichte = daten.gewichte.filter((g) => g.tierId === tier.id);
+  // Ein vergangener Tag wird an der Freigabe und den Gewichten gemessen, die an diesem Tag galten.
+  const freigabe = freigabeVonTier(tag);
+  const gewichte = gewichteBis(daten.gewichte.filter((g) => g.tierId === tier.id), tag);
 
   const liste = warnungen({
     name: tier.name,
@@ -164,8 +167,8 @@ function datumText(iso) {
   return new Date(j, m - 1, t).toLocaleDateString("de-DE", { day: "numeric", month: "short", year: "numeric" });
 }
 
-function freigabeVonTier() {
-  return aktuelleFreigabe(daten.freigaben.filter((f) => f.tierId === tier.id));
+function freigabeVonTier(stichtag) {
+  return aktuelleFreigabe(daten.freigaben.filter((f) => f.tierId === tier.id), stichtag);
 }
 
 function zeichneFreigabe() {
@@ -182,7 +185,39 @@ function zeichneAlles() {
   zeichneGewicht();
   zeichneFutter();
   zeichneFreigabe();
+  $("verlauf-inhalt").innerHTML = zeichneVerlauf({
+    gewichte: daten.gewichte.filter((g) => g.tierId === tier.id),
+    mahlzeiten: daten.mahlzeiten.filter((m) => m.tierId === tier.id),
+    freigaben: daten.freigaben.filter((f) => f.tierId === tier.id),
+    futterNachId: futterNachId(daten),
+  });
 }
+
+// Tooltip der Diagramme: Zeigen (Maus) oder Tippen (Handy) auf eine Trefferfläche.
+function zeigeTooltip(ereignis) {
+  const treffer = ereignis.target.closest?.(".treffer");
+  const tooltip = $("tooltip");
+  document.querySelectorAll(".treffer.aktiv").forEach((g) => g !== treffer && g.classList.remove("aktiv"));
+  if (!treffer) {
+    tooltip.hidden = true;
+    return;
+  }
+  treffer.classList.add("aktiv");
+  tooltip.textContent = treffer.dataset.tip;
+  tooltip.hidden = false;
+  const flaeche = $("verlauf-inhalt").getBoundingClientRect();
+  const ziel = treffer.getBoundingClientRect();
+  const karte = treffer.closest(".karte").getBoundingClientRect();
+  const links = Math.min(Math.max(ziel.left + ziel.width / 2 - flaeche.left - tooltip.offsetWidth / 2, 0), flaeche.width - tooltip.offsetWidth);
+  tooltip.style.left = `${links}px`;
+  tooltip.style.top = `${karte.top - flaeche.top + 8}px`;
+}
+$("verlauf-inhalt").addEventListener("pointerover", zeigeTooltip);
+$("verlauf-inhalt").addEventListener("pointerdown", zeigeTooltip);
+$("verlauf-inhalt").addEventListener("pointerleave", () => {
+  $("tooltip").hidden = true;
+  document.querySelectorAll(".treffer.aktiv").forEach((g) => g.classList.remove("aktiv"));
+});
 
 // ---------- Formulare ----------
 

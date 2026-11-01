@@ -8,6 +8,7 @@ import {
   abnahmeProWoche,
   leckerliKcal,
   aktuelleFreigabe,
+  gewichteBis,
   warnungen,
 } from "../js/rechnen.js";
 
@@ -65,11 +66,18 @@ test("leckerliKcal zählt nur Leckerlis", () => {
   assert.equal(leckerliKcal(mahlzeiten, futter), 20);
 });
 
+test("gewichteBis lässt spätere Messungen weg", () => {
+  const g = [{ datum: "2026-11-01" }, { datum: "2026-11-08" }];
+  assert.deepEqual(gewichteBis(g, "2026-11-07"), [g[0]]);
+});
+
 test("aktuelleFreigabe nimmt die neueste", () => {
   const alt = { datum: "2026-11-03", kcalProTag: 260 };
   const neu = { datum: "2026-12-01", kcalProTag: 245 };
   assert.equal(aktuelleFreigabe([neu, alt]), neu);
   assert.equal(aktuelleFreigabe([]), null);
+  assert.equal(aktuelleFreigabe([neu, alt], "2026-11-20"), alt); // galt an diesem Tag
+  assert.equal(aktuelleFreigabe([neu, alt], "2026-11-01"), null);
 });
 
 // ---------- Warnungen ----------

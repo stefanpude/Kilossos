@@ -135,12 +135,19 @@ export function leckerliKcal(mahlzeiten, futterNachId) {
   return kcal;
 }
 
-export function aktuelleFreigabe(freigaben) {
-  return [...freigaben].sort((a, b) => b.datum.localeCompare(a.datum))[0] ?? null;
+// Die neueste Freigabe – mit "stichtag" ("JJJJ-MM-TT") die, die an diesem Tag galt.
+export function aktuelleFreigabe(freigaben, stichtag = "9999-12-31") {
+  return [...freigaben].filter((f) => f.datum <= stichtag).sort((a, b) => b.datum.localeCompare(a.datum))[0] ?? null;
+}
+
+// Gewichte, die an einem Tag schon bekannt waren – für den Blick auf vergangene Tage.
+export function gewichteBis(gewichte, stichtag) {
+  return gewichte.filter((g) => g.datum <= stichtag);
 }
 
 // Alle Warnungen für einen Tag, die dringendsten zuerst. art: "sofort" | "achtung" | "hinweis".
 // tag/heute: "JJJJ-MM-TT"; kcal und leckerli: Summe des Tages; fruehereMahlzeiten: gab es vor "tag" schon Einträge?
+// freigabe und gewichte so übergeben, wie sie an "tag" galten (aktuelleFreigabe mit Stichtag, gewichteBis).
 export function warnungen({ name, tag, heute, kcal, leckerli, freigabe, gewichte, fruehereMahlzeiten }) {
   const liste = [];
   const neuestes = gewichteSortiert(gewichte)[0];
@@ -231,7 +238,7 @@ export function warnungen({ name, tag, heute, kcal, leckerli, freigabe, gewichte
         quelle: QUELLEN.kontrolle,
       });
     }
-    if (tageZwischen(freigabe.datum, heute) > GRENZEN.freigabeTage) {
+    if (tageZwischen(freigabe.datum, tag) > GRENZEN.freigabeTage) {
       liste.push({
         art: "hinweis",
         id: "freigabe-alt",
