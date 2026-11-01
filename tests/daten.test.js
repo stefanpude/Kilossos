@@ -16,7 +16,7 @@ test("erster Start legt Kito und seine beiden Sorten an", () => {
   const daten = laden(speicher);
   assert.equal(daten.tiere.length, 1);
   assert.equal(daten.tiere[0].name, "Kito");
-  assert.deepEqual(daten.futter.map((f) => [f.kcalPro100g, f.kcalQuelle]), [[77, "packung"], [346, "geschaetzt"]]);
+  assert.deepEqual(daten.futter.map((f) => [f.kcalPro100g, f.kcalQuelle]), [[77, "packung"], [327.5, "hersteller"]]);
   assert.ok(istGueltig(daten));
 });
 
@@ -28,21 +28,32 @@ test("gespeicherte Einträge kommen beim nächsten Start unverändert zurück", 
   assert.deepEqual(laden(speicher), daten);
 });
 
-test("alter Purina-Startwert (360, ungefähr) wird einmalig ersetzt, eigene Änderungen bleiben", () => {
+// Speichert Purina mit den angegebenen Werten und lädt danach neu, wie beim nächsten App-Start.
+function purinaNachNeustart(werte) {
   const speicher = testSpeicher();
   const daten = laden(speicher);
   const purina = daten.futter.find((f) => f.name === "Purina One Light");
-  Object.assign(purina, { kcalPro100g: 360, kcalQuelle: "ungefaehr", notiz: "alt" });
+  Object.assign(purina, werte);
   speichern(daten, speicher);
   const neu = laden(speicher).futter.find((f) => f.name === "Purina One Light");
-  assert.deepEqual([neu.kcalPro100g, neu.kcalQuelle], [346, "geschaetzt"]);
   assert.equal(neu.id, purina.id); // gleiche Sorte, Mahlzeiten bleiben verknüpft
+  return neu;
+}
 
-  Object.assign(neu, { kcalPro100g: 352, kcalQuelle: "packung" });
-  const datenEigen = laden(speicher);
-  datenEigen.futter.find((f) => f.id === neu.id).kcalPro100g = 352;
-  speichern(datenEigen, speicher);
-  assert.equal(laden(speicher).futter.find((f) => f.id === neu.id).kcalPro100g, 352);
+test("alte Purina-Startwerte (360 ungefähr, 346 geschätzt) werden durch die Herstellerangabe ersetzt", () => {
+  for (const alt of [
+    { kcalPro100g: 360, kcalQuelle: "ungefaehr" },
+    { kcalPro100g: 346, kcalQuelle: "geschaetzt" },
+  ]) {
+    const neu = purinaNachNeustart(alt);
+    assert.deepEqual([neu.kcalPro100g, neu.kcalQuelle], [327.5, "hersteller"]);
+    assert.match(neu.notiz, /purina\.co\.uk/);
+  }
+});
+
+test("selbst geänderte Purina-Werte bleiben stehen", () => {
+  const neu = purinaNachNeustart({ kcalPro100g: 352, kcalQuelle: "packung", notiz: "eigene" });
+  assert.deepEqual([neu.kcalPro100g, neu.kcalQuelle, neu.notiz], [352, "packung", "eigene"]);
 });
 
 test("fremde oder kaputte Daten werden nicht übernommen", () => {

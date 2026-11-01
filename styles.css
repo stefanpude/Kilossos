@@ -155,7 +155,7 @@ main {
   border-radius: 999px;
   border: 1px solid currentColor;
 }
-.marke-packung { color: var(--gut); }
+.marke-packung, .marke-hersteller { color: var(--gut); }
 .marke-ungefaehr, .marke-geschaetzt { color: var(--warnung); }
 
 /* Knöpfe */

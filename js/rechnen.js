@@ -24,7 +24,10 @@ export function kcalAusBestandteilen({ protein, fett, asche, faser, feuchte }) {
   return verdaulicheEnergie - 0.77 * protein;
 }
 
-// Summe eines Tages. "unsicher" ist wahr, sobald ein Futter keinen genau abgelesenen kcal-Wert hat.
+// Quellen, deren kcal-Wert als genau gilt. Alles andere macht eine Summe zu "ca.".
+const GENAUE_QUELLEN = ["packung", "hersteller"];
+
+// Summe eines Tages. "unsicher" ist wahr, sobald ein Futter keinen genauen kcal-Wert hat.
 export function tagesSumme(mahlzeiten, futterNachId) {
   let gramm = 0;
   let kcal = 0;
@@ -37,7 +40,7 @@ export function tagesSumme(mahlzeiten, futterNachId) {
       continue;
     }
     kcal += kcalFuer(mahlzeit.gramm, futter.kcalPro100g);
-    if (futter.kcalQuelle !== "packung") unsicher = true;
+    if (!GENAUE_QUELLEN.includes(futter.kcalQuelle)) unsicher = true;
   }
   return { gramm, kcal, unsicher };
 }

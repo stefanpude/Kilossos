@@ -55,6 +55,11 @@ test("tagesSumme addiert Gramm und kcal und meldet ungefähre Werte", () => {
   assert.equal(beide.unsicher, true);
 });
 
+test("tagesSumme: Herstellerangabe gilt als genauer Wert", () => {
+  const futter = new Map([["purina", { kcalPro100g: 327.5, kcalQuelle: "hersteller" }]]);
+  assert.deepEqual(tagesSumme([{ futterId: "purina", gramm: 30 }], futter), { gramm: 30, kcal: 98.25, unsicher: false });
+});
+
 test("tagesSumme eines leeren Tages ist null", () => {
   assert.deepEqual(tagesSumme([], new Map()), { gramm: 0, kcal: 0, unsicher: false });
 });

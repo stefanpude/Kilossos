@@ -2,7 +2,8 @@
 // Aufbau (Version 1):
 //   tiere:      { id, name, art, geschlecht, kastriert }
 //   futter:     { id, name, typ: "nass" | "trocken" | "leckerli", kcalPro100g, kcalQuelle, notiz }
-//               kcalQuelle: "packung" (genau abgelesen) | "ungefaehr" | "geschaetzt" (aus Bestandteilen berechnet)
+//               kcalQuelle: "packung" (genau abgelesen) | "hersteller" (Herstellerangabe, z. B. Website)
+//                         | "geschaetzt" (aus Bestandteilen berechnet) | "ungefaehr"
 //   mahlzeiten: { id, tierId, futterId, gramm, zeitpunkt (ISO-Zeit) }
 //   gewichte:   { id, tierId, kg, datum ("JJJJ-MM-TT"), notiz }
 //   freigaben:  { id, tierId, datum, zielgewichtKg, kcalProTag, tierarzt, notiz }  – Oberfläche folgt in Schritt 4
@@ -34,10 +35,10 @@ function startDaten() {
         id: neueId(),
         name: "Purina One Light",
         typ: "trocken",
-        kcalPro100g: 346,
-        kcalQuelle: "geschaetzt",
+        kcalPro100g: 327.5,
+        kcalQuelle: "hersteller",
         notiz:
-          "Packung nennt keine kcal. Berechnet aus Protein 37 %, Fett 9,5 %, Asche 7,5 %, Faser 6 %, Feuchte angenommen 8 % (NRC 2006); Spanne 339–353.",
+          "Herstellerangabe purina.co.uk (11/2026), gleiche Nährwerte wie die deutsche Packung (Protein 37 %, Fett 9,5 %, Asche 7,5 %, Faser 6 %). Die Packung selbst nennt keine kcal. Eigene Nachrechnung (NRC 2006): 339–353.",
       },
     ],
     mahlzeiten: [],
@@ -77,7 +78,10 @@ function startwerteAktualisieren(daten) {
   const neueStartwerte = startDaten().futter;
   let geaendert = false;
   for (const futter of daten.futter) {
-    const alt = futter.name === "Purina One Light" && futter.kcalPro100g === 360 && futter.kcalQuelle === "ungefaehr";
+    const alt =
+      futter.name === "Purina One Light" &&
+      ((futter.kcalPro100g === 360 && futter.kcalQuelle === "ungefaehr") ||
+        (futter.kcalPro100g === 346 && futter.kcalQuelle === "geschaetzt"));
     if (alt) {
       const neu = neueStartwerte.find((f) => f.name === futter.name);
       Object.assign(futter, { kcalPro100g: neu.kcalPro100g, kcalQuelle: neu.kcalQuelle, notiz: neu.notiz });

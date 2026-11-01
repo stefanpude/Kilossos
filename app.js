@@ -17,7 +17,7 @@ const sicher = (text) =>
   String(text).replace(/[&<>"']/g, (z) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[z]);
 
 const TYP_NAMEN = { nass: "Nassfutter", trocken: "Trockenfutter", leckerli: "Leckerli" };
-const QUELLE_NAMEN = { packung: "Packung", ungefaehr: "ungefähr", geschaetzt: "geschätzt" };
+const QUELLE_NAMEN = { packung: "Packung", hersteller: "Hersteller", ungefaehr: "ungefähr", geschaetzt: "geschätzt" };
 
 let daten;
 try {
