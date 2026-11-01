@@ -1,7 +1,7 @@
 // Erzeugt eine SIMULIERTE Kilossos-Sicherung: Kito nimmt in 34 Wochen von 9,32 auf 7,2 kg ab,
-// innerhalb aller Grenzen aus docs/sicherheitsgrenzen.md. Nur zum Testen – nie auf dem Handy einlesen,
-// das würde die echten Einträge ersetzen.
-// Aufruf: node werkzeuge/erzeuge-testdaten.js  →  werkzeuge/testdaten-kito.json
+// innerhalb aller Grenzen aus docs/sicherheitsgrenzen.md. Die App zeigt sie im Demo-Modus (Link mit "?demo")
+// in einem eigenen Speicherplatz an. Nie über "Sicherung einlesen" laden – das würde die echten Einträge ersetzen.
+// Aufruf: node werkzeuge/erzeuge-testdaten.js  →  demo/kito-simulation.json
 // Jeder simulierte Tag wird mit den Warnregeln der App geprüft; bei einer Warnung bricht das Skript ab.
 
 import { writeFileSync } from "node:fs";
@@ -117,7 +117,7 @@ if (fehler.length) {
 }
 
 const sicherung = { version: VERSION, tiere: [kito], futter, mahlzeiten, gewichte, freigaben };
-writeFileSync(new URL("testdaten-kito.json", import.meta.url), JSON.stringify(sicherung, null, 2));
+writeFileSync(new URL("../demo/kito-simulation.json", import.meta.url), JSON.stringify(sicherung));
 const wochenRaten = gewichte.slice(1).map((g, i) => ((gewichte[i].kg - g.kg) / gewichte[i].kg) * 100);
 console.log(
   `OK: ${WOCHEN} Wochen (${tagSchluessel(start)} bis ${heuteSchluessel}), ${gewichte.length} Wägungen, ` +

@@ -1,4 +1,13 @@
-import { laden, speichern, istGueltig, neueId, dauerhaftSpeichern, futterNachId } from "./js/daten.js";
+import {
+  laden,
+  speichern,
+  istGueltig,
+  neueId,
+  dauerhaftSpeichern,
+  futterNachId,
+  demoModus,
+  verschiebeDaten,
+} from "./js/daten.js";
 import {
   leseZahl,
   kcalFuer,
@@ -33,6 +42,24 @@ const sicher = (text) =>
 
 const TYP_NAMEN = { nass: "Nassfutter", trocken: "Trockenfutter", leckerli: "Leckerli" };
 const QUELLE_NAMEN = { packung: "Packung", hersteller: "Hersteller", ungefaehr: "ungefähr", geschaetzt: "geschätzt" };
+
+// Demo-Modus (Link mit "?demo"): lädt bei jedem Öffnen frisch die Simulation aus werkzeuge/erzeuge-testdaten.js,
+// verschoben auf heute, in einen eigenen Speicherplatz. Die echten Einträge bleiben unberührt.
+const demo = new URLSearchParams(location.search).has("demo");
+if (demo) {
+  demoModus(true);
+  $("demo-leiste").hidden = false;
+  try {
+    const simulation = await (await fetch("demo/kito-simulation.json")).json();
+    const letzterTag = [...simulation.gewichte].sort((a, b) => b.datum.localeCompare(a.datum))[0].datum;
+    const [j, m, t] = letzterTag.split("-").map(Number);
+    const heute = new Date();
+    const tage = Math.round((new Date(heute.getFullYear(), heute.getMonth(), heute.getDate()) - new Date(j, m - 1, t)) / 86400000);
+    speichern(verschiebeDaten(simulation, tage));
+  } catch (fehler) {
+    console.error("Demo-Daten konnten nicht geladen werden:", fehler);
+  }
+}
 
 let daten;
 try {
@@ -399,7 +426,7 @@ function exportieren() {
   const datei = new Blob([JSON.stringify(daten, null, 2)], { type: "application/json" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(datei);
-  link.download = `kilossos-sicherung-${tagSchluessel(new Date())}.json`;
+  link.download = `kilossos-${demo ? "demo" : "sicherung"}-${tagSchluessel(new Date())}.json`;
   link.click();
   URL.revokeObjectURL(link.href);
 }

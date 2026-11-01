@@ -324,3 +324,15 @@ dialog input:not([type="radio"]) {
   font-size: 0.8125rem;
   pointer-events: none;
 }
+
+/* Hinweisleiste im Demo-Modus */
+.demo-leiste {
+  margin: 0 auto;
+  max-width: 640px;
+  padding: 0.5rem 1rem;
+  background: var(--warnung);
+  color: var(--flaeche);
+  font-size: 0.875rem;
+  border-radius: 0 0 12px 12px;
+}
+.demo-leiste a { color: inherit; font-weight: 600; margin-left: 0.25rem; }

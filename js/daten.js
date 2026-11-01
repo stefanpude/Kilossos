@@ -11,7 +11,15 @@
 // später durch den genauen Packungswert ersetzt, stimmen damit auch alle früheren Tage.
 
 const SCHLUESSEL = "kilossos-daten";
+const DEMO_SCHLUESSEL = "kilossos-demo";
 export const VERSION = 1;
+
+// Im Demo-Modus (Link mit "?demo") gehen alle Lese- und Schreibzugriffe in einen eigenen Speicherplatz.
+// Die echten Einträge unter "kilossos-daten" werden dabei nie angefasst.
+let schluessel = SCHLUESSEL;
+export function demoModus(an) {
+  schluessel = an ? DEMO_SCHLUESSEL : SCHLUESSEL;
+}
 
 export function neueId() {
   return crypto.randomUUID();
@@ -58,7 +66,7 @@ export function istGueltig(daten) {
 }
 
 export function laden(speicher = localStorage) {
-  const text = speicher.getItem(SCHLUESSEL);
+  const text = speicher.getItem(schluessel);
   if (text === null) {
     const daten = startDaten();
     speichern(daten, speicher);
@@ -92,7 +100,7 @@ function startwerteAktualisieren(daten) {
 }
 
 export function speichern(daten, speicher = localStorage) {
-  speicher.setItem(SCHLUESSEL, JSON.stringify(daten));
+  speicher.setItem(schluessel, JSON.stringify(daten));
 }
 
 // Bittet den Browser, die Daten nicht bei Speicherknappheit automatisch zu löschen.
@@ -101,6 +109,26 @@ export async function dauerhaftSpeichern() {
     return navigator.storage.persist();
   }
   return false;
+}
+
+// Verschiebt alle Datumsangaben um "tage" Tage – damit die Demo-Simulation immer am heutigen Tag endet.
+export function verschiebeDaten(daten, tage) {
+  const tag = (iso) => {
+    const [j, m, t] = iso.split("-").map(Number);
+    const d = new Date(j, m - 1, t + tage);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  };
+  const zeitpunkt = (iso) => {
+    const d = new Date(iso);
+    d.setDate(d.getDate() + tage); // Ortszeit: Uhrzeit bleibt auch über die Zeitumstellung gleich
+    return d.toISOString();
+  };
+  return {
+    ...daten,
+    mahlzeiten: daten.mahlzeiten.map((m) => ({ ...m, zeitpunkt: zeitpunkt(m.zeitpunkt) })),
+    gewichte: daten.gewichte.map((g) => ({ ...g, datum: tag(g.datum) })),
+    freigaben: daten.freigaben.map((f) => ({ ...f, datum: tag(f.datum) })),
+  };
 }
 
 export function futterNachId(daten) {

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { laden, speichern, istGueltig } from "../js/daten.js";
+import { laden, speichern, istGueltig, demoModus, verschiebeDaten } from "../js/daten.js";
 
 // Ersatz für den Browserspeicher, damit die Tests ohne Browser laufen.
 function testSpeicher() {
@@ -63,4 +63,38 @@ test("fremde oder kaputte Daten werden nicht übernommen", () => {
   const speicher = testSpeicher();
   speicher.setItem("kilossos-daten", JSON.stringify({ irgendwas: true }));
   assert.throws(() => laden(speicher), /unbekanntes Format/);
+});
+
+test("Demo-Modus schreibt in einen eigenen Speicherplatz, echte Daten bleiben unberührt", () => {
+  const speicher = testSpeicher();
+  const echt = laden(speicher);
+  echt.gewichte.push({ id: "echt", tierId: echt.tiere[0].id, kg: 9.32, datum: "2026-10-25", notiz: "" });
+  speichern(echt, speicher);
+  demoModus(true);
+  try {
+    const demo = laden(speicher);
+    assert.equal(demo.gewichte.length, 0);
+    demo.gewichte.push({ id: "demo", tierId: demo.tiere[0].id, kg: 7.2, datum: "2026-11-01", notiz: "" });
+    speichern(demo, speicher);
+  } finally {
+    demoModus(false);
+  }
+  assert.deepEqual(laden(speicher).gewichte.map((g) => g.id), ["echt"]);
+});
+
+test("verschiebeDaten verschiebt Tage, Uhrzeit bleibt (auch über die Zeitumstellung)", () => {
+  const daten = {
+    version: 1,
+    tiere: [],
+    futter: [],
+    mahlzeiten: [{ zeitpunkt: new Date(2026, 2, 20, 7, 30).toISOString() }],
+    gewichte: [{ datum: "2026-03-20" }],
+    freigaben: [{ datum: "2026-12-30" }],
+  };
+  const neu = verschiebeDaten(daten, 10);
+  assert.equal(neu.gewichte[0].datum, "2026-03-30");
+  assert.equal(neu.freigaben[0].datum, "2027-01-09");
+  const zeit = new Date(neu.mahlzeiten[0].zeitpunkt);
+  assert.deepEqual([zeit.getDate(), zeit.getHours(), zeit.getMinutes()], [30, 7, 30]);
+  assert.equal(daten.gewichte[0].datum, "2026-03-20"); // Original unverändert
 });
