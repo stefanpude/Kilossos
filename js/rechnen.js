@@ -11,6 +11,19 @@ export function kcalFuer(gramm, kcalPro100g) {
   return (gramm * kcalPro100g) / 100;
 }
 
+// Schätzt die umsetzbare Energie (kcal pro 100 g) aus den "Analytischen Bestandteilen" der Packung,
+// alle Angaben in Prozent. Formel: NRC 2006, "Nutrient Requirements of Dogs and Cats", modifizierte
+// Atwater-Faktoren für Katzen. Typische Abweichung vom echten Wert: bis etwa 10 %.
+// Trockenfutter nennt die Feuchte oft nicht (Pflicht erst ab 14 %); dann sind 8 % ein üblicher Annahmewert.
+export function kcalAusBestandteilen({ protein, fett, asche, faser, feuchte }) {
+  const kohlenhydrate = 100 - protein - fett - asche - faser - feuchte;
+  const bruttoEnergie = 5.7 * protein + 9.4 * fett + 4.1 * (kohlenhydrate + faser);
+  const faserInTrockenmasse = (faser / (100 - feuchte)) * 100;
+  const verdaulichProzent = 87.9 - 0.88 * faserInTrockenmasse;
+  const verdaulicheEnergie = (bruttoEnergie * verdaulichProzent) / 100;
+  return verdaulicheEnergie - 0.77 * protein;
+}
+
 // Summe eines Tages. "unsicher" ist wahr, sobald ein Futter keinen genau abgelesenen kcal-Wert hat.
 export function tagesSumme(mahlzeiten, futterNachId) {
   let gramm = 0;

@@ -1,6 +1,21 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { leseZahl, kcalFuer, tagesSumme, tagSchluessel, mahlzeitenAm, gewichteSortiert } from "../js/rechnen.js";
+import {
+  leseZahl,
+  kcalFuer,
+  kcalAusBestandteilen,
+  tagesSumme,
+  tagSchluessel,
+  mahlzeitenAm,
+  gewichteSortiert,
+} from "../js/rechnen.js";
+
+test("kcalAusBestandteilen: Purina One Light (Packung 11/2026, Feuchte angenommen)", () => {
+  const purina = { protein: 37, fett: 9.5, asche: 7.5, faser: 6 };
+  assert.equal(Math.round(kcalAusBestandteilen({ ...purina, feuchte: 8 })), 346);
+  assert.equal(Math.round(kcalAusBestandteilen({ ...purina, feuchte: 6 })), 353);
+  assert.equal(Math.round(kcalAusBestandteilen({ ...purina, feuchte: 10 })), 339);
+});
 
 test("leseZahl versteht Komma und Punkt", () => {
   assert.equal(leseZahl("9,32"), 9.32);

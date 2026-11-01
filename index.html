@@ -68,7 +68,7 @@
         </label>
         <p class="hinweis" id="speicher-status"></p>
       </div>
-      <p class="fuss" id="version">Version 0.2</p>
+      <p class="fuss" id="version">Version 0.2.1</p>
     </section>
   </main>
 
@@ -139,8 +139,10 @@
       <fieldset class="auswahl">
         <legend>Woher stammt der Wert?</legend>
         <label><input type="radio" name="quelle" value="packung" required> Genau von der Packung</label>
+        <label><input type="radio" name="quelle" value="geschaetzt"> Aus den Bestandteilen berechnet</label>
         <label><input type="radio" name="quelle" value="ungefaehr"> Ungefähr</label>
       </fieldset>
+      <p class="tipp" id="futter-notiz" hidden></p>
       <p class="fehler" id="futter-fehler" hidden></p>
       <div class="knoepfe">
         <button value="loeschen" formnovalidate class="knopf-gefahr" id="futter-loeschen" hidden>Löschen</button>

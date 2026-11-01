@@ -34,9 +34,10 @@ function startDaten() {
         id: neueId(),
         name: "Purina One Light",
         typ: "trocken",
-        kcalPro100g: 360,
-        kcalQuelle: "ungefaehr",
-        notiz: "Genauen Wert von der Packung übernehmen",
+        kcalPro100g: 346,
+        kcalQuelle: "geschaetzt",
+        notiz:
+          "Packung nennt keine kcal. Berechnet aus Protein 37 %, Fett 9,5 %, Asche 7,5 %, Faser 6 %, Feuchte angenommen 8 % (NRC 2006); Spanne 339–353.",
       },
     ],
     mahlzeiten: [],
@@ -66,7 +67,24 @@ export function laden(speicher = localStorage) {
   if (!istGueltig(daten)) {
     throw new Error("Die gespeicherten Daten haben ein unbekanntes Format.");
   }
+  if (startwerteAktualisieren(daten)) speichern(daten, speicher);
   return daten;
+}
+
+// Ersetzt veraltete Startwerte aus früheren Versionen – aber nur, wenn sie noch unverändert sind.
+// Was Stefan selbst geändert hat, bleibt immer stehen.
+function startwerteAktualisieren(daten) {
+  const neueStartwerte = startDaten().futter;
+  let geaendert = false;
+  for (const futter of daten.futter) {
+    const alt = futter.name === "Purina One Light" && futter.kcalPro100g === 360 && futter.kcalQuelle === "ungefaehr";
+    if (alt) {
+      const neu = neueStartwerte.find((f) => f.name === futter.name);
+      Object.assign(futter, { kcalPro100g: neu.kcalPro100g, kcalQuelle: neu.kcalQuelle, notiz: neu.notiz });
+      geaendert = true;
+    }
+  }
+  return geaendert;
 }
 
 export function speichern(daten, speicher = localStorage) {

@@ -231,8 +231,10 @@ function oeffneFutter(futter) {
     form.name.value = futter.name;
     form.typ.value = futter.typ;
     form.kcal.value = String(futter.kcalPro100g).replace(".", ",");
-    form.quelle.value = futter.kcalQuelle === "packung" ? "packung" : "ungefaehr";
+    form.quelle.value = futter.kcalQuelle;
   }
+  $("futter-notiz").textContent = futter?.notiz ?? "";
+  $("futter-notiz").hidden = !futter?.notiz;
   $("dialog-futter").showModal();
 }
 
