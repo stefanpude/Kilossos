@@ -35,9 +35,10 @@ function startDaten() {
         id: neueId(),
         name: "Sheba Fresh n Fine in Sauce mit Geflügel",
         typ: "nass",
-        kcalPro100g: 77,
-        kcalQuelle: "packung",
-        notiz: "",
+        kcalPro100g: 71,
+        kcalQuelle: "hersteller",
+        notiz:
+          "Rezeptur „Huhn, Geflügel & Truthahn in Sauce“ (EAN 4770608260286), Angaben laut zooplus.de (11/2026): Protein 7,7 %, Fett 3,9 %, Asche 1,8 %, Faser 0,2 %, Feuchte 84,7 %; 35,5 kcal je 50-g-Beutel. Eigene Nachrechnung (NRC 2006): 70,7.",
       },
       {
         id: neueId(),
@@ -86,10 +87,17 @@ function startwerteAktualisieren(daten) {
   const neueStartwerte = startDaten().futter;
   let geaendert = false;
   for (const futter of daten.futter) {
-    const alt =
+    const altPurina =
       futter.name === "Purina One Light" &&
       ((futter.kcalPro100g === 360 && futter.kcalQuelle === "ungefaehr") ||
         (futter.kcalPro100g === 346 && futter.kcalQuelle === "geschaetzt"));
+    // Bis 0.5.0 stand hier der Wert einer anderen Sheba-Rezeptur (77 kcal, "Huhn, Truthahn & Ente").
+    const altSheba =
+      futter.name === "Sheba Fresh n Fine in Sauce mit Geflügel" &&
+      futter.kcalPro100g === 77 &&
+      futter.kcalQuelle === "packung" &&
+      !futter.notiz;
+    const alt = altPurina || altSheba;
     if (alt) {
       const neu = neueStartwerte.find((f) => f.name === futter.name);
       Object.assign(futter, { kcalPro100g: neu.kcalPro100g, kcalQuelle: neu.kcalQuelle, notiz: neu.notiz });

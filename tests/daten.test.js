@@ -16,7 +16,7 @@ test("erster Start legt Kito und seine beiden Sorten an", () => {
   const daten = laden(speicher);
   assert.equal(daten.tiere.length, 1);
   assert.equal(daten.tiere[0].name, "Kito");
-  assert.deepEqual(daten.futter.map((f) => [f.kcalPro100g, f.kcalQuelle]), [[77, "packung"], [327.5, "hersteller"]]);
+  assert.deepEqual(daten.futter.map((f) => [f.kcalPro100g, f.kcalQuelle]), [[71, "hersteller"], [327.5, "hersteller"]]);
   assert.ok(istGueltig(daten));
 });
 
@@ -49,6 +49,17 @@ test("alte Purina-Startwerte (360 ungefähr, 346 geschätzt) werden durch die He
     assert.deepEqual([neu.kcalPro100g, neu.kcalQuelle], [327.5, "hersteller"]);
     assert.match(neu.notiz, /purina\.co\.uk/);
   }
+});
+
+test("alter Sheba-Startwert (77, Packung) wird durch Rezeptur „Huhn, Geflügel & Truthahn“ ersetzt", () => {
+  const speicher = testSpeicher();
+  const daten = laden(speicher);
+  const sheba = daten.futter.find((f) => f.name.startsWith("Sheba"));
+  Object.assign(sheba, { kcalPro100g: 77, kcalQuelle: "packung", notiz: "" });
+  speichern(daten, speicher);
+  const neu = laden(speicher).futter.find((f) => f.id === sheba.id);
+  assert.deepEqual([neu.kcalPro100g, neu.kcalQuelle], [71, "hersteller"]);
+  assert.match(neu.notiz, /4770608260286/);
 });
 
 test("selbst geänderte Purina-Werte bleiben stehen", () => {

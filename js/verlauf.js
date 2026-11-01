@@ -64,7 +64,7 @@ const svg = (inhalt, titel) =>
 const treffer = (x, breite, tip, extra = "") =>
   `<g class="treffer" data-tip="${sicher(tip)}">${extra}<rect x="${x - breite / 2}" y="${RAND.oben}" width="${breite}" height="${innenH}" fill="transparent"/></g>`;
 
-function gewichtDiagramm(gewichte, freigaben) {
+export function gewichtDiagramm(gewichte, freigaben) {
   const liste = [...gewichteSortiert(gewichte)].reverse();
   const erste = freigaben.length ? [...freigaben].sort((a, b) => a.datum.localeCompare(b.datum))[0] : null;
   const ziel = aktuelleFreigabe(freigaben)?.zielgewichtKg;
@@ -180,7 +180,7 @@ function wochenKcal(mahlzeiten, futterNachId) {
     .map((w) => ({ montag: w.montag, kcal: w.kcal / w.tage, leckerli: w.leckerli / w.tage }));
 }
 
-function kcalDiagramm(mahlzeiten, futterNachId, freigaben) {
+export function kcalDiagramm(mahlzeiten, futterNachId, freigaben) {
   const wochen = wochenKcal(mahlzeiten, futterNachId);
   const sortiert = [...freigaben].sort((a, b) => a.datum.localeCompare(b.datum));
   const yMax = Math.max(...wochen.map((w) => w.kcal), ...sortiert.map((f) => f.kcalProTag)) * 1.1;

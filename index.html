@@ -63,6 +63,16 @@
       <div class="tooltip" id="tooltip" hidden></div>
     </section>
 
+    <!-- Übersicht für den Tierarzt (über "Mehr" erreichbar) -->
+    <section class="ansicht" data-ansicht="bericht" hidden>
+      <div class="bericht-werkzeuge">
+        <button class="knopf-zweit" data-ziel="mehr">‹ Zurück</button>
+        <button class="knopf-haupt" data-aktion="bericht-drucken">Drucken / als PDF speichern</button>
+        <p class="tipp">Im Druckfenster als Drucker „Als PDF speichern“ wählen.</p>
+      </div>
+      <article class="bericht" id="bericht-inhalt"></article>
+    </section>
+
     <!-- Futter -->
     <section class="ansicht" data-ansicht="futter" hidden>
       <p class="tipp">Tippe auf eine Sorte, um sie zu ändern – zum Beispiel, um den genauen kcal-Wert von der Packung einzutragen.</p>
@@ -79,6 +89,18 @@
         <p class="tipp">Zielgewicht und Tagesmenge legt nur der Tierarzt fest. Ohne Freigabe zeichnet Kilossos nur auf und warnt, schlägt aber keine Mengen vor.</p>
       </div>
       <div class="karte">
+        <h2>Übersicht für den Tierarzt</h2>
+        <p class="leise">Gewicht, Fütterung, Freigaben und Auffälligkeiten auf einen Blick – zum Ausdrucken oder als PDF zum Mitnehmen.</p>
+        <label>Zeitraum
+          <select id="bericht-zeitraum">
+            <option value="28">letzte 4 Wochen</option>
+            <option value="84">letzte 12 Wochen</option>
+            <option value="alles" selected>alles</option>
+          </select>
+        </label>
+        <button class="knopf-haupt" data-aktion="bericht-oeffnen">Übersicht öffnen</button>
+      </div>
+      <div class="karte">
         <h2>Sicherung</h2>
         <p class="leise">Alle Einträge liegen nur auf diesem Handy. Speichere regelmäßig eine Sicherung, zum Beispiel in deinem Cloud-Ordner oder per Mail an dich selbst.</p>
         <button class="knopf-haupt" data-aktion="export">Sicherung speichern</button>
@@ -88,7 +110,7 @@
         </label>
         <p class="hinweis" id="speicher-status"></p>
       </div>
-      <p class="fuss" id="version">Version 0.4.1</p>
+      <p class="fuss" id="version">Version 0.5.0</p>
     </section>
   </main>
 

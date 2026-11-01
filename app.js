@@ -24,6 +24,7 @@ import {
   warnungen,
 } from "./js/rechnen.js";
 import { zeichneVerlauf } from "./js/verlauf.js";
+import { berichtDaten, berichtHtml } from "./js/bericht.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
 if ("serviceWorker" in navigator) {
@@ -217,6 +218,37 @@ function zeichneAlles() {
     mahlzeiten: daten.mahlzeiten.filter((m) => m.tierId === tier.id),
     freigaben: daten.freigaben.filter((f) => f.tierId === tier.id),
     futterNachId: futterNachId(daten),
+  });
+}
+
+function zeichneBericht() {
+  const heute = tagSchluessel(new Date());
+  const eigene = {
+    gewichte: daten.gewichte.filter((g) => g.tierId === tier.id),
+    mahlzeiten: daten.mahlzeiten.filter((m) => m.tierId === tier.id),
+    freigaben: daten.freigaben.filter((f) => f.tierId === tier.id),
+  };
+  const auswahl = $("bericht-zeitraum").value;
+  let von;
+  if (auswahl === "alles") {
+    const anfaenge = [
+      ...eigene.gewichte.map((g) => g.datum),
+      ...eigene.mahlzeiten.map((m) => tagSchluessel(new Date(m.zeitpunkt))),
+      ...eigene.freigaben.map((f) => f.datum),
+    ].sort();
+    von = anfaenge[0] ?? heute;
+  } else {
+    const d = new Date();
+    d.setDate(d.getDate() - Number(auswahl));
+    von = tagSchluessel(d);
+  }
+  const bericht = berichtDaten({ tier, ...eigene, futter: daten.futter, von, bis: heute, heute });
+  $("bericht-inhalt").innerHTML = berichtHtml(bericht, {
+    tier,
+    ...eigene,
+    futterNachId: futterNachId(daten),
+    erstellt: heute,
+    demo,
   });
 }
 
@@ -496,6 +528,12 @@ document.addEventListener("click", (ereignis) => {
       return oeffneFutter(daten.futter.find((f) => f.id === id));
     case "freigabe-neu":
       return oeffneFreigabe();
+    case "bericht-oeffnen":
+      zeichneBericht();
+      zeigeAnsicht("bericht");
+      return window.scrollTo(0, 0);
+    case "bericht-drucken":
+      return window.print();
     case "export":
       return exportieren();
   }

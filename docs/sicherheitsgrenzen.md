@@ -58,7 +58,7 @@ Vorgeschlagene Kernparameter:
 
 **Klinisch relevanter Befund aus der Beispielrechnung:** Mit Kitos jetzigem Futter (Nassfutter Alleinfutter plus
 Purina One Light, beides kein Diätfuttermittel) läge die Proteinaufnahme bei 0,8 × RER(Ziel) nur bei etwa
-3,7 g/kg Zielgewicht. Das ist deutlich weniger als die ≈ 5,2 g/kg KM, die Laflamme & Hannah 2013 für den Erhalt
+3,8 g/kg Zielgewicht. Das ist deutlich weniger als die ≈ 5,2 g/kg KM, die Laflamme & Hannah 2013 für den Erhalt
 der Magermasse ermittelt haben. Außerdem würde das Trockenfutter weit unter der Herstellerempfehlung gefüttert.
 Das spricht dafür, ein therapeutisches Reduktionsfutter zu prüfen (Abschnitt B3, Punkt 6).
 
@@ -208,17 +208,17 @@ Die Untergrenze ohne Freigabe (B2, Zeile 3b) liegt für Kito bei RER(9,32 ÷ 1,4
 
 | Futter | kcal/100 g | Menge | kcal | Protein |
 |---|---|---|---|---|
-| Sheba Fresh n Fine Geflügel (nass) | 77 (Packung) | 100 g = 2 Beutel | 77 | 7,9 g |
-| Purina One Light (trocken) | 327,5 (Herstellerangabe UK) | 51 g | 168 | 18,9 g |
-| **Summe** | | | **245** | **26,8 g ≈ 3,7 g/kg Ziel** |
+| Sheba Fresh & Fine „Huhn, Geflügel & Truthahn“ (nass) | 71 (Herstellerangabe, siehe futter-recherche.md) | 100 g = 2 Beutel | 71 | 7,7 g |
+| Purina One Light (trocken) | 327,5 (Herstellerangabe UK) | 53 g | 174 | 19,6 g |
+| **Summe** | | | **245** | **27,3 g ≈ 3,8 g/kg Ziel** |
 
 Zum Vergleich:
 - nur Trockenfutter: 75 g
-- nur Nassfutter: 319 g, also gut 6 Beutel
+- nur Nassfutter: 345 g, also knapp 7 Beutel
 
 **Beurteilung:**
-- Die Proteinaufnahme läge rund 30 % unter dem Studienwert von etwa 37 g.
-- Die Fütterungstabelle von Purina nennt für 8–10 kg 90–115 g/Tag als Erhaltung. 51 g sind weniger als die
+- Die Proteinaufnahme läge rund ein Viertel unter dem Studienwert von etwa 37 g.
+- Die Fütterungstabelle von Purina nennt für 8–10 kg 90–115 g/Tag als Erhaltung. 53 g sind weniger als die
   Hälfte davon. Die Versorgung mit Mikronährstoffen ist damit nicht mehr durch die Deklaration abgesichert [3].
 - Sheba und Purina One Light sind Alleinfuttermittel für die Erhaltung, keine Diätfuttermittel.
 - Die Proteindichte ist mit etwa 10–11 g/100 kcal bei beiden Sorten ähnlich. Die Mischung ändert daran wenig. Nur
