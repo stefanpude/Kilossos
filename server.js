@@ -1,0 +1,34 @@
+// Kleiner Testserver ohne Zusatzpakete: node server.js  →  http://localhost:8080
+const http = require("http");
+const fs = require("fs");
+const path = require("path");
+
+const PORT = 8080;
+const WURZEL = __dirname;
+const TYPEN = {
+  ".html": "text/html; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".webmanifest": "application/manifest+json",
+  ".png": "image/png",
+  ".svg": "image/svg+xml",
+};
+
+http
+  .createServer((anfrage, antwort) => {
+    const pfad = decodeURIComponent(new URL(anfrage.url, "http://localhost").pathname);
+    const datei = path.join(WURZEL, pfad === "/" ? "index.html" : pfad);
+    if (!datei.startsWith(WURZEL)) {
+      antwort.writeHead(403).end();
+      return;
+    }
+    fs.readFile(datei, (fehler, inhalt) => {
+      if (fehler) {
+        antwort.writeHead(404).end("Nicht gefunden");
+        return;
+      }
+      antwort.writeHead(200, { "Content-Type": TYPEN[path.extname(datei)] || "application/octet-stream" });
+      antwort.end(inhalt);
+    });
+  })
+  .listen(PORT, () => console.log(`Kilossos läuft auf http://localhost:${PORT}`));
