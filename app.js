@@ -1,5 +1,18 @@
 import { laden, speichern, istGueltig, neueId, dauerhaftSpeichern, futterNachId } from "./js/daten.js";
-import { leseZahl, kcalFuer, tagesSumme, tagSchluessel, mahlzeitenAm, gewichteSortiert } from "./js/rechnen.js";
+import {
+  leseZahl,
+  kcalFuer,
+  tagesSumme,
+  tagSchluessel,
+  mahlzeitenAm,
+  gewichteSortiert,
+  GRENZEN,
+  harteUntergrenze,
+  abnahmeProWoche,
+  leckerliKcal,
+  aktuelleFreigabe,
+  warnungen,
+} from "./js/rechnen.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
 if ("serviceWorker" in navigator) {
@@ -59,7 +72,25 @@ function zeichneHeute() {
   const futter = futterNachId(daten);
   const mahlzeiten = mahlzeitenAm(daten.mahlzeiten.filter((m) => m.tierId === tier.id), tag);
   const summe = tagesSumme(mahlzeiten, futter);
+  const freigabe = freigabeVonTier();
+  const gewichte = daten.gewichte.filter((g) => g.tierId === tier.id);
 
+  const liste = warnungen({
+    name: tier.name,
+    tag,
+    heute: tagSchluessel(new Date()),
+    kcal: summe.kcal,
+    leckerli: leckerliKcal(mahlzeiten, futter),
+    freigabe,
+    gewichte,
+    fruehereMahlzeiten: daten.mahlzeiten.some((m) => m.tierId === tier.id && tagSchluessel(new Date(m.zeitpunkt)) < tag),
+  });
+  $("warnungen-liste").innerHTML = liste
+    .map((w) => `<li class="warnung warnung-${w.art}">${sicher(w.text)}<span class="quelle">Quelle: ${sicher(w.quelle)}</span></li>`)
+    .join("");
+
+  $("summe-freigabe").textContent = freigabe ? `von ${zahl(freigabe.kcalProTag)} kcal freigegeben` : "";
+  $("summe-freigabe").hidden = !freigabe;
   $("tag-titel").textContent = tagTitel(gewaehlterTag);
   document.querySelector('[data-aktion="tag-vor"]').disabled = tag >= tagSchluessel(new Date());
   $("summe-kcal").textContent = (summe.unsicher ? "ca. " : "") + zahl(summe.kcal);
@@ -97,6 +128,14 @@ function zeichneGewicht() {
         ? `am ${datumText(neuestes.datum)} · unverändert`
         : `am ${datumText(neuestes.datum)} · ${zahl(Math.abs(diffGramm))} g ${richtung} als am ${datumText(vorheriges.datum)}`;
   }
+  const trend = abnahmeProWoche(gewichte, GRENZEN.tageZuSchnell);
+  $("gewicht-trend").hidden = !trend;
+  if (trend) {
+    const richtung = trend.prozent >= 0 ? "Abnahme" : "Zunahme";
+    $("gewicht-trend").textContent =
+      `${richtung}: ${zahl(Math.abs(trend.prozent), 1)} % pro Woche (seit ${datumText(trend.von.datum)}) · ` +
+      `sicherer Bereich ${zahl(GRENZEN.abnahmeMin, 1)}–${zahl(GRENZEN.abnahmeMax)} %`;
+  }
   $("gewicht-liste").innerHTML = gewichte
     .map(
       (g) => `<li>
@@ -125,11 +164,24 @@ function datumText(iso) {
   return new Date(j, m - 1, t).toLocaleDateString("de-DE", { day: "numeric", month: "short", year: "numeric" });
 }
 
+function freigabeVonTier() {
+  return aktuelleFreigabe(daten.freigaben.filter((f) => f.tierId === tier.id));
+}
+
+function zeichneFreigabe() {
+  const freigabe = freigabeVonTier();
+  $("freigabe-text").textContent = freigabe
+    ? `${zahl(freigabe.zielgewichtKg, 1)} kg Zielgewicht · ${zahl(freigabe.kcalProTag)} kcal pro Tag · ` +
+      `${freigabe.tierarzt}, ${datumText(freigabe.datum)}${freigabe.notiz ? " · " + freigabe.notiz : ""}`
+    : "Noch keine Freigabe eingetragen.";
+}
+
 function zeichneAlles() {
   $("tiername").textContent = tier.name;
   zeichneHeute();
   zeichneGewicht();
   zeichneFutter();
+  zeichneFreigabe();
 }
 
 // ---------- Formulare ----------
@@ -213,6 +265,44 @@ beimSpeichern("form-gewicht", "gewicht-fehler", (werte) => {
     tierId: tier.id,
     kg,
     datum: werte.get("datum"),
+    notiz: werte.get("notiz").trim(),
+  });
+  sichern();
+});
+
+function oeffneFreigabe() {
+  const form = $("form-freigabe");
+  form.reset();
+  zeigeFehler("freigabe-fehler", "");
+  form.datum.value = tagSchluessel(new Date());
+  form.datum.max = tagSchluessel(new Date());
+  $("dialog-freigabe").showModal();
+}
+
+// Eine neue Freigabe ersetzt die alte nicht, sondern kommt dazu – so bleibt der Verlauf für den Tierarzt erhalten.
+beimSpeichern("form-freigabe", "freigabe-fehler", (werte) => {
+  const ziel = leseZahl(werte.get("ziel"));
+  const kcal = leseZahl(werte.get("kcal"));
+  const tierarzt = werte.get("tierarzt").trim();
+  if (!ziel || ziel < 1 || ziel > 15) return "Bitte ein Zielgewicht zwischen 1 und 15 kg eingeben.";
+  if (!kcal || kcal < 50 || kcal > 600) return "Bitte eine Tagesmenge zwischen 50 und 600 kcal eingeben.";
+  if (!tierarzt) return "Bitte Tierarzt oder Praxis eintragen.";
+  const grenze = Math.round(harteUntergrenze(ziel));
+  if (
+    kcal < grenze &&
+    !confirm(
+      `${zahl(kcal)} kcal liegen unter ${grenze} kcal (60 % des Ruhebedarfs beim Zielgewicht). ` +
+        "Das empfehlen die Leitlinien nur mit einem Fachtierarzt für Ernährung. Hat der Tierarzt das genau so festgelegt?"
+    )
+  )
+    return "Bitte die Tagesmenge mit dem Tierarzt klären.";
+  daten.freigaben.push({
+    id: neueId(),
+    tierId: tier.id,
+    datum: werte.get("datum"),
+    zielgewichtKg: ziel,
+    kcalProTag: kcal,
+    tierarzt,
     notiz: werte.get("notiz").trim(),
   });
   sichern();
@@ -342,6 +432,8 @@ document.addEventListener("click", (ereignis) => {
       return oeffneFutter(null);
     case "futter-bearbeiten":
       return oeffneFutter(daten.futter.find((f) => f.id === id));
+    case "freigabe-neu":
+      return oeffneFreigabe();
     case "export":
       return exportieren();
   }

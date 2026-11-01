@@ -255,3 +255,18 @@ dialog input:not([type="radio"]) {
 .knoepfe { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
 
 .fuss { margin: 0; text-align: center; color: var(--text-leise); font-size: 0.8125rem; }
+
+/* Warnhinweise auf "Heute" – die dringendsten zuerst */
+.warnungen { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.warnungen:empty { display: none; }
+.warnung {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--rand);
+  border-left: 4px solid var(--warnung);
+  background: var(--flaeche);
+  font-size: 0.9375rem;
+}
+.warnung-sofort { border-left-color: var(--gefahr); font-weight: 600; }
+.warnung-hinweis { border-left-color: var(--text-leise); }
+.warnung .quelle { display: block; margin-top: 0.25rem; color: var(--text-leise); font-size: 0.75rem; font-weight: 400; }
