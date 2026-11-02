@@ -75,16 +75,16 @@ export const GRENZEN = {
   teilerOhneFreigabe: 1.4, // Zielgewicht bei BCS 9 – kleinstes Ziel, das der BCS-Schlüssel zulässt
   spielraum: 0.1, // ±10 % um die freigegebene Menge gelten noch als eingehalten
   wenigGefressen: 0.5, // unter der Hälfte: nachfragen, Fettleber-Gefahr
-  leckerliMax: 0.1, // Anteil an den Tageskalorien – AAHA 2014
+  leckerliMax: 0.1, // Anteil an den Tageskalorien – AAHA 2014 und 2021, WSAVA 2025
   freigabeTage: 90,
 };
 
 const QUELLEN = {
-  abnahme: "AAHA Weight Management Guidelines 2014; Flanagan et al. 2018",
+  abnahme: "AAHA Weight Management Guidelines 2014; Flanagan et al. 2018; Hoelmkjaer & Bjornvad",
   fettleber: "Armstrong 2011 (WSAVA); Merck Veterinary Manual; AAHA 2014",
-  untergrenze: "AAHA 2014; Flanagan et al. 2018",
-  leckerli: "AAHA Weight Management Guidelines 2014",
-  kontrolle: "AAHA 2014: Kontrolle alle 2–4 Wochen",
+  untergrenze: "AAHA 2014 und 2021; Flanagan et al. 2018",
+  leckerli: "AAHA 2014 und 2021; WSAVA 2025",
+  kontrolle: "AAHA 2014: Kontrolle alle 2 Wochen, später monatlich",
 };
 
 // Ruheenergiebedarf (RER) in kcal pro Tag – NRC 2006. Für die Abnahme immer mit dem Zielgewicht rechnen.

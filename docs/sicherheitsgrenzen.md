@@ -1,6 +1,6 @@
 # Kilossos – Sicherheitsgrenzen für die Gewichtsabnahme bei Katzen
 
-**Entwurf vom 01.11.2026 – zur Prüfung durch den behandelnden Tierarzt**
+**Entwurf vom 01.11.2026, Quellen abgeglichen am 02.11.2026 – zur Prüfung durch den behandelnden Tierarzt**
 Tier: Kito, Kater, kastriert, Wohnungskatze · 9,32 kg (Praxis, Oktober 2026) · BCS noch nicht erhoben
 
 > **Wichtiger Hinweis.** Dieses Dokument hat eine KI (Claude, Anthropic) verfasst. Sie hat dafür veröffentlichte
@@ -65,28 +65,28 @@ Das spricht dafür, ein therapeutisches Reduktionsfutter zu prüfen (Abschnitt B
 ### B2. Grenzwerte im Überblick
 
 Spalte „Prüfstatus“: **O** = im Original oder Volltext gelesen · **S** = über eine Sekundärquelle oder
-Zusammenfassung belegt, Original nicht eingesehen (Grund: Der Volltext von JAAHA und AAHA war beim Abruf
-gesperrt, HTTP 403).
+Zusammenfassung belegt, Original nicht eingesehen. Seit dem 02.11.2026 liegen die Volltexte von AAHA 2014 [1]
+und AAHA 2021 [3] sowie die WSAVA-Merkblätter [13], [14] vor; die betroffenen Zeilen sind jetzt mit O markiert.
 
 | # | Parameter | Vorschlag für die App | Quelle | Status |
 |---|---|---|---|---|
-| 1a | Zielabnahme | 0,5–2 % KM/Woche, gerechnet ab dem Gewicht zu Beginn des Messzeitraums | AAHA 2014 [1]; Flanagan 2018 [5]; AAHA Diabetes 2018 [3] | S / O |
-| 1b | Warnung „zu schnell“ | > 2 %/Woche im Mittel über 2 Wochen → Hinweis „Tierarzt kontaktieren“ | [1], [5] | S / O |
-| 1c | Warnung „Stillstand“ | < 0,5 %/Woche im Mittel über 4 Wochen (oder Zunahme) → Hinweis „Plan mit Tierarzt anpassen“ | [1], [5] | S / O |
+| 1a | Zielabnahme | 0,5–2 % KM/Woche, gerechnet ab dem Gewicht zu Beginn des Messzeitraums | AAHA 2014 [1]; Flanagan 2018 [5]; Hoelmkjaer & Bjornvad [12]; AAHA Diabetes 2018 [3] | O (Diabetes 2018: S) |
+| 1b | Warnung „zu schnell“ | > 2 %/Woche im Mittel über 2 Wochen → Hinweis „Tierarzt kontaktieren“ | [1], [5] | O |
+| 1c | Warnung „Stillstand“ | < 0,5 %/Woche im Mittel über 4 Wochen (oder Zunahme) → Hinweis „Plan mit Tierarzt anpassen“ | [1], [5] | O |
 | 1d | Realistische Erwartung | Mittelwert in der Kohortenstudie: 0,8 ± 0,5 % der Ausgangs-KM/Woche | [5] | O |
-| 2a | RER | 70 × kg^0,75, **bezogen auf das Zielgewicht** | NRC 2006 [9]; AAHA 2014 [1]; Armstrong 2011 [6] | S / O |
-| 2b | Startenergie Katze | 0,8 × RER(Zielgewicht) | AAHA 2014 [1] (über [2]) | S |
-| 2c | Alternative Formel | 53 kcal × Zielgewicht^0,711 (222 kJ/kg^0,711) | Flanagan 2018 [5] | O |
-| 3a | Harte Untergrenze | 0,6 × RER(Zielgewicht). Darunter nur mit Fachtierarzt für Ernährung | AAHA 2014 [1]; strenger: 0,7 × RER [2] | S |
+| 2a | RER | 70 × kg^0,75, **bezogen auf das Zielgewicht** | NRC 2006 [9]; AAHA 2014 [1]; AAHA 2021 Box 1 [3]; Armstrong 2011 [6] | O |
+| 2b | Startenergie Katze | 0,8 × RER(Zielgewicht) | AAHA 2014 [1]; AAHA 2021 Box 1 [3] (Faktor 0,8 „weight loss“) | O |
+| 2c | Alternative Formel | 53 kcal × Zielgewicht^0,711 (222 kJ/kg^0,711) | Flanagan 2018 [5]; AAHA 2021 [3]: im Mittel 52 ± 4,9 kcal/kg^0,711 | O |
+| 3a | Harte Untergrenze | 0,6 × RER(Zielgewicht). Darunter nur mit Fachtierarzt für Ernährung | AAHA 2014 [1] (unter 60 % RER bei Katzen erhöhtes Lipidoserisiko); strenger: 0,7 × RER [2] | O |
 | 3b | Untergrenze **ohne** Freigabe | RER(aktuelle KM ÷ 1,4) = RER beim kleinsten plausiblen Zielgewicht; Kito: ≈ 290 kcal/Tag | abgeleitet aus [1], [5] | – |
 | 3c | Akuter Abbruch | 24 h nichts oder kaum gefressen → Plan stoppen, Tierarzt am selben Tag | [2]; Armstrong 2011 [6]; Merck [7] | S / O |
-| 4a | Zielgewicht aus BCS (9er-Skala) | aktuelle KM ÷ (1 + 0,1 × (BCS − 5)), also ÷ 1,2 / 1,3 / 1,4 bei BCS 7 / 8 / 9 | AAHA 2014 [1] (über [4]); Flanagan 2018 [5] | S / O |
-| 4b | Grenze der Methode | BCS 9 ist nach oben offen; bei großrahmigen Tieren das historische Gewicht bei BCS 5 vorziehen | [1] (über [4]); WSAVA 2011 [8] | S |
-| 5 | Leckerlis | ≤ 10 % der Tagesenergie, inklusive Tischreste, Dental-Snacks und Futter zur Medikamentengabe | AAHA [1], [4] | S |
-| 6 | Protein | eiweißreiche, angereicherte Diät; Orientierung ≥ 5 g Protein/kg Zielgewicht/Tag (Studienwert, keine Leitlinienzahl) | AAHA 2021 [3]; Laflamme & Hannah 2013 [10] | S |
-| 7 | Anpassung | Abnahme zu langsam → −10 % kcal; zu schnell → +10 % kcal; vorher Fütterung, Leckerlis und Gesundheit prüfen | [1]; [5] | S / O |
+| 4a | Zielgewicht aus BCS (9er-Skala) | aktuelle KM ÷ (1 + 0,1 × (BCS − 5)), also ÷ 1,2 / 1,3 / 1,4 bei BCS 7 / 8 / 9 | AAHA 2014 [1]; AAHA 2021 Tab. 2 [3]; Flanagan 2018 [5] | O |
+| 4b | Grenze der Methode | BCS 9 ist nach oben offen; bei großrahmigen Tieren das historische Gewicht bei BCS 5 vorziehen | [1]; AAHA 2021 [3] (BCS ab 8/9 unscharf, Körperfettindex als Ergänzung); WSAVA 2011 [8] | O |
+| 5 | Leckerlis | ≤ 10 % der Tagesenergie, inklusive Tischreste, Dental-Snacks und Futter zur Medikamentengabe | AAHA 2014 [1]; AAHA 2021 [3]; WSAVA 2025 [13] | O |
+| 6 | Protein | eiweißreiche, angereicherte Diät; Orientierung ≥ 5 g Protein/kg Zielgewicht/Tag (Faustregel AAHA 2014; Studienwert Laflamme & Hannah ≈ 5,2 g) | AAHA 2014 [1]; AAHA 2021 [3]; Laflamme & Hannah 2013 [10] | O |
+| 7 | Anpassung | Abnahme zu langsam → −10 % kcal; zu schnell → +10 % kcal; vorher Fütterung, Leckerlis und Gesundheit prüfen | [1]; [5] | O |
 | 8a | Wiegen zu Hause | 1×/Woche, gleiche Bedingungen, Waage mit ≤ 20 g Auflösung | eigene Ableitung (Wochenänderung ≈ 50–90 g) | – |
-| 8b | Kontrolle in der Praxis | anfangs alle 2–4 Wochen (z. B. Woche 2, 4, 8, 12), dann monatlich; jedes Mal BCS und MCS | [1], [2], [5], [8] | S / O |
+| 8b | Kontrolle in der Praxis | alle 2 Wochen (Telefon oder Praxis), bis die Abnahmerate stimmt, dann monatlich; Praxistermine alle 4–8 Wochen; jedes Mal BCS und MCS | AAHA 2014 [1]; AAHA 2021 [3]; [5], [8] | O |
 | 9 | Pflicht-Hinweis „zum Tierarzt“ | siehe Abschnitt B3, Punkt 9 | [2], [6], [7] | S / O |
 
 ### B3. Begründungen zu den einzelnen Punkten
@@ -139,8 +139,9 @@ Tabletten (AAHA [1], [4]). Die App rechnet die Leckerlis aus der Tagessumme hera
 erhalten. Bei deutlicher Restriktion empfiehlt die AAHA 2021 ein angereichertes therapeutisches Reduktionsfutter,
 weil die bloße Kürzung eines Erhaltungsfutters zu Mängeln an Vitaminen und Mineralstoffen führen kann [3].
 Laflamme & Hannah 2013 schätzten an 24 kastrierten Katern, dass für den Erhalt der Magermasse etwa 5,2 g
-Protein/kg KM/Tag nötig sind. Für die Stickstoffbilanz genügten bereits etwa 1,5 g/kg [10]. Das ist ein
-Studienwert unter Erhaltungsbedingungen, kein Leitlinienwert. Die App soll die Proteinaufnahme deshalb nur
+Protein/kg KM/Tag nötig sind. Für die Stickstoffbilanz genügten bereits etwa 1,5 g/kg [10]. Die AAHA 2014 nennt
+als Faustregel ≥ 5 g Protein/kg Idealgewicht für Katzen [1] (im Volltext bestätigt). Die App soll die Proteinaufnahme
+trotzdem nur
 **anzeigen**, nicht bewerten, bis der Tierarzt einen Zielwert nennt.
 
 **7. Anpassungsregeln.** Die App ändert Mengen nie selbst. Sie zeigt die Regel aus den Leitlinien und bittet
@@ -234,6 +235,23 @@ Zum Vergleich:
 - **„Zu schnell“:** Die Warnung kommt erst bei einem 2-Wochen-Mittel über 2 %, nicht bei einer einzelnen Messung.
   Grund ist die Messunsicherheit beim Wiegen zu Hause.
 
+### B6. Abgleich mit den neuen Quellen (02.11.2026)
+
+Gelesen wurden die Volltexte von AAHA 2014 [1] und AAHA 2021 [3], die WSAVA-Merkblätter zu Leckerlis [13] und zum
+Kalorienbedarf [14], die WSAVA-Leitlinienseite [15] und die Zusammenfassung von Hoelmkjaer & Bjornvad [12].
+
+- **Bestätigt, keine Änderung nötig:** 0,5–2 %/Woche; Start 0,8 × RER(Ziel); Untergrenze 0,6 × RER(Ziel) mit
+  Fachtierarzt darunter; ±10 % Anpassung; jeder BCS-Punkt über 5 ≈ 10 % Übergewicht; Leckerlis ≤ 10 %;
+  Protein ≥ 5 g/kg Idealgewicht.
+- **Korrigiert:** Kontrollintervall (8b) jetzt wie im Original: alle 2 Wochen, bis die Rate stimmt, dann monatlich.
+- **Neu und für Kito wichtig:** Die AAHA 2021 (Tab. 8, Adipositas) hält eine Restriktion **unter RER mit
+  Handelsfutter** für nicht empfehlenswert; ab ≤ RER werden angereicherte Diätfutter empfohlen. Kitos Sheba und
+  Purina ONE Light sind Handelsfutter. → stützt Frage 5 an den Tierarzt.
+- **Hinweis zum Zielgewicht:** Das Rechenbeispiel der AAHA 2014 zieht ab (45 kg bei BCS 8 → ≈ 32 kg). Die App teilt
+  (KM ÷ 1,3) und landet damit beim vorsichtigeren, höheren Zielgewicht (B3, Punkt 4).
+- **WSAVA 2025:** Leckerlis „weniger als 10 %“; Tabelle bis 7 kg Körpergewicht (28 kcal/Tag aus Leckerlis).
+  Nassfutter mit viel Wasser kann die Sättigung fördern (AAHA 2021 [3]).
+
 ---
 
 ## Fragen an den Tierarzt
@@ -279,15 +297,17 @@ Zum Vergleich:
 
 1. Brooks D, Churchill J, Fein K, et al. *2014 AAHA Weight Management Guidelines for Dogs and Cats.*
    J Am Anim Hosp Assoc 2014;50(1):1–11. doi:10.5326/JAAHA-MS-6331.
-   Abschnitt „Monitoring and maintenance“ auf aaha.org (0,5–2 %/Woche Katze, +10 % bei zu schneller Abnahme,
-   Fachtierarzt unter 60 % RER, Komorbiditäten). Volltext beim Abruf gesperrt, Inhalte über [2], [4] und die
-   AAHA-Webseite belegt.
+   **Volltext gelesen (02.11.2026):** 0,5–2 %/Woche Katze, 80 % RER(Ideal), +10 % bei zu schneller Abnahme,
+   −10–20 % bei zu langsamer, bis 60 % RER, darunter Fachtierarzt (Lipidoserisiko bei Katzen), Leckerlis ≤ 10 %,
+   Protein ≥ 5 g/kg Idealgewicht, Kontrolle alle 2 Wochen, dann monatlich.
 2. Association for Pet Obesity Prevention / World Pet Obesity Association. *Veterinary Step-Based Weight Loss
    Calculator for Dogs and Cats* (petobesityprevention.org, abgerufen 01.11.2026). Zitiert [1], [3], [5]:
    „Cats: 80 % of RER at IBW“, Grenze 70 % RER, Kontrolle alle 2–4 Wochen, 24-h-Regel bei Nahrungsverweigerung.
-3. AAHA. *2021 AAHA Nutrition and Weight Management Guidelines for Dogs and Cats* (eiweißreiche und angereicherte
-   Diät bei Restriktion); AAHA. *2018 Diabetes Management Guidelines for Dogs and Cats* (0,5–2 %/Woche bei adipösen
-   Katzen). Über die Zusammenfassungen auf aaha.org belegt.
+3. Cline MG, Burns KM, Coe JB, et al. *2021 AAHA Nutrition and Weight Management Guidelines for Dogs and Cats.*
+   J Am Anim Hosp Assoc 2021;57:153–178. doi:10.5326/JAAHA-MS-7232. **Volltext gelesen (02.11.2026):** BCS-Tabelle
+   (Tab. 2), Faktor 0,8 × RER bei Abnahme (Box 1), 52 ± 4,9 kcal/kg^0,711, Diätfutter ab ≤ RER, keine Restriktion
+   unter RER mit Handelsfutter (Tab. 8), Leckerlis ≤ 10 %. Dazu AAHA *2018 Diabetes Management Guidelines*
+   (0,5–2 %/Woche bei adipösen Katzen), nur über die Zusammenfassung belegt.
 4. Elite Learning, CE-Kurs (Zusammenfassung von [1]): „Each BCS ≥ 5 (on a 9-point scale) … is equivalent to being
    10 % overweight“; Leckerlis, Tischreste und Medikamenten-Futter mitrechnen; historische Gewichte.
 5. Flanagan J, Bissot T, Hours M-A, Moreno B, German AJ. *An international multi-centre cohort study of weight
@@ -307,5 +327,14 @@ Zum Vergleich:
 11. Sadek T, et al. *Feline feeding programs: addressing behavioural needs to improve feline health and
     wellbeing.* AAFP/ISFM Consensus Statement, J Feline Med Surg 2018;20(11):1049–1055.
     doi:10.1177/1098612X18791877.
+
+12. Hoelmkjaer KM, Bjornvad CR. *Management of obesity in cats.* Veterinary Medicine: Research and Reports (Dove
+    Medical Press), über DOAJ (Abstract gelesen: 0,5–2 %/Woche; Diätfutter mit geringerer Energiedichte, mehr Protein
+    und Faser).
+13. WSAVA Global Nutrition Committee. *Feeding treats to your cat* (11/2025). **Gelesen:** Leckerlis < 10 % der
+    Tageskalorien, Tabelle nach Körpergewicht.
+14. WSAVA Global Nutrition Committee. *Calorie Needs for an Average Healthy Adult Cat in Ideal Body Condition*
+    (07/2020). **Gelesen:** Erhaltungsbedarf gesunder, schlanker Katzen (nicht für die Abnahme gedacht).
+15. WSAVA. *Global Nutrition Guidelines* (Webseite, 2024), mit BCS-Tafel Katze (06/2025) und MCS-Tafel.
 
 *Futterwerte: Sheba laut Packung, Purina One Light laut purina.co.uk (siehe Kilossos-Futterliste).*
