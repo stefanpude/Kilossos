@@ -11,8 +11,8 @@ Kilossos ist aus eigener Not entstanden.
 
 Kito ist mein Kater: kastriert, von Natur aus sehr groß – und inzwischen zu schwer.
 Seit vor unserer Tür eine Baustelle ist, kann er nicht mehr nach draußen. Weniger Bewegung, gleiches Futter,
-und die Waage beim Tierarzt zeigte 9,32 kg. Zuki, unsere zweite Katze, ist das Gegenteil: zierlich.
-Beide fressen getrennt, beide brauchen etwas anderes.
+und die Waage beim Tierarzt zeigte 9,32 kg. Zuki, unsere zweite Katze, ist zierlich gebaut,
+aber im Verhältnis sogar noch dicker als Kito. Beide fressen getrennt, beide brauchen etwas anderes.
 
 Also wollte ich Kito beim Abnehmen helfen. Schnell habe ich gemerkt: Bei Katzen ist das heikler, als man denkt.
 Bekommt eine übergewichtige Katze zu wenig Futter, kann sie lebensgefährlich krank werden (Fettleber).
@@ -24,6 +24,7 @@ und rechtzeitig warnt, wenn etwas aus dem sicheren Bereich läuft. Die Grenzen d
 der Tierärzteverbände AAHA und WSAVA.
 
 Der Name? **Ki**to + **Kolossos** (altgriechisch für „riesig“) + englisch **loss** (Verlust). Kilossos eben.
+Kito stand Pate, weil es einfach zu gut passte. Abnehmen müssen beide.
 
 ## Wichtig: Immer mit dem Tierarzt
 
