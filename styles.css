@@ -339,6 +339,11 @@ a.knopf-zweit[hidden] { display: none; }
 .zahlen p { margin: 6px 0 0; color: var(--text-leise); font-size: 0.8125rem; }
 .ca-hinweis { margin: 0; color: var(--text-leise); font-size: 0.8125rem; }
 .ca-hinweis[hidden] { display: none; }
+.notfall-hinweis {
+  margin: 0; padding: 12px 14px; border: 1px solid var(--rand); border-radius: 18px;
+  color: var(--text-leise); font-size: 0.875rem;
+}
+.notfall-hinweis strong { color: var(--text); }
 
 /* ---------- Kacheln ---------- */
 .kacheln { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
