@@ -43,9 +43,9 @@ const futter = [
 // Tierarzt-Kontrollen: Start mit 0,8 × RER(7,2 kg) ≈ 245 kcal; nach 12 Wochen wird die Abnahme langsamer
 // → 10 % weniger (AAHA 2014); danach Kontrollen spätestens alle 3 Monate.
 const freigaben = [
-  { woche: 0, kcalProTag: 245, notiz: "Simulation: BCS 8, Start 0,8 × RER(Ziel)" },
-  { woche: 12, kcalProTag: 220, notiz: "Simulation: Abnahme langsamer, −10 %" },
-  { woche: 24, kcalProTag: 220, notiz: "Simulation: Kontrolle, Plan bleibt" },
+  { woche: 0, kcalProTag: 245, bcs: 8, mcs: "normal", notiz: "Simulation: Start 0,8 × RER(Ziel)" },
+  { woche: 12, kcalProTag: 220, bcs: 7, mcs: "normal", notiz: "Simulation: Abnahme langsamer, −10 %" },
+  { woche: 24, kcalProTag: 220, bcs: 6, mcs: "normal", notiz: "Simulation: Kontrolle, Plan bleibt" },
 ].map((f, i) => ({
   id: `freigabe-${i + 1}`,
   tierId: kito.id,
@@ -54,6 +54,8 @@ const freigaben = [
   kcalProTag: f.kcalProTag,
   tierarzt: "Testpraxis (Simulation)",
   notiz: f.notiz,
+  bcs: f.bcs,
+  mcs: f.mcs,
 }));
 
 // Wochenabnahme in %: anfangs schneller, später langsamer – dann so skaliert, dass genau das Ziel herauskommt.

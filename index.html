@@ -161,6 +161,7 @@
         <button class="knopf-haupt" data-aktion="freigabe-neu">Freigabe eintragen</button>
         <p class="tipp">Zielgewicht und Tagesmenge legt nur der Tierarzt fest. Ohne Freigabe zeichnet Kilossos nur auf und warnt, schlägt aber keine Mengen vor.</p>
         <button type="button" class="knopf-zweit" data-aktion="warum-kein-ziel">Warum keine Futtermenge?</button>
+        <button type="button" class="knopf-zweit" data-aktion="bcs-erklaerung">Was ist der BCS?</button>
         <a class="knopf-zweit" id="praxis-anrufen" hidden></a>
       </div>
       <div class="karte">
@@ -227,7 +228,7 @@
         <p class="leise"><strong>Grenzwerte:</strong> nach den Leitlinien von AAHA (2014, 2021) und WSAVA, mit allen Quellen in
           <a href="https://github.com/stefanpude/Kilossos/blob/main/docs/sicherheitsgrenzen.md" target="_blank" rel="noopener">docs/sicherheitsgrenzen.md</a>.</p>
       </div>
-      <p class="fuss" id="version">Version 0.11.0</p>
+      <p class="fuss" id="version">Version 0.12.0</p>
     </section>
   </main>
 
@@ -339,8 +340,11 @@
       <label>Tierarzt / Praxis
         <input name="tierarzt" autocomplete="off" required>
       </label>
+      <div class="feld"><span id="label-bcs">BCS vom Tierarzt (optional)</span><div id="freigabe-bcs"></div></div>
+      <div class="feld"><span id="label-mcs">Muskelzustand (MCS) vom Tierarzt (optional)</span><div id="freigabe-mcs"></div></div>
+      <button type="button" class="knopf-text" data-aktion="bcs-erklaerung">Was ist der BCS?</button>
       <label>Notiz (optional)
-        <input name="notiz" autocomplete="off" placeholder="z. B. BCS 8, nächste Kontrolle in 4 Wochen">
+        <input name="notiz" autocomplete="off" placeholder="z. B. nächste Kontrolle in 4 Wochen">
       </label>
       <p class="fehler" id="freigabe-fehler" hidden></p>
       <div class="knoepfe">
@@ -400,6 +404,42 @@
       <p>Der Tierarzt kennt, was keine Formel kennt: Körperzustand, Muskeln, Vorerkrankungen und das Futter deiner Katze.
         Deshalb trägst du seine Werte als Freigabe ein. Ab dann vergleicht Kilossos jeden Tag mit diesen Werten
         und warnt, wenn etwas aus dem sicheren Bereich läuft.</p>
+      <div class="knoepfe">
+        <button value="abbrechen" class="knopf-haupt">Verstanden</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Erklärung BCS und MCS (Text: docs/texte/bcs-erklaerung.md, nach den WSAVA-Tafeln) -->
+  <dialog id="dialog-bcs">
+    <form method="dialog">
+      <!-- autofocus auf der Überschrift: sonst springt der Fokus auf „Verstanden“ und das Blatt öffnet unten -->
+      <h2 tabindex="-1" autofocus>Was ist der BCS?</h2>
+      <p>Der <strong>Body Condition Score (BCS)</strong> beschreibt, wie viel Fett eine Katze am Körper trägt. Der Tierarzt
+        bestimmt ihn mit Augen und Händen: Er tastet Rippen, Wirbelsäule und Bauch ab und schaut von oben und von
+        der Seite auf die Taille. Die Skala geht von 1 bis 9.</p>
+      <ul>
+        <li><strong>1 bis 3: zu dünn.</strong> Rippen und Knochen sind gut zu sehen oder sehr leicht zu fühlen, kaum Fett.</li>
+        <li><strong>4 und 5: ideal.</strong> Die Rippen sind unter einer dünnen Fettschicht gut zu fühlen. Von oben ist hinter den
+          Rippen eine Taille zu sehen, am Bauch nur ein kleines Fettpolster.</li>
+        <li><strong>6: etwas zu schwer.</strong> Die Rippen sind noch zu fühlen, aber mit mehr Fett darüber. Die Taille ist schwach.</li>
+        <li><strong>7: übergewichtig.</strong> Die Rippen sind nur schwer zu fühlen. Keine Taille mehr, der Bauch ist rund.</li>
+        <li><strong>8: deutlich übergewichtig.</strong> Die Rippen sind unter dem Fett nicht mehr zu fühlen. Der Bauch ist deutlich
+          rund, auch am Rücken vor dem Schwanz sitzt Fett.</li>
+        <li><strong>9: stark übergewichtig.</strong> Dicke Fettpolster an Bauch, Rücken, Gesicht und Beinen.</li>
+      </ul>
+      <p>Jeder Punkt über 5 bedeutet ungefähr 10 % zu viel Gewicht. Daraus leitet der Tierarzt das Zielgewicht ab.</p>
+      <h3>Und der MCS?</h3>
+      <p>Der <strong>Muscle Condition Score (MCS)</strong> beschreibt die Muskeln, nicht das Fett. Der Tierarzt tastet dafür
+        Wirbelsäule, Schulterblätter, Kopf und Becken ab. Es gibt vier Stufen: normale Muskeln, leichter, mäßiger
+        oder starker Muskelabbau. Eine dicke Katze kann trotzdem zu wenig Muskeln haben. Beim Abnehmen soll Fett
+        weggehen, keine Muskeln. Deshalb prüft der Tierarzt beides bei jeder Kontrolle.</p>
+      <h3>Warum fragt Kilossos nicht nach deiner eigenen Einschätzung?</h3>
+      <p>Fell täuscht. Ob unter dem Fell Fett oder Muskeln sitzen, fühlt man erst mit Übung. Eine falsche
+        Einstufung führt zu einem falschen Zielgewicht, und bei Katzen ist auch zu schnelles Abnehmen gefährlich.
+        Darum trägst du in Kilossos nur den BCS ein, den der Tierarzt bestimmt hat. Er steht dann in der Freigabe,
+        im Verlauf und in der Übersicht für den Tierarzt.</p>
+      <p class="leise">Quelle: WSAVA, Body-Condition-Score- und Muscle-Condition-Score-Tafeln für Katzen.</p>
       <div class="knoepfe">
         <button value="abbrechen" class="knopf-haupt">Verstanden</button>
       </div>

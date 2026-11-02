@@ -1,11 +1,12 @@
-// Ansicht "Verlauf": Zeitraum-Umschalter, weiche Gewichtskurve, Kennzahlen und zwei aufklappbare Karten
-// (Abnahme pro Woche, Futter pro Tag) – alles als HTML-Text, ohne Zusatzpakete.
+// Ansicht "Verlauf": Zeitraum-Umschalter, weiche Gewichtskurve, Kennzahlen und drei aufklappbare Karten
+// (Abnahme pro Woche, Futter pro Tag, Befunde vom Tierarzt) – alles als HTML-Text, ohne Zusatzpakete.
 // gewichtDiagramm und kcalDiagramm sind die älteren Diagramme; sie bleiben unverändert für den PDF-Bericht.
 // Farben kommen aus styles.css (--reihe-1, --reihe-2, --akzent, --gut, --rand, --text-leise).
 
 import { GRENZEN, gewichteSortiert, tagesSumme, leckerliKcal, tagSchluessel, aktuelleFreigabe, kcalFuer } from "./rechnen.js";
 import { zeitraumStart, wochenRaten, abnahmeZusammenfassung, futterTage, futterZusammenfassung, wochenGruppen } from "./zusammenfassung.js";
 import { aufklappKarte } from "./aufklappen.js";
+import { befundText } from "./daten.js";
 
 const B = 340; // Breite der Zeichenfläche (viewBox); das SVG skaliert auf die Bildschirmbreite
 const H = 190;
@@ -385,6 +386,28 @@ function futterKarte(mahlzeiten, futterNachId, freigaben, von, heute) {
   });
 }
 
+// Alle Freigaben, neueste zuerst – unabhängig vom Zeitraum, damit der Verlauf von BCS und MCS sichtbar bleibt.
+function befundKarte(freigaben) {
+  if (freigaben.length === 0) return "";
+  const sortiert = [...freigaben].sort((a, b) => b.datum.localeCompare(a.datum));
+  const langDatum = (iso) => new Date(ms(iso)).toLocaleDateString("de-DE");
+  const zeilen = sortiert
+    .map(
+      (f) => `<div class="zeile"><span class="icon" aria-hidden="true">🩺</span>
+        <span class="name">${befundText(f) || "ohne BCS"}<small>${langDatum(f.datum)} · ${sicher(f.tierarzt)}<br>
+          Ziel ${zahl(f.zielgewichtKg, 1)} kg · ${zahl(f.kcalProTag)} kcal pro Tag</small></span></div>`
+    )
+    .join("");
+  const neueste = befundText(sortiert[0]) || "ohne BCS";
+  return aufklappKarte({
+    id: "befunde",
+    klasse: "karte",
+    kopf: `<span class="zusammen"><span class="label">Befunde vom Tierarzt</span><br>${neueste}
+      <small>${sortiert.length} ${sortiert.length === 1 ? "Freigabe" : "Freigaben"} · neueste zuerst</small></span>`,
+    inhalt: zeilen,
+  });
+}
+
 export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, futterNachId, zeitraum, heute, kopf }) {
   if (gewichte.length < 2) {
     return `${kopf}<p class="leer">Sobald mindestens zwei Gewichte eingetragen sind, erscheint hier der Verlauf.</p>`;
@@ -425,6 +448,7 @@ export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, futterNachId, 
     (imZeitraum.length >= 2 ? kennzahlen(imZeitraum) : "") +
     abnahmeKarte(gewichte, freigaben, von) +
     (mahlzeiten.length ? futterKarte(mahlzeiten, futterNachId, freigaben, von, heute) : "") +
+    befundKarte(freigaben) +
     `<p class="tipp">Tippe auf die Kurve, um Datum und Gewicht zu sehen. Alle Gewichte als Liste stehen unter „Gewicht“.</p>`
   );
 }

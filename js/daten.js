@@ -10,7 +10,10 @@
 //                         | "geschaetzt" (aus Bestandteilen berechnet) | "ungefaehr"
 //   mahlzeiten: { id, tierId, futterId, gramm, zeitpunkt (ISO-Zeit) }
 //   gewichte:   { id, tierId, kg, datum ("JJJJ-MM-TT"), notiz }
-//   freigaben:  { id, tierId, datum, zielgewichtKg, kcalProTag, tierarzt, notiz }  – Oberfläche folgt in Schritt 4
+//   freigaben:  { id, tierId, datum, zielgewichtKg, kcalProTag, tierarzt, notiz, bcs?, mcs? }
+//               bcs: optional, Body Condition Score vom Tierarzt, ganze Zahl 1–9 (seit 0.12.0)
+//               mcs: optional, Muscle Condition Score vom Tierarzt, Schlüssel aus MCS (seit 0.12.0)
+//               Ältere Freigaben haben beide Felder nicht – sie bleiben ohne Umwandlung gültig.
 // Die kcal einer Mahlzeit werden immer aus dem aktuellen Futterwert berechnet: Wird ein ungefährer Wert
 // später durch den genauen Packungswert ersetzt, stimmen damit auch alle früheren Tage.
 
@@ -92,6 +95,43 @@ export function fotoBereinigen(daten) {
     }
   }
   return entfernt;
+}
+
+// ---------- BCS und MCS (nur vom Tierarzt, keine Selbst-Einstufung) ----------
+// Stufen des Muscle Condition Score nach der WSAVA-Tafel.
+export const MCS = {
+  normal: "normale Muskeln",
+  leicht: "leichter Muskelabbau",
+  maessig: "mäßiger Muskelabbau",
+  stark: "starker Muskelabbau",
+};
+
+export function bcsGueltig(bcs) {
+  return Number.isInteger(bcs) && bcs >= 1 && bcs <= 9;
+}
+
+// Entfernt ungültige BCS- und MCS-Angaben (z. B. aus einer eingelesenen Sicherung); der Rest der Freigabe bleibt.
+export function freigabenBereinigen(daten) {
+  let entfernt = 0;
+  for (const freigabe of daten.freigaben) {
+    if ("bcs" in freigabe && !bcsGueltig(freigabe.bcs)) {
+      delete freigabe.bcs;
+      entfernt += 1;
+    }
+    if ("mcs" in freigabe && !Object.hasOwn(MCS, freigabe.mcs)) {
+      delete freigabe.mcs;
+      entfernt += 1;
+    }
+  }
+  return entfernt;
+}
+
+// "BCS 8 von 9 · leichter Muskelabbau"; leer, wenn der Tierarzt beides nicht angegeben hat.
+export function befundText(freigabe) {
+  const teile = [];
+  if (bcsGueltig(freigabe.bcs)) teile.push(`BCS ${freigabe.bcs} von 9`);
+  if (Object.hasOwn(MCS, freigabe.mcs)) teile.push(MCS[freigabe.mcs]);
+  return teile.join(" · ");
 }
 
 export function laden(speicher = localStorage) {

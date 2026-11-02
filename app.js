@@ -13,6 +13,9 @@ import {
   SICHERUNG_ALLE_TAGE,
   fotoGueltig,
   fotoBereinigen,
+  freigabenBereinigen,
+  befundText,
+  MCS,
 } from "./js/daten.js";
 import {
   leseZahl,
@@ -430,6 +433,7 @@ function zeichneFreigabe() {
   $("titel-tierarzt").textContent = daten.tiere.length > 1 ? `Tierarzt · ${tier.name}` : "Tierarzt";
   $("freigabe-text").textContent = freigabe
     ? `${zahl(freigabe.zielgewichtKg, 1)} kg Zielgewicht · ${zahl(freigabe.kcalProTag)} kcal pro Tag · ` +
+      `${befundText(freigabe) ? befundText(freigabe) + " · " : ""}` +
       `${freigabe.tierarzt}, ${datumText(freigabe.datum)}${freigabe.notiz ? " · " + freigabe.notiz : ""}`
     : "Noch keine Freigabe eingetragen.";
   const link = telefonLink(tier.tierarzt?.telefon);
@@ -875,6 +879,10 @@ beimSpeichern("form-gewicht", "gewicht-fehler", (werte) => {
   sichern();
 });
 
+// BCS 1–9 mit grober Einordnung als Hilfe beim Abschreiben – den Wert selbst legt nur der Tierarzt fest.
+const BCS_GRUPPE = (bcs) => (bcs <= 3 ? "zu dünn" : bcs <= 5 ? "ideal" : bcs === 6 ? "etwas zu schwer" : "übergewichtig");
+const BCS_OPTIONEN = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((bcs) => ({ wert: String(bcs), text: String(bcs), zusatz: BCS_GRUPPE(bcs) }));
+
 function oeffneFreigabe() {
   const form = $("form-freigabe");
   form.reset();
@@ -883,6 +891,18 @@ function oeffneFreigabe() {
   form.datum.value = tagSchluessel(new Date());
   form.datum.max = tagSchluessel(new Date());
   form.tierarzt.value = tier.tierarzt?.praxis ?? "";
+  $("freigabe-bcs").innerHTML = auswahlFeld({
+    name: "bcs",
+    beschriftung: "label-bcs",
+    optionen: [{ wert: "", text: "Keine Angabe" }, ...BCS_OPTIONEN],
+    wert: "",
+  });
+  $("freigabe-mcs").innerHTML = auswahlFeld({
+    name: "mcs",
+    beschriftung: "label-mcs",
+    optionen: [{ wert: "", text: "Keine Angabe" }, ...Object.entries(MCS).map(([wert, text]) => ({ wert, text }))],
+    wert: "",
+  });
   $("dialog-freigabe").showModal();
 }
 
@@ -911,6 +931,9 @@ beimSpeichern("form-freigabe", "freigabe-fehler", (werte) => {
     kcalProTag: kcal,
     tierarzt,
     notiz: werte.get("notiz").trim(),
+    // BCS und MCS sind freiwillig: ohne Angabe fehlen die Felder ganz, wie in Freigaben vor 0.12.0.
+    ...(werte.get("bcs") ? { bcs: Number(werte.get("bcs")) } : {}),
+    ...(werte.get("mcs") ? { mcs: werte.get("mcs") } : {}),
   });
   sichern();
 });
@@ -1187,10 +1210,10 @@ $("import-datei").addEventListener("change", async (ereignis) => {
     return;
   }
   const verworfen = fotoBereinigen(neu);
-  const profilFehler = profilBereinigen(neu, tagSchluessel(new Date()));
+  const profilFehler = profilBereinigen(neu, tagSchluessel(new Date())) + freigabenBereinigen(neu);
   const anzahl = `${neu.mahlzeiten.length} Mahlzeiten und ${neu.gewichte.length} Gewichte`;
   const fotoText = verworfen > 0 ? " Das Profilbild in der Datei war ungültig und wird nicht übernommen." : "";
-  const profilText = profilFehler > 0 ? " Einige Profilangaben in der Datei waren ungültig und werden nicht übernommen." : "";
+  const profilText = profilFehler > 0 ? " Einige Angaben im Profil oder in den Freigaben waren ungültig und werden nicht übernommen." : "";
   if (!confirm(`Sicherung mit ${anzahl} einlesen? Alle Einträge auf diesem Handy werden dadurch ersetzt.${fotoText}${profilText}`)) return;
   speichern(neu);
   location.reload();
@@ -1316,6 +1339,8 @@ document.addEventListener("click", (ereignis) => {
       return oeffneMahlzeit(daten.mahlzeiten.find((m) => m.id === id));
     case "warum-kein-ziel":
       return $("dialog-warum").showModal();
+    case "bcs-erklaerung":
+      return $("dialog-bcs").showModal();
     case "gramm-minus":
       return grammSchritt(-5);
     case "gramm-plus":

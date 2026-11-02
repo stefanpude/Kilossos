@@ -12,6 +12,10 @@ import {
   fotoGueltig,
   fotoBereinigen,
   FOTO_MAX_ZEICHEN,
+  MCS,
+  bcsGueltig,
+  befundText,
+  freigabenBereinigen,
 } from "../js/daten.js";
 
 // Ersatz für den Browserspeicher, damit die Tests ohne Browser laufen.
@@ -185,4 +189,53 @@ test("alte Sicherung ohne foto bleibt gültig", () => {
   delete daten.tiere[0].foto;
   assert.ok(istGueltig(daten));
   assert.equal(fotoBereinigen(daten), 0);
+});
+
+// ---------- BCS und MCS in der Freigabe (0.12.0) ----------
+const fr = (mehr = {}) => ({ id: "f", tierId: "k", datum: "2026-11-03", zielgewichtKg: 7.2, kcalProTag: 245, tierarzt: "T", notiz: "", ...mehr });
+
+test("bcsGueltig: nur ganze Zahlen von 1 bis 9", () => {
+  for (const bcs of [1, 5, 9]) assert.ok(bcsGueltig(bcs));
+  for (const bcs of [0, 10, 7.5, "8", null, undefined, NaN]) assert.equal(bcsGueltig(bcs), false);
+});
+
+test("alte Sicherung: Freigabe ohne BCS und MCS bleibt gültig und unverändert", () => {
+  const daten = laden(testSpeicher());
+  daten.freigaben.push(fr());
+  const vorher = JSON.stringify(daten);
+  assert.ok(istGueltig(daten));
+  assert.equal(freigabenBereinigen(daten), 0);
+  assert.equal(JSON.stringify(daten), vorher);
+});
+
+test("freigabenBereinigen: gültige Werte bleiben, ungültige werden einzeln entfernt", () => {
+  const daten = laden(testSpeicher());
+  daten.freigaben.push(fr({ id: "a", bcs: 8, mcs: "leicht" }), fr({ id: "b", bcs: 12, mcs: "<img>" }), fr({ id: "c", bcs: 7.5 }));
+  assert.equal(freigabenBereinigen(daten), 3);
+  const [a, b, c] = daten.freigaben;
+  assert.equal(a.bcs, 8);
+  assert.equal(a.mcs, "leicht");
+  assert.equal("bcs" in b, false);
+  assert.equal("mcs" in b, false);
+  assert.equal(b.zielgewichtKg, 7.2); // der Rest der Freigabe bleibt
+  assert.equal("bcs" in c, false);
+  assert.ok(istGueltig(daten));
+});
+
+test("Speichern und Laden behält BCS und MCS", () => {
+  const speicher = testSpeicher();
+  const daten = laden(speicher);
+  daten.freigaben.push(fr({ bcs: 8, mcs: "normal" }));
+  speichern(daten, speicher);
+  const neu = laden(speicher);
+  assert.equal(neu.freigaben[0].bcs, 8);
+  assert.equal(neu.freigaben[0].mcs, "normal");
+});
+
+test("befundText: BCS und MCS in Worten, leer ohne Angaben", () => {
+  assert.equal(befundText(fr({ bcs: 8, mcs: "leicht" })), "BCS 8 von 9 · leichter Muskelabbau");
+  assert.equal(befundText(fr({ bcs: 5 })), "BCS 5 von 9");
+  assert.equal(befundText(fr({ mcs: "normal" })), "normale Muskeln");
+  assert.equal(befundText(fr()), "");
+  assert.deepEqual(Object.keys(MCS), ["normal", "leicht", "maessig", "stark"]);
 });

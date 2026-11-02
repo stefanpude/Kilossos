@@ -14,7 +14,7 @@ import {
 } from "./rechnen.js";
 import { gewichtDiagramm, kcalDiagramm } from "./verlauf.js";
 import { normalesFutterKcal } from "./futterliste.js";
-import { fotoGueltig } from "./daten.js";
+import { fotoGueltig, bcsGueltig, MCS } from "./daten.js";
 import { alterText, HALTUNG } from "./profil.js";
 
 const TAG_MS = 86400000;
@@ -244,10 +244,11 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
   teile.push(`<section class="bericht-teil"><h2>Tierärztliche Freigaben</h2>
     ${
       b.freigaben.length
-        ? `<table><thead><tr><th>Datum</th><th>Zielgewicht</th><th>kcal/Tag</th><th>Tierarzt</th><th>Notiz</th></tr></thead><tbody>
+        ? `<table><thead><tr><th>Datum</th><th>Zielgewicht</th><th>kcal/Tag</th><th>BCS</th><th>MCS</th><th>Tierarzt</th><th>Notiz</th></tr></thead><tbody>
           ${b.freigaben
             .map(
               (fr) => `<tr><td>${datum(fr.datum)}</td><td>${zahl(fr.zielgewichtKg, 1)} kg</td><td>${zahl(fr.kcalProTag)}</td>
+                <td>${bcsGueltig(fr.bcs) ? fr.bcs : "–"}</td><td>${Object.hasOwn(MCS, fr.mcs) ? MCS[fr.mcs] : "–"}</td>
                 <td>${sicher(fr.tierarzt)}</td><td>${sicher(fr.notiz ?? "")}</td></tr>`
             )
             .join("")}</tbody></table>`

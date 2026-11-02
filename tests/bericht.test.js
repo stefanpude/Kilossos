@@ -106,3 +106,14 @@ test("berichtHtml zeigt ein gültiges Profilbild neben dem Namen, sonst keins", 
   assert.doesNotMatch(html(null), /bericht-foto/);
   assert.doesNotMatch(html("javascript:x"), /<img/);
 });
+
+test("berichtHtml: Freigaben-Tabelle zeigt BCS und MCS, ohne Angabe einen Strich", () => {
+  const html = (fr) => {
+    const b = berichtDaten({ ...eingabe, freigaben: [fr] });
+    return berichtHtml(b, { tier: { name: "Kito" }, gewichte, mahlzeiten, freigaben: [fr], futterNachId: new Map(futter.map((f) => [f.id, f])), erstellt: "2026-11-04", demo: false });
+  };
+  const mit = html({ ...freigabe, bcs: 8, mcs: "leicht" });
+  assert.match(mit, /<th>BCS<\/th><th>MCS<\/th>/);
+  assert.match(mit, /<td>8<\/td><td>leichter Muskelabbau<\/td>/);
+  assert.match(html(freigabe), /<td>–<\/td><td>–<\/td>/);
+});

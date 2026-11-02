@@ -81,3 +81,22 @@ test("zeichneVerlauf: ohne Freigabe kein „im sicheren Bereich“", () => {
   const mit = zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [freigabe], futterNachId: new Map(), zeitraum: "alles", heute: "2026-10-20", kopf: "" });
   assert.match(mit, /von 1 Wochen? im sicheren Bereich/);
 });
+
+test("zeichneVerlauf: Karte „Befunde vom Tierarzt“ nur mit Freigaben, mit BCS und MCS", () => {
+  const ohne = zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [], futterNachId: new Map(), zeitraum: "alles", heute: "2026-10-20", kopf: "" });
+  assert.doesNotMatch(ohne, /Befunde vom Tierarzt/);
+  const mit = zeichneVerlauf({
+    gewichte,
+    mahlzeiten: [],
+    freigaben: [{ ...freigabe, bcs: 8, mcs: "leicht" }, { ...freigabe, id: "g", datum: "2026-10-15" }],
+    futterNachId: new Map(),
+    zeitraum: "alles",
+    heute: "2026-10-20",
+    kopf: "",
+  });
+  assert.match(mit, /Befunde vom Tierarzt/);
+  assert.match(mit, /BCS 8 von 9 · leichter Muskelabbau/);
+  assert.match(mit, /ohne BCS/);
+  // neueste Freigabe zuerst
+  assert.ok(mit.indexOf("15.10.") < mit.indexOf("8.10."));
+});
