@@ -34,7 +34,7 @@ import { berichtDaten, berichtHtml } from "./js/bericht.js";
 import { FUTTERLISTE, sucheFutter, ausListe, normalesFutterKcal } from "./js/futterliste.js";
 import { ringWerte, leckerliKachel, monatsGruppen } from "./js/zusammenfassung.js";
 import { leseAnzeige, merkeAnzeige, aufgeloest } from "./js/anzeige.js";
-import { aufklappKarte, merkeZustand, aufklappenAnmelden } from "./js/aufklappen.js";
+import { aufklappKarte, merkeZustand, zustandVon, zustandVergessen, aufklappenAnmelden } from "./js/aufklappen.js";
 import { auswahlFeld, auswahlAnmelden } from "./js/auswahl.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
@@ -386,6 +386,7 @@ function zeichneFutter() {
         return aufklappKarte({
           id: "futter-" + typ,
           offen,
+          festhalten: true,
           klasse: "tag-klapp",
           kopf: `<span class="icon" aria-hidden="true">${TYP_SYMBOL[typ]}</span><span class="zusammen">${TYP_NAMEN[typ]}<small>${sorten.length === 1 ? "1 Sorte" : `${sorten.length} Sorten`}</small></span>`,
           inhalt: sorten.map(sortenZeile).join(""),
@@ -504,13 +505,21 @@ aufklappenAnmelden(document);
 auswahlAnmelden(document);
 
 // Antippen des abgedunkelten Hintergrunds schließt das Blatt wie „Abbrechen“; gespeichert wird nichts.
+// Nur wenn Drücken UND Loslassen draußen waren – wer Text in einem Feld markiert und dabei über den
+// Rand hinauszieht, verliert sonst das ganze Blatt.
 document.querySelectorAll("dialog").forEach((dialog) => {
-  dialog.addEventListener("click", (ereignis) => {
-    if (ereignis.target !== dialog) return;
+  const draussen = (ereignis) => {
+    if (ereignis.target !== dialog) return false;
     const r = dialog.getBoundingClientRect();
-    const draussen =
-      ereignis.clientX < r.left || ereignis.clientX > r.right || ereignis.clientY < r.top || ereignis.clientY > r.bottom;
-    if (draussen) dialog.close("abbrechen");
+    return ereignis.clientX < r.left || ereignis.clientX > r.right || ereignis.clientY < r.top || ereignis.clientY > r.bottom;
+  };
+  let gedruecktDraussen = false;
+  dialog.addEventListener("pointerdown", (ereignis) => {
+    gedruecktDraussen = draussen(ereignis);
+  });
+  dialog.addEventListener("click", (ereignis) => {
+    if (gedruecktDraussen && draussen(ereignis)) dialog.close("abbrechen");
+    gedruecktDraussen = false;
   });
 });
 
@@ -536,6 +545,7 @@ function beimSpeichern(formId, fehlerId, pruefenUndSpeichern) {
 function futterMenue(gewaehlt) {
   $("mahlzeit-futter").innerHTML = auswahlFeld({
     name: "futter",
+    beschriftung: "label-futter",
     optionen: daten.futter.map((f) => ({
       wert: f.id,
       text: f.name,
@@ -674,8 +684,8 @@ function oeffneFutter(futter) {
   zeigeFehler("futter-fehler", "");
   $("futter-titel").textContent = futter ? "Sorte ändern" : "Eigene Sorte";
   $("futter-loeschen").hidden = !futter;
-  $("futter-typ").innerHTML = auswahlFeld({ name: "typ", optionen: TYP_OPTIONEN, wert: futter?.typ });
-  $("futter-quelle").innerHTML = auswahlFeld({ name: "quelle", optionen: QUELLE_OPTIONEN, wert: futter?.kcalQuelle });
+  $("futter-typ").innerHTML = auswahlFeld({ name: "typ", beschriftung: "label-typ", optionen: TYP_OPTIONEN, wert: futter?.typ });
+  $("futter-quelle").innerHTML = auswahlFeld({ name: "quelle", beschriftung: "label-quelle", optionen: QUELLE_OPTIONEN, wert: futter?.kcalQuelle });
   if (futter) {
     form.name.value = futter.name;
     form.kcal.value = String(futter.kcalPro100g).replace(".", ",");
@@ -719,9 +729,18 @@ $("form-futter").addEventListener("submit", (ereignis) => {
 
 // ---------- Futterliste ----------
 
+// Auf/Zu der Listen-Gruppen vor Beginn einer Suche; nach dem Leeren des Suchfelds wird er wiederhergestellt.
+let vorSuche = null;
+const LISTEN_GRUPPEN = ["liste-diaet", "liste-weitere"];
+
 function zeichneListe() {
   const vorhanden = new Set(daten.futter.map((f) => f.listeId).filter(Boolean));
   const suche = $("liste-suche").value.trim();
+  if (suche && !vorSuche) vorSuche = new Map(LISTEN_GRUPPEN.map((id) => [id, zustandVon(id)]));
+  if (!suche && vorSuche) {
+    for (const [id, offen] of vorSuche) offen === undefined ? zustandVergessen(id) : merkeZustand(id, offen);
+    vorSuche = null;
+  }
   const treffer = sucheFutter(suche);
   const gruppe = (id, titel, eintraege) => {
     if (eintraege.length === 0) return "";
@@ -802,10 +821,31 @@ function setzeFoto(foto) {
   return true;
 }
 
-function profilMenueZu() {
+function profilMenueZu(fokus = false) {
+  if (!$("profil-feld").classList.contains("offen")) return;
   $("profil-feld").classList.remove("offen");
   $("profil-feld").querySelector(".profil-menue")?.remove();
+  if (fokus) $("profil").focus();
 }
+
+// Tastatur im Profil-Menü: Pfeile wandern, Escape schließt; mit Tab hinaus schließt es ebenfalls.
+$("profil-feld").addEventListener("keydown", (ereignis) => {
+  const knoepfe = [...$("profil-feld").querySelectorAll(".profil-menue button")];
+  if (knoepfe.length === 0) return;
+  const jetzt = knoepfe.indexOf(document.activeElement);
+  if (ereignis.key === "Escape") {
+    ereignis.preventDefault();
+    return profilMenueZu(true);
+  }
+  if (ereignis.key === "ArrowDown" || ereignis.key === "ArrowUp") {
+    ereignis.preventDefault();
+    const schritt = ereignis.key === "ArrowDown" ? 1 : -1;
+    knoepfe[(jetzt + schritt + knoepfe.length) % knoepfe.length].focus();
+  }
+});
+$("profil-feld").addEventListener("focusout", (ereignis) => {
+  if (ereignis.relatedTarget && !$("profil-feld").contains(ereignis.relatedTarget)) profilMenueZu();
+});
 
 function profilAntippen() {
   if (demo) return zeigeToast("In der Demo lässt sich kein Foto setzen.", 2500);
@@ -908,6 +948,7 @@ async function zeigeSpeicherStatus() {
 
 $("bericht-zeitraum-feld").innerHTML = auswahlFeld({
   name: "bericht-zeitraum",
+  beschriftung: "label-bericht-zeitraum",
   optionen: [
     { wert: "28", text: "letzte 4 Wochen" },
     { wert: "84", text: "letzte 12 Wochen" },
@@ -917,6 +958,7 @@ $("bericht-zeitraum-feld").innerHTML = auswahlFeld({
 });
 $("anzeige-feld").innerHTML = auswahlFeld({
   name: "anzeige",
+  beschriftung: "label-anzeige",
   optionen: [
     { wert: "hell", text: "Hell" },
     { wert: "dunkel", text: "Dunkel" },

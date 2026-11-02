@@ -391,9 +391,9 @@ export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, futterNachId, 
   }
   const von = zeitraumStart(zeitraum, heute);
   const pos = ZEITRAEUME.findIndex(([wert]) => wert === zeitraum);
-  const umschalter = `<div class="umschalter" role="tablist" aria-label="Zeitraum" style="--pos: ${Math.max(0, pos)}">
+  const umschalter = `<div class="umschalter" role="group" aria-label="Zeitraum" style="--pos: ${Math.max(0, pos)}">
     <span class="gleiter" aria-hidden="true"></span>
-    ${ZEITRAEUME.map(([wert, text]) => `<button type="button" role="tab" data-aktion="zeitraum" data-wert="${wert}" aria-selected="${wert === zeitraum}">${text}</button>`).join("")}
+    ${ZEITRAEUME.map(([wert, text]) => `<button type="button" data-aktion="zeitraum" data-wert="${wert}" aria-pressed="${wert === zeitraum}">${text}</button>`).join("")}
   </div>`;
 
   const imZeitraum = verlaufGewichte(gewichte, von);

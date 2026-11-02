@@ -8,7 +8,10 @@ const sicher = (text) =>
 
 const anzeige = (option) => `${sicher(option.text)}${option.zusatz ? `<small>${sicher(option.zusatz)}</small>` : ""}`;
 
-export function auswahlFeld({ name, optionen, wert, platzhalter = "Bitte wählen", extra = [] }) {
+// beschriftung: id des Elements mit der Überschrift (z. B. „Futtersorte“), damit die Vorlesefunktion sie mitliest.
+export function auswahlFeld({ name, optionen, wert, platzhalter = "Bitte wählen", extra = [], beschriftung }) {
+  const knopfId = `auswahl-${sicher(name)}`;
+  const label = beschriftung ? ` aria-labelledby="${sicher(beschriftung)} ${knopfId}"` : "";
   const gewaehlt = optionen.find((o) => o.wert === wert);
   const feld = `<input type="hidden" name="${sicher(name)}" value="${sicher(gewaehlt ? wert : "")}">`;
   if (optionen.length === 1 && extra.length === 0) {
@@ -25,7 +28,7 @@ export function auswahlFeld({ name, optionen, wert, platzhalter = "Bitte wählen
     .join("");
   return `<div class="auswahl" data-auswahl="${sicher(name)}">
     ${feld}
-    <button type="button" class="auswahl-knopf" aria-haspopup="listbox" aria-expanded="false"><span class="auswahl-text">${gewaehlt ? anzeige(gewaehlt) : `<span class="platzhalter">${sicher(platzhalter)}</span>`}</span><span class="pfeil" aria-hidden="true">⌄</span></button>
+    <button type="button" class="auswahl-knopf" id="${knopfId}"${label} aria-haspopup="listbox" aria-expanded="false"><span class="auswahl-text">${gewaehlt ? anzeige(gewaehlt) : `<span class="platzhalter">${sicher(platzhalter)}</span>`}</span><span class="pfeil" aria-hidden="true">⌄</span></button>
     <ul class="auswahl-menue" role="listbox">${eintraege}</ul>
   </div>`;
 }
@@ -95,5 +98,14 @@ export function auswahlAnmelden(wurzel) {
       ereignis.preventDefault();
       optionen[jetzt].click();
     }
+  });
+
+  // Mit Tab aus dem Menü heraus: Menü schließen (sonst bleibt es offen über dem nächsten Feld stehen).
+  wurzel.addEventListener("focusout", (ereignis) => {
+    const auswahl = ereignis.target.closest?.(".auswahl");
+    if (!auswahl || !auswahl.classList.contains("offen")) return;
+    if (ereignis.relatedTarget && auswahl.contains(ereignis.relatedTarget)) return;
+    // Ohne neues Ziel (z. B. Klick ins Leere) erledigt das der Klick-Listener.
+    if (ereignis.relatedTarget) schliessen(auswahl);
   });
 }

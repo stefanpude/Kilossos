@@ -52,6 +52,13 @@ test("zeichneVerlauf: Zeitraum mit weniger als zwei Wägungen zeigt einen Satz s
   assert.match(html, /data-aktion="zeitraum"/);
 });
 
+test("zeichneVerlauf: Zeitraum-Umschalter sind Umschaltknöpfe (aria-pressed), keine Tabs", () => {
+  const html = zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [], futterNachId: new Map(), zeitraum: "3m", heute: "2026-10-20", kopf: "" });
+  assert.doesNotMatch(html, /role="tab/);
+  assert.match(html, /data-wert="3m" aria-pressed="true"/);
+  assert.match(html, /data-wert="1m" aria-pressed="false"/);
+});
+
 test("zeichneVerlauf: Änderungs-Marke ist neutral (kein Grün ohne Bewertung)", () => {
   const html = zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [], futterNachId: new Map(), zeitraum: "alles", heute: "2026-10-20", kopf: "" });
   const marke = html.match(/<span class="marke[^"]*">[^<]* kg<\/span>/)[0];

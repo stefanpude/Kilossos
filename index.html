@@ -2,18 +2,19 @@
 <html lang="de" data-theme="hell">
 <head>
   <meta charset="utf-8">
+  <meta name="theme-color" content="#fbf6f1" id="theme-farbe">
   <!-- Hell/Dunkel vor dem ersten Zeichnen setzen, damit nichts aufblitzt (gleiche Regel wie js/anzeige.js). -->
   <script>
     try {
       var w = localStorage.getItem("kilossos-anzeige");
       var d = w === "dunkel" || (w === "handy" && matchMedia("(prefers-color-scheme: dark)").matches);
       document.documentElement.dataset.theme = d ? "dunkel" : "hell";
+      if (d) document.getElementById("theme-farbe").content = "#1c1714";
     } catch (e) { document.documentElement.dataset.theme = "hell"; }
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Kilossos</title>
   <meta name="description" content="Kilossos begleitet übergewichtige Katzen bei einer sicheren, kontrollierten Abnahme.">
-  <meta name="theme-color" content="#fbf6f1" id="theme-farbe">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -120,11 +121,11 @@
       <div class="karte">
         <h2>Übersicht für den Tierarzt</h2>
         <p class="leise">Gewicht, Fütterung, Freigaben und Auffälligkeiten auf einen Blick – zum Ausdrucken oder als PDF zum Mitnehmen.</p>
-        <div class="feld"><span>Zeitraum</span><div id="bericht-zeitraum-feld"></div></div>
+        <div class="feld"><span id="label-bericht-zeitraum">Zeitraum</span><div id="bericht-zeitraum-feld"></div></div>
         <button class="knopf-haupt" data-aktion="bericht-oeffnen">Übersicht öffnen</button>
       </div>
       <div class="karte">
-        <h2>Darstellung</h2>
+        <h2 id="label-anzeige">Darstellung</h2>
         <div id="anzeige-feld"></div>
         <p class="tipp">Gilt nur für dieses Gerät.</p>
       </div>
@@ -139,7 +140,7 @@
         </label>
         <p class="hinweis-text-klein" id="speicher-status"></p>
       </div>
-      <p class="fuss" id="version">Version 0.7.0</p>
+      <p class="fuss" id="version">Version 0.7.1</p>
     </section>
   </main>
 
@@ -155,7 +156,7 @@
   <dialog id="dialog-mahlzeit">
     <form method="dialog" id="form-mahlzeit">
       <h2>Mahlzeit eintragen</h2>
-      <div class="feld"><span>Futtersorte</span><div id="mahlzeit-futter"></div></div>
+      <div class="feld"><span id="label-futter">Futtersorte</span><div id="mahlzeit-futter"></div></div>
       <label>Uhrzeit
         <input name="uhrzeit" type="time" required>
       </label>
@@ -203,11 +204,11 @@
       <label>Name
         <input name="name" autocomplete="off" required>
       </label>
-      <div class="feld"><span>Art</span><div id="futter-typ"></div></div>
+      <div class="feld"><span id="label-typ">Art</span><div id="futter-typ"></div></div>
       <label>kcal pro 100 g
         <input name="kcal" inputmode="decimal" autocomplete="off" required>
       </label>
-      <div class="feld"><span>Woher stammt der Wert?</span><div id="futter-quelle"></div></div>
+      <div class="feld"><span id="label-quelle">Woher stammt der Wert?</span><div id="futter-quelle"></div></div>
       <p class="tipp" id="futter-notiz" hidden></p>
       <p class="fehler" id="futter-fehler" hidden></p>
       <div class="knoepfe">

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { leseAnzeige, merkeAnzeige, aufgeloest } from "../js/anzeige.js";
-import { aufklappKarte, merkeZustand, zustandVergessen } from "../js/aufklappen.js";
+import { aufklappKarte, merkeZustand, zustandVergessen, zustandVon } from "../js/aufklappen.js";
 import { auswahlFeld } from "../js/auswahl.js";
 
 function testSpeicher() {
@@ -62,4 +62,24 @@ test("auswahlFeld schützt Text vor HTML", () => {
   const feld = auswahlFeld({ name: "f", optionen: [{ wert: "1", text: "<b>x</b>" }, { wert: "2", text: "y" }] });
   assert.doesNotMatch(feld, /<b>x<\/b>/);
   assert.match(feld, /&lt;b&gt;x&lt;\/b&gt;/);
+});
+
+test("aufklappKarte: festhalten merkt den ersten Zustand, spätere Standardwerte ändern ihn nicht", () => {
+  zustandVergessen();
+  aufklappKarte({ id: "g", kopf: "K", inhalt: "I", offen: true, festhalten: true });
+  assert.equal(zustandVon("g"), true);
+  // z. B. die 6. Sorte kommt dazu: der neue Standard wäre "zu", die Gruppe bleibt aber offen
+  assert.match(aufklappKarte({ id: "g", kopf: "K", inhalt: "I", offen: false, festhalten: true }), /aria-expanded="true"/);
+  assert.equal(zustandVon("unbekannt"), undefined);
+});
+
+test("aufklappKarte schützt die id in Attributen", () => {
+  const html = aufklappKarte({ id: 'x"y', kopf: "K", inhalt: "I" });
+  assert.doesNotMatch(html, /data-aufklapp="x"y"/);
+  assert.match(html, /data-aufklapp="x&quot;y"/);
+});
+
+test("auswahlFeld: Beschriftung wird dem Knopf zugeordnet", () => {
+  const feld = auswahlFeld({ name: "typ", beschriftung: "typ-label", optionen: [{ wert: "a", text: "A" }, { wert: "b", text: "B" }] });
+  assert.match(feld, /<button[^>]*id="auswahl-typ"[^>]*aria-labelledby="typ-label auswahl-typ"/);
 });

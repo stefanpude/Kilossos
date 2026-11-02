@@ -4,21 +4,33 @@
 // (z. B. nach dem Speichern einer Mahlzeit). Gespeichert wird er nicht.
 
 const zustand = new Map();
+const sicher = (text) =>
+  String(text).replace(/[&<>"']/g, (z) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[z]);
 
 export function merkeZustand(id, offen) {
   zustand.set(id, offen);
 }
 
-export function zustandVergessen() {
-  zustand.clear();
+// Gemerkter Zustand oder undefined, wenn die Karte noch nie gezeichnet bzw. umgeschaltet wurde.
+export function zustandVon(id) {
+  return zustand.get(id);
+}
+
+export function zustandVergessen(id) {
+  if (id === undefined) zustand.clear();
+  else zustand.delete(id);
 }
 
 // kopf und inhalt sind fertiges HTML – Text darin schützt der Aufrufer selbst.
-export function aufklappKarte({ id, kopf, inhalt, offen = false, klasse = "" }) {
+// festhalten: der Standard "offen" gilt nur beim ersten Zeichnen; danach bleibt die Karte, wie sie war
+// (sonst klappt z. B. die 6. Futtersorte alle Gruppen auf einmal zu).
+export function aufklappKarte({ id, kopf, inhalt, offen = false, klasse = "", festhalten = false }) {
+  if (festhalten && !zustand.has(id)) zustand.set(id, offen);
   const auf = zustand.has(id) ? zustand.get(id) : offen;
-  return `<div class="aufklapp${auf ? " offen" : ""}${klasse ? " " + klasse : ""}" data-aufklapp="${id}">
-    <button type="button" class="aufklapp-kopf" aria-expanded="${auf}" aria-controls="ak-${id}">${kopf}<span class="pfeil" aria-hidden="true">⌄</span></button>
-    <div class="aufklapp-inhalt" id="ak-${id}"><div>${inhalt}</div></div>
+  const i = sicher(id);
+  return `<div class="aufklapp${auf ? " offen" : ""}${klasse ? " " + klasse : ""}" data-aufklapp="${i}">
+    <button type="button" class="aufklapp-kopf" aria-expanded="${auf}" aria-controls="ak-${i}">${kopf}<span class="pfeil" aria-hidden="true">⌄</span></button>
+    <div class="aufklapp-inhalt" id="ak-${i}"><div>${inhalt}</div></div>
   </div>`;
 }
 
