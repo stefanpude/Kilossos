@@ -135,7 +135,18 @@ main {
   display: grid; place-items: center; font-size: 22px; overflow: hidden; flex: none;
 }
 .profil-menue { left: 0; right: auto; min-width: 190px; }
-.profil-feld.offen > .auswahl-menue { transform: none; opacity: 1; visibility: visible; }
+.profil-feld.offen > .auswahl-menue, .tier-feld.offen > .auswahl-menue { transform: none; opacity: 1; visibility: visible; }
+/* Name auf „Heute“: bei mehreren Tieren ein Knopf zum Wechseln */
+.tier-feld { position: relative; }
+.tier-wechsel {
+  display: block; width: 100%; min-height: 48px; padding: 0; border: 0; background: none;
+  color: var(--text); font: inherit; text-align: left; cursor: pointer;
+}
+.tier-wechsel:disabled { cursor: default; }
+.tier-wechsel .pfeil { color: var(--text-leise); font-weight: 400; }
+.tier-menue { left: 0; right: auto; min-width: 190px; }
+.auswahl-menue.tier-menue .haken { opacity: 1; }
+.tier-menue .avatar { width: 32px; height: 32px; font-size: 18px; }
 
 /* ---------- Tagesauswahl ---------- */
 .tagwahl { display: flex; align-items: center; justify-content: space-between; }
@@ -210,6 +221,8 @@ a.knopf-zweit[hidden] { display: none; }
 .profil-karte b { font-size: 1.125rem; }
 .profil-karte small { color: var(--text-leise); font-size: 0.875rem; }
 .profil-karte .weiter { font-size: 1.6rem; color: var(--text-leise); }
+.tiere-liste { display: grid; gap: 10px; }
+.profil-karte .aktiv-marke { color: var(--akzent-stark); font-weight: 600; }
 .zwei-spalten { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
 /* ---------- Untere Leiste ---------- */

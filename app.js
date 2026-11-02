@@ -37,6 +37,7 @@ import { leseAnzeige, merkeAnzeige, aufgeloest } from "./js/anzeige.js";
 import { aufklappKarte, merkeZustand, zustandVon, zustandVergessen, aufklappenAnmelden } from "./js/aufklappen.js";
 import { auswahlFeld, auswahlAnmelden } from "./js/auswahl.js";
 import { profilBereinigen, alterText, telefonLink, telefonGueltig, istWiegetag, WOCHENTAGE, HALTUNG } from "./js/profil.js";
+import { aktivesTier, leseAktivesTier, merkeAktivesTier, neuesTier, eintraegeVon, tierEntfernen } from "./js/tiere.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
 if ("serviceWorker" in navigator) {
@@ -107,13 +108,21 @@ try {
     `<div class="karte"><h2>Daten konnten nicht geladen werden</h2><p>${sicher(fehler.message)}</p></div>`;
   throw fehler;
 }
-const tier = daten.tiere[0]; // vorerst nur Kito sichtbar, das Datenmodell kann mehrere Tiere
+// Alle Ansichten zeigen das aktive Tier; gewechselt wird oben auf „Heute“.
+let tier = aktivesTier(daten, leseAktivesTier(demo));
 let gewaehlterTag = new Date();
 let zeitraum = "3m";
 
 function sichern() {
   speichern(daten);
   zeichneAlles();
+}
+
+function wechsleTier(id) {
+  tier = aktivesTier(daten, id);
+  merkeAktivesTier(tier.id, demo);
+  zeichneAlles();
+  zeichneHeute(true);
 }
 
 // Kurze Bestätigung unten, z. B. „✓ Gespeichert“.
@@ -220,6 +229,11 @@ function zeichneHeute(vonNull = false) {
   // Kopf
   $("profil").innerHTML = profilHtml(tier, "gross");
   $("profil").setAttribute("aria-label", `Profil und Foto von ${tier.name}`);
+  const mehrere = daten.tiere.length > 1;
+  $("tier-wechsel").disabled = !mehrere;
+  $("tier-pfeil").hidden = !mehrere;
+  if (mehrere) $("tier-wechsel").setAttribute("aria-label", `${tier.name}, Tier wechseln`);
+  else $("tier-wechsel").removeAttribute("aria-label");
   const art = { kater: "Kater", katze: "Katze" }[tier.geschlecht] ?? "";
   $("kopf-gewicht").textContent = [art, sortiert[0] ? `${zahl(sortiert[0].kg, 2)} kg` : ""].filter(Boolean).join(" · ");
 
@@ -412,6 +426,7 @@ function freigabeVonTier(stichtag) {
 
 function zeichneFreigabe() {
   const freigabe = freigabeVonTier();
+  $("titel-tierarzt").textContent = daten.tiere.length > 1 ? `Tierarzt · ${tier.name}` : "Tierarzt";
   $("freigabe-text").textContent = freigabe
     ? `${zahl(freigabe.zielgewichtKg, 1)} kg Zielgewicht · ${zahl(freigabe.kcalProTag)} kcal pro Tag · ` +
       `${freigabe.tierarzt}, ${datumText(freigabe.datum)}${freigabe.notiz ? " · " + freigabe.notiz : ""}`
@@ -428,30 +443,67 @@ function zeichneFreigabe() {
 
 const GESCHLECHT_NAMEN = { kater: "Kater", katze: "Katze" };
 
-function profilZusammenfassung() {
+function profilZusammenfassung(einTier) {
   const heute = tagSchluessel(new Date());
-  const geschlecht = [GESCHLECHT_NAMEN[tier.geschlecht], tier.kastriert ? "kastriert" : ""].filter(Boolean).join(", ");
-  const alter = alterText(tier.geburtsdatum, heute);
-  return [geschlecht, alter, HALTUNG[tier.haltung]].filter(Boolean).join(" · ");
+  const geschlecht = [GESCHLECHT_NAMEN[einTier.geschlecht], einTier.kastriert ? "kastriert" : ""].filter(Boolean).join(", ");
+  const alter = alterText(einTier.geburtsdatum, heute);
+  return [geschlecht, alter, HALTUNG[einTier.haltung]].filter(Boolean).join(" · ");
 }
 
-function zeichneProfilKarte() {
-  const zusammen = profilZusammenfassung();
-  const fehlt = !tier.geburtsdatum && !tier.tierarzt && !tier.koerperbau;
-  $("profil-karte").innerHTML = `${profilHtml(tier, "klein")}
-    <span class="profil-text"><b>${sicher(tier.name)}</b>
-      <small>${sicher(zusammen || "Profil")}</small>
-      ${fehlt ? "<small>Profil ergänzen: Alter, Körperbau, Tierarzt</small>" : ""}</span>
-    <span class="weiter" aria-hidden="true">›</span>`;
-  $("profil-karte").setAttribute("aria-label", `Profil von ${tier.name} bearbeiten`);
+// „Mehr“ → Tiere: eine Karte je Tier, Antippen öffnet sein Profil.
+function zeichneTiere() {
+  const mehrere = daten.tiere.length > 1;
+  $("tiere-liste").innerHTML = daten.tiere
+    .map((t) => {
+      const zusammen = profilZusammenfassung(t);
+      const fehlt = !t.geburtsdatum && !t.tierarzt && !t.koerperbau;
+      const aktiv = mehrere && t === tier ? '<small class="aktiv-marke">wird gerade angezeigt</small>' : "";
+      return `<button type="button" class="karte profil-karte" data-aktion="profil-oeffnen" data-id="${t.id}" aria-label="Profil von ${sicher(t.name)} bearbeiten">
+        ${profilHtml(t, "klein")}
+        <span class="profil-text"><b>${sicher(t.name)}</b>
+          <small>${sicher(zusammen || "Profil")}</small>
+          ${fehlt ? "<small>Profil ergänzen: Alter, Körperbau, Tierarzt</small>" : ""}${aktiv}</span>
+        <span class="weiter" aria-hidden="true">›</span></button>`;
+    })
+    .join("");
 }
 
-function oeffneProfil() {
+// Tierwahl auf „Heute“: nur Wechseln, Hinzufügen gibt es unter „Mehr“.
+function tierMenueZu(fokus = false) {
+  if (!$("tier-feld").classList.contains("offen")) return;
+  $("tier-feld").classList.remove("offen");
+  $("tier-feld").querySelector(".tier-menue")?.remove();
+  $("tier-wechsel").setAttribute("aria-expanded", "false");
+  if (fokus) $("tier-wechsel").focus();
+}
+
+function tierWahlAntippen() {
+  if ($("tier-feld").classList.contains("offen")) return tierMenueZu();
+  profilMenueZu();
+  const eintraege = daten.tiere
+    .map(
+      (t) => `<li role="none"><button type="button" role="menuitem" data-aktion="tier-waehlen" data-id="${t.id}">
+        ${profilHtml(t, "klein")}<span>${sicher(t.name)}</span>${t === tier ? '<span class="haken" aria-hidden="true">✓</span>' : ""}</button></li>`
+    )
+    .join("");
+  $("tier-feld").insertAdjacentHTML("beforeend", `<ul class="auswahl-menue tier-menue" role="menu">${eintraege}</ul>`);
+  $("tier-feld").classList.add("offen");
+  $("tier-wechsel").setAttribute("aria-expanded", "true");
+  $("tier-feld").querySelector(".tier-menue button").focus();
+}
+
+// Das Profil-Blatt dient zum Bearbeiten (einTier) und zum Anlegen (null).
+let bearbeitetesTier = null;
+
+function oeffneProfil(einTier) {
+  bearbeitetesTier = einTier;
+  const p = einTier ?? {};
   const form = $("form-profil");
   form.reset();
   zeigeFehler("profil-fehler", "");
-  $("profil-titel").textContent = `Profil von ${tier.name}`;
-  form.name.value = tier.name;
+  $("profil-titel").textContent = einTier ? `Profil von ${einTier.name}` : "Neues Tier";
+  $("profil-entfernen").hidden = !einTier || daten.tiere.length <= 1;
+  form.name.value = p.name ?? "";
   $("profil-geschlecht").innerHTML = auswahlFeld({
     name: "geschlecht",
     beschriftung: "label-geschlecht",
@@ -459,7 +511,7 @@ function oeffneProfil() {
       { wert: "kater", text: "Kater" },
       { wert: "katze", text: "Katze" },
     ],
-    wert: tier.geschlecht,
+    wert: p.geschlecht,
   });
   $("profil-kastriert").innerHTML = auswahlFeld({
     name: "kastriert",
@@ -468,20 +520,20 @@ function oeffneProfil() {
       { wert: "ja", text: "ja" },
       { wert: "nein", text: "nein" },
     ],
-    wert: tier.kastriert ? "ja" : "nein",
+    wert: einTier ? (p.kastriert ? "ja" : "nein") : undefined,
   });
   $("profil-haltung").innerHTML = auswahlFeld({
     name: "haltung",
     beschriftung: "label-haltung",
     optionen: [{ wert: "", text: "Keine Angabe" }, ...Object.entries(HALTUNG).map(([wert, text]) => ({ wert, text }))],
-    wert: tier.haltung ?? "",
+    wert: p.haltung ?? "",
   });
-  form.geburtsdatum.value = tier.geburtsdatum ?? "";
+  form.geburtsdatum.value = p.geburtsdatum ?? "";
   form.geburtsdatum.max = tagSchluessel(new Date());
-  form.koerperbau.value = tier.koerperbau ?? "";
-  form.schlank.value = tier.schlankKg ? String(tier.schlankKg).replace(".", ",") : "";
-  form.praxis.value = tier.tierarzt?.praxis ?? "";
-  form.telefon.value = tier.tierarzt?.telefon ?? "";
+  form.koerperbau.value = p.koerperbau ?? "";
+  form.schlank.value = p.schlankKg ? String(p.schlankKg).replace(".", ",") : "";
+  form.praxis.value = p.tierarzt?.praxis ?? "";
+  form.telefon.value = p.tierarzt?.telefon ?? "";
   $("dialog-profil").showModal();
 }
 
@@ -497,21 +549,55 @@ beimSpeichern("form-profil", "profil-fehler", (werte) => {
   if (schlankText && (!schlank || schlank < 0.5 || schlank > 20)) return "Bitte ein Gewicht zwischen 0,5 und 20 kg eingeben, z. B. 7,5.";
   if (telefon && !telefonGueltig(telefon)) return "Die Telefonnummer darf nur Ziffern, Leerzeichen und + ( ) / - enthalten.";
 
+  const ziel = bearbeitetesTier ?? neuesTier(neueId(), name);
   // Leere Angaben werden entfernt statt als leerer Text gespeichert.
   const setze = (feld, wert) => {
-    if (wert === "" || wert === null) delete tier[feld];
-    else tier[feld] = wert;
+    if (wert === "" || wert === null) delete ziel[feld];
+    else ziel[feld] = wert;
   };
-  tier.name = name;
+  ziel.name = name;
   setze("geschlecht", werte.get("geschlecht"));
-  tier.kastriert = werte.get("kastriert") === "ja";
+  ziel.kastriert = werte.get("kastriert") === "ja";
   setze("geburtsdatum", geburtsdatum);
   setze("koerperbau", werte.get("koerperbau").trim());
   setze("haltung", werte.get("haltung"));
   setze("schlankKg", schlank);
   const tierarzt = { ...(praxis && { praxis }), ...(telefon && { telefon }) };
   setze("tierarzt", Object.keys(tierarzt).length ? tierarzt : null);
-  sichern();
+  if (bearbeitetesTier) return sichern();
+  // Ein neues Tier wird gleich angezeigt, damit die ersten Einträge nicht beim alten Tier landen.
+  daten.tiere.push(ziel);
+  speichern(daten);
+  wechsleTier(ziel.id);
+});
+
+// Entfernen mit Rückfrage: löscht das Tier mit allen Mahlzeiten, Gewichten und Freigaben. Das letzte Tier bleibt.
+$("form-profil").addEventListener("submit", (ereignis) => {
+  if (ereignis.submitter?.value !== "entfernen" || !bearbeitetesTier) return;
+  const anzahl = eintraegeVon(daten, bearbeitetesTier.id);
+  const teile = [
+    [anzahl.mahlzeiten, "Mahlzeit", "Mahlzeiten"],
+    [anzahl.gewichte, "Gewicht", "Gewichte"],
+    [anzahl.freigaben, "Freigabe", "Freigaben"],
+  ]
+    .filter(([n]) => n > 0)
+    .map(([n, eins, mehr]) => `${n} ${n === 1 ? eins : mehr}`);
+  const eintraege = teile.length
+    ? ` Dabei werden auch ${teile.length > 1 ? `${teile.slice(0, -1).join(", ")} und ${teile.at(-1)}` : teile[0]} von ${bearbeitetesTier.name} gelöscht. Das lässt sich nicht rückgängig machen.`
+    : "";
+  const frage = `${bearbeitetesTier.name} wirklich entfernen?${eintraege} Die Futtersorten bleiben.`;
+  if (!confirm(frage)) {
+    ereignis.preventDefault();
+    return;
+  }
+  const name = bearbeitetesTier.name;
+  if (!tierEntfernen(daten, bearbeitetesTier.id)) {
+    ereignis.preventDefault();
+    return zeigeFehler("profil-fehler", "Das letzte Tier kann nicht entfernt werden.");
+  }
+  speichern(daten);
+  wechsleTier(tier.id); // war es das angezeigte Tier, springt die Anzeige auf das erste
+  zeigeToast(`${name} entfernt`);
 });
 
 function zeichneVerlaufAnsicht() {
@@ -532,7 +618,8 @@ function zeichneAlles() {
   zeichneGewicht();
   zeichneFutter();
   zeichneFreigabe();
-  zeichneProfilKarte();
+  zeichneTiere();
+  zeichneWiegetag();
   zeichneSicherung();
   zeichneVerlaufAnsicht();
 }
@@ -711,6 +798,7 @@ function oeffneMahlzeit() {
   const form = $("form-mahlzeit");
   form.reset();
   zeigeFehler("mahlzeit-fehler", "");
+  $("mahlzeit-titel").textContent = `Mahlzeit für ${tier.name}`;
   futterMenue(daten.futter[0]?.id);
   const jetzt = new Date();
   form.uhrzeit.value = `${String(jetzt.getHours()).padStart(2, "0")}:${String(jetzt.getMinutes()).padStart(2, "0")}`;
@@ -757,6 +845,7 @@ beimSpeichern("form-mahlzeit", "mahlzeit-fehler", (werte) => {
 function oeffneGewicht() {
   const form = $("form-gewicht");
   form.reset();
+  $("gewicht-titel").textContent = `Gewicht von ${tier.name}`;
   zeigeFehler("gewicht-fehler", "");
   form.datum.value = tagSchluessel(new Date());
   form.datum.max = tagSchluessel(new Date());
@@ -779,6 +868,7 @@ beimSpeichern("form-gewicht", "gewicht-fehler", (werte) => {
 function oeffneFreigabe() {
   const form = $("form-freigabe");
   form.reset();
+  $("freigabe-titel").textContent = `Freigabe für ${tier.name}`;
   zeigeFehler("freigabe-fehler", "");
   form.datum.value = tagSchluessel(new Date());
   form.datum.max = tagSchluessel(new Date());
@@ -980,27 +1070,32 @@ function profilMenueZu(fokus = false) {
   if (fokus) $("profil").focus();
 }
 
-// Tastatur im Profil-Menü: Pfeile wandern, Escape schließt; mit Tab hinaus schließt es ebenfalls.
-$("profil-feld").addEventListener("keydown", (ereignis) => {
-  const knoepfe = [...$("profil-feld").querySelectorAll(".profil-menue button")];
-  if (knoepfe.length === 0) return;
-  const jetzt = knoepfe.indexOf(document.activeElement);
-  if (ereignis.key === "Escape") {
-    ereignis.preventDefault();
-    return profilMenueZu(true);
-  }
-  if (ereignis.key === "ArrowDown" || ereignis.key === "ArrowUp") {
-    ereignis.preventDefault();
-    const schritt = ereignis.key === "ArrowDown" ? 1 : -1;
-    knoepfe[(jetzt + schritt + knoepfe.length) % knoepfe.length].focus();
-  }
-});
-$("profil-feld").addEventListener("focusout", (ereignis) => {
-  if (ereignis.relatedTarget && !$("profil-feld").contains(ereignis.relatedTarget)) profilMenueZu();
-});
+// Tastatur im Profil- und im Tier-Menü: Pfeile wandern, Escape schließt; mit Tab hinaus schließt es ebenfalls.
+function menueTastatur(feld, zu) {
+  feld.addEventListener("keydown", (ereignis) => {
+    const knoepfe = [...feld.querySelectorAll(".auswahl-menue button")];
+    if (knoepfe.length === 0) return;
+    const jetzt = knoepfe.indexOf(document.activeElement);
+    if (ereignis.key === "Escape") {
+      ereignis.preventDefault();
+      return zu(true);
+    }
+    if (ereignis.key === "ArrowDown" || ereignis.key === "ArrowUp") {
+      ereignis.preventDefault();
+      const schritt = ereignis.key === "ArrowDown" ? 1 : -1;
+      knoepfe[(jetzt + schritt + knoepfe.length) % knoepfe.length].focus();
+    }
+  });
+  feld.addEventListener("focusout", (ereignis) => {
+    if (ereignis.relatedTarget && !feld.contains(ereignis.relatedTarget)) zu();
+  });
+}
+menueTastatur($("profil-feld"), profilMenueZu);
+menueTastatur($("tier-feld"), tierMenueZu);
 
 function profilAntippen() {
   if ($("profil-feld").classList.contains("offen")) return profilMenueZu();
+  tierMenueZu();
   const mitFoto = fotoGueltig(tier.foto);
   $("profil-feld").insertAdjacentHTML(
     "beforeend",
@@ -1131,13 +1226,17 @@ $("anzeige-feld").innerHTML = auswahlFeld({
   ],
   wert: leseAnzeige(),
 });
-$("wiegetag-feld").innerHTML = auswahlFeld({
-  name: "wiegetag",
-  beschriftung: "label-wiegetag",
-  // Montag zuerst, wie im deutschen Kalender
-  optionen: [{ wert: "", text: "Kein fester Tag" }, ...[1, 2, 3, 4, 5, 6, 0].map((t) => ({ wert: String(t), text: WOCHENTAGE[t] }))],
-  wert: Number.isInteger(tier.wiegetag) ? String(tier.wiegetag) : "",
-});
+// Der Wiegetag gehört zum aktiven Tier; beim Wechsel wird das Feld neu gezeichnet.
+function zeichneWiegetag() {
+  $("label-wiegetag").textContent = daten.tiere.length > 1 ? `Wiegetag von ${tier.name}` : "Wiegetag";
+  $("wiegetag-feld").innerHTML = auswahlFeld({
+    name: "wiegetag",
+    beschriftung: "label-wiegetag",
+    // Montag zuerst, wie im deutschen Kalender
+    optionen: [{ wert: "", text: "Kein fester Tag" }, ...[1, 2, 3, 4, 5, 6, 0].map((t) => ({ wert: String(t), text: WOCHENTAGE[t] }))],
+    wert: Number.isInteger(tier.wiegetag) ? String(tier.wiegetag) : "",
+  });
+}
 document.addEventListener("change", (ereignis) => {
   if (ereignis.target.name !== "wiegetag") return;
   if (ereignis.target.value === "") delete tier.wiegetag;
@@ -1159,6 +1258,7 @@ document.addEventListener("change", (ereignis) => {
 
 document.addEventListener("click", (ereignis) => {
   if (!ereignis.target.closest?.("#profil-feld")) profilMenueZu();
+  if (!ereignis.target.closest?.("#tier-feld")) tierMenueZu();
   const ziel = ereignis.target.closest("[data-ziel], [data-aktion]");
   if (!ziel) return;
   if (ziel.dataset.ziel) return zeigeAnsicht(ziel.dataset.ziel);
@@ -1216,7 +1316,18 @@ document.addEventListener("click", (ereignis) => {
       return profilAntippen();
     case "profil-oeffnen":
       profilMenueZu();
-      return oeffneProfil();
+      return oeffneProfil(id ? daten.tiere.find((t) => t.id === id) : tier);
+    case "tier-neu":
+      return oeffneProfil(null);
+    case "tier-wahl":
+      return tierWahlAntippen();
+    case "tier-waehlen":
+      tierMenueZu(true);
+      if (id !== tier.id) {
+        wechsleTier(id);
+        zeigeToast(`${tier.name} wird angezeigt`);
+      }
+      return;
     case "foto-aendern":
       profilMenueZu();
       if (demo) return zeigeToast("In der Demo lässt sich kein Foto setzen.", 2500);

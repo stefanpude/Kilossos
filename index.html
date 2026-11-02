@@ -37,7 +37,11 @@
           <button type="button" class="profil" id="profil" data-aktion="profil" aria-label="Profilbild ändern"></button>
           <input type="file" accept="image/*" id="foto-datei" hidden>
         </div>
-        <div class="tier-text"><b id="tiername">Kito</b><small id="kopf-gewicht"></small></div>
+        <div class="tier-text tier-feld" id="tier-feld">
+          <button type="button" class="tier-wechsel" id="tier-wechsel" data-aktion="tier-wahl" aria-haspopup="menu" aria-expanded="false">
+            <b><span id="tiername">Kito</span><span class="pfeil" id="tier-pfeil" aria-hidden="true" hidden> ⌄</span></b><small id="kopf-gewicht"></small>
+          </button>
+        </div>
         <div class="datum" id="kopf-datum"></div>
       </div>
 
@@ -117,9 +121,11 @@
 
     <!-- Mehr -->
     <section class="ansicht" data-ansicht="mehr" hidden>
-      <button type="button" class="karte profil-karte" data-aktion="profil-oeffnen" id="profil-karte"></button>
+      <h3 class="gruppe-titel">Tiere</h3>
+      <div class="tiere-liste" id="tiere-liste"></div>
+      <button type="button" class="knopf-zweit" data-aktion="tier-neu">＋ Tier hinzufügen</button>
 
-      <h3 class="gruppe-titel">Tierarzt</h3>
+      <h3 class="gruppe-titel" id="titel-tierarzt">Tierarzt</h3>
       <div class="karte">
         <h2>Freigabe vom Tierarzt</h2>
         <p class="leise" id="freigabe-text"></p>
@@ -188,7 +194,7 @@
         <p class="leise"><strong>Grenzwerte:</strong> nach den Leitlinien von AAHA (2014, 2021) und WSAVA, mit allen Quellen in
           <a href="https://github.com/stefanpude/Kilossos/blob/main/docs/sicherheitsgrenzen.md" target="_blank" rel="noopener">docs/sicherheitsgrenzen.md</a>.</p>
       </div>
-      <p class="fuss" id="version">Version 0.8.2</p>
+      <p class="fuss" id="version">Version 0.9.0</p>
     </section>
   </main>
 
@@ -203,7 +209,7 @@
   <!-- Formular: Mahlzeit -->
   <dialog id="dialog-mahlzeit">
     <form method="dialog" id="form-mahlzeit">
-      <h2>Mahlzeit eintragen</h2>
+      <h2 id="mahlzeit-titel">Mahlzeit eintragen</h2>
       <div class="feld"><span id="label-futter">Futtersorte</span><div id="mahlzeit-futter"></div></div>
       <label>Uhrzeit
         <input name="uhrzeit" type="time" required>
@@ -227,7 +233,7 @@
   <!-- Formular: Gewicht -->
   <dialog id="dialog-gewicht">
     <form method="dialog" id="form-gewicht">
-      <h2>Gewicht eintragen</h2>
+      <h2 id="gewicht-titel">Gewicht eintragen</h2>
       <label>Gewicht in kg
         <input name="kg" inputmode="decimal" autocomplete="off" placeholder="z. B. 9,32" required>
       </label>
@@ -286,7 +292,7 @@
   <!-- Formular: Freigabe vom Tierarzt -->
   <dialog id="dialog-freigabe">
     <form method="dialog" id="form-freigabe">
-      <h2>Freigabe vom Tierarzt</h2>
+      <h2 id="freigabe-titel">Freigabe vom Tierarzt</h2>
       <p class="tipp">Bitte genau die Werte eintragen, die der Tierarzt festgelegt hat.</p>
       <label>Zielgewicht in kg
         <input name="ziel" inputmode="decimal" autocomplete="off" placeholder="z. B. 7,2" required>
@@ -342,6 +348,7 @@
       </label>
       <p class="fehler" id="profil-fehler" hidden></p>
       <div class="knoepfe">
+        <button value="entfernen" formnovalidate class="knopf-gefahr" id="profil-entfernen" hidden>Entfernen</button>
         <button value="abbrechen" formnovalidate class="knopf-zweit">Abbrechen</button>
         <button value="speichern" class="knopf-haupt">Speichern</button>
       </div>
