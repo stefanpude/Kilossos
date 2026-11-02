@@ -1,6 +1,6 @@
 // Speichert die App-Dateien auf dem Gerät, damit Kilossos auch ohne Internet startet.
 // Bei jeder Änderung an den Dateien CACHE_NAME hochzählen.
-const CACHE_NAME = "kilossos-v15";
+const CACHE_NAME = "kilossos-v16";
 const DATEIEN = [
   "./",
   "index.html",
@@ -40,11 +40,14 @@ self.addEventListener("activate", (event) => {
 // Erst das Netz fragen (damit Updates sofort ankommen), ohne Netz die gespeicherte Fassung nehmen.
 // "no-cache" umgeht die bis zu 10 Minuten alte Zwischenkopie des Browsers, sonst passen nach einem
 // Update alte und neue Dateien nicht zusammen. Unveränderte Dateien kosten dabei nur eine kurze Rückfrage.
+// Fehlerantworten (z. B. 503 kurz nach dem Hochladen) werden nie gespeichert; dann gilt wie ohne Netz
+// die gespeicherte Fassung, damit eine gute Offline-Kopie nicht durch eine kaputte ersetzt wird.
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   event.respondWith(
     fetch(event.request, { cache: "no-cache" })
       .then((antwort) => {
+        if (!antwort.ok) return caches.match(event.request).then((treffer) => treffer || antwort);
         const kopie = antwort.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, kopie));
         return antwort;

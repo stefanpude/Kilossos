@@ -523,6 +523,17 @@ document.querySelectorAll("dialog").forEach((dialog) => {
   });
 });
 
+// Enter in einem Eingabefeld speichert. Der Browser würde sonst den ersten Knopf auslösen
+// („Abbrechen“ oder sogar „Löschen“). Im Suchfeld der Futterliste passiert nichts.
+document.querySelectorAll("dialog form").forEach((form) => {
+  form.addEventListener("keydown", (ereignis) => {
+    if (ereignis.key !== "Enter" || ereignis.target.tagName !== "INPUT" || ereignis.isComposing) return;
+    ereignis.preventDefault();
+    const speichern = form.querySelector('button[value="speichern"]');
+    if (speichern) form.requestSubmit(speichern);
+  });
+});
+
 function zeigeFehler(id, text) {
   $(id).textContent = text;
   $(id).hidden = !text;
