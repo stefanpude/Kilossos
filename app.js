@@ -41,6 +41,7 @@ import { aufklappKarte, merkeZustand, zustandVon, zustandVergessen, aufklappenAn
 import { auswahlFeld, auswahlAnmelden } from "./js/auswahl.js";
 import { profilBereinigen, alterText, telefonLink, telefonGueltig, istWiegetag, WOCHENTAGE, HALTUNG } from "./js/profil.js";
 import { aktivesTier, leseAktivesTier, merkeAktivesTier, neuesTier, eintraegeVon, tierEntfernen } from "./js/tiere.js";
+import { wischenAnmelden } from "./js/wischen.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
 if ("serviceWorker" in navigator) {
@@ -140,14 +141,15 @@ function zeigeToast(text, dauerMs = 1800) {
 
 // ---------- Ansichten ----------
 
-function zeigeAnsicht(name) {
+// richtung: 1/-1 nach einem Wischen, dann gleitet der Bereich von der Seite herein.
+function zeigeAnsicht(name, richtung = 0) {
   document.querySelectorAll(".ansicht").forEach((el) => {
     el.hidden = el.dataset.ansicht !== name;
-    el.classList.remove("rein");
+    el.classList.remove("rein", "rein-rechts", "rein-links");
   });
   const ansicht = document.querySelector(`.ansicht[data-ansicht="${name}"]`);
   void ansicht.offsetWidth; // Animation neu starten
-  ansicht.classList.add("rein");
+  ansicht.classList.add(richtung > 0 ? "rein-rechts" : richtung < 0 ? "rein-links" : "rein");
   document.querySelectorAll(".leiste button").forEach((knopf) => {
     if (knopf.dataset.ziel === name) knopf.setAttribute("aria-current", "page");
     else knopf.removeAttribute("aria-current");
@@ -1316,6 +1318,15 @@ function willkommenGesehen() {
     return true;
   }
 }
+
+// ---------- Wischen zwischen den Bereichen ----------
+
+wischenAnmelden(document.querySelector("main"), {
+  leiste: () => [...document.querySelectorAll(".leiste button[data-ziel]")].map((knopf) => knopf.dataset.ziel),
+  aktuell: () => document.querySelector(".ansicht:not([hidden])")?.dataset.ansicht,
+  wechseln: zeigeAnsicht,
+  gesperrt: () => document.body.classList.contains("willkommen-offen") || !!document.querySelector("dialog[open]"),
+});
 
 // ---------- Klicks ----------
 
