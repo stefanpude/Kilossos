@@ -1,6 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { laden, speichern, istGueltig, demoModus, verschiebeDaten } from "../js/daten.js";
+import {
+  laden,
+  speichern,
+  istGueltig,
+  demoModus,
+  verschiebeDaten,
+  sicherungsHinweis,
+  letzteSicherung,
+  sicherungMerken,
+} from "../js/daten.js";
 
 // Ersatz für den Browserspeicher, damit die Tests ohne Browser laufen.
 function testSpeicher() {
@@ -108,4 +117,26 @@ test("verschiebeDaten verschiebt Tage, Uhrzeit bleibt (auch über die Zeitumstel
   const zeit = new Date(neu.mahlzeiten[0].zeitpunkt);
   assert.deepEqual([zeit.getDate(), zeit.getHours(), zeit.getMinutes()], [30, 7, 30]);
   assert.equal(daten.gewichte[0].datum, "2026-03-20"); // Original unverändert
+});
+
+test("sicherungsHinweis: ohne Einträge nie, noch nie gesichert erst nach 7 Tagen", () => {
+  assert.equal(sicherungsHinweis({ letzte: null, ersterEintrag: undefined, letzterEintrag: undefined, heute: "2026-11-20" }), null);
+  const basis = { letzte: null, ersterEintrag: "2026-11-02", letzterEintrag: "2026-11-08", heute: "2026-11-08" };
+  assert.equal(sicherungsHinweis(basis), null); // 6 Tage
+  assert.deepEqual(sicherungsHinweis({ ...basis, heute: "2026-11-09" }), { nieGesichert: true, tage: 7 });
+});
+
+test("sicherungsHinweis: alle 14 Tage, aber nur wenn danach etwas eingetragen wurde", () => {
+  const basis = { letzte: "2026-11-01", ersterEintrag: "2026-10-20", letzterEintrag: "2026-11-14", heute: "2026-11-14" };
+  assert.equal(sicherungsHinweis(basis), null); // 13 Tage
+  assert.deepEqual(sicherungsHinweis({ ...basis, heute: "2026-11-15", letzterEintrag: "2026-11-15" }), { nieGesichert: false, tage: 14 });
+  assert.equal(sicherungsHinweis({ ...basis, heute: "2026-11-30", letzterEintrag: "2026-11-01" }), null); // nichts Neues
+});
+
+test("letzteSicherung wird getrennt von den Daten gemerkt", () => {
+  const speicher = testSpeicher();
+  assert.equal(letzteSicherung(speicher), null);
+  sicherungMerken("2026-11-02", speicher);
+  assert.equal(letzteSicherung(speicher), "2026-11-02");
+  assert.equal(speicher.getItem("kilossos-daten"), null);
 });

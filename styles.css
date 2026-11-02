@@ -391,3 +391,7 @@ select {
   .bericht h2 { break-after: avoid; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* Sicherungs-Erinnerung auf "Heute" */
+.sicherung-hinweis { display: grid; gap: 10px; }
+.sicherung-hinweis[hidden] { display: none; }

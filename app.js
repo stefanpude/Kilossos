@@ -7,6 +7,10 @@ import {
   futterNachId,
   demoModus,
   verschiebeDaten,
+  letzteSicherung,
+  sicherungMerken,
+  sicherungsHinweis,
+  SICHERUNG_ALLE_TAGE,
 } from "./js/daten.js";
 import {
   leseZahl,
@@ -213,6 +217,7 @@ function zeichneAlles() {
   zeichneGewicht();
   zeichneFutter();
   zeichneFreigabe();
+  zeichneSicherung();
   $("verlauf-inhalt").innerHTML = zeichneVerlauf({
     gewichte: daten.gewichte.filter((g) => g.tierId === tier.id),
     mahlzeiten: daten.mahlzeiten.filter((m) => m.tierId === tier.id),
@@ -461,6 +466,34 @@ function exportieren() {
   link.download = `kilossos-${demo ? "demo" : "sicherung"}-${tagSchluessel(new Date())}.json`;
   link.click();
   URL.revokeObjectURL(link.href);
+  if (!demo) {
+    sicherungMerken(tagSchluessel(new Date()));
+    zeichneSicherung();
+  }
+}
+
+// Erinnert auf "Heute" an eine Sicherung; im Demo-Modus nie (dort gibt es nichts Echtes zu sichern).
+function zeichneSicherung() {
+  const letzte = letzteSicherung();
+  const tage = [
+    ...daten.mahlzeiten.map((m) => tagSchluessel(new Date(m.zeitpunkt))),
+    ...daten.gewichte.map((g) => g.datum),
+    ...daten.freigaben.map((f) => f.datum),
+  ].sort();
+  const hinweis = demo
+    ? null
+    : sicherungsHinweis({ letzte, ersterEintrag: tage[0], letzterEintrag: tage.at(-1), heute: tagSchluessel(new Date()) });
+  $("sicherung-hinweis").hidden = !hinweis;
+  if (hinweis) {
+    $("sicherung-hinweis-text").textContent = hinweis.nieGesichert
+      ? "Du hast noch nie eine Sicherung gespeichert. Alle Einträge liegen nur auf diesem Handy – geht es verloren, sind sie weg."
+      : `Deine letzte Sicherung ist ${hinweis.tage} Tage her. Seitdem ist Neues dazugekommen.`;
+  }
+  $("sicherung-datum").textContent = demo
+    ? "Demo: Sicherungen werden hier nicht gemerkt."
+    : letzte
+      ? `Letzte Sicherung: ${datumText(letzte)}. Kilossos erinnert dich alle ${SICHERUNG_ALLE_TAGE} Tage.`
+      : "Noch keine Sicherung gespeichert.";
 }
 
 $("import-datei").addEventListener("change", async (ereignis) => {

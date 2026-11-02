@@ -30,6 +30,11 @@
         <button class="knopf-rund" data-aktion="tag-vor" aria-label="Nächster Tag">›</button>
       </div>
 
+      <div class="warnung warnung-achtung sicherung-hinweis" id="sicherung-hinweis" hidden>
+        <span id="sicherung-hinweis-text"></span>
+        <button class="knopf-haupt" data-aktion="export">Jetzt sichern</button>
+      </div>
+
       <ul class="warnungen" id="warnungen-liste"></ul>
 
       <div class="karte summe">
@@ -103,6 +108,7 @@
       <div class="karte">
         <h2>Sicherung</h2>
         <p class="leise">Alle Einträge liegen nur auf diesem Handy. Speichere regelmäßig eine Sicherung, zum Beispiel in deinem Cloud-Ordner oder per Mail an dich selbst.</p>
+        <p class="leise" id="sicherung-datum"></p>
         <button class="knopf-haupt" data-aktion="export">Sicherung speichern</button>
         <label class="knopf-zweit">
           Sicherung einlesen
@@ -110,7 +116,7 @@
         </label>
         <p class="hinweis" id="speicher-status"></p>
       </div>
-      <p class="fuss" id="version">Version 0.5.0</p>
+      <p class="fuss" id="version">Version 0.5.1</p>
     </section>
   </main>
 

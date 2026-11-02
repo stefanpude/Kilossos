@@ -119,6 +119,42 @@ export async function dauerhaftSpeichern() {
   return false;
 }
 
+// ---------- Sicherungs-Erinnerung ----------
+// Der Tag der letzten Sicherung liegt in einem eigenen Schlüssel, nicht in den Daten selbst:
+// So bleibt er beim Einlesen einer alten Sicherung richtig und steckt nicht in der Sicherungsdatei.
+const SICHERUNG_SCHLUESSEL = "kilossos-letzte-sicherung";
+export const SICHERUNG_ALLE_TAGE = 14;
+const ERSTE_SICHERUNG_NACH_TAGEN = 7;
+
+export function letzteSicherung(speicher = localStorage) {
+  return speicher.getItem(SICHERUNG_SCHLUESSEL);
+}
+
+export function sicherungMerken(tag, speicher = localStorage) {
+  speicher.setItem(SICHERUNG_SCHLUESSEL, tag);
+}
+
+// Wann eine Erinnerung fällig ist (alle Tage als "JJJJ-MM-TT"); null = keine Erinnerung.
+// Ohne Einträge gibt es nichts zu sichern. Noch nie gesichert: 7 Tage nach dem ersten Eintrag.
+// Sonst: wenn die letzte Sicherung 14 Tage oder länger her ist und es danach neue Einträge gab.
+export function sicherungsHinweis({ letzte, ersterEintrag, letzterEintrag, heute }) {
+  if (!ersterEintrag) return null;
+  const tage = (von, bis) => {
+    const ms = (iso) => {
+      const [j, m, t] = iso.split("-").map(Number);
+      return Date.UTC(j, m - 1, t);
+    };
+    return Math.round((ms(bis) - ms(von)) / 86400000);
+  };
+  if (!letzte) {
+    const seit = tage(ersterEintrag, heute);
+    return seit >= ERSTE_SICHERUNG_NACH_TAGEN ? { nieGesichert: true, tage: seit } : null;
+  }
+  const seit = tage(letzte, heute);
+  if (seit < SICHERUNG_ALLE_TAGE || letzterEintrag <= letzte) return null;
+  return { nieGesichert: false, tage: seit };
+}
+
 // Verschiebt alle Datumsangaben um "tage" Tage – damit die Demo-Simulation immer am heutigen Tag endet.
 export function verschiebeDaten(daten, tage) {
   const tag = (iso) => {
