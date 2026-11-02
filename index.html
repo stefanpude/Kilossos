@@ -39,7 +39,8 @@
         <h2>Wichtig: Immer mit dem Tierarzt</h2>
         <p class="leise">Kilossos ersetzt keinen Tierarzt und ist kein Medizinprodukt. Lass deine Katze untersuchen, bevor sie abnimmt.
           Zielgewicht und Tagesmenge legt immer der Tierarzt fest. Kilossos vergleicht deine Fütterung dann mit diesen Werten,
-          schlägt aber nie selbst Mengen vor. Ohne Freigabe zeichnet die App nur auf und warnt.</p>
+          schlägt aber nie selbst Mengen vor. Ohne Freigabe zeichnet die App nur auf und warnt.
+          Warum? Eine Formel kennt deine Katze nicht, und bei Katzen sind zu viel und zu wenig Futter riskant.</p>
         <p class="leise"><strong>Ist deine Katze krank</strong> (zum Beispiel Diabetes, Nieren-, Schilddrüsen- oder Lebererkrankung) oder frisst sie
           plötzlich schlecht, besprich jede Änderung am Futter vorher mit deinem Tierarzt.
           <strong>Frisst eine Katze einen Tag oder länger gar nicht, gehört sie sofort zum Tierarzt.</strong></p>
@@ -159,6 +160,7 @@
         <p class="leise" id="freigabe-text"></p>
         <button class="knopf-haupt" data-aktion="freigabe-neu">Freigabe eintragen</button>
         <p class="tipp">Zielgewicht und Tagesmenge legt nur der Tierarzt fest. Ohne Freigabe zeichnet Kilossos nur auf und warnt, schlägt aber keine Mengen vor.</p>
+        <button type="button" class="knopf-zweit" data-aktion="warum-kein-ziel">Warum keine Futtermenge?</button>
         <a class="knopf-zweit" id="praxis-anrufen" hidden></a>
       </div>
       <div class="karte">
@@ -225,7 +227,7 @@
         <p class="leise"><strong>Grenzwerte:</strong> nach den Leitlinien von AAHA (2014, 2021) und WSAVA, mit allen Quellen in
           <a href="https://github.com/stefanpude/Kilossos/blob/main/docs/sicherheitsgrenzen.md" target="_blank" rel="noopener">docs/sicherheitsgrenzen.md</a>.</p>
       </div>
-      <p class="fuss" id="version">Version 0.10.0</p>
+      <p class="fuss" id="version">Version 0.11.0</p>
     </section>
   </main>
 
@@ -382,6 +384,24 @@
         <button value="entfernen" formnovalidate class="knopf-gefahr" id="profil-entfernen" hidden>Entfernen</button>
         <button value="abbrechen" formnovalidate class="knopf-zweit">Abbrechen</button>
         <button value="speichern" class="knopf-haupt">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Erklärung: warum Kilossos keine Futtermenge vorschlägt -->
+  <dialog id="dialog-warum">
+    <form method="dialog">
+      <h2>Warum schlägt Kilossos keine Futtermenge vor?</h2>
+      <p>Rechner im Internet und in anderen Apps schätzen den Futterbedarf mit einer Formel aus dem Gewicht.
+        Für eine einzelne Katze kann das deutlich danebenliegen. Die Leitlinien der Tierärzteverbände (AAHA) sehen jede
+        Formel deshalb nur als Startwert, den der Tierarzt festlegt und danach in kleinen Schritten anpasst.</p>
+      <p>Bei Katzen sind beide Richtungen riskant: Zu viel Futter bremst die Abnahme, zu wenig kann eine lebensgefährliche
+        Fettleber auslösen.</p>
+      <p>Der Tierarzt kennt, was keine Formel kennt: Körperzustand, Muskeln, Vorerkrankungen und das Futter deiner Katze.
+        Deshalb trägst du seine Werte als Freigabe ein. Ab dann vergleicht Kilossos jeden Tag mit diesen Werten
+        und warnt, wenn etwas aus dem sicheren Bereich läuft.</p>
+      <div class="knoepfe">
+        <button value="abbrechen" class="knopf-haupt">Verstanden</button>
       </div>
     </form>
   </dialog>

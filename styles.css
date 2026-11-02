@@ -85,6 +85,11 @@ button { -webkit-tap-highlight-color: transparent; }
 .willkommen-daten { margin: 0; text-align: center; }
 body.willkommen-offen { overflow: hidden; }
 #geschichte { scroll-margin-top: 24px; }
+.knopf-text {
+  border: 0; background: none; padding: 12px 0; min-height: 48px; cursor: pointer;
+  color: var(--akzent-stark); font-weight: 600; text-align: left; text-decoration: underline; text-underline-offset: 3px;
+}
+#dialog-warum p { margin: 0 0 10px; }
 .kopf h1 { margin: 0; font-size: 0.8125rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--akzent-stark); }
 
 main {

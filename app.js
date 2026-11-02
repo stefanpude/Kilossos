@@ -286,7 +286,8 @@ function zeichneHeute(vonNull = false) {
     $("ring-rechts").innerHTML =
       zeile("Gefüttert", `${ca}${zahl(summe.kcal)} kcal`) +
       zeile("Menge", `${zahl(summe.gramm)} g`) +
-      `<p>Ziel kommt mit der Freigabe vom Tierarzt.</p>`;
+      `<p>Ziel kommt mit der Freigabe vom Tierarzt.</p>` +
+      `<button type="button" class="knopf-text" data-aktion="warum-kein-ziel">Warum kein Ziel?</button>`;
   }
   $("summe-hinweis").hidden = !summe.unsicher;
 
@@ -316,7 +317,7 @@ function zeichneHeute(vonNull = false) {
       .map((m) => {
         const f = futter.get(m.futterId);
         const kcal = f ? `${zahl(kcalFuer(m.gramm, f.kcalPro100g))} kcal` : "kcal unbekannt";
-        return `<div class="zeile"><span class="icon" aria-hidden="true">${TYP_SYMBOL[f?.typ] ?? "🍽️"}</span>
+        return `<div class="zeile tippbar" data-aktion="mahlzeit-bearbeiten" data-id="${m.id}"><span class="icon" aria-hidden="true">${TYP_SYMBOL[f?.typ] ?? "🍽️"}</span>
           <span class="name">${sicher(f ? f.name : "Gelöschte Sorte")}<small>${uhr(m)} · ${zahl(m.gramm)} g</small></span>
           <span class="kcal">${kcal}</span>
           <button type="button" class="knopf-loeschen" data-aktion="mahlzeit-loeschen" data-id="${m.id}" aria-label="Mahlzeit löschen">✕</button></div>`;
@@ -794,14 +795,19 @@ function futterMenue(gewaehlt) {
   });
 }
 
-function oeffneMahlzeit() {
+// Ohne Mahlzeit: neu eintragen. Mit Mahlzeit: Sorte, Uhrzeit und Menge nachträglich ändern (der Tag bleibt).
+let bearbeiteteMahlzeit = null;
+
+function oeffneMahlzeit(mahlzeit = null) {
+  bearbeiteteMahlzeit = mahlzeit;
   const form = $("form-mahlzeit");
   form.reset();
   zeigeFehler("mahlzeit-fehler", "");
-  $("mahlzeit-titel").textContent = `Mahlzeit für ${tier.name}`;
-  futterMenue(daten.futter[0]?.id);
-  const jetzt = new Date();
-  form.uhrzeit.value = `${String(jetzt.getHours()).padStart(2, "0")}:${String(jetzt.getMinutes()).padStart(2, "0")}`;
+  $("mahlzeit-titel").textContent = mahlzeit ? `Mahlzeit von ${tier.name} ändern` : `Mahlzeit für ${tier.name}`;
+  futterMenue(mahlzeit ? mahlzeit.futterId : daten.futter[0]?.id);
+  const zeit = mahlzeit ? new Date(mahlzeit.zeitpunkt) : new Date();
+  form.uhrzeit.value = `${String(zeit.getHours()).padStart(2, "0")}:${String(zeit.getMinutes()).padStart(2, "0")}`;
+  if (mahlzeit) form.gramm.value = String(mahlzeit.gramm).replace(".", ",");
   zeigeMahlzeitVorschau();
   $("dialog-mahlzeit").showModal();
 }
@@ -830,8 +836,12 @@ beimSpeichern("form-mahlzeit", "mahlzeit-fehler", (werte) => {
   const gramm = leseZahl(werte.get("gramm"));
   if (!gramm || gramm > 1000) return "Bitte eine Menge zwischen 1 und 1000 g eingeben.";
   const [stunde, minute] = werte.get("uhrzeit").split(":").map(Number);
-  const zeitpunkt = new Date(gewaehlterTag);
+  const zeitpunkt = new Date(bearbeiteteMahlzeit ? bearbeiteteMahlzeit.zeitpunkt : gewaehlterTag);
   zeitpunkt.setHours(stunde, minute, 0, 0);
+  if (bearbeiteteMahlzeit) {
+    Object.assign(bearbeiteteMahlzeit, { futterId: werte.get("futter"), gramm, zeitpunkt: zeitpunkt.toISOString() });
+    return sichern();
+  }
   daten.mahlzeiten.push({
     id: neueId(),
     tierId: tier.id,
@@ -1302,6 +1312,10 @@ document.addEventListener("click", (ereignis) => {
       return zeichneHeute(true);
     case "mahlzeit-neu":
       return oeffneMahlzeit();
+    case "mahlzeit-bearbeiten":
+      return oeffneMahlzeit(daten.mahlzeiten.find((m) => m.id === id));
+    case "warum-kein-ziel":
+      return $("dialog-warum").showModal();
     case "gramm-minus":
       return grammSchritt(-5);
     case "gramm-plus":
