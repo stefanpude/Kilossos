@@ -52,6 +52,21 @@ test("zeichneVerlauf: Zeitraum mit weniger als zwei Wägungen zeigt einen Satz s
   assert.match(html, /data-aktion="zeitraum"/);
 });
 
+test("zeichneVerlauf: Änderungs-Marke ist neutral (kein Grün ohne Bewertung)", () => {
+  const html = zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [], futterNachId: new Map(), zeitraum: "alles", heute: "2026-10-20", kopf: "" });
+  const marke = html.match(/<span class="marke[^"]*">[^<]* kg<\/span>/)[0];
+  assert.doesNotMatch(marke, /marke-(gut|warnung|gefahr)/);
+});
+
+test("zeichneVerlauf: Kennzahl-Kacheln folgen dem Zeitraum", () => {
+  const mitAlt = [G("2026-08-01", 9.6), ...gewichte];
+  const html = zeichneVerlauf({ gewichte: mitAlt, mahlzeiten: [], freigaben: [], futterNachId: new Map(), zeitraum: "1m", heute: "2026-10-20", kopf: "" });
+  assert.match(html, /Start<\/span><strong>9,32 kg/);
+  assert.doesNotMatch(html, /9,60 kg/);
+  const alles = zeichneVerlauf({ gewichte: mitAlt, mahlzeiten: [], freigaben: [], futterNachId: new Map(), zeitraum: "alles", heute: "2026-10-20", kopf: "" });
+  assert.match(alles, /Start<\/span><strong>9,60 kg/);
+});
+
 test("zeichneVerlauf: ohne Freigabe kein „im sicheren Bereich“", () => {
   const html = zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [], futterNachId: new Map(), zeitraum: "alles", heute: "2026-10-20", kopf: "" });
   assert.match(html, /Ø [\d,]+ % pro Woche/);

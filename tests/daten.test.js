@@ -162,6 +162,13 @@ test("fotoGueltig nimmt nur JPEG/PNG bis 300 KB", () => {
   assert.equal(fotoGueltig(42), false);
 });
 
+test("fotoGueltig lässt keine Anführungszeichen oder Fremdtext durch (Schutz vor eingeschleustem Code)", () => {
+  assert.equal(fotoGueltig('data:image/png;base64,x" onerror="alert(1)'), false);
+  assert.equal(fotoGueltig("data:image/jpeg;base64,AAAA<script>"), false);
+  assert.equal(fotoGueltig("data:image/jpeg;base64,"), false);
+  assert.equal(fotoGueltig("data:image/jpeg;base64,/9j/4AAQSkZJRg=="), true);
+});
+
 test("fotoBereinigen verwirft ungültige Fotos, der Rest bleibt", () => {
   const daten = laden(testSpeicher());
   daten.tiere[0].foto = "javascript:alert(1)";

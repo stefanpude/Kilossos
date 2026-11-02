@@ -73,12 +73,11 @@ export function istGueltig(daten) {
 // Profilbild: nur echte JPEG- oder PNG-Bilder und nicht zu groß – eine Sicherungsdatei kann von irgendwoher kommen.
 export const FOTO_MAX_ZEICHEN = 300 * 1024;
 
+// Nach dem Präfix nur Base64-Zeichen: so kann kein Anführungszeichen oder Code in die Seite gelangen.
+const FOTO_MUSTER = /^data:image\/(jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/;
+
 export function fotoGueltig(foto) {
-  return (
-    typeof foto === "string" &&
-    foto.length <= FOTO_MAX_ZEICHEN &&
-    (foto.startsWith("data:image/jpeg;base64,") || foto.startsWith("data:image/png;base64,"))
-  );
+  return typeof foto === "string" && foto.length <= FOTO_MAX_ZEICHEN && FOTO_MUSTER.test(foto);
 }
 
 // Entfernt ungültige Profilbilder (z. B. aus einer eingelesenen Sicherung); alle anderen Daten bleiben.

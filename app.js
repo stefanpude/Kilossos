@@ -155,7 +155,7 @@ function tagTitel(datum) {
 
 // Rundes Profilbild: "gross" füllt den Knopf auf „Heute“, "klein" steht im Kopf von „Verlauf“.
 function profilHtml(einTier, groesse) {
-  const bild = fotoGueltig(einTier.foto) ? `<img src="${einTier.foto}" alt="">` : "🐱";
+  const bild = fotoGueltig(einTier.foto) ? `<img src="${sicher(einTier.foto)}" alt="">` : "🐱";
   if (groesse === "klein") return `<span class="avatar">${bild}</span>`;
   return `${bild}<span class="kamera" aria-hidden="true">📷</span>`;
 }
@@ -348,7 +348,7 @@ function zeichneGewicht() {
           const marke =
             g100 === null
               ? ""
-              : `<span class="marke ${g100 < 0 ? "marke-gut" : g100 > 0 ? "marke-warnung" : ""}">${g100 < 0 ? "−" : g100 > 0 ? "+" : "±"}${zahl(Math.abs(g100))} g</span>`;
+              : `<span class="marke">${g100 < 0 ? "−" : g100 > 0 ? "+" : "±"}${zahl(Math.abs(g100))} g</span>`; // neutral, siehe verlauf.js
           return `<div class="zeile"><span class="name"><b>${zahl(g.kg, 2)} kg</b><small>${datumText(g.datum)}${g.notiz ? " · " + sicher(g.notiz) : ""}</small></span>
             ${marke}
             <button type="button" class="knopf-loeschen" data-aktion="gewicht-loeschen" data-id="${g.id}" aria-label="Gewicht löschen">✕</button></div>`;

@@ -402,7 +402,8 @@ export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, futterNachId, 
   let aenderung = "";
   if (imZeitraum.length >= 2) {
     const diff = imZeitraum.at(-1).kg - imZeitraum[0].kg;
-    aenderung = `<span class="marke ${diff < 0 ? "marke-gut" : diff > 0 ? "marke-warnung" : ""}">${vorzeichen(diff, 2)} kg</span>`;
+    // Neutral: ob eine Abnahme gut ist, bewertet nur „Abnahme pro Woche“ (mit Freigabe, rot über 2 %).
+    aenderung = `<span class="marke">${vorzeichen(diff, 2)} kg</span>`;
   }
   const kurve =
     imZeitraum.length >= 2
@@ -421,7 +422,7 @@ export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, futterNachId, 
     kopf +
     umschalter +
     gewichtKarte +
-    kennzahlen(gewichte) +
+    (imZeitraum.length >= 2 ? kennzahlen(imZeitraum) : "") +
     abnahmeKarte(gewichte, freigaben, von) +
     (mahlzeiten.length ? futterKarte(mahlzeiten, futterNachId, freigaben, von, heute) : "") +
     `<p class="tipp">Tippe auf die Kurve, um Datum und Gewicht zu sehen. Alle Gewichte als Liste stehen unter „Gewicht“.</p>`
