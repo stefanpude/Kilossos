@@ -521,6 +521,43 @@ document.querySelectorAll("dialog").forEach((dialog) => {
     if (gedruecktDraussen && draussen(ereignis)) dialog.close("abbrechen");
     gedruecktDraussen = false;
   });
+
+  // Am Griff oder an der Überschrift nach unten ziehen schließt das Blatt wie „Abbrechen“.
+  // Ein Viertel der Höhe oder ein schneller Wisch reicht; sonst springt das Blatt zurück.
+  const griff = document.createElement("div");
+  griff.className = "griff";
+  griff.setAttribute("aria-hidden", "true");
+  dialog.prepend(griff);
+  let zug = null;
+  dialog.addEventListener("pointerdown", (ereignis) => {
+    if (!ereignis.target.closest(".griff, h2")) return;
+    zug = { y: ereignis.clientY, zeit: ereignis.timeStamp };
+    dialog.setPointerCapture(ereignis.pointerId);
+    dialog.style.transition = "none";
+  });
+  dialog.addEventListener("pointermove", (ereignis) => {
+    if (!zug) return;
+    const weg = Math.max(0, ereignis.clientY - zug.y);
+    dialog.style.transform = weg ? `translateY(${weg}px)` : "";
+  });
+  const loslassen = (ereignis) => {
+    if (!zug) return;
+    const weg = ereignis.clientY - zug.y;
+    const schnell = weg / Math.max(1, ereignis.timeStamp - zug.zeit) > 0.5;
+    zug = null;
+    dialog.style.transition = "";
+    if (ereignis.type === "pointerup" && (weg > dialog.offsetHeight / 4 || (weg > 30 && schnell))) {
+      dialog.style.transform = "translateY(100%)";
+      setTimeout(() => {
+        dialog.close("abbrechen");
+        dialog.style.transform = "";
+      }, 200);
+    } else {
+      dialog.style.transform = "";
+    }
+  };
+  dialog.addEventListener("pointerup", loslassen);
+  dialog.addEventListener("pointercancel", loslassen);
 });
 
 // Enter in einem Eingabefeld speichert. Der Browser würde sonst den ersten Knopf auslösen
