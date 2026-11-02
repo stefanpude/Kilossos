@@ -1,6 +1,6 @@
 # Texte: Geschichte, Tierarzt-Hinweis, Unterstützen (von Stefan freigegeben 02.11.2026)
 
-Entwurf für „Über Kilossos“ bzw. die spätere Willkommensseite. Noch nicht in der App.
+Geschichte steht seit 0.8.2 in der App unter „Mehr“ → „Über Kilossos“ (`#geschichte` in `index.html`, einzige Quelle; die Willkommensseite soll darauf verlinken). Tierarzt-Hinweis und Unterstützen noch nicht eingebaut.
 Nur Fakten aus CLAUDE.md verwendet; offene Stellen sind mit [ ] markiert.
 
 ---
