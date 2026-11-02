@@ -1290,7 +1290,8 @@ document.addEventListener("change", (ereignis) => {
 // ---------- Willkommensseite ----------
 
 // Einmal beim ersten Öffnen, nie in der Demo. „Alle Daten löschen“ entfernt den Schlüssel, dann erscheint sie wieder.
-const WILLKOMMEN_SCHLUESSEL = "kilossos-willkommen";
+// Neuer Name (0.13.2), damit sie nach dem Logo-Wechsel auf jedem Gerät noch einmal erscheint.
+const WILLKOMMEN_SCHLUESSEL = "kilossos-willkommen-2";
 
 function willkommenZeigen() {
   $("willkommen").hidden = false;
