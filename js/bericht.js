@@ -15,6 +15,7 @@ import {
 import { gewichtDiagramm, kcalDiagramm } from "./verlauf.js";
 import { normalesFutterKcal } from "./futterliste.js";
 import { fotoGueltig } from "./daten.js";
+import { alterText, HALTUNG } from "./profil.js";
 
 const TAG_MS = 86400000;
 const ms = (iso) => {
@@ -162,12 +163,26 @@ function tierText(tier) {
   return [geschlecht, tier.kastriert ? "kastriert" : ""].filter(Boolean).join(", ");
 }
 
+// Angaben aus dem Profil (alle freiwillig); ohne Angaben keine Zeile.
+function profilZeile(tier, heute) {
+  const alter = alterText(tier.geburtsdatum, heute);
+  const teile = [
+    alter && `Alter ${alter} (geb. ${datum(tier.geburtsdatum)})`,
+    tier.koerperbau && `Körperbau: ${tier.koerperbau}`,
+    HALTUNG[tier.haltung],
+    tier.schlankKg && `Gewicht in der schlanken Zeit laut Halter: ${tier.schlankKg.toLocaleString("de-DE")} kg`,
+    tier.tierarzt && `Praxis: ${[tier.tierarzt.praxis, tier.tierarzt.telefon].filter(Boolean).join(", ")}`,
+  ].filter(Boolean);
+  return teile.length ? `<p>${teile.map(sicher).join(" · ")}</p>` : "";
+}
+
 export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNachId, erstellt, demo }) {
   const teile = [];
   teile.push(`<header class="bericht-kopf">
     ${fotoGueltig(tier.foto) ? `<img class="bericht-foto" src="${sicher(tier.foto)}" alt="">` : ""}
     <h1>Kilossos – Übersicht für den Tierarzt</h1>
     <p><strong>${sicher(tier.name)}</strong>${tierText(tier) ? " · " + tierText(tier) : ""} · Zeitraum ${datum(b.von)} bis ${datum(b.bis)} · erstellt am ${datum(erstellt)}</p>
+    ${profilZeile(tier, erstellt)}
     ${demo ? `<p class="bericht-demo">DEMO – simulierte Daten, nicht von ${sicher(tier.name)}</p>` : ""}
     <p class="bericht-klein">Alle Werte hat der Halter zu Hause erfasst (Küchenwaage, eigene Katzenwaage). Die Warnregeln der App
       beruhen auf den Sicherheitsgrenzen in docs/sicherheitsgrenzen.md (AAHA 2014, WSAVA 2011, Flanagan et al. 2018)

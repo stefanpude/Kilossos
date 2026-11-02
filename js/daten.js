@@ -1,7 +1,9 @@
 // Alle Daten von Kilossos liegen als ein JSON-Dokument im Speicher des Geräts (kein Server, keine Cloud).
 // Aufbau (Version 1):
-//   tiere:      { id, name, art, geschlecht, kastriert, foto? }
+//   tiere:      { id, name, art, geschlecht, kastriert, foto?, geburtsdatum?, koerperbau?, haltung?, schlankKg?,
+//                 tierarzt?: { praxis?, telefon? }, wiegetag? }
 //               foto: optional, "data:image/jpeg;base64,…" (256 × 256 px, in der App zugeschnitten)
+//               übrige Profilfelder: siehe js/profil.js (dort auch die Prüfung beim Einlesen)
 //   futter:     { id, name, typ: "nass" | "trocken" | "leckerli", kcalPro100g, kcalQuelle, notiz, listeId? }
 //               listeId: Kennung in der Kilossos-Futterliste (js/futterliste.js), wenn die Sorte von dort stammt
 //               kcalQuelle: "packung" (genau abgelesen) | "hersteller" (Herstellerangabe, z. B. Website)

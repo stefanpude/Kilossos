@@ -36,6 +36,7 @@ import { ringWerte, leckerliKachel, monatsGruppen } from "./js/zusammenfassung.j
 import { leseAnzeige, merkeAnzeige, aufgeloest } from "./js/anzeige.js";
 import { aufklappKarte, merkeZustand, zustandVon, zustandVergessen, aufklappenAnmelden } from "./js/aufklappen.js";
 import { auswahlFeld, auswahlAnmelden } from "./js/auswahl.js";
+import { profilBereinigen, alterText, telefonLink, telefonGueltig, istWiegetag, WOCHENTAGE, HALTUNG } from "./js/profil.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
 if ("serviceWorker" in navigator) {
@@ -218,9 +219,14 @@ function zeichneHeute(vonNull = false) {
 
   // Kopf
   $("profil").innerHTML = profilHtml(tier, "gross");
-  $("profil").setAttribute("aria-label", `Profilbild von ${tier.name} ändern`);
+  $("profil").setAttribute("aria-label", `Profil und Foto von ${tier.name}`);
   const art = { kater: "Kater", katze: "Katze" }[tier.geschlecht] ?? "";
   $("kopf-gewicht").textContent = [art, sortiert[0] ? `${zahl(sortiert[0].kg, 2)} kg` : ""].filter(Boolean).join(" · ");
+
+  // Wiegetag: nur am heutigen Tag und nur, solange heute noch kein Gewicht eingetragen ist.
+  const wiegen = tag === heute && istWiegetag(tier, heute) && !gewichte.some((g) => g.datum === heute);
+  $("wiegetag-hinweis").hidden = !wiegen;
+  if (wiegen) $("wiegetag-hinweis-text").textContent = `⚖️ Heute ist Wiegetag für ${tier.name}. Am besten zur gewohnten Uhrzeit mit der gleichen Waage.`;
   $("kopf-datum").textContent = new Date().toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "short" });
   $("tag-titel").textContent = tagTitel(gewaehlterTag);
   document.querySelector('[data-aktion="tag-vor"]').disabled = tag >= heute;
@@ -410,7 +416,103 @@ function zeichneFreigabe() {
     ? `${zahl(freigabe.zielgewichtKg, 1)} kg Zielgewicht · ${zahl(freigabe.kcalProTag)} kcal pro Tag · ` +
       `${freigabe.tierarzt}, ${datumText(freigabe.datum)}${freigabe.notiz ? " · " + freigabe.notiz : ""}`
     : "Noch keine Freigabe eingetragen.";
+  const link = telefonLink(tier.tierarzt?.telefon);
+  $("praxis-anrufen").hidden = !link;
+  if (link) {
+    $("praxis-anrufen").href = link;
+    $("praxis-anrufen").textContent = `📞 ${tier.tierarzt.praxis ?? "Praxis"} anrufen`;
+  }
 }
+
+// ---------- Profil ----------
+
+const GESCHLECHT_NAMEN = { kater: "Kater", katze: "Katze" };
+
+function profilZusammenfassung() {
+  const heute = tagSchluessel(new Date());
+  const geschlecht = [GESCHLECHT_NAMEN[tier.geschlecht], tier.kastriert ? "kastriert" : ""].filter(Boolean).join(", ");
+  const alter = alterText(tier.geburtsdatum, heute);
+  return [geschlecht, alter, HALTUNG[tier.haltung]].filter(Boolean).join(" · ");
+}
+
+function zeichneProfilKarte() {
+  const zusammen = profilZusammenfassung();
+  const fehlt = !tier.geburtsdatum && !tier.tierarzt && !tier.koerperbau;
+  $("profil-karte").innerHTML = `${profilHtml(tier, "klein")}
+    <span class="profil-text"><b>${sicher(tier.name)}</b>
+      <small>${sicher(zusammen || "Profil")}</small>
+      ${fehlt ? "<small>Profil ergänzen: Alter, Körperbau, Tierarzt</small>" : ""}</span>
+    <span class="weiter" aria-hidden="true">›</span>`;
+  $("profil-karte").setAttribute("aria-label", `Profil von ${tier.name} bearbeiten`);
+}
+
+function oeffneProfil() {
+  const form = $("form-profil");
+  form.reset();
+  zeigeFehler("profil-fehler", "");
+  $("profil-titel").textContent = `Profil von ${tier.name}`;
+  form.name.value = tier.name;
+  $("profil-geschlecht").innerHTML = auswahlFeld({
+    name: "geschlecht",
+    beschriftung: "label-geschlecht",
+    optionen: [
+      { wert: "kater", text: "Kater" },
+      { wert: "katze", text: "Katze" },
+    ],
+    wert: tier.geschlecht,
+  });
+  $("profil-kastriert").innerHTML = auswahlFeld({
+    name: "kastriert",
+    beschriftung: "label-kastriert",
+    optionen: [
+      { wert: "ja", text: "ja" },
+      { wert: "nein", text: "nein" },
+    ],
+    wert: tier.kastriert ? "ja" : "nein",
+  });
+  $("profil-haltung").innerHTML = auswahlFeld({
+    name: "haltung",
+    beschriftung: "label-haltung",
+    optionen: [{ wert: "", text: "Keine Angabe" }, ...Object.entries(HALTUNG).map(([wert, text]) => ({ wert, text }))],
+    wert: tier.haltung ?? "",
+  });
+  form.geburtsdatum.value = tier.geburtsdatum ?? "";
+  form.geburtsdatum.max = tagSchluessel(new Date());
+  form.koerperbau.value = tier.koerperbau ?? "";
+  form.schlank.value = tier.schlankKg ? String(tier.schlankKg).replace(".", ",") : "";
+  form.praxis.value = tier.tierarzt?.praxis ?? "";
+  form.telefon.value = tier.tierarzt?.telefon ?? "";
+  $("dialog-profil").showModal();
+}
+
+beimSpeichern("form-profil", "profil-fehler", (werte) => {
+  const name = werte.get("name").trim();
+  const geburtsdatum = werte.get("geburtsdatum");
+  const schlankText = werte.get("schlank").trim();
+  const schlank = schlankText ? leseZahl(schlankText) : null;
+  const praxis = werte.get("praxis").trim();
+  const telefon = werte.get("telefon").trim();
+  if (!name) return "Bitte einen Namen eingeben.";
+  if (geburtsdatum && geburtsdatum > tagSchluessel(new Date())) return "Das Geburtsdatum liegt in der Zukunft.";
+  if (schlankText && (!schlank || schlank < 0.5 || schlank > 20)) return "Bitte ein Gewicht zwischen 0,5 und 20 kg eingeben, z. B. 7,5.";
+  if (telefon && !telefonGueltig(telefon)) return "Die Telefonnummer darf nur Ziffern, Leerzeichen und + ( ) / - enthalten.";
+
+  // Leere Angaben werden entfernt statt als leerer Text gespeichert.
+  const setze = (feld, wert) => {
+    if (wert === "" || wert === null) delete tier[feld];
+    else tier[feld] = wert;
+  };
+  tier.name = name;
+  setze("geschlecht", werte.get("geschlecht"));
+  tier.kastriert = werte.get("kastriert") === "ja";
+  setze("geburtsdatum", geburtsdatum);
+  setze("koerperbau", werte.get("koerperbau").trim());
+  setze("haltung", werte.get("haltung"));
+  setze("schlankKg", schlank);
+  const tierarzt = { ...(praxis && { praxis }), ...(telefon && { telefon }) };
+  setze("tierarzt", Object.keys(tierarzt).length ? tierarzt : null);
+  sichern();
+});
 
 function zeichneVerlaufAnsicht() {
   $("verlauf-inhalt").innerHTML = zeichneVerlauf({
@@ -430,6 +532,7 @@ function zeichneAlles() {
   zeichneGewicht();
   zeichneFutter();
   zeichneFreigabe();
+  zeichneProfilKarte();
   zeichneSicherung();
   zeichneVerlaufAnsicht();
 }
@@ -679,6 +782,7 @@ function oeffneFreigabe() {
   zeigeFehler("freigabe-fehler", "");
   form.datum.value = tagSchluessel(new Date());
   form.datum.max = tagSchluessel(new Date());
+  form.tierarzt.value = tier.tierarzt?.praxis ?? "";
   $("dialog-freigabe").showModal();
 }
 
@@ -896,14 +1000,14 @@ $("profil-feld").addEventListener("focusout", (ereignis) => {
 });
 
 function profilAntippen() {
-  if (demo) return zeigeToast("In der Demo lässt sich kein Foto setzen.", 2500);
-  if (!fotoGueltig(tier.foto)) return $("foto-datei").click();
   if ($("profil-feld").classList.contains("offen")) return profilMenueZu();
+  const mitFoto = fotoGueltig(tier.foto);
   $("profil-feld").insertAdjacentHTML(
     "beforeend",
     `<ul class="auswahl-menue profil-menue" role="menu">
-      <li role="none"><button type="button" role="menuitem" data-aktion="foto-aendern">Foto ändern</button></li>
-      <li role="none"><button type="button" role="menuitem" data-aktion="foto-entfernen">Foto entfernen</button></li>
+      <li role="none"><button type="button" role="menuitem" data-aktion="profil-oeffnen">Profil bearbeiten</button></li>
+      <li role="none"><button type="button" role="menuitem" data-aktion="foto-aendern">${mitFoto ? "Foto ändern" : "Foto wählen"}</button></li>
+      ${mitFoto ? '<li role="none"><button type="button" role="menuitem" data-aktion="foto-entfernen">Foto entfernen</button></li>' : ""}
     </ul>`
   );
   $("profil-feld").classList.add("offen");
@@ -978,12 +1082,25 @@ $("import-datei").addEventListener("change", async (ereignis) => {
     return;
   }
   const verworfen = fotoBereinigen(neu);
+  const profilFehler = profilBereinigen(neu, tagSchluessel(new Date()));
   const anzahl = `${neu.mahlzeiten.length} Mahlzeiten und ${neu.gewichte.length} Gewichte`;
   const fotoText = verworfen > 0 ? " Das Profilbild in der Datei war ungültig und wird nicht übernommen." : "";
-  if (!confirm(`Sicherung mit ${anzahl} einlesen? Alle Einträge auf diesem Handy werden dadurch ersetzt.${fotoText}`)) return;
+  const profilText = profilFehler > 0 ? " Einige Profilangaben in der Datei waren ungültig und werden nicht übernommen." : "";
+  if (!confirm(`Sicherung mit ${anzahl} einlesen? Alle Einträge auf diesem Handy werden dadurch ersetzt.${fotoText}${profilText}`)) return;
   speichern(neu);
   location.reload();
 });
+
+// Recht auf Löschung (DSGVO): alles, was Kilossos auf diesem Gerät gespeichert hat. Doppelt nachfragen.
+function allesLoeschen() {
+  if (demo) return zeigeToast("In der Demo gibt es nichts Echtes zu löschen.", 2500);
+  if (!confirm("Wirklich ALLE Daten löschen? Einträge, Profil, Foto und Einstellungen auf diesem Handy gehen verloren.")) return;
+  if (!confirm("Letzte Rückfrage: Das lässt sich nicht rückgängig machen. Hast du eine Sicherung, falls du die Daten noch brauchst?")) return;
+  for (const schluessel of Object.keys(localStorage)) {
+    if (schluessel.startsWith("kilossos-")) localStorage.removeItem(schluessel);
+  }
+  location.reload();
+}
 
 async function zeigeSpeicherStatus() {
   const dauerhaft = await dauerhaftSpeichern();
@@ -1013,6 +1130,20 @@ $("anzeige-feld").innerHTML = auswahlFeld({
     { wert: "handy", text: "Wie das Handy" },
   ],
   wert: leseAnzeige(),
+});
+$("wiegetag-feld").innerHTML = auswahlFeld({
+  name: "wiegetag",
+  beschriftung: "label-wiegetag",
+  // Montag zuerst, wie im deutschen Kalender
+  optionen: [{ wert: "", text: "Kein fester Tag" }, ...[1, 2, 3, 4, 5, 6, 0].map((t) => ({ wert: String(t), text: WOCHENTAGE[t] }))],
+  wert: Number.isInteger(tier.wiegetag) ? String(tier.wiegetag) : "",
+});
+document.addEventListener("change", (ereignis) => {
+  if (ereignis.target.name !== "wiegetag") return;
+  if (ereignis.target.value === "") delete tier.wiegetag;
+  else tier.wiegetag = Number(ereignis.target.value);
+  sichern();
+  zeigeToast("✓ Wiegetag gespeichert");
 });
 document.addEventListener("change", (ereignis) => {
   if (ereignis.target.name !== "anzeige") return;
@@ -1083,9 +1214,15 @@ document.addEventListener("click", (ereignis) => {
     }
     case "profil":
       return profilAntippen();
+    case "profil-oeffnen":
+      profilMenueZu();
+      return oeffneProfil();
     case "foto-aendern":
       profilMenueZu();
+      if (demo) return zeigeToast("In der Demo lässt sich kein Foto setzen.", 2500);
       return $("foto-datei").click();
+    case "alles-loeschen":
+      return allesLoeschen();
     case "foto-entfernen":
       profilMenueZu();
       if (setzeFoto(null)) zeigeToast("Foto entfernt");

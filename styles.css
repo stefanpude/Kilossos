@@ -192,6 +192,25 @@ main {
 .knopf-zweit { background: var(--flaeche); border: 1.5px solid var(--rand); }
 .knopf-gefahr { background: transparent; border: 1.5px solid var(--gefahr); color: var(--gefahr); margin-right: auto; }
 .knopf-gefahr[hidden] { display: none; }
+a.knopf-zweit { color: var(--text); text-decoration: none; }
+a.knopf-zweit[hidden] { display: none; }
+
+/* ---------- „Mehr“: Profil-Karte und Gruppen ---------- */
+.gruppe-titel {
+  margin: 10px 4px -4px; font-size: 0.8125rem; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-leise); font-weight: 600;
+}
+.profil-karte {
+  display: flex; align-items: center; gap: 14px; width: 100%; min-height: 80px; border: 0;
+  color: var(--text); font: inherit; text-align: left; cursor: pointer;
+}
+.profil-karte:active { transform: scale(0.99); }
+.profil-karte .avatar { width: 56px; height: 56px; font-size: 1.8rem; }
+.profil-karte .profil-text { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.profil-karte b { font-size: 1.125rem; }
+.profil-karte small { color: var(--text-leise); font-size: 0.875rem; }
+.profil-karte .weiter { font-size: 1.6rem; color: var(--text-leise); }
+.zwei-spalten { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
 /* ---------- Untere Leiste ---------- */
 .leiste {

@@ -52,6 +52,11 @@
         <button class="knopf-haupt" data-aktion="export">Jetzt sichern</button>
       </div>
 
+      <div class="warnung sicherung-hinweis" id="wiegetag-hinweis" hidden>
+        <span id="wiegetag-hinweis-text"></span>
+        <button class="knopf-haupt" data-aktion="gewicht-neu">Gewicht eintragen</button>
+      </div>
+
       <ul class="warnungen" id="warnungen-liste"></ul>
 
       <div class="karte">
@@ -112,11 +117,15 @@
 
     <!-- Mehr -->
     <section class="ansicht" data-ansicht="mehr" hidden>
+      <button type="button" class="karte profil-karte" data-aktion="profil-oeffnen" id="profil-karte"></button>
+
+      <h3 class="gruppe-titel">Tierarzt</h3>
       <div class="karte">
         <h2>Freigabe vom Tierarzt</h2>
         <p class="leise" id="freigabe-text"></p>
         <button class="knopf-haupt" data-aktion="freigabe-neu">Freigabe eintragen</button>
         <p class="tipp">Zielgewicht und Tagesmenge legt nur der Tierarzt fest. Ohne Freigabe zeichnet Kilossos nur auf und warnt, schlägt aber keine Mengen vor.</p>
+        <a class="knopf-zweit" id="praxis-anrufen" hidden></a>
       </div>
       <div class="karte">
         <h2>Übersicht für den Tierarzt</h2>
@@ -124,11 +133,19 @@
         <div class="feld"><span id="label-bericht-zeitraum">Zeitraum</span><div id="bericht-zeitraum-feld"></div></div>
         <button class="knopf-haupt" data-aktion="bericht-oeffnen">Übersicht öffnen</button>
       </div>
+      <h3 class="gruppe-titel">Einstellungen</h3>
+      <div class="karte">
+        <h2 id="label-wiegetag">Wiegetag</h2>
+        <div id="wiegetag-feld"></div>
+        <p class="tipp">Am besten immer am gleichen Wochentag, zur gleichen Uhrzeit, mit der gleichen Waage. An diesem Tag erinnert „Heute“ daran.</p>
+      </div>
       <div class="karte">
         <h2 id="label-anzeige">Darstellung</h2>
         <div id="anzeige-feld"></div>
         <p class="tipp">Gilt nur für dieses Gerät.</p>
       </div>
+
+      <h3 class="gruppe-titel">Daten</h3>
       <div class="karte">
         <h2>Sicherung</h2>
         <p class="leise">Alle Einträge liegen nur auf diesem Handy. Speichere regelmäßig eine Sicherung, zum Beispiel in deinem Cloud-Ordner oder per Mail an dich selbst.</p>
@@ -140,7 +157,22 @@
         </label>
         <p class="hinweis-text-klein" id="speicher-status"></p>
       </div>
-      <p class="fuss" id="version">Version 0.7.3</p>
+      <div class="karte">
+        <h2>Alle Daten löschen</h2>
+        <p class="leise">Löscht alle Einträge, das Profil und die Einstellungen auf diesem Handy. Speichere vorher eine Sicherung, wenn du die Daten noch brauchst.</p>
+        <button type="button" class="knopf-gefahr" data-aktion="alles-loeschen">Alle Daten löschen</button>
+      </div>
+
+      <h3 class="gruppe-titel">Über Kilossos</h3>
+      <div class="karte">
+        <p class="leise">Kilossos begleitet die Abnahme von Kito und anderen Katzen: Es zeichnet auf, rechnet nach und warnt.
+          <strong>Es ersetzt keinen Tierarzt</strong> und ist kein Medizinprodukt. Zielgewicht und Tagesmenge legt immer der Tierarzt fest.</p>
+        <p class="leise"><strong>Datenschutz:</strong> keine Anmeldung, keine Cloud, keine Werbung, keine Auswertung.
+          Alle Daten bleiben auf diesem Handy, bis du selbst eine Sicherung speicherst.</p>
+        <p class="leise"><strong>Grenzwerte:</strong> nach den Leitlinien von AAHA (2014, 2021) und WSAVA, mit allen Quellen in
+          <a href="https://github.com/stefanpude/Kilossos/blob/main/docs/sicherheitsgrenzen.md" target="_blank" rel="noopener">docs/sicherheitsgrenzen.md</a>.</p>
+      </div>
+      <p class="fuss" id="version">Version 0.8.0</p>
     </section>
   </main>
 
@@ -256,6 +288,43 @@
         <input name="notiz" autocomplete="off" placeholder="z. B. BCS 8, nächste Kontrolle in 4 Wochen">
       </label>
       <p class="fehler" id="freigabe-fehler" hidden></p>
+      <div class="knoepfe">
+        <button value="abbrechen" formnovalidate class="knopf-zweit">Abbrechen</button>
+        <button value="speichern" class="knopf-haupt">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Formular: Profil des Tiers -->
+  <dialog id="dialog-profil">
+    <form method="dialog" id="form-profil">
+      <h2 id="profil-titel">Profil</h2>
+      <label>Name
+        <input name="name" autocomplete="off" maxlength="40" required>
+      </label>
+      <div class="zwei-spalten">
+        <div class="feld"><span id="label-geschlecht">Geschlecht</span><div id="profil-geschlecht"></div></div>
+        <div class="feld"><span id="label-kastriert">Kastriert</span><div id="profil-kastriert"></div></div>
+      </div>
+      <label>Geburtsdatum (optional)
+        <input name="geburtsdatum" type="date">
+      </label>
+      <p class="tipp">Ungefähr reicht, z. B. der 1. Januar des Geburtsjahres.</p>
+      <label>Rasse / Körperbau (optional)
+        <input name="koerperbau" autocomplete="off" maxlength="80" placeholder="z. B. von Natur aus sehr groß">
+      </label>
+      <div class="feld"><span id="label-haltung">Haltung (optional)</span><div id="profil-haltung"></div></div>
+      <label>Gewicht in der schlanken Zeit in kg (optional)
+        <input name="schlank" inputmode="decimal" autocomplete="off" placeholder="z. B. 7,5">
+      </label>
+      <p class="tipp">Hilft dem Tierarzt beim Zielgewicht. Das Zielgewicht selbst legt nur der Tierarzt fest.</p>
+      <label>Tierarztpraxis (optional)
+        <input name="praxis" autocomplete="off" maxlength="80">
+      </label>
+      <label>Telefon der Praxis (optional)
+        <input name="telefon" type="tel" inputmode="tel" autocomplete="off" maxlength="25" placeholder="z. B. 0441 123456">
+      </label>
+      <p class="fehler" id="profil-fehler" hidden></p>
       <div class="knoepfe">
         <button value="abbrechen" formnovalidate class="knopf-zweit">Abbrechen</button>
         <button value="speichern" class="knopf-haupt">Speichern</button>
