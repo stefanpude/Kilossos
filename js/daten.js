@@ -1,6 +1,7 @@
 // Alle Daten von Kilossos liegen als ein JSON-Dokument im Speicher des Geräts (kein Server, keine Cloud).
 // Aufbau (Version 1):
-//   tiere:      { id, name, art, geschlecht, kastriert }
+//   tiere:      { id, name, art, geschlecht, kastriert, foto? }
+//               foto: optional, "data:image/jpeg;base64,…" (256 × 256 px, in der App zugeschnitten)
 //   futter:     { id, name, typ: "nass" | "trocken" | "leckerli", kcalPro100g, kcalQuelle, notiz, listeId? }
 //               listeId: Kennung in der Kilossos-Futterliste (js/futterliste.js), wenn die Sorte von dort stammt
 //               kcalQuelle: "packung" (genau abgelesen) | "hersteller" (Herstellerangabe, z. B. Website)
@@ -67,6 +68,29 @@ export function istGueltig(daten) {
     ["tiere", "futter", "mahlzeiten", "gewichte", "freigaben"].every((feld) => Array.isArray(daten[feld])) &&
     daten.tiere.length > 0
   );
+}
+
+// Profilbild: nur echte JPEG- oder PNG-Bilder und nicht zu groß – eine Sicherungsdatei kann von irgendwoher kommen.
+export const FOTO_MAX_ZEICHEN = 300 * 1024;
+
+export function fotoGueltig(foto) {
+  return (
+    typeof foto === "string" &&
+    foto.length <= FOTO_MAX_ZEICHEN &&
+    (foto.startsWith("data:image/jpeg;base64,") || foto.startsWith("data:image/png;base64,"))
+  );
+}
+
+// Entfernt ungültige Profilbilder (z. B. aus einer eingelesenen Sicherung); alle anderen Daten bleiben.
+export function fotoBereinigen(daten) {
+  let entfernt = 0;
+  for (const tier of daten.tiere) {
+    if ("foto" in tier && !fotoGueltig(tier.foto)) {
+      delete tier.foto;
+      entfernt += 1;
+    }
+  }
+  return entfernt;
 }
 
 export function laden(speicher = localStorage) {
