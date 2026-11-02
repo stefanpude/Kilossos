@@ -1,9 +1,10 @@
 // Kleiner Testserver ohne Zusatzpakete: node server.js  →  http://localhost:8080
+// Ein anderer Port geht über die Umgebungsvariable PORT (z. B. wenn 8080 schon belegt ist).
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 
-const PORT = 8080;
+const PORT = Number(process.env.PORT) || 8080;
 const WURZEL = import.meta.dirname;
 const TYPEN = {
   ".json": "application/json; charset=utf-8",
