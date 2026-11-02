@@ -9,6 +9,9 @@ import {
   sicherungsHinweis,
   letzteSicherung,
   sicherungMerken,
+  fotoGueltig,
+  fotoBereinigen,
+  FOTO_MAX_ZEICHEN,
 } from "../js/daten.js";
 
 // Ersatz für den Browserspeicher, damit die Tests ohne Browser laufen.
@@ -149,4 +152,30 @@ test("letzteSicherung wird getrennt von den Daten gemerkt", () => {
   sicherungMerken("2026-11-02", speicher);
   assert.equal(letzteSicherung(speicher), "2026-11-02");
   assert.equal(speicher.getItem("kilossos-daten"), null);
+});
+
+test("fotoGueltig nimmt nur JPEG/PNG bis 300 KB", () => {
+  assert.equal(fotoGueltig("data:image/jpeg;base64,AAAA"), true);
+  assert.equal(fotoGueltig("data:image/png;base64,AAAA"), true);
+  assert.equal(fotoGueltig("data:image/gif;base64,AAAA"), false);
+  assert.equal(fotoGueltig("data:image/jpeg;base64," + "A".repeat(FOTO_MAX_ZEICHEN)), false);
+  assert.equal(fotoGueltig(42), false);
+});
+
+test("fotoBereinigen verwirft ungültige Fotos, der Rest bleibt", () => {
+  const daten = laden(testSpeicher());
+  daten.tiere[0].foto = "javascript:alert(1)";
+  assert.equal(fotoBereinigen(daten), 1);
+  assert.equal("foto" in daten.tiere[0], false);
+  assert.ok(istGueltig(daten));
+  daten.tiere[0].foto = "data:image/jpeg;base64,AAAA";
+  assert.equal(fotoBereinigen(daten), 0);
+  assert.equal(daten.tiere[0].foto, "data:image/jpeg;base64,AAAA");
+});
+
+test("alte Sicherung ohne foto bleibt gültig", () => {
+  const daten = laden(testSpeicher());
+  delete daten.tiere[0].foto;
+  assert.ok(istGueltig(daten));
+  assert.equal(fotoBereinigen(daten), 0);
 });
