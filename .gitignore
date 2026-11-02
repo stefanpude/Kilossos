@@ -4,3 +4,6 @@ Thumbs.db
 .claude/settings.local.json
 AGENTS.md
 .superpowers/
+.claude/skills/
+skills-lock.json
+logo-quelle/
