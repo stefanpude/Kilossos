@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { berichtDaten } from "../js/bericht.js";
+import { berichtDaten, berichtHtml } from "../js/bericht.js";
 
 const futter = [
   { id: "sheba", name: "Sheba", typ: "nass", kcalPro100g: 77, kcalQuelle: "packung" },
@@ -94,4 +94,15 @@ test("berichtDaten: ein Zeitraum ohne Daten ergibt leere Werte statt Fehler", ()
   assert.equal(b.abnahme, null);
   assert.equal(b.fuetterung, null);
   assert.deepEqual(b.gewichte, []);
+});
+
+test("berichtHtml zeigt ein gültiges Profilbild neben dem Namen, sonst keins", () => {
+  const html = (foto) => {
+    const tier = { name: "Kito", geschlecht: "kater", kastriert: true, ...(foto ? { foto } : {}) };
+    const b = berichtDaten({ ...eingabe, tier });
+    return berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben: [freigabe], futterNachId: new Map(futter.map((f) => [f.id, f])), erstellt: "2026-11-04", demo: false });
+  };
+  assert.match(html("data:image/jpeg;base64,AAAA"), /<img class="bericht-foto" src="data:image\/jpeg;base64,AAAA"/);
+  assert.doesNotMatch(html(null), /bericht-foto/);
+  assert.doesNotMatch(html("javascript:x"), /<img/);
 });

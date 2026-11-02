@@ -11,6 +11,8 @@ import {
   sicherungMerken,
   sicherungsHinweis,
   SICHERUNG_ALLE_TAGE,
+  fotoGueltig,
+  fotoBereinigen,
 } from "./js/daten.js";
 import {
   leseZahl,
@@ -27,9 +29,13 @@ import {
   gewichteBis,
   warnungen,
 } from "./js/rechnen.js";
-import { zeichneVerlauf } from "./js/verlauf.js";
+import { zeichneVerlauf, glatt } from "./js/verlauf.js";
 import { berichtDaten, berichtHtml } from "./js/bericht.js";
 import { FUTTERLISTE, sucheFutter, ausListe, normalesFutterKcal } from "./js/futterliste.js";
+import { ringWerte, leckerliKachel, monatsGruppen } from "./js/zusammenfassung.js";
+import { leseAnzeige, merkeAnzeige, aufgeloest } from "./js/anzeige.js";
+import { aufklappKarte, merkeZustand, aufklappenAnmelden } from "./js/aufklappen.js";
+import { auswahlFeld, auswahlAnmelden } from "./js/auswahl.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
 if ("serviceWorker" in navigator) {
@@ -45,9 +51,34 @@ const zahl = (wert, stellen = 0) =>
   wert.toLocaleString("de-DE", { minimumFractionDigits: stellen, maximumFractionDigits: stellen });
 const sicher = (text) =>
   String(text).replace(/[&<>"']/g, (z) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[z]);
+const ohneBewegung = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const TYP_NAMEN = { nass: "Nassfutter", trocken: "Trockenfutter", leckerli: "Leckerli" };
+const TYP_SYMBOL = { nass: "🥫", trocken: "🥣", leckerli: "🍬" };
 const QUELLE_NAMEN = { packung: "Packung", hersteller: "Hersteller", ungefaehr: "ungefähr", geschaetzt: "geschätzt" };
+
+// Kurztitel für Hinweise (Art "hinweis"): zugeklappt steht nur diese Zeile, der volle Text klappt auf.
+// Warnungen der Art "sofort" und "achtung" sind nie zugeklappt.
+const HINWEIS_TITEL = {
+  "ueber-freigabe": "Mehr als freigegeben",
+  diaetfutter: "Diätfutter mit dem Tierarzt besprechen",
+  stillstand: "Abnahme stockt",
+  "ziel-erreicht": "Zielgewicht erreicht",
+  "freigabe-alt": "Freigabe ist älter als 3 Monate",
+};
+
+// ---------- Darstellung Hell / Dunkel / Wie das Handy ----------
+
+const handyDunkel = matchMedia("(prefers-color-scheme: dark)");
+function wendeAnzeigeAn(wahl) {
+  const thema = aufgeloest(wahl, handyDunkel.matches);
+  document.documentElement.dataset.theme = thema;
+  $("theme-farbe").content = thema === "dunkel" ? "#1c1714" : "#fbf6f1";
+}
+handyDunkel.addEventListener("change", () => {
+  if (leseAnzeige() === "handy") wendeAnzeigeAn("handy");
+});
+wendeAnzeigeAn(leseAnzeige());
 
 // Demo-Modus (Link mit "?demo"): lädt bei jedem Öffnen frisch die Simulation aus werkzeuge/erzeuge-testdaten.js,
 // verschoben auf heute, in einen eigenen Speicherplatz. Die echten Einträge bleiben unberührt.
@@ -77,20 +108,40 @@ try {
 }
 const tier = daten.tiere[0]; // vorerst nur Kito sichtbar, das Datenmodell kann mehrere Tiere
 let gewaehlterTag = new Date();
+let zeitraum = "3m";
 
 function sichern() {
   speichern(daten);
   zeichneAlles();
 }
 
+// Kurze Bestätigung unten, z. B. „✓ Gespeichert“.
+let toastUhr;
+function zeigeToast(text, dauerMs = 1800) {
+  const toast = $("toast");
+  toast.textContent = text;
+  toast.classList.add("zeigen");
+  clearTimeout(toastUhr);
+  toastUhr = setTimeout(() => toast.classList.remove("zeigen"), dauerMs);
+}
+
 // ---------- Ansichten ----------
 
 function zeigeAnsicht(name) {
-  document.querySelectorAll(".ansicht").forEach((el) => (el.hidden = el.dataset.ansicht !== name));
+  document.querySelectorAll(".ansicht").forEach((el) => {
+    el.hidden = el.dataset.ansicht !== name;
+    el.classList.remove("rein");
+  });
+  const ansicht = document.querySelector(`.ansicht[data-ansicht="${name}"]`);
+  void ansicht.offsetWidth; // Animation neu starten
+  ansicht.classList.add("rein");
   document.querySelectorAll(".leiste button").forEach((knopf) => {
     if (knopf.dataset.ziel === name) knopf.setAttribute("aria-current", "page");
     else knopf.removeAttribute("aria-current");
   });
+  window.scrollTo(0, 0);
+  versteckeInfoblase();
+  if (name === "heute") zeichneHeute(true);
 }
 
 function tagTitel(datum) {
@@ -102,52 +153,166 @@ function tagTitel(datum) {
   return datum.toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "long" });
 }
 
-function zeichneHeute() {
+// Rundes Profilbild: "gross" füllt den Knopf auf „Heute“, "klein" steht im Kopf von „Verlauf“.
+function profilHtml(einTier, groesse) {
+  const bild = fotoGueltig(einTier.foto) ? `<img src="${einTier.foto}" alt="">` : "🐱";
+  if (groesse === "klein") return `<span class="avatar">${bild}</span>`;
+  return `${bild}<span class="kamera" aria-hidden="true">📷</span>`;
+}
+
+// ---------- Heute ----------
+
+const UMFANG = 2 * Math.PI * 54;
+let ringZahl = 0;
+
+// Füllt den Ring auf "anteil" (0–1; null = ohne Freigabe, nur die Bahn) und zählt die Zahl hoch.
+// vonNull: beim Wechsel auf „Heute“ und beim Tageswechsel von 0 an, sonst vom alten Wert aus.
+function zeichneRing(anteil, kcal, ueber, vonNull) {
+  const fuell = $("ring-fuell");
+  fuell.setAttribute("stroke-dasharray", UMFANG);
+  fuell.classList.toggle("ueber", ueber);
+  fuell.style.visibility = anteil === null ? "hidden" : "visible";
+  if (vonNull) {
+    fuell.style.transition = "none";
+    fuell.setAttribute("stroke-dashoffset", UMFANG);
+    fuell.getBoundingClientRect();
+    fuell.style.transition = "";
+    ringZahl = 0;
+  }
+  fuell.setAttribute("stroke-dashoffset", UMFANG * (1 - (anteil ?? 0)));
+  const start = performance.now();
+  const von = ringZahl;
+  const dauer = ohneBewegung() ? 1 : 1000;
+  const zahlFeld = $("ring-zahl");
+  (function schritt(jetzt) {
+    const p = Math.min(1, (jetzt - start) / dauer);
+    const e = 1 - (1 - p) ** 3;
+    zahlFeld.textContent = zahl(Math.round(von + (kcal - von) * e));
+    if (p < 1) requestAnimationFrame(schritt);
+  })(start);
+  ringZahl = kcal;
+}
+
+// Kleine Kurve der letzten Wägungen für die Gewichtskachel.
+function miniKurve(gewichte) {
+  const liste = [...gewichte].reverse().slice(-6);
+  if (liste.length < 2) return "";
+  const kgs = liste.map((g) => g.kg);
+  const min = Math.min(...kgs);
+  const max = Math.max(...kgs);
+  const punkte = liste.map((g, i) => [4 + (i / (liste.length - 1)) * 112, 30 - ((g.kg - min) / (max - min || 1)) * 26]);
+  return `<svg class="mini" viewBox="0 0 120 34" aria-hidden="true"><path d="${glatt(punkte)}"/></svg>`;
+}
+
+function zeichneHeute(vonNull = false) {
   const tag = tagSchluessel(gewaehlterTag);
+  const heute = tagSchluessel(new Date());
   const futter = futterNachId(daten);
   const mahlzeiten = mahlzeitenAm(daten.mahlzeiten.filter((m) => m.tierId === tier.id), tag);
   const summe = tagesSumme(mahlzeiten, futter);
+  const leckerli = leckerliKcal(mahlzeiten, futter);
   // Ein vergangener Tag wird an der Freigabe und den Gewichten gemessen, die an diesem Tag galten.
   const freigabe = freigabeVonTier(tag);
   const gewichte = gewichteBis(daten.gewichte.filter((g) => g.tierId === tier.id), tag);
+  const sortiert = gewichteSortiert(gewichte);
 
+  // Kopf
+  $("profil").innerHTML = profilHtml(tier, "gross");
+  $("profil").setAttribute("aria-label", `Profilbild von ${tier.name} ändern`);
+  const art = { kater: "Kater", katze: "Katze" }[tier.geschlecht] ?? "";
+  $("kopf-gewicht").textContent = [art, sortiert[0] ? `${zahl(sortiert[0].kg, 2)} kg` : ""].filter(Boolean).join(" · ");
+  $("kopf-datum").textContent = new Date().toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "short" });
+  $("tag-titel").textContent = tagTitel(gewaehlterTag);
+  document.querySelector('[data-aktion="tag-vor"]').disabled = tag >= heute;
+
+  // Warnungen: "sofort" und "achtung" immer offen, "hinweis" einzeilig und aufklappbar.
   const liste = warnungen({
     name: tier.name,
     tag,
-    heute: tagSchluessel(new Date()),
+    heute,
     kcal: summe.kcal,
-    leckerli: leckerliKcal(mahlzeiten, futter),
+    leckerli,
     freigabe,
     gewichte,
     fruehereMahlzeiten: daten.mahlzeiten.some((m) => m.tierId === tier.id && tagSchluessel(new Date(m.zeitpunkt)) < tag),
     normalesFutterKcal: normalesFutterKcal(mahlzeiten, futter),
   });
   $("warnungen-liste").innerHTML = liste
-    .map((w) => `<li class="warnung warnung-${w.art}">${sicher(w.text)}<span class="quelle">Quelle: ${sicher(w.quelle)}</span></li>`)
+    .map((w) =>
+      w.art === "hinweis"
+        ? `<li>${aufklappKarte({
+            id: "hinweis-" + w.id,
+            klasse: "hinweis",
+            kopf: `<span class="punkt" aria-hidden="true">i</span><span class="zusammen">${sicher(HINWEIS_TITEL[w.id] ?? "Hinweis")}</span>`,
+            inhalt: `<p>${sicher(w.text)}</p><span class="quelle">Quelle: ${sicher(w.quelle)}</span>`,
+          })}</li>`
+        : `<li class="warnung warnung-${w.art}">${sicher(w.text)}<span class="quelle">Quelle: ${sicher(w.quelle)}</span></li>`
+    )
     .join("");
 
-  $("summe-freigabe").textContent = freigabe ? `von ${zahl(freigabe.kcalProTag)} kcal freigegeben` : "";
-  $("summe-freigabe").hidden = !freigabe;
-  $("tag-titel").textContent = tagTitel(gewaehlterTag);
-  document.querySelector('[data-aktion="tag-vor"]').disabled = tag >= tagSchluessel(new Date());
-  $("summe-kcal").textContent = (summe.unsicher ? "ca. " : "") + zahl(summe.kcal);
-  $("summe-gramm").textContent = zahl(summe.gramm);
+  // Ring: ohne Freigabe kein Ziel und kein Füllstand.
+  const ring = ringWerte(summe.kcal, freigabe);
+  const ca = summe.unsicher ? "ca. " : "";
+  zeichneRing(ring.anteil, Math.round(summe.kcal), ring.ueber, vonNull);
+  const zeile = (titel, wert) => `<div><span>${titel}</span><b>${wert}</b></div>`;
+  if (freigabe) {
+    $("ring-unter").textContent = `${ca}von ${zahl(freigabe.kcalProTag)} kcal`;
+    $("ring-rechts").innerHTML =
+      zeile("Gefüttert", `${ca}${zahl(summe.kcal)} kcal`) +
+      zeile("Freigabe", `${zahl(freigabe.kcalProTag)} kcal`) +
+      (ring.darueber > 0 ? zeile("darüber", `${zahl(ring.darueber)} kcal`) : zeile("Noch offen", `${zahl(ring.offen)} kcal`));
+  } else {
+    $("ring-unter").textContent = `${ca}kcal · ${zahl(summe.gramm)} g Futter`;
+    $("ring-rechts").innerHTML =
+      zeile("Gefüttert", `${ca}${zahl(summe.kcal)} kcal`) +
+      zeile("Menge", `${zahl(summe.gramm)} g`) +
+      `<p>Ziel kommt mit der Freigabe vom Tierarzt.</p>`;
+  }
   $("summe-hinweis").hidden = !summe.unsicher;
-  $("mahlzeiten-leer").hidden = mahlzeiten.length > 0;
 
-  $("mahlzeiten-liste").innerHTML = mahlzeiten
-    .map((m) => {
-      const f = futter.get(m.futterId);
-      const uhrzeit = new Date(m.zeitpunkt).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
-      const kcal = f ? zahl(kcalFuer(m.gramm, f.kcalPro100g)) + " kcal" : "kcal unbekannt";
-      return `<li>
-        <div><strong>${sicher(f ? f.name : "Gelöschte Sorte")}</strong>
-          <span class="leise">${uhrzeit} · ${zahl(m.gramm)} g · ${kcal}</span></div>
-        <button class="knopf-loeschen" data-aktion="mahlzeit-loeschen" data-id="${m.id}" aria-label="Mahlzeit löschen">✕</button>
-      </li>`;
-    })
-    .join("");
+  // Kacheln: Gewicht und Leckerli
+  const trend = abnahmeProWoche(gewichte, GRENZEN.tageZuSchnell);
+  const gewichtKachel = sortiert[0]
+    ? `<div class="kachel"><span class="label">Gewicht</span>
+        <div class="wert">${zahl(sortiert[0].kg, 2)} <small>kg</small></div>
+        ${trend ? `<span class="leise">${trend.prozent >= 0 ? "−" : "+"}${zahl(Math.abs(trend.prozent), 1)} % pro Woche</span>` : ""}
+        ${miniKurve(sortiert)}</div>`
+    : `<div class="kachel"><span class="label">Gewicht</span><div class="wert">–</div><span class="leise">noch nicht gewogen</span></div>`;
+  const lk = leckerliKachel({ tag, heute, kcal: summe.kcal, leckerli, freigabe, warnungAktiv: liste.some((w) => w.id === "leckerli") });
+  const anteilText = lk.anteil === null ? (lk.amTagesende ? "wird am Tagesende bewertet" : "") : `${zahl(lk.anteil * 100)} % der Tages-kcal · Grenze 10 %`;
+  const breite = lk.anteil === null ? 0 : Math.min(100, (lk.anteil / GRENZEN.leckerliMax) * 100);
+  const leckerliKachelHtml = `<div class="kachel"><span class="label">Leckerli</span>
+      <div class="wert">${zahl(lk.kcal)} <small>kcal</small></div>
+      <span class="leise">${anteilText}</span>
+      ${lk.anteil === null ? "" : `<span class="balken sofort${lk.stufe === "achtung" ? " gefahr" : ""}"><i style="--w: ${breite.toFixed(1)}%"></i></span>`}</div>`;
+  $("heute-kacheln").innerHTML = gewichtKachel + leckerliKachelHtml;
+
+  // Mahlzeiten des Tages: zugeklappt nur die Zusammenfassung.
+  if (mahlzeiten.length === 0) {
+    $("heute-mahlzeiten").innerHTML = '<p class="leer">Noch keine Mahlzeit an diesem Tag.</p>';
+  } else {
+    const uhr = (m) => new Date(m.zeitpunkt).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+    const zeilen = mahlzeiten
+      .map((m) => {
+        const f = futter.get(m.futterId);
+        const kcal = f ? `${zahl(kcalFuer(m.gramm, f.kcalPro100g))} kcal` : "kcal unbekannt";
+        return `<div class="zeile"><span class="icon" aria-hidden="true">${TYP_SYMBOL[f?.typ] ?? "🍽️"}</span>
+          <span class="name">${sicher(f ? f.name : "Gelöschte Sorte")}<small>${uhr(m)} · ${zahl(m.gramm)} g</small></span>
+          <span class="kcal">${kcal}</span>
+          <button type="button" class="knopf-loeschen" data-aktion="mahlzeit-loeschen" data-id="${m.id}" aria-label="Mahlzeit löschen">✕</button></div>`;
+      })
+      .join("");
+    const anzahl = mahlzeiten.length === 1 ? "1 Eintrag" : `${mahlzeiten.length} Einträge`;
+    $("heute-mahlzeiten").innerHTML = aufklappKarte({
+      id: "mahlzeiten-heute",
+      klasse: "karte",
+      kopf: `<span class="zusammen"><span class="label">Mahlzeiten</span><br>${anzahl} · ${ca}${zahl(summe.kcal)} kcal · zuletzt ${uhr(mahlzeiten.at(-1))}</span>`,
+      inhalt: zeilen,
+    });
+  }
 }
+
+// ---------- Gewicht ----------
 
 function zeichneGewicht() {
   const gewichte = gewichteSortiert(daten.gewichte.filter((g) => g.tierId === tier.id));
@@ -173,27 +338,60 @@ function zeichneGewicht() {
       `${richtung}: ${zahl(Math.abs(trend.prozent), 1)} % pro Woche (seit ${datumText(trend.von.datum)}) · ` +
       `sicherer Bereich ${zahl(GRENZEN.abnahmeMin, 1)}–${zahl(GRENZEN.abnahmeMax)} %`;
   }
-  $("gewicht-liste").innerHTML = gewichte
-    .map(
-      (g) => `<li>
-        <div><strong>${zahl(g.kg, 2)} kg</strong>
-          <span class="leise">${datumText(g.datum)}${g.notiz ? " · " + sicher(g.notiz) : ""}</span></div>
-        <button class="knopf-loeschen" data-aktion="gewicht-loeschen" data-id="${g.id}" aria-label="Gewicht löschen">✕</button>
-      </li>`
-    )
+  // Wägungen nach Monaten: der neueste Monat offen, ältere zu.
+  $("gewicht-monate").hidden = gewichte.length === 0;
+  $("gewicht-monate").innerHTML = monatsGruppen(gewichte)
+    .map((monat, index) => {
+      const zeilen = monat.eintraege
+        .map((g) => {
+          const g100 = g.diffKg === null ? null : Math.round(g.diffKg * 1000);
+          const marke =
+            g100 === null
+              ? ""
+              : `<span class="marke ${g100 < 0 ? "marke-gut" : g100 > 0 ? "marke-warnung" : ""}">${g100 < 0 ? "−" : g100 > 0 ? "+" : "±"}${zahl(Math.abs(g100))} g</span>`;
+          return `<div class="zeile"><span class="name"><b>${zahl(g.kg, 2)} kg</b><small>${datumText(g.datum)}${g.notiz ? " · " + sicher(g.notiz) : ""}</small></span>
+            ${marke}
+            <button type="button" class="knopf-loeschen" data-aktion="gewicht-loeschen" data-id="${g.id}" aria-label="Gewicht löschen">✕</button></div>`;
+        })
+        .join("");
+      const anzahl = monat.eintraege.length === 1 ? "1 Wägung" : `${monat.eintraege.length} Wägungen`;
+      return aufklappKarte({
+        id: "monat-" + monat.schluessel,
+        offen: index === 0,
+        klasse: "tag-klapp",
+        kopf: `<span class="zusammen">${monat.titel}<small>${anzahl} · Ø ${zahl(monat.durchschnitt, 2)} kg</small></span>`,
+        inhalt: zeilen,
+      });
+    })
     .join("");
 }
 
+// ---------- Futter ----------
+
+function sortenZeile(f) {
+  return `<div class="zeile tippbar" data-aktion="futter-bearbeiten" data-id="${f.id}">
+    <span class="icon" aria-hidden="true">${TYP_SYMBOL[f.typ]}</span>
+    <span class="name">${sicher(f.name)}<small>${TYP_NAMEN[f.typ]} · ${zahl(f.kcalPro100g, f.kcalPro100g % 1 ? 1 : 0)} kcal/100 g</small></span>
+    <span class="marke marke-${f.kcalQuelle}">${QUELLE_NAMEN[f.kcalQuelle]}</span>
+  </div>`;
+}
+
 function zeichneFutter() {
-  $("futter-liste").innerHTML = daten.futter
-    .map(
-      (f) => `<li class="tippbar" data-aktion="futter-bearbeiten" data-id="${f.id}">
-        <div><strong>${sicher(f.name)}</strong>
-          <span class="leise">${TYP_NAMEN[f.typ]} · ${zahl(f.kcalPro100g)} kcal/100 g</span></div>
-        <span class="marke marke-${f.kcalQuelle}">${QUELLE_NAMEN[f.kcalQuelle]}</span>
-      </li>`
-    )
-    .join("");
+  const offen = daten.futter.length <= 5;
+  $("futter-gruppen").innerHTML =
+    ["nass", "trocken", "leckerli"]
+      .map((typ) => {
+        const sorten = daten.futter.filter((f) => f.typ === typ);
+        if (sorten.length === 0) return "";
+        return aufklappKarte({
+          id: "futter-" + typ,
+          offen,
+          klasse: "tag-klapp",
+          kopf: `<span class="icon" aria-hidden="true">${TYP_SYMBOL[typ]}</span><span class="zusammen">${TYP_NAMEN[typ]}<small>${sorten.length === 1 ? "1 Sorte" : `${sorten.length} Sorten`}</small></span>`,
+          inhalt: sorten.map(sortenZeile).join(""),
+        });
+      })
+      .join("") || '<p class="leer">Noch keine Sorte angelegt.</p>';
 }
 
 function datumText(iso) {
@@ -213,6 +411,18 @@ function zeichneFreigabe() {
     : "Noch keine Freigabe eingetragen.";
 }
 
+function zeichneVerlaufAnsicht() {
+  $("verlauf-inhalt").innerHTML = zeichneVerlauf({
+    gewichte: daten.gewichte.filter((g) => g.tierId === tier.id),
+    mahlzeiten: daten.mahlzeiten.filter((m) => m.tierId === tier.id),
+    freigaben: daten.freigaben.filter((f) => f.tierId === tier.id),
+    futterNachId: futterNachId(daten),
+    zeitraum,
+    heute: tagSchluessel(new Date()),
+    kopf: `<div class="verlauf-kopf">${profilHtml(tier, "klein")}<h2>Verlauf</h2></div>`,
+  });
+}
+
 function zeichneAlles() {
   $("tiername").textContent = tier.name;
   zeichneHeute();
@@ -220,12 +430,7 @@ function zeichneAlles() {
   zeichneFutter();
   zeichneFreigabe();
   zeichneSicherung();
-  $("verlauf-inhalt").innerHTML = zeichneVerlauf({
-    gewichte: daten.gewichte.filter((g) => g.tierId === tier.id),
-    mahlzeiten: daten.mahlzeiten.filter((m) => m.tierId === tier.id),
-    freigaben: daten.freigaben.filter((f) => f.tierId === tier.id),
-    futterNachId: futterNachId(daten),
-  });
+  zeichneVerlaufAnsicht();
 }
 
 function zeichneBericht() {
@@ -235,7 +440,7 @@ function zeichneBericht() {
     mahlzeiten: daten.mahlzeiten.filter((m) => m.tierId === tier.id),
     freigaben: daten.freigaben.filter((f) => f.tierId === tier.id),
   };
-  const auswahl = $("bericht-zeitraum").value;
+  const auswahl = document.querySelector('[name="bericht-zeitraum"]').value;
   let von;
   if (auswahl === "alles") {
     const anfaenge = [
@@ -259,33 +464,55 @@ function zeichneBericht() {
   });
 }
 
-// Tooltip der Diagramme: Zeigen (Maus) oder Tippen (Handy) auf eine Trefferfläche.
-function zeigeTooltip(ereignis) {
-  const treffer = ereignis.target.closest?.(".treffer");
-  const tooltip = $("tooltip");
-  document.querySelectorAll(".treffer.aktiv").forEach((g) => g !== treffer && g.classList.remove("aktiv"));
-  if (!treffer) {
-    tooltip.hidden = true;
-    return;
-  }
-  treffer.classList.add("aktiv");
-  tooltip.textContent = treffer.dataset.tip;
-  tooltip.hidden = false;
-  const flaeche = $("verlauf-inhalt").getBoundingClientRect();
-  const ziel = treffer.getBoundingClientRect();
-  const karte = treffer.closest(".karte").getBoundingClientRect();
-  const links = Math.min(Math.max(ziel.left + ziel.width / 2 - flaeche.left - tooltip.offsetWidth / 2, 0), flaeche.width - tooltip.offsetWidth);
-  tooltip.style.left = `${links}px`;
-  tooltip.style.top = `${karte.top - flaeche.top + 8}px`;
+// Infoblase der Gewichtskurve: Antippen oder Ziehen zeigt den nächsten Punkt mit Datum und kg.
+function zeigeInfoblase(ereignis) {
+  const kurve = ereignis.target.closest?.("svg.kurve");
+  const blase = $("infoblase");
+  if (!kurve || !blase) return;
+  const punkte = JSON.parse(kurve.dataset.punkte);
+  const flaeche = kurve.getBoundingClientRect();
+  const breite = kurve.viewBox.baseVal.width;
+  const hoehe = kurve.viewBox.baseVal.height;
+  const x = ((ereignis.clientX - flaeche.left) * breite) / flaeche.width;
+  const naechster = punkte.reduce((a, b) => (Math.abs(b[0] - x) < Math.abs(a[0] - x) ? b : a));
+  const linie = kurve.querySelector(".hilfslinie");
+  const punkt = kurve.querySelector(".punkt.aktiv");
+  linie.setAttribute("x1", naechster[0]);
+  linie.setAttribute("x2", naechster[0]);
+  punkt.setAttribute("cx", naechster[0]);
+  punkt.setAttribute("cy", naechster[1]);
+  linie.setAttribute("visibility", "visible");
+  punkt.setAttribute("visibility", "visible");
+  blase.textContent = naechster[2];
+  blase.hidden = false;
+  const links = (naechster[0] * flaeche.width) / breite;
+  blase.style.left = `${Math.min(Math.max(links, blase.offsetWidth / 2), flaeche.width - blase.offsetWidth / 2)}px`;
+  blase.style.top = `${(naechster[1] * flaeche.height) / hoehe}px`;
 }
-$("verlauf-inhalt").addEventListener("pointerover", zeigeTooltip);
-$("verlauf-inhalt").addEventListener("pointerdown", zeigeTooltip);
-$("verlauf-inhalt").addEventListener("pointerleave", () => {
-  $("tooltip").hidden = true;
-  document.querySelectorAll(".treffer.aktiv").forEach((g) => g.classList.remove("aktiv"));
-});
+function versteckeInfoblase() {
+  const blase = $("infoblase");
+  if (blase) blase.hidden = true;
+  document.querySelectorAll(".kurve .hilfslinie, .kurve .punkt.aktiv").forEach((el) => el.setAttribute("visibility", "hidden"));
+}
+$("verlauf-inhalt").addEventListener("pointerdown", zeigeInfoblase);
+$("verlauf-inhalt").addEventListener("pointermove", zeigeInfoblase);
+$("verlauf-inhalt").addEventListener("pointerleave", versteckeInfoblase);
 
-// ---------- Formulare ----------
+// ---------- Formulare (als Blätter von unten) ----------
+
+aufklappenAnmelden(document);
+auswahlAnmelden(document);
+
+// Antippen des abgedunkelten Hintergrunds schließt das Blatt wie „Abbrechen“; gespeichert wird nichts.
+document.querySelectorAll("dialog").forEach((dialog) => {
+  dialog.addEventListener("click", (ereignis) => {
+    if (ereignis.target !== dialog) return;
+    const r = dialog.getBoundingClientRect();
+    const draussen =
+      ereignis.clientX < r.left || ereignis.clientX > r.right || ereignis.clientY < r.top || ereignis.clientY > r.bottom;
+    if (draussen) dialog.close("abbrechen");
+  });
+});
 
 function zeigeFehler(id, text) {
   $(id).textContent = text;
@@ -300,7 +527,22 @@ function beimSpeichern(formId, fehlerId, pruefenUndSpeichern) {
     if (fehler) {
       ereignis.preventDefault();
       zeigeFehler(fehlerId, fehler);
+    } else {
+      zeigeToast("✓ Gespeichert");
     }
+  });
+}
+
+function futterMenue(gewaehlt) {
+  $("mahlzeit-futter").innerHTML = auswahlFeld({
+    name: "futter",
+    optionen: daten.futter.map((f) => ({
+      wert: f.id,
+      text: f.name,
+      zusatz: `${TYP_NAMEN[f.typ]} · ${zahl(f.kcalPro100g, f.kcalPro100g % 1 ? 1 : 0)} kcal/100 g`,
+    })),
+    wert: gewaehlt,
+    extra: [{ text: "＋ Aus der Futterliste wählen", aktion: "liste-oeffnen" }],
   });
 }
 
@@ -308,15 +550,7 @@ function oeffneMahlzeit() {
   const form = $("form-mahlzeit");
   form.reset();
   zeigeFehler("mahlzeit-fehler", "");
-  const legende = '<legend>Futter</legend>';
-  $("mahlzeit-futter").innerHTML =
-    legende +
-    daten.futter
-      .map(
-        (f, i) => `<label><input type="radio" name="futter" value="${f.id}" ${i === 0 ? "checked" : ""} required>
-          ${sicher(f.name)} <span class="leise">${zahl(f.kcalPro100g)} kcal/100 g</span></label>`
-      )
-      .join("");
+  futterMenue(daten.futter[0]?.id);
   const jetzt = new Date();
   form.uhrzeit.value = `${String(jetzt.getHours()).padStart(2, "0")}:${String(jetzt.getMinutes()).padStart(2, "0")}`;
   zeigeMahlzeitVorschau();
@@ -331,9 +565,19 @@ function zeigeMahlzeitVorschau() {
     gramm && futter ? `= ${zahl(kcalFuer(gramm, futter.kcalPro100g))} kcal` : "";
 }
 
+// − / ＋ in 5-g-Schritten; eintippen bleibt möglich.
+function grammSchritt(schritt) {
+  const feld = $("form-mahlzeit").gramm;
+  const jetzt = leseZahl(feld.value) ?? 0;
+  const neu = Math.max(0, Math.round((jetzt + schritt) / 5) * 5);
+  feld.value = neu ? String(neu) : "";
+  zeigeMahlzeitVorschau();
+}
+
 $("form-mahlzeit").addEventListener("input", zeigeMahlzeitVorschau);
 
 beimSpeichern("form-mahlzeit", "mahlzeit-fehler", (werte) => {
+  if (!werte.get("futter")) return "Bitte eine Futtersorte wählen.";
   const gramm = leseZahl(werte.get("gramm"));
   if (!gramm || gramm > 1000) return "Bitte eine Menge zwischen 1 und 1000 g eingeben.";
   const [stunde, minute] = werte.get("uhrzeit").split(":").map(Number);
@@ -411,6 +655,18 @@ beimSpeichern("form-freigabe", "freigabe-fehler", (werte) => {
 
 let bearbeitetesFutter = null;
 
+const TYP_OPTIONEN = [
+  { wert: "nass", text: "Nassfutter" },
+  { wert: "trocken", text: "Trockenfutter" },
+  { wert: "leckerli", text: "Leckerli / Snack" },
+];
+const QUELLE_OPTIONEN = [
+  { wert: "packung", text: "Genau von der Packung" },
+  { wert: "hersteller", text: "Herstellerangabe (z. B. Website)" },
+  { wert: "geschaetzt", text: "Aus den Bestandteilen berechnet" },
+  { wert: "ungefaehr", text: "Ungefähr" },
+];
+
 function oeffneFutter(futter) {
   bearbeitetesFutter = futter;
   const form = $("form-futter");
@@ -418,11 +674,11 @@ function oeffneFutter(futter) {
   zeigeFehler("futter-fehler", "");
   $("futter-titel").textContent = futter ? "Sorte ändern" : "Eigene Sorte";
   $("futter-loeschen").hidden = !futter;
+  $("futter-typ").innerHTML = auswahlFeld({ name: "typ", optionen: TYP_OPTIONEN, wert: futter?.typ });
+  $("futter-quelle").innerHTML = auswahlFeld({ name: "quelle", optionen: QUELLE_OPTIONEN, wert: futter?.kcalQuelle });
   if (futter) {
     form.name.value = futter.name;
-    form.typ.value = futter.typ;
     form.kcal.value = String(futter.kcalPro100g).replace(".", ",");
-    form.quelle.value = futter.kcalQuelle;
   }
   $("futter-notiz").textContent = futter?.notiz ?? "";
   $("futter-notiz").hidden = !futter?.notiz;
@@ -433,7 +689,9 @@ beimSpeichern("form-futter", "futter-fehler", (werte) => {
   const name = werte.get("name").trim();
   const kcal = leseZahl(werte.get("kcal"));
   if (!name) return "Bitte einen Namen eingeben.";
+  if (!werte.get("typ")) return "Bitte die Art wählen.";
   if (!kcal || kcal < 20 || kcal > 700) return "Bitte einen kcal-Wert zwischen 20 und 700 pro 100 g eingeben.";
+  if (!werte.get("quelle")) return "Bitte angeben, woher der Wert stammt.";
   const felder = { name, typ: werte.get("typ"), kcalPro100g: kcal, kcalQuelle: werte.get("quelle") };
   if (bearbeitetesFutter) {
     Object.assign(bearbeitetesFutter, felder);
@@ -463,25 +721,31 @@ $("form-futter").addEventListener("submit", (ereignis) => {
 
 function zeichneListe() {
   const vorhanden = new Set(daten.futter.map((f) => f.listeId).filter(Boolean));
-  const treffer = sucheFutter($("liste-suche").value);
-  const gruppe = (titel, eintraege) =>
-    eintraege.length === 0
-      ? ""
-      : `<h3>${titel}</h3><ul class="liste">${eintraege
-          .map((e) => {
-            const drin = vorhanden.has(e.id);
-            return `<li ${drin ? "" : `class="tippbar" data-aktion="liste-uebernehmen" data-id="${e.id}"`}>
-              <div><strong>${sicher(e.name)}</strong>
-                <span class="leise">${TYP_NAMEN[e.typ]} · ${zahl(e.kcalPro100g, e.kcalPro100g % 1 ? 1 : 0)} kcal/100 g</span></div>
-              ${drin
-                ? '<span class="marke">in deiner Liste</span>'
-                : `<span class="marke marke-${e.kcalQuelle}">${QUELLE_NAMEN[e.kcalQuelle]}</span>`}
-            </li>`;
-          })
-          .join("")}</ul>`;
+  const suche = $("liste-suche").value.trim();
+  const treffer = sucheFutter(suche);
+  const gruppe = (id, titel, eintraege) => {
+    if (eintraege.length === 0) return "";
+    if (suche) merkeZustand(id, true); // bei einer Suche alle Gruppen mit Treffern aufklappen
+    const zeilen = eintraege
+      .map((e) => {
+        const drin = vorhanden.has(e.id);
+        return `<div class="zeile${drin ? "" : " tippbar"}" ${drin ? "" : `data-aktion="liste-uebernehmen" data-id="${e.id}"`}>
+          <span class="icon" aria-hidden="true">${TYP_SYMBOL[e.typ]}</span>
+          <span class="name">${sicher(e.name)}<small>${TYP_NAMEN[e.typ]} · ${zahl(e.kcalPro100g, e.kcalPro100g % 1 ? 1 : 0)} kcal/100 g</small></span>
+          ${drin ? '<span class="marke">in deiner Liste</span>' : `<span class="marke marke-${e.kcalQuelle}">${QUELLE_NAMEN[e.kcalQuelle]}</span>`}
+        </div>`;
+      })
+      .join("");
+    return aufklappKarte({
+      id,
+      klasse: "tag-klapp",
+      kopf: `<span class="zusammen">${titel}<small>${eintraege.length === 1 ? "1 Sorte" : `${eintraege.length} Sorten`}</small></span>`,
+      inhalt: zeilen,
+    });
+  };
   $("liste-treffer").innerHTML =
-    gruppe("Diätfutter vom Tierarzt – nur nach Rücksprache", treffer.filter((e) => e.diaet)) +
-      gruppe("Weitere Sorten", treffer.filter((e) => !e.diaet)) ||
+    gruppe("liste-diaet", "Diätfutter vom Tierarzt – nur nach Rücksprache", treffer.filter((e) => e.diaet)) +
+      gruppe("liste-weitere", "Weitere Sorten", treffer.filter((e) => !e.diaet)) ||
     '<p class="leise">Keine Sorte gefunden. Du kannst sie unter „Eigene Sorte anlegen“ selbst eintragen.</p>';
 }
 
@@ -493,13 +757,83 @@ function oeffneListe() {
 
 $("liste-suche").addEventListener("input", zeichneListe);
 
+// Wurde die Liste aus dem Mahlzeit-Blatt geöffnet, bleibt dieses offen: neue Sorte gewählt, Menge und Uhrzeit bleiben.
 function uebernehmeAusListe(listeId) {
   const eintrag = FUTTERLISTE.find((e) => e.id === listeId);
   if (!eintrag) return;
-  daten.futter.push(ausListe(eintrag, neueId()));
+  const neu = ausListe(eintrag, neueId());
+  daten.futter.push(neu);
   sichern();
   $("dialog-liste").close();
+  if ($("dialog-mahlzeit").open) {
+    futterMenue(neu.id);
+    zeigeMahlzeitVorschau();
+  }
+  zeigeToast(`✓ ${eintrag.name} übernommen`);
 }
+
+// ---------- Profilbild ----------
+
+// Mittig quadratisch zuschneiden, auf 256 × 256 px verkleinern, als JPEG speichern (wenige KB statt mehrerer MB).
+async function fotoZuschneiden(datei) {
+  const bild = await createImageBitmap(datei);
+  const seite = Math.min(bild.width, bild.height);
+  const ziel = 256;
+  const leinwand = document.createElement("canvas");
+  leinwand.width = leinwand.height = ziel;
+  leinwand.getContext("2d").drawImage(bild, (bild.width - seite) / 2, (bild.height - seite) / 2, seite, seite, 0, 0, ziel, ziel);
+  return leinwand.toDataURL("image/jpeg", 0.8);
+}
+
+// Speichern kann scheitern, wenn der Speicher voll ist: dann bleibt alles wie vorher.
+function setzeFoto(foto) {
+  const vorher = tier.foto;
+  if (foto) tier.foto = foto;
+  else delete tier.foto;
+  try {
+    speichern(daten);
+  } catch {
+    if (vorher) tier.foto = vorher;
+    else delete tier.foto;
+    zeigeToast("Das Foto passt nicht mehr in den Speicher. Die übrigen Daten sind unverändert.", 4000);
+    return false;
+  }
+  zeichneAlles();
+  return true;
+}
+
+function profilMenueZu() {
+  $("profil-feld").classList.remove("offen");
+  $("profil-feld").querySelector(".profil-menue")?.remove();
+}
+
+function profilAntippen() {
+  if (demo) return zeigeToast("In der Demo lässt sich kein Foto setzen.", 2500);
+  if (!fotoGueltig(tier.foto)) return $("foto-datei").click();
+  if ($("profil-feld").classList.contains("offen")) return profilMenueZu();
+  $("profil-feld").insertAdjacentHTML(
+    "beforeend",
+    `<ul class="auswahl-menue profil-menue" role="menu">
+      <li role="none"><button type="button" role="menuitem" data-aktion="foto-aendern">Foto ändern</button></li>
+      <li role="none"><button type="button" role="menuitem" data-aktion="foto-entfernen">Foto entfernen</button></li>
+    </ul>`
+  );
+  $("profil-feld").classList.add("offen");
+  $("profil-feld").querySelector(".profil-menue button").focus();
+}
+
+$("foto-datei").addEventListener("change", async (ereignis) => {
+  const datei = ereignis.target.files[0];
+  ereignis.target.value = "";
+  if (!datei) return;
+  let foto;
+  try {
+    foto = await fotoZuschneiden(datei);
+  } catch {
+    return zeigeToast("Dieses Bild konnte nicht gelesen werden.", 3000);
+  }
+  if (setzeFoto(foto)) zeigeToast("✓ Foto übernommen");
+});
 
 // ---------- Sicherung ----------
 
@@ -555,8 +889,10 @@ $("import-datei").addEventListener("change", async (ereignis) => {
     alert("Diese Datei ist keine gültige Kilossos-Sicherung.");
     return;
   }
+  const verworfen = fotoBereinigen(neu);
   const anzahl = `${neu.mahlzeiten.length} Mahlzeiten und ${neu.gewichte.length} Gewichte`;
-  if (!confirm(`Sicherung mit ${anzahl} einlesen? Alle Einträge auf diesem Handy werden dadurch ersetzt.`)) return;
+  const fotoText = verworfen > 0 ? " Das Profilbild in der Datei war ungültig und wird nicht übernommen." : "";
+  if (!confirm(`Sicherung mit ${anzahl} einlesen? Alle Einträge auf diesem Handy werden dadurch ersetzt.${fotoText}`)) return;
   speichern(neu);
   location.reload();
 });
@@ -568,9 +904,40 @@ async function zeigeSpeicherStatus() {
     : "Hinweis: Der Browser könnte die Daten bei Speichermangel löschen – Sicherungen sind deshalb wichtig.";
 }
 
+// ---------- Auswahlfelder in „Mehr“ ----------
+
+$("bericht-zeitraum-feld").innerHTML = auswahlFeld({
+  name: "bericht-zeitraum",
+  optionen: [
+    { wert: "28", text: "letzte 4 Wochen" },
+    { wert: "84", text: "letzte 12 Wochen" },
+    { wert: "alles", text: "alles" },
+  ],
+  wert: "alles",
+});
+$("anzeige-feld").innerHTML = auswahlFeld({
+  name: "anzeige",
+  optionen: [
+    { wert: "hell", text: "Hell" },
+    { wert: "dunkel", text: "Dunkel" },
+    { wert: "handy", text: "Wie das Handy" },
+  ],
+  wert: leseAnzeige(),
+});
+document.addEventListener("change", (ereignis) => {
+  if (ereignis.target.name !== "anzeige") return;
+  try {
+    merkeAnzeige(ereignis.target.value);
+  } catch {
+    // Speicher gesperrt: die Wahl gilt dann nur bis zum Schließen der App.
+  }
+  wendeAnzeigeAn(ereignis.target.value);
+});
+
 // ---------- Klicks ----------
 
 document.addEventListener("click", (ereignis) => {
+  if (!ereignis.target.closest?.("#profil-feld")) profilMenueZu();
   const ziel = ereignis.target.closest("[data-ziel], [data-aktion]");
   if (!ziel) return;
   if (ziel.dataset.ziel) return zeigeAnsicht(ziel.dataset.ziel);
@@ -579,12 +946,16 @@ document.addEventListener("click", (ereignis) => {
   switch (ziel.dataset.aktion) {
     case "tag-zurueck":
       gewaehlterTag = new Date(gewaehlterTag.getFullYear(), gewaehlterTag.getMonth(), gewaehlterTag.getDate() - 1);
-      return zeichneHeute();
+      return zeichneHeute(true);
     case "tag-vor":
       gewaehlterTag = new Date(gewaehlterTag.getFullYear(), gewaehlterTag.getMonth(), gewaehlterTag.getDate() + 1);
-      return zeichneHeute();
+      return zeichneHeute(true);
     case "mahlzeit-neu":
       return oeffneMahlzeit();
+    case "gramm-minus":
+      return grammSchritt(-5);
+    case "gramm-plus":
+      return grammSchritt(5);
     case "mahlzeit-loeschen":
       if (confirm("Diese Mahlzeit löschen?")) {
         daten.mahlzeiten = daten.mahlzeiten.filter((m) => m.id !== id);
@@ -609,6 +980,26 @@ document.addEventListener("click", (ereignis) => {
       return uebernehmeAusListe(id);
     case "freigabe-neu":
       return oeffneFreigabe();
+    case "zeitraum": {
+      // Die Markierung startet an der alten Stelle und gleitet zur neuen (die Ansicht wird neu gezeichnet).
+      const altePos = ziel.closest(".umschalter").style.getPropertyValue("--pos");
+      zeitraum = ziel.dataset.wert;
+      zeichneVerlaufAnsicht();
+      const umschalter = document.querySelector("#verlauf-inhalt .umschalter");
+      const neuePos = umschalter.style.getPropertyValue("--pos");
+      umschalter.style.setProperty("--pos", altePos);
+      requestAnimationFrame(() => requestAnimationFrame(() => umschalter.style.setProperty("--pos", neuePos)));
+      return;
+    }
+    case "profil":
+      return profilAntippen();
+    case "foto-aendern":
+      profilMenueZu();
+      return $("foto-datei").click();
+    case "foto-entfernen":
+      profilMenueZu();
+      if (setzeFoto(null)) zeigeToast("Foto entfernt");
+      return;
     case "bericht-oeffnen":
       zeichneBericht();
       zeigeAnsicht("bericht");
@@ -621,4 +1012,5 @@ document.addEventListener("click", (ereignis) => {
 });
 
 zeichneAlles();
+zeichneHeute(true);
 zeigeSpeicherStatus();

@@ -1,11 +1,19 @@
 <!doctype html>
-<html lang="de">
+<html lang="de" data-theme="hell">
 <head>
   <meta charset="utf-8">
+  <!-- Hell/Dunkel vor dem ersten Zeichnen setzen, damit nichts aufblitzt (gleiche Regel wie js/anzeige.js). -->
+  <script>
+    try {
+      var w = localStorage.getItem("kilossos-anzeige");
+      var d = w === "dunkel" || (w === "handy" && matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.dataset.theme = d ? "dunkel" : "hell";
+    } catch (e) { document.documentElement.dataset.theme = "hell"; }
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Kilossos</title>
   <meta name="description" content="Kilossos begleitet übergewichtige Katzen bei einer sicheren, kontrollierten Abnahme.">
-  <meta name="theme-color" content="#c8642d">
+  <meta name="theme-color" content="#fbf6f1" id="theme-farbe">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -14,7 +22,6 @@
 <body>
   <header class="kopf">
     <h1>Kilossos</h1>
-    <p class="untertitel" id="tiername">Kito</p>
   </header>
   <p class="demo-leiste" id="demo-leiste" hidden>
     <strong>Demo:</strong> simulierte Daten – deine echten Einträge sind nicht betroffen.
@@ -24,48 +31,64 @@
   <main>
     <!-- Heute -->
     <section class="ansicht" data-ansicht="heute">
+      <div class="tier-kopf">
+        <div class="profil-feld" id="profil-feld">
+          <button type="button" class="profil" id="profil" data-aktion="profil" aria-label="Profilbild ändern"></button>
+          <input type="file" accept="image/*" id="foto-datei" hidden>
+        </div>
+        <div class="tier-text"><b id="tiername">Kito</b><small id="kopf-gewicht"></small></div>
+        <div class="datum" id="kopf-datum"></div>
+      </div>
+
       <div class="tagwahl">
         <button class="knopf-rund" data-aktion="tag-zurueck" aria-label="Vorheriger Tag">‹</button>
         <h2 id="tag-titel">Heute</h2>
         <button class="knopf-rund" data-aktion="tag-vor" aria-label="Nächster Tag">›</button>
       </div>
 
-      <div class="warnung warnung-achtung sicherung-hinweis" id="sicherung-hinweis" hidden>
+      <div class="warnung sicherung-hinweis" id="sicherung-hinweis" hidden>
         <span id="sicherung-hinweis-text"></span>
         <button class="knopf-haupt" data-aktion="export">Jetzt sichern</button>
       </div>
 
       <ul class="warnungen" id="warnungen-liste"></ul>
 
-      <div class="karte summe">
-        <div><span class="gross" id="summe-kcal">0</span> kcal</div>
-        <div class="leise" id="summe-freigabe" hidden></div>
-        <div class="leise"><span id="summe-gramm">0</span> g Futter</div>
-        <p class="hinweis" id="summe-hinweis" hidden>ca. – enthält Futter ohne genau abgelesenen kcal-Wert</p>
+      <div class="karte">
+        <span class="label">Kalorien</span>
+        <div class="ring-zeile">
+          <div class="ring">
+            <svg width="130" height="130" viewBox="0 0 130 130" aria-hidden="true">
+              <circle class="bahn" cx="65" cy="65" r="54" fill="none" stroke-width="12"/>
+              <circle class="fuell" id="ring-fuell" cx="65" cy="65" r="54" fill="none" stroke-width="12"/>
+            </svg>
+            <div class="ring-mitte"><b id="ring-zahl">0</b><small id="ring-unter"></small></div>
+          </div>
+          <div class="zahlen" id="ring-rechts"></div>
+        </div>
+        <p class="ca-hinweis" id="summe-hinweis" hidden>ca. – enthält Futter ohne genau abgelesenen kcal-Wert</p>
+        <button class="knopf-haupt" data-aktion="mahlzeit-neu">＋ Mahlzeit eintragen</button>
       </div>
 
-      <ul class="liste" id="mahlzeiten-liste"></ul>
-      <p class="leer" id="mahlzeiten-leer">Noch keine Mahlzeit an diesem Tag.</p>
-
-      <button class="knopf-haupt" data-aktion="mahlzeit-neu">+ Mahlzeit eintragen</button>
+      <div class="kacheln" id="heute-kacheln"></div>
+      <div id="heute-mahlzeiten"></div>
     </section>
 
     <!-- Gewicht -->
     <section class="ansicht" data-ansicht="gewicht" hidden>
       <div class="karte summe">
+        <span class="label">Gewicht</span>
         <div><span class="gross" id="gewicht-aktuell">–</span> kg</div>
         <div class="leise" id="gewicht-aenderung">Noch kein Gewicht eingetragen.</div>
         <div class="leise" id="gewicht-trend" hidden></div>
       </div>
       <p class="tipp">Am besten 1× pro Woche wiegen: gleicher Wochentag, gleiche Uhrzeit, gleiche Waage.</p>
-      <ul class="liste" id="gewicht-liste"></ul>
-      <button class="knopf-haupt" data-aktion="gewicht-neu">+ Gewicht eintragen</button>
+      <div class="karte" id="gewicht-monate"></div>
+      <button class="knopf-haupt" data-aktion="gewicht-neu">＋ Gewicht eintragen</button>
     </section>
 
     <!-- Verlauf -->
     <section class="ansicht" data-ansicht="verlauf" hidden>
       <div id="verlauf-inhalt"></div>
-      <div class="tooltip" id="tooltip" hidden></div>
     </section>
 
     <!-- Übersicht für den Tierarzt (über "Mehr" erreichbar) -->
@@ -81,9 +104,9 @@
     <!-- Futter -->
     <section class="ansicht" data-ansicht="futter" hidden>
       <p class="tipp">Tippe auf eine Sorte, um sie zu ändern – zum Beispiel, um den genauen kcal-Wert von der Packung einzutragen.</p>
-      <ul class="liste" id="futter-liste"></ul>
+      <div class="karte" id="futter-gruppen"></div>
       <button class="knopf-haupt" data-aktion="liste-oeffnen">Aus der Futterliste wählen</button>
-      <button class="knopf-zweit" data-aktion="futter-neu">+ Eigene Sorte anlegen</button>
+      <button class="knopf-zweit" data-aktion="futter-neu">＋ Eigene Sorte anlegen</button>
     </section>
 
     <!-- Mehr -->
@@ -97,14 +120,13 @@
       <div class="karte">
         <h2>Übersicht für den Tierarzt</h2>
         <p class="leise">Gewicht, Fütterung, Freigaben und Auffälligkeiten auf einen Blick – zum Ausdrucken oder als PDF zum Mitnehmen.</p>
-        <label>Zeitraum
-          <select id="bericht-zeitraum">
-            <option value="28">letzte 4 Wochen</option>
-            <option value="84">letzte 12 Wochen</option>
-            <option value="alles" selected>alles</option>
-          </select>
-        </label>
+        <div class="feld"><span>Zeitraum</span><div id="bericht-zeitraum-feld"></div></div>
         <button class="knopf-haupt" data-aktion="bericht-oeffnen">Übersicht öffnen</button>
+      </div>
+      <div class="karte">
+        <h2>Darstellung</h2>
+        <div id="anzeige-feld"></div>
+        <p class="tipp">Gilt nur für dieses Gerät.</p>
       </div>
       <div class="karte">
         <h2>Sicherung</h2>
@@ -115,31 +137,35 @@
           Sicherung einlesen
           <input type="file" accept="application/json,.json" id="import-datei" hidden>
         </label>
-        <p class="hinweis" id="speicher-status"></p>
+        <p class="hinweis-text-klein" id="speicher-status"></p>
       </div>
-      <p class="fuss" id="version">Version 0.6.2</p>
+      <p class="fuss" id="version">Version 0.7.0</p>
     </section>
   </main>
 
   <nav class="leiste" aria-label="Bereiche">
-    <button data-ziel="heute" aria-current="page">Heute</button>
-    <button data-ziel="gewicht">Gewicht</button>
-    <button data-ziel="verlauf">Verlauf</button>
-    <button data-ziel="futter">Futter</button>
-    <button data-ziel="mehr">Mehr</button>
+    <button data-ziel="heute" aria-current="page"><span class="symbol" aria-hidden="true">🏠</span>Heute</button>
+    <button data-ziel="gewicht"><span class="symbol" aria-hidden="true">⚖️</span>Gewicht</button>
+    <button data-ziel="verlauf"><span class="symbol" aria-hidden="true">📈</span>Verlauf</button>
+    <button data-ziel="futter"><span class="symbol" aria-hidden="true">🥣</span>Futter</button>
+    <button data-ziel="mehr"><span class="symbol" aria-hidden="true">☰</span>Mehr</button>
   </nav>
 
   <!-- Formular: Mahlzeit -->
   <dialog id="dialog-mahlzeit">
     <form method="dialog" id="form-mahlzeit">
       <h2>Mahlzeit eintragen</h2>
-      <fieldset class="auswahl" id="mahlzeit-futter"><legend>Futter</legend></fieldset>
-      <label>Menge in Gramm
-        <input name="gramm" inputmode="decimal" autocomplete="off" required>
-      </label>
+      <div class="feld"><span>Futtersorte</span><div id="mahlzeit-futter"></div></div>
       <label>Uhrzeit
         <input name="uhrzeit" type="time" required>
       </label>
+      <div class="feld"><span id="gramm-label">Menge in Gramm</span>
+        <div class="gramm">
+          <button type="button" data-aktion="gramm-minus" aria-label="5 Gramm weniger">−</button>
+          <input name="gramm" inputmode="decimal" autocomplete="off" placeholder="0" aria-labelledby="gramm-label" required>
+          <button type="button" data-aktion="gramm-plus" aria-label="5 Gramm mehr">＋</button>
+        </div>
+      </div>
       <p class="vorschau" id="mahlzeit-vorschau"></p>
       <p class="fehler" id="mahlzeit-fehler" hidden></p>
       <div class="knoepfe">
@@ -177,22 +203,11 @@
       <label>Name
         <input name="name" autocomplete="off" required>
       </label>
-      <fieldset class="auswahl">
-        <legend>Art</legend>
-        <label><input type="radio" name="typ" value="nass" required> Nassfutter</label>
-        <label><input type="radio" name="typ" value="trocken"> Trockenfutter</label>
-        <label><input type="radio" name="typ" value="leckerli"> Leckerli / Snack</label>
-      </fieldset>
+      <div class="feld"><span>Art</span><div id="futter-typ"></div></div>
       <label>kcal pro 100 g
         <input name="kcal" inputmode="decimal" autocomplete="off" required>
       </label>
-      <fieldset class="auswahl">
-        <legend>Woher stammt der Wert?</legend>
-        <label><input type="radio" name="quelle" value="packung" required> Genau von der Packung</label>
-        <label><input type="radio" name="quelle" value="hersteller"> Herstellerangabe (z. B. Website)</label>
-        <label><input type="radio" name="quelle" value="geschaetzt"> Aus den Bestandteilen berechnet</label>
-        <label><input type="radio" name="quelle" value="ungefaehr"> Ungefähr</label>
-      </fieldset>
+      <div class="feld"><span>Woher stammt der Wert?</span><div id="futter-quelle"></div></div>
       <p class="tipp" id="futter-notiz" hidden></p>
       <p class="fehler" id="futter-fehler" hidden></p>
       <div class="knoepfe">
@@ -246,6 +261,8 @@
       </div>
     </form>
   </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script type="module" src="app.js"></script>
 </body>

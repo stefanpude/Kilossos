@@ -14,6 +14,7 @@ import {
 } from "./rechnen.js";
 import { gewichtDiagramm, kcalDiagramm } from "./verlauf.js";
 import { normalesFutterKcal } from "./futterliste.js";
+import { fotoGueltig } from "./daten.js";
 
 const TAG_MS = 86400000;
 const ms = (iso) => {
@@ -164,6 +165,7 @@ function tierText(tier) {
 export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNachId, erstellt, demo }) {
   const teile = [];
   teile.push(`<header class="bericht-kopf">
+    ${fotoGueltig(tier.foto) ? `<img class="bericht-foto" src="${tier.foto}" alt="">` : ""}
     <h1>Kilossos – Übersicht für den Tierarzt</h1>
     <p><strong>${sicher(tier.name)}</strong>${tierText(tier) ? " · " + tierText(tier) : ""} · Zeitraum ${datum(b.von)} bis ${datum(b.bis)} · erstellt am ${datum(erstellt)}</p>
     ${demo ? `<p class="bericht-demo">DEMO – simulierte Daten, nicht von ${sicher(tier.name)}</p>` : ""}
