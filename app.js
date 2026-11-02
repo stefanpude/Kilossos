@@ -1254,6 +1254,35 @@ document.addEventListener("change", (ereignis) => {
   wendeAnzeigeAn(ereignis.target.value);
 });
 
+// ---------- Willkommensseite ----------
+
+// Einmal beim ersten Öffnen, nie in der Demo. „Alle Daten löschen“ entfernt den Schlüssel, dann erscheint sie wieder.
+const WILLKOMMEN_SCHLUESSEL = "kilossos-willkommen";
+
+function willkommenZeigen() {
+  $("willkommen").hidden = false;
+  document.body.classList.add("willkommen-offen");
+  $("willkommen-titel").focus();
+}
+
+function willkommenSchliessen() {
+  try {
+    localStorage.setItem(WILLKOMMEN_SCHLUESSEL, "gesehen");
+  } catch {
+    // Speicher gesperrt: dann erscheint die Seite beim nächsten Öffnen noch einmal.
+  }
+  $("willkommen").hidden = true;
+  document.body.classList.remove("willkommen-offen");
+}
+
+function willkommenGesehen() {
+  try {
+    return localStorage.getItem(WILLKOMMEN_SCHLUESSEL) !== null;
+  } catch {
+    return true;
+  }
+}
+
 // ---------- Klicks ----------
 
 document.addEventListener("click", (ereignis) => {
@@ -1346,9 +1375,16 @@ document.addEventListener("click", (ereignis) => {
       return window.print();
     case "export":
       return exportieren();
+    case "willkommen-weiter":
+      return willkommenSchliessen();
+    case "willkommen-geschichte":
+      willkommenSchliessen();
+      zeigeAnsicht("mehr");
+      return $("geschichte").scrollIntoView();
   }
 });
 
 zeichneAlles();
 zeichneHeute(true);
 zeigeSpeicherStatus();
+if (!demo && !willkommenGesehen()) willkommenZeigen();

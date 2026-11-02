@@ -21,6 +21,34 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Willkommensseite: erscheint einmal beim ersten Öffnen (app.js, Schlüssel kilossos-willkommen). -->
+  <section class="willkommen" id="willkommen" hidden aria-labelledby="willkommen-titel">
+    <div class="willkommen-inhalt">
+      <img class="willkommen-logo" src="icons/icon-192.png" alt="" width="104" height="104">
+      <h1 id="willkommen-titel" tabindex="-1">Willkommen bei Kilossos</h1>
+      <p class="willkommen-unter">Sicher abnehmen für übergewichtige Katzen</p>
+      <div class="karte">
+        <p>Kilossos ist aus eigener Not entstanden. Mein Kater Kito wog beim Tierarzt 9,32 kg und soll abnehmen.
+          Bei Katzen ist das heikler, als man denkt: Bekommt eine übergewichtige Katze zu wenig Futter,
+          kann sie lebensgefährlich krank werden (Fettleber).</p>
+        <p class="leise">Kilossos rechnet Futter in Gramm und Kalorien mit, behält das Gewicht im Blick und warnt,
+          wenn etwas aus dem sicheren Bereich läuft. Die Grenzen stammen aus den Leitlinien der Tierärzteverbände AAHA und WSAVA.</p>
+        <button type="button" class="knopf-zweit" data-aktion="willkommen-geschichte">Ganze Geschichte lesen</button>
+      </div>
+      <div class="karte">
+        <h2>Wichtig: Immer mit dem Tierarzt</h2>
+        <p class="leise">Kilossos ersetzt keinen Tierarzt und ist kein Medizinprodukt. Lass deine Katze untersuchen, bevor sie abnimmt.
+          Zielgewicht und Tagesmenge legt immer der Tierarzt fest. Kilossos vergleicht deine Fütterung dann mit diesen Werten,
+          schlägt aber nie selbst Mengen vor. Ohne Freigabe zeichnet die App nur auf und warnt.</p>
+        <p class="leise"><strong>Ist deine Katze krank</strong> (zum Beispiel Diabetes, Nieren-, Schilddrüsen- oder Lebererkrankung) oder frisst sie
+          plötzlich schlecht, besprich jede Änderung am Futter vorher mit deinem Tierarzt.
+          <strong>Frisst eine Katze einen Tag oder länger gar nicht, gehört sie sofort zum Tierarzt.</strong></p>
+      </div>
+      <p class="leise willkommen-daten">Keine Anmeldung, keine Cloud, keine Werbung. Alle Daten bleiben auf deinem Handy.</p>
+      <button type="button" class="knopf-haupt" data-aktion="willkommen-weiter">Los geht's</button>
+    </div>
+  </section>
+
   <header class="kopf">
     <h1>Kilossos</h1>
   </header>
@@ -189,12 +217,15 @@
       <div class="karte">
         <p class="leise">Kilossos begleitet die Abnahme von Kito und anderen Katzen: Es zeichnet auf, rechnet nach und warnt.
           <strong>Es ersetzt keinen Tierarzt</strong> und ist kein Medizinprodukt. Zielgewicht und Tagesmenge legt immer der Tierarzt fest.</p>
+        <p class="leise"><strong>Ist deine Katze krank</strong> (zum Beispiel Diabetes, Nieren-, Schilddrüsen- oder Lebererkrankung) oder frisst sie
+          plötzlich schlecht, besprich jede Änderung am Futter vorher mit deinem Tierarzt.
+          <strong>Frisst eine Katze einen Tag oder länger gar nicht, gehört sie sofort zum Tierarzt.</strong></p>
         <p class="leise"><strong>Datenschutz:</strong> keine Anmeldung, keine Cloud, keine Werbung, keine Auswertung.
           Alle Daten bleiben auf diesem Handy, bis du selbst eine Sicherung speicherst.</p>
         <p class="leise"><strong>Grenzwerte:</strong> nach den Leitlinien von AAHA (2014, 2021) und WSAVA, mit allen Quellen in
           <a href="https://github.com/stefanpude/Kilossos/blob/main/docs/sicherheitsgrenzen.md" target="_blank" rel="noopener">docs/sicherheitsgrenzen.md</a>.</p>
       </div>
-      <p class="fuss" id="version">Version 0.9.0</p>
+      <p class="fuss" id="version">Version 0.10.0</p>
     </section>
   </main>
 

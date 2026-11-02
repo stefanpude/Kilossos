@@ -70,6 +70,21 @@ button { -webkit-tap-highlight-color: transparent; }
   max-width: 560px;
   margin: 0 auto;
 }
+/* ---------- Willkommensseite (einmal beim ersten Öffnen) ---------- */
+.willkommen {
+  position: fixed; inset: 0; z-index: 8; overflow-y: auto; background: var(--hintergrund);
+  padding: calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
+}
+.willkommen[hidden] { display: none; }
+.willkommen-inhalt { max-width: 560px; margin: 0 auto; display: grid; gap: 14px; animation: hereinfahren 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.willkommen-logo { justify-self: center; border-radius: 50%; box-shadow: 0 0 0 3px var(--hintergrund), 0 0 0 5px var(--akzent); }
+.willkommen h1 { margin: 6px 0 0; text-align: center; font-size: 1.6rem; line-height: 1.2; }
+.willkommen h1:focus { outline: none; }
+.willkommen-unter { margin: -8px 0 4px; text-align: center; color: var(--akzent-stark); font-weight: 600; }
+.willkommen .karte p { margin: 0 0 10px; }
+.willkommen-daten { margin: 0; text-align: center; }
+body.willkommen-offen { overflow: hidden; }
+#geschichte { scroll-margin-top: 24px; }
 .kopf h1 { margin: 0; font-size: 0.8125rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--akzent-stark); }
 
 main {
@@ -525,7 +540,7 @@ dialog .gramm input { text-align: center; font-size: 1.75rem; font-weight: 700; 
   @page { size: A4; margin: 14mm; }
   body { background: #fff; padding: 0; }
   .kopf, .leiste, .demo-leiste, .toast, .bericht-werkzeuge, .ansicht:not([data-ansicht="bericht"]) { display: none !important; }
-  .ansicht.rein { animation: none; }
+  .ansicht.rein, .willkommen-inhalt { animation: none; }
   main { max-width: none; padding: 0; }
   .bericht { border: none; box-shadow: none; padding: 0; font-size: 10pt; }
   .bericht .diagramm { max-width: 150mm; }
