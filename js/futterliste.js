@@ -1,0 +1,321 @@
+// Geprüfte Futterliste von Kilossos. Sie gehört zur App und wird nie verändert; wer eine Sorte wählt,
+// bekommt eine eigene Kopie in "daten.futter" (mit "listeId"), die er frei anpassen kann.
+// Jeder Eintrag nennt Quelle, Abrufdatum und Status:
+//   kcalQuelle "hersteller": kcal-Wert vom Hersteller (Website, Datenblatt oder Händlerseite mit der Deklaration)
+//   kcalQuelle "geschaetzt": kein kcal-Wert veröffentlicht, aus den Analytischen Bestandteilen berechnet (NRC 2006)
+// Bei Abweichung gilt immer die Packung. Hintergrund und Rechenwege: docs/futter-recherche.md
+
+import { kcalAusBestandteilen } from "./rechnen.js";
+
+// Trockenfutter nennt die Feuchte oft nicht. Für die Nachrechnung wird dann dieser Wert angenommen.
+export const FEUCHTE_TROCKEN_ANNAHME = 8;
+
+const ABGERUFEN = "2026-11-02";
+
+export const FUTTERLISTE = [
+  // ---------- Diätfutter vom Tierarzt ----------
+  {
+    id: "royal-canin-satiety-trocken",
+    name: "Royal Canin Veterinary Satiety Weight Management (trocken)",
+    typ: "trocken",
+    diaet: true,
+    kcalPro100g: 304,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 34, fett: 9, asche: 8.6, faser: 14.6, feuchte: null },
+    quelle: "zooplus.de, gleiche Werte auf royalcanin.com",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_trockenfutter/royal_canin_veterinary_diet/obesity_management/301101",
+    abgerufen: ABGERUFEN,
+    hinweis: "Sehr viel Rohfaser für mehr Sättigung. Die 3,5-kg-Packung nennt 309 kcal/100 g.",
+  },
+  {
+    id: "royal-canin-satiety-nass",
+    name: "Royal Canin Veterinary Satiety Weight Management in Soße",
+    typ: "nass",
+    diaet: true,
+    kcalPro100g: 60.7,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 7.6, fett: 2.3, asche: 1.7, faser: 1.1, feuchte: 84 },
+    quelle: "zooplus.de",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_dose/royal_canin_veterinary_diet_feline_nassfutter/obesity_management/849648",
+    abgerufen: ABGERUFEN,
+    hinweis: "85-g-Beutel = 51,6 kcal.",
+  },
+  {
+    id: "hills-metabolic-trocken",
+    name: "Hill's Prescription Diet Metabolic mit Huhn (trocken)",
+    typ: "trocken",
+    diaet: true,
+    kcalPro100g: 341,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 37.7, fett: 11.7, asche: 5.5, faser: 9.3, feuchte: null },
+    quelle: "zooplus.de",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_trockenfutter/hills_prescription_diet/450357",
+    abgerufen: ABGERUFEN,
+    hinweis: "Einige Packungsgrößen nennen 345 kcal/100 g.",
+  },
+  {
+    id: "hills-metabolic-nass",
+    name: "Hill's Prescription Diet Metabolic mit Huhn (nass)",
+    typ: "nass",
+    diaet: true,
+    kcalPro100g: 67.9,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 7.3, fett: 2.6, asche: 1.4, faser: 1.9, feuchte: 81 },
+    quelle: "zooplus.de",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_dose/hills_prescription_diet/weight_reduction/628018",
+    abgerufen: ABGERUFEN,
+    hinweis: "85-g-Beutel = 57,7 kcal.",
+  },
+  {
+    id: "purina-om-trocken",
+    name: "Purina Pro Plan Veterinary Diets OM Obesity Management (trocken)",
+    typ: "trocken",
+    diaet: true,
+    kcalPro100g: 340,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 48, fett: 8, asche: 8, faser: 8, feuchte: null },
+    quelle: "zooplus.de",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_trockenfutter/purina_veterinary_diets_cat/ubergewicht/576058",
+    abgerufen: ABGERUFEN,
+    hinweis: "Sehr eiweißreich. Die Rezeptur in Nordamerika ist eine andere (323 kcal/100 g).",
+  },
+  {
+    id: "purina-om-nass",
+    name: "Purina Pro Plan Veterinary Diets OM Obesity Management Huhn (nass)",
+    typ: "nass",
+    diaet: true,
+    kcalPro100g: 75,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 10.6, fett: 2.5, asche: 2.7, faser: 1.4, feuchte: 80 },
+    quelle: "zooplus.de",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_dose/purina_veterinary_diets_cat_wet/ubergewicht/738991",
+    abgerufen: ABGERUFEN,
+    hinweis: "85-g-Beutel = 63,8 kcal.",
+  },
+
+  // ---------- Light-Futter aus dem Handel ----------
+  {
+    id: "royal-canin-light-weight-care-trocken",
+    name: "Royal Canin Light Weight Care (trocken)",
+    typ: "trocken",
+    diaet: false,
+    kcalPro100g: 338.2,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 36, fett: 10, asche: 7.5, faser: 10.3, feuchte: null },
+    quelle: "zooplus.ie (deutsche Seiten nennen keine kcal, gleiche Analysewerte)",
+    url: "https://www.zooplus.ie/shop/cats/dry_cat_food/royal_canin/care_nutrition/126948",
+    abgerufen: ABGERUFEN,
+    hinweis: "Alleinfutter mit L-Carnitin, kein Diätfutter.",
+  },
+  {
+    id: "royal-canin-light-weight-care-sosse",
+    name: "Royal Canin Light Weight Care in Soße",
+    typ: "nass",
+    diaet: false,
+    kcalPro100g: 69,
+    kcalQuelle: "geschaetzt",
+    analyse: { protein: 10, fett: 2.1, asche: 1.7, faser: 1.2, feuchte: 82 },
+    quelle: "zooplus.de (ohne kcal-Angabe)",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_dose/royal_canin_katzenfutter/royal_canin_adult/879819",
+    abgerufen: ABGERUFEN,
+    hinweis: "",
+  },
+  {
+    id: "hills-perfect-weight-trocken",
+    name: "Hill's Science Plan Perfect Weight Adult mit Huhn (trocken)",
+    typ: "trocken",
+    diaet: false,
+    kcalPro100g: 342.9,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 37.1, fett: 13, asche: 6.1, faser: 8.8, feuchte: 6 },
+    quelle: "hillspet.co.uk (deutsche Seiten nennen keine kcal)",
+    url: "https://www.hillspet.co.uk/cat-food/sp-feline-science-plan-adult-perfect-weight-with-chicken-dry",
+    abgerufen: ABGERUFEN,
+    hinweis: "Die deutsche Deklaration weicht leicht ab: Protein 37,6 %, Fett 12,7 %, Faser 8,9 %.",
+  },
+  {
+    id: "purina-one-light-trocken",
+    name: "Purina ONE Light (trocken)",
+    typ: "trocken",
+    diaet: false,
+    kcalPro100g: 327.5,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 37, fett: 9.5, asche: 7.5, faser: 6, feuchte: null },
+    quelle: "purina.co.uk, Analysewerte gleich wie auf zooplus.de",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_trockenfutter/purina_one/purinaone_spezialfutter/194144",
+    abgerufen: "2026-11-01",
+    hinweis: "Die deutsche Packung nennt keine kcal.",
+  },
+
+  // ---------- Gängige Sorten aus Supermarkt und Drogerie ----------
+  {
+    id: "sheba-fresh-fine-huhn-gefluegel-truthahn",
+    name: "Sheba Fresh & Fine in Sauce – Huhn, Geflügel & Truthahn",
+    typ: "nass",
+    diaet: false,
+    kcalPro100g: 71,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 7.7, fett: 3.9, asche: 1.8, faser: 0.2, feuchte: 84.7 },
+    quelle: "zooplus.de",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_dose/sheba/sheba_freshfine/2088614",
+    abgerufen: "2026-11-01",
+    hinweis: "Megapack, EAN 4770608260286. 50-g-Beutel = 35,5 kcal.",
+  },
+  {
+    id: "sheba-fresh-fine-huhn-truthahn-ente",
+    name: "Sheba Fresh & Fine in Sauce – Huhn, Truthahn & Ente",
+    typ: "nass",
+    diaet: false,
+    kcalPro100g: 77,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 7.9, fett: 4.4, asche: 1.4, faser: 0.3, feuchte: 84 },
+    quelle: "zooplus.de und dm.de",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_dose/sheba/sheba_freshfine/2088614",
+    abgerufen: "2026-11-01",
+    hinweis: "Multipack, auch „Huhn, Rind & Ente“. 50-g-Beutel = 38,5 kcal.",
+  },
+  {
+    id: "whiskas-1plus-nass",
+    name: "Whiskas 1+ Frischebeutel (Geflügel- oder klassische Auswahl)",
+    typ: "nass",
+    diaet: false,
+    kcalPro100g: 71,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 7.5, fett: 4, asche: 1.6, faser: 0.35, feuchte: 84.8 },
+    quelle: "zooplus.de",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_dose/whiskas_katzenfutter/adult/443954",
+    abgerufen: ABGERUFEN,
+    hinweis: "Gilt für Sauce und Gelee. 85-g-Beutel = 60,4 kcal.",
+  },
+  {
+    id: "felix-so-gut-gelee",
+    name: "Felix So gut wie es aussieht in Gelee",
+    typ: "nass",
+    diaet: false,
+    kcalPro100g: 75,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 11.5, fett: 2.5, asche: 2.5, faser: 0.05, feuchte: 82 },
+    quelle: "zooplus.de",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_dose/felix/felix_so_gut/397041",
+    abgerufen: ABGERUFEN,
+    hinweis:
+      "Der kcal-Wert steht nur bei „Huhn, Lachs, Kabeljau, Ente“; die anderen Sorten haben dieselben Analysewerte. 85-g-Beutel = 63,8 kcal.",
+  },
+  {
+    id: "gourmet-perle-erlesene-streifen",
+    name: "Gourmet Perle Erlesene Streifen",
+    typ: "nass",
+    diaet: false,
+    kcalPro100g: 82,
+    kcalQuelle: "geschaetzt",
+    analyse: { protein: 12.5, fett: 2.5, asche: 2.5, faser: 0.05, feuchte: 80 },
+    quelle: "zooplus.de (ohne kcal-Angabe)",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_dose/gourmet_perle/gourmet_perle/1281616",
+    abgerufen: ABGERUFEN,
+    hinweis: "Gilt für die Fleisch- und Fischsorten; „mit Gemüse/Spinat“ haben 12 % Protein.",
+  },
+  {
+    id: "kitekat-frischebeutel-sosse",
+    name: "Kitekat Frischebeutel in Soße",
+    typ: "nass",
+    diaet: false,
+    kcalPro100g: 73,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 6.4, fett: 4.1, asche: 1.5, faser: 0.15, feuchte: 84.5 },
+    quelle: "zooplus.de, gleicher Wert bei dm.de und rossmann.de (62 kcal je Beutel)",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_dose/kitekat/566939",
+    abgerufen: ABGERUFEN,
+    hinweis: "Bunte Vielfalt und Landpicknick. 85-g-Beutel = 62 kcal.",
+  },
+  {
+    id: "animonda-carny-adult-rind",
+    name: "animonda Carny Adult Rind (Dose)",
+    typ: "nass",
+    diaet: false,
+    kcalPro100g: 104,
+    kcalQuelle: "geschaetzt",
+    analyse: { protein: 11.5, fett: 6.5, asche: 1.8, faser: 0.5, feuchte: 79 },
+    quelle: "zooplus.de (ohne kcal-Angabe)",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_dose/animonda_rafine/animonda_carny/554202",
+    abgerufen: ABGERUFEN,
+    hinweis: "Fettreicher als Beutelfutter. Andere Carny-Sorten haben 5,5–6,5 % Fett.",
+  },
+  {
+    id: "whiskas-1plus-huhn-trocken",
+    name: "Whiskas 1+ mit Huhn (trocken)",
+    typ: "trocken",
+    diaet: false,
+    kcalPro100g: 363,
+    kcalQuelle: "geschaetzt",
+    analyse: { protein: 30, fett: 11.5, asche: 9.1, faser: 1.9, feuchte: null },
+    quelle: "zooplus.de (ohne kcal-Angabe)",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_trockenfutter/whiskas/whiskas_trockenfutter_adult/173449",
+    abgerufen: ABGERUFEN,
+    hinweis: "Einige Händler nennen 376–378 kcal/100 g, ohne Beleg vom Hersteller.",
+  },
+  {
+    id: "purina-one-adult-huhn-trocken",
+    name: "Purina ONE Adult Huhn & Vollkorngetreide (trocken)",
+    typ: "trocken",
+    diaet: false,
+    kcalPro100g: 380,
+    kcalQuelle: "geschaetzt",
+    analyse: { protein: 34, fett: 14, asche: 7.5, faser: 2.5, feuchte: null },
+    quelle: "zooplus.de (ohne kcal-Angabe)",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_trockenfutter/purina_one/purina_one_adult/194025",
+    abgerufen: ABGERUFEN,
+    hinweis: "Stiftung Warentest nennt 395 kcal/100 g.",
+  },
+
+  // ---------- Leckerlis ----------
+  {
+    id: "dreamies-huhn",
+    name: "Dreamies mit Huhn",
+    typ: "leckerli",
+    diaet: false,
+    kcalPro100g: 416,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 22, fett: 22, asche: 8, faser: 2, feuchte: null },
+    quelle: "zooplus.de",
+    url: "https://www.zooplus.de/shop/katzen/katzensnacks/dreamies_snack/die_klassiker/220858",
+    abgerufen: ABGERUFEN,
+    hinweis: "Etwa 2 kcal pro Stück. Rind, Thunfisch und Katzenminze: 408 kcal/100 g.",
+  },
+];
+
+// kcal pro 100 g aus den Analytischen Bestandteilen, bei Trockenfutter ohne Feuchte mit der Annahme oben.
+export function nachrechnung(eintrag) {
+  return kcalAusBestandteilen({ ...eintrag.analyse, feuchte: eintrag.analyse.feuchte ?? FEUCHTE_TROCKEN_ANNAHME });
+}
+
+// Findet Einträge, deren Name alle eingegebenen Wörter enthält (Groß-/Kleinschreibung egal).
+export function sucheFutter(text, liste = FUTTERLISTE) {
+  const woerter = text.toLowerCase().split(/\s+/).filter(Boolean);
+  return liste.filter((eintrag) => woerter.every((wort) => eintrag.name.toLowerCase().includes(wort)));
+}
+
+const prozent = (wert) => `${String(wert).replace(".", ",")} %`;
+
+// Eigene Kopie eines Listeneintrags für daten.futter. Quelle und Stand stehen in der Notiz.
+export function ausListe(eintrag, id) {
+  const { protein, fett, asche, faser, feuchte } = eintrag.analyse;
+  const teile = [
+    eintrag.diaet ? "Diätfutter – nur nach Rücksprache mit dem Tierarzt." : "",
+    `Laut ${eintrag.quelle}: Protein ${prozent(protein)}, Fett ${prozent(fett)}, Asche ${prozent(asche)}, ` +
+      `Faser ${prozent(faser)}, Feuchte ${feuchte === null ? "nicht angegeben" : prozent(feuchte)}.`,
+    eintrag.kcalQuelle === "geschaetzt"
+      ? "Kein kcal-Wert veröffentlicht, aus den Bestandteilen berechnet (NRC 2006)."
+      : "",
+    eintrag.hinweis,
+    `Aus der Kilossos-Futterliste, Stand ${eintrag.abgerufen.split("-").reverse().join(".")}. Bei Abweichung gilt die Packung.`,
+  ];
+  return {
+    id,
+    listeId: eintrag.id,
+    name: eintrag.name,
+    typ: eintrag.typ,
+    kcalPro100g: eintrag.kcalPro100g,
+    kcalQuelle: eintrag.kcalQuelle,
+    notiz: teile.filter(Boolean).join(" "),
+  };
+}

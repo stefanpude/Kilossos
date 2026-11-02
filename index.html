@@ -82,7 +82,8 @@
     <section class="ansicht" data-ansicht="futter" hidden>
       <p class="tipp">Tippe auf eine Sorte, um sie zu ändern – zum Beispiel, um den genauen kcal-Wert von der Packung einzutragen.</p>
       <ul class="liste" id="futter-liste"></ul>
-      <button class="knopf-haupt" data-aktion="futter-neu">+ Eigene Sorte anlegen</button>
+      <button class="knopf-haupt" data-aktion="liste-oeffnen">Aus der Futterliste wählen</button>
+      <button class="knopf-zweit" data-aktion="futter-neu">+ Eigene Sorte anlegen</button>
     </section>
 
     <!-- Mehr -->
@@ -116,7 +117,7 @@
         </label>
         <p class="hinweis" id="speicher-status"></p>
       </div>
-      <p class="fuss" id="version">Version 0.5.1</p>
+      <p class="fuss" id="version">Version 0.6.0</p>
     </section>
   </main>
 
@@ -198,6 +199,22 @@
         <button value="loeschen" formnovalidate class="knopf-gefahr" id="futter-loeschen" hidden>Löschen</button>
         <button value="abbrechen" formnovalidate class="knopf-zweit">Abbrechen</button>
         <button value="speichern" class="knopf-haupt">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Auswahl aus der Futterliste -->
+  <dialog id="dialog-liste">
+    <form method="dialog" id="form-liste">
+      <h2>Aus der Futterliste wählen</h2>
+      <p class="tipp">Geprüfte Sorten mit Quelle. Tippe auf eine Sorte, um sie in deine Liste zu übernehmen.
+        Bei Abweichung gilt immer die Packung.</p>
+      <label>Suchen
+        <input type="search" id="liste-suche" autocomplete="off" placeholder="z. B. Hill's oder Sheba">
+      </label>
+      <div class="liste-gruppen" id="liste-treffer"></div>
+      <div class="knoepfe">
+        <button value="abbrechen" formnovalidate class="knopf-zweit">Schließen</button>
       </div>
     </form>
   </dialog>

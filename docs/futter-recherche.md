@@ -53,3 +53,53 @@ abgerufen 01.11.2026.
   Punkt aus `sicherheitsgrenzen.md` (B4): Bei stark gekürzten Mengen ist die Versorgung mit Mikronährstoffen nicht mehr
   durch die Deklaration abgesichert. → Frage 5 an den Tierarzt (Diätfutter).
 - Eiweiß je 100 kcal: Sheba A ≈ 10,8 g, Sheba B ≈ 10,3 g, Purina One Light ≈ 11,3 g.
+
+---
+
+# Kilossos-Futterliste, erste Runde (Stand 02.11.2026)
+
+Die Liste steht in `js/futterliste.js`, die Tests in `tests/futterliste.test.js`. In der App: „Futter“ →
+„Aus der Futterliste wählen“. Eine gewählte Sorte wird mit Quelle und Datum in die eigene Liste kopiert und kann dort
+jederzeit geändert werden. **Bei Abweichung gilt die Packung.**
+
+**Prüfung:** Jeder kcal-Wert wurde mit der NRC-2006-Formel (`kcalAusBestandteilen`) aus den Analytischen Bestandteilen
+nachgerechnet; bei Trockenfutter ohne Feuchteangabe mit 8 %. Der Test verlangt, dass Herstellerwerte höchstens 10 % von
+der Nachrechnung abweichen. Wo kein kcal-Wert veröffentlicht ist, steht die Nachrechnung mit dem Status „geschätzt“.
+
+| Sorte | Art | kcal/100 g | Status | NRC-Nachrechnung | Quelle |
+|---|---|---|---|---|---|
+| **Diätfutter vom Tierarzt** | | | | | |
+| Royal Canin Vet. Satiety Weight Management | trocken | 304 | Hersteller | 306 | zooplus.de, royalcanin.com |
+| Royal Canin Vet. Satiety Weight Management in Soße | nass | 60,7 | Hersteller | 62 | zooplus.de |
+| Hill's PD Metabolic mit Huhn | trocken | 341 | Hersteller | 348 | zooplus.de |
+| Hill's PD Metabolic mit Huhn | nass | 67,9 | Hersteller | 72 | zooplus.de |
+| Purina PPVD OM Obesity Management | trocken | 340 | Hersteller | 335 | zooplus.de |
+| Purina PPVD OM Obesity Management Huhn | nass | 75 | Hersteller | 74,5 | zooplus.de |
+| **Light-Futter aus dem Handel** | | | | | |
+| Royal Canin Light Weight Care | trocken | 338,2 | Hersteller | 329 | zooplus.ie (DE ohne kcal) |
+| Royal Canin Light Weight Care in Soße | nass | 69 | geschätzt | 69 | zooplus.de |
+| Hill's Science Plan Perfect Weight Huhn | trocken | 342,9 | Hersteller | 361 | hillspet.co.uk (DE ohne kcal) |
+| Purina ONE Light | trocken | 327,5 | Hersteller | 346 | purina.co.uk (siehe oben) |
+| **Supermarkt und Drogerie** | | | | | |
+| Sheba Fresh & Fine – Huhn, Geflügel & Truthahn | nass | 71 | Hersteller | 70,7 | siehe oben |
+| Sheba Fresh & Fine – Huhn, Truthahn & Ente | nass | 77 | Hersteller | 76,6 | siehe oben |
+| Whiskas 1+ Frischebeutel | nass | 71 | Hersteller | 70,6 | zooplus.de |
+| Felix So gut wie es aussieht in Gelee | nass | 75 | Hersteller | 74,6 | zooplus.de (kcal nur bei einer Sorte) |
+| Gourmet Perle Erlesene Streifen | nass | 82 | geschätzt | 82 | zooplus.de |
+| Kitekat Frischebeutel in Soße | nass | 73 | Hersteller | 72,9 | zooplus.de, dm.de, rossmann.de |
+| animonda Carny Adult Rind | nass | 104 | geschätzt | 104 | zooplus.de |
+| Whiskas 1+ mit Huhn | trocken | 363 | geschätzt | 363 | zooplus.de |
+| Purina ONE Adult Huhn & Vollkorn | trocken | 380 | geschätzt | 380 | zooplus.de |
+| **Leckerli** | | | | | |
+| Dreamies mit Huhn | Leckerli | 416 | Hersteller | 410 | zooplus.de |
+
+**Was auffällt (für Kito):**
+- Diätfutter ist „verdünnter“: Die nassen Diätsorten haben 61–75 kcal/100 g und deutlich mehr Eiweiß je kcal
+  (Purina OM nass ≈ 14 g Protein je 100 kcal, Sheba A ≈ 10,8 g). Das passt zu Frage 5 an den Tierarzt
+  (Eiweiß ≈ 3,8 statt ≈ 5,2 g je kg Zielgewicht mit dem jetzigen Futter).
+- animonda Carny ist fettreich: ≈ 104 kcal/100 g, fast 50 % mehr als Beutelfutter.
+- Dreamies: ≈ 2 kcal pro Stück; 10 Stück ≈ 20 kcal, das sind schon 7 % von 290 kcal (Untergrenze ohne Freigabe).
+
+**Offen für Runde 2 (auf 30–50 Sorten):** MAC's, Catz finefood, Hill's PD r/d und w/d, Royal Canin Light Weight Care in
+Gelee, weitere Leckerlis (Whiskas Temptations, Felix Crispies), Eigenmarken von Lidl/Aldi (Coshida, Cachet),
+Stichproben mit Packungsfotos von Stefan.

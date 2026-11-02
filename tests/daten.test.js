@@ -76,6 +76,16 @@ test("selbst geänderte Purina-Werte bleiben stehen", () => {
   assert.deepEqual([neu.kcalPro100g, neu.kcalQuelle, neu.notiz], [352, "packung", "eigene"]);
 });
 
+test("Startsorten aus älteren Versionen bekommen ihre Kennung in der Futterliste, eigene Sorten nicht", () => {
+  const speicher = testSpeicher();
+  const daten = laden(speicher);
+  for (const futter of daten.futter) delete futter.listeId;
+  daten.futter.push({ id: "eigen", name: "Selbst gekocht", typ: "nass", kcalPro100g: 90, kcalQuelle: "ungefaehr", notiz: "" });
+  speichern(daten, speicher);
+  const neu = laden(speicher).futter;
+  assert.deepEqual(neu.map((f) => f.listeId), ["sheba-fresh-fine-huhn-gefluegel-truthahn", "purina-one-light-trocken", undefined]);
+});
+
 test("fremde oder kaputte Daten werden nicht übernommen", () => {
   assert.equal(istGueltig(null), false);
   assert.equal(istGueltig({ version: 99, tiere: [{}], futter: [], mahlzeiten: [], gewichte: [], freigaben: [] }), false);

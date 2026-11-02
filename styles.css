@@ -163,6 +163,10 @@ main {
 .marke-packung, .marke-hersteller { color: var(--gut); }
 .marke-ungefaehr, .marke-geschaetzt { color: var(--warnung); }
 
+/* Auswahl aus der Futterliste */
+.liste-gruppen { display: grid; gap: 8px; }
+.liste-gruppen h3 { margin: 8px 0 0; font-size: 1rem; }
+
 /* Knöpfe */
 .knopf-haupt, .knopf-zweit, .knopf-gefahr {
   min-height: 48px;

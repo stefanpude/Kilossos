@@ -29,6 +29,7 @@ import {
 } from "./js/rechnen.js";
 import { zeichneVerlauf } from "./js/verlauf.js";
 import { berichtDaten, berichtHtml } from "./js/bericht.js";
+import { FUTTERLISTE, sucheFutter, ausListe } from "./js/futterliste.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
 if ("serviceWorker" in navigator) {
@@ -457,6 +458,48 @@ $("form-futter").addEventListener("submit", (ereignis) => {
   sichern();
 });
 
+// ---------- Futterliste ----------
+
+function zeichneListe() {
+  const vorhanden = new Set(daten.futter.map((f) => f.listeId).filter(Boolean));
+  const treffer = sucheFutter($("liste-suche").value);
+  const gruppe = (titel, eintraege) =>
+    eintraege.length === 0
+      ? ""
+      : `<h3>${titel}</h3><ul class="liste">${eintraege
+          .map((e) => {
+            const drin = vorhanden.has(e.id);
+            return `<li ${drin ? "" : `class="tippbar" data-aktion="liste-uebernehmen" data-id="${e.id}"`}>
+              <div><strong>${sicher(e.name)}</strong>
+                <span class="leise">${TYP_NAMEN[e.typ]} · ${zahl(e.kcalPro100g, e.kcalPro100g % 1 ? 1 : 0)} kcal/100 g</span></div>
+              ${drin
+                ? '<span class="marke">in deiner Liste</span>'
+                : `<span class="marke marke-${e.kcalQuelle}">${QUELLE_NAMEN[e.kcalQuelle]}</span>`}
+            </li>`;
+          })
+          .join("")}</ul>`;
+  $("liste-treffer").innerHTML =
+    gruppe("Diätfutter vom Tierarzt – nur nach Rücksprache", treffer.filter((e) => e.diaet)) +
+      gruppe("Weitere Sorten", treffer.filter((e) => !e.diaet)) ||
+    '<p class="leise">Keine Sorte gefunden. Du kannst sie unter „Eigene Sorte anlegen“ selbst eintragen.</p>';
+}
+
+function oeffneListe() {
+  $("liste-suche").value = "";
+  zeichneListe();
+  $("dialog-liste").showModal();
+}
+
+$("liste-suche").addEventListener("input", zeichneListe);
+
+function uebernehmeAusListe(listeId) {
+  const eintrag = FUTTERLISTE.find((e) => e.id === listeId);
+  if (!eintrag) return;
+  daten.futter.push(ausListe(eintrag, neueId()));
+  sichern();
+  $("dialog-liste").close();
+}
+
 // ---------- Sicherung ----------
 
 function exportieren() {
@@ -559,6 +602,10 @@ document.addEventListener("click", (ereignis) => {
       return oeffneFutter(null);
     case "futter-bearbeiten":
       return oeffneFutter(daten.futter.find((f) => f.id === id));
+    case "liste-oeffnen":
+      return oeffneListe();
+    case "liste-uebernehmen":
+      return uebernehmeAusListe(id);
     case "freigabe-neu":
       return oeffneFreigabe();
     case "bericht-oeffnen":

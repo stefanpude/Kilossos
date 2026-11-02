@@ -1,7 +1,8 @@
 // Alle Daten von Kilossos liegen als ein JSON-Dokument im Speicher des Geräts (kein Server, keine Cloud).
 // Aufbau (Version 1):
 //   tiere:      { id, name, art, geschlecht, kastriert }
-//   futter:     { id, name, typ: "nass" | "trocken" | "leckerli", kcalPro100g, kcalQuelle, notiz }
+//   futter:     { id, name, typ: "nass" | "trocken" | "leckerli", kcalPro100g, kcalQuelle, notiz, listeId? }
+//               listeId: Kennung in der Kilossos-Futterliste (js/futterliste.js), wenn die Sorte von dort stammt
 //               kcalQuelle: "packung" (genau abgelesen) | "hersteller" (Herstellerangabe, z. B. Website)
 //                         | "geschaetzt" (aus Bestandteilen berechnet) | "ungefaehr"
 //   mahlzeiten: { id, tierId, futterId, gramm, zeitpunkt (ISO-Zeit) }
@@ -33,6 +34,7 @@ function startDaten() {
     futter: [
       {
         id: neueId(),
+        listeId: "sheba-fresh-fine-huhn-gefluegel-truthahn",
         name: "Sheba Fresh n Fine in Sauce mit Geflügel",
         typ: "nass",
         kcalPro100g: 71,
@@ -42,6 +44,7 @@ function startDaten() {
       },
       {
         id: neueId(),
+        listeId: "purina-one-light-trocken",
         name: "Purina One Light",
         typ: "trocken",
         kcalPro100g: 327.5,
@@ -101,6 +104,12 @@ function startwerteAktualisieren(daten) {
     if (alt) {
       const neu = neueStartwerte.find((f) => f.name === futter.name);
       Object.assign(futter, { kcalPro100g: neu.kcalPro100g, kcalQuelle: neu.kcalQuelle, notiz: neu.notiz });
+      geaendert = true;
+    }
+    // Seit 0.6.0 wissen die beiden Startsorten, zu welchem Eintrag der Futterliste sie gehören.
+    const start = neueStartwerte.find((f) => f.name === futter.name);
+    if (start && !futter.listeId) {
+      futter.listeId = start.listeId;
       geaendert = true;
     }
   }
