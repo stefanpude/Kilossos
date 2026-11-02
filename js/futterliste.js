@@ -5,7 +5,7 @@
 //   kcalQuelle "geschaetzt": kein kcal-Wert veröffentlicht, aus den Analytischen Bestandteilen berechnet (NRC 2006)
 // Bei Abweichung gilt immer die Packung. Hintergrund und Rechenwege: docs/futter-recherche.md
 
-import { kcalAusBestandteilen } from "./rechnen.js";
+import { kcalAusBestandteilen, kcalFuer } from "./rechnen.js";
 
 // Trockenfutter nennt die Feuchte oft nicht. Für die Nachrechnung wird dann dieser Wert angenommen.
 export const FEUCHTE_TROCKEN_ANNAHME = 8;
@@ -292,6 +292,18 @@ export function nachrechnung(eintrag) {
 export function sucheFutter(text, liste = FUTTERLISTE) {
   const woerter = text.toLowerCase().split(/\s+/).filter(Boolean);
   return liste.filter((eintrag) => woerter.every((wort) => eintrag.name.toLowerCase().includes(wort)));
+}
+
+// kcal aus Futter, das kein Diätfutter der Liste ist (Leckerlis zählen getrennt). Eigene Sorten gelten als normales
+// Futter, weil die App bei ihnen nicht weiß, ob es ein Diätfutter ist.
+export function normalesFutterKcal(mahlzeiten, futterNachId, liste = FUTTERLISTE) {
+  const diaet = new Set(liste.filter((e) => e.diaet).map((e) => e.id));
+  let kcal = 0;
+  for (const mahlzeit of mahlzeiten) {
+    const futter = futterNachId.get(mahlzeit.futterId);
+    if (futter && futter.typ !== "leckerli" && !diaet.has(futter.listeId)) kcal += kcalFuer(mahlzeit.gramm, futter.kcalPro100g);
+  }
+  return kcal;
 }
 
 const prozent = (wert) => `${String(wert).replace(".", ",")} %`;

@@ -64,15 +64,28 @@ test("berichtDaten: Gewichte im Zeitraum mit Änderung zur Messung davor", () =>
   assert.equal(b.abnahme.prozent.toFixed(2), "0.43");
 });
 
+// Dieselben Mengen, aber als Diätfutter aus der Futterliste: dann gibt es keinen Diätfutter-Hinweis.
+const diaetFutter = futter.map((f) =>
+  f.typ === "leckerli" ? f : { ...f, listeId: f.typ === "nass" ? "purina-om-nass" : "purina-om-trocken" }
+);
+
 test("berichtDaten: ohne Auffälligkeiten ist die Liste leer", () => {
-  assert.deepEqual(berichtDaten(eingabe).auffaelligkeiten, []);
+  assert.deepEqual(berichtDaten({ ...eingabe, futter: diaetFutter }).auffaelligkeiten, []);
 });
 
 test("berichtDaten: Auffälligkeiten werden je Art gezählt", () => {
-  const b = berichtDaten({ ...eingabe, freigaben: [{ ...freigabe, kcalProTag: 300 }] });
+  const b = berichtDaten({ ...eingabe, futter: diaetFutter, freigaben: [{ ...freigabe, kcalProTag: 300 }] });
   assert.deepEqual(
     b.auffaelligkeiten.map((a) => [a.id, a.anzahl, a.erster, a.letzter]),
     [["unter-freigabe", 2, "2026-11-02", "2026-11-03"]]
+  );
+});
+
+test("berichtDaten: Handelsfutter bei einer Freigabe unter RER(Ziel) wird je Tag gezählt", () => {
+  const b = berichtDaten(eingabe);
+  assert.deepEqual(
+    b.auffaelligkeiten.map((a) => [a.id, a.anzahl, a.erster, a.letzter]),
+    [["diaetfutter", 3, "2026-11-02", "2026-11-04"]]
   );
 });
 

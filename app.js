@@ -29,7 +29,7 @@ import {
 } from "./js/rechnen.js";
 import { zeichneVerlauf } from "./js/verlauf.js";
 import { berichtDaten, berichtHtml } from "./js/bericht.js";
-import { FUTTERLISTE, sucheFutter, ausListe } from "./js/futterliste.js";
+import { FUTTERLISTE, sucheFutter, ausListe, normalesFutterKcal } from "./js/futterliste.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
 if ("serviceWorker" in navigator) {
@@ -120,6 +120,7 @@ function zeichneHeute() {
     freigabe,
     gewichte,
     fruehereMahlzeiten: daten.mahlzeiten.some((m) => m.tierId === tier.id && tagSchluessel(new Date(m.zeitpunkt)) < tag),
+    normalesFutterKcal: normalesFutterKcal(mahlzeiten, futter),
   });
   $("warnungen-liste").innerHTML = liste
     .map((w) => `<li class="warnung warnung-${w.art}">${sicher(w.text)}<span class="quelle">Quelle: ${sicher(w.quelle)}</span></li>`)

@@ -128,6 +128,16 @@ test("warnungen: Leckerlis über 10 %", () => {
   assert.deepEqual(arten(warnungen({ ...ohneHeute, tag: "2026-11-10", kcal: 300, leckerli: 40 })), ["achtung:leckerli"]);
 });
 
+test("warnungen: Freigabe unter RER(Ziel) mit normalem Futter → Hinweis auf Diätfutter (AAHA 2021)", () => {
+  // Kito: RER(7,2 kg) ≈ 308 kcal, freigegeben 245 kcal
+  assert.deepEqual(arten(warnungen({ ...basis, normalesFutterKcal: 245 })), ["hinweis:diaetfutter"]);
+  assert.match(warnungen({ ...basis, normalesFutterKcal: 245 })[0].text, /Ruhebedarf beim Zielgewicht \(308 kcal\)/);
+  assert.deepEqual(warnungen({ ...basis, normalesFutterKcal: 0 }), []); // nur Diätfutter gefüttert
+  const ueberRer = { ...freigabe, kcalProTag: 310 };
+  assert.deepEqual(warnungen({ ...basis, freigabe: ueberRer, kcal: 310, normalesFutterKcal: 310 }), []);
+  assert.deepEqual(warnungen({ ...basis, freigabe: null, kcal: 300, normalesFutterKcal: 300 }), []); // ohne Freigabe
+});
+
 test("warnungen: Abnahme zu schnell (über 2 % pro Woche, 2 Wochen)", () => {
   const schnell = [
     { kg: 9.32, datum: "2026-11-01" },

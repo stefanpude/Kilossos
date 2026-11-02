@@ -1,6 +1,22 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { FUTTERLISTE, nachrechnung, sucheFutter, ausListe } from "../js/futterliste.js";
+import { FUTTERLISTE, nachrechnung, sucheFutter, ausListe, normalesFutterKcal } from "../js/futterliste.js";
+
+test("normalesFutterKcal zählt Handelsfutter und eigene Sorten, aber kein Diätfutter und keine Leckerlis", () => {
+  const futter = new Map([
+    ["sheba", { typ: "nass", kcalPro100g: 71, listeId: "sheba-fresh-fine-huhn-gefluegel-truthahn" }],
+    ["om", { typ: "nass", kcalPro100g: 75, listeId: "purina-om-nass" }],
+    ["eigen", { typ: "trocken", kcalPro100g: 350 }],
+    ["snack", { typ: "leckerli", kcalPro100g: 416, listeId: "dreamies-huhn" }],
+  ]);
+  const mahlzeiten = [
+    { futterId: "sheba", gramm: 100 },
+    { futterId: "om", gramm: 100 },
+    { futterId: "eigen", gramm: 10 },
+    { futterId: "snack", gramm: 5 },
+  ];
+  assert.equal(normalesFutterKcal(mahlzeiten, futter), 71 + 35);
+});
 
 test("jeder Eintrag ist vollständig und hat eine Quelle mit Datum", () => {
   for (const e of FUTTERLISTE) {

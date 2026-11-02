@@ -13,6 +13,7 @@ import {
   warnungen,
 } from "./rechnen.js";
 import { gewichtDiagramm, kcalDiagramm } from "./verlauf.js";
+import { normalesFutterKcal } from "./futterliste.js";
 
 const TAG_MS = 86400000;
 const ms = (iso) => {
@@ -109,6 +110,7 @@ export function berichtDaten({ tier, gewichte, mahlzeiten, freigaben, futter, vo
       freigabe: aktuelleFreigabe(freigaben, tag),
       gewichte: gewichteBis(gewichte, tag),
       fruehereMahlzeiten: Boolean(ersterEintrag && ersterEintrag < tag),
+      normalesFutterKcal: normalesFutterKcal(amTag, futterMap),
     });
     for (const w of liste) {
       const z = zaehler.get(w.id) ?? { id: w.id, art: w.art, anzahl: 0, erster: tag, letzter: tag, text: w.text };
@@ -151,6 +153,7 @@ const AUFFAELLIG = {
   stillstand: "Abnahme unter 0,5 % KM/Woche (Mittel 4 Wochen)",
   "ziel-erreicht": "Zielgewicht erreicht",
   "freigabe-alt": "Freigabe älter als 3 Monate",
+  diaetfutter: "Freigabe unter RER(Ziel), aber Handelsfutter gefüttert (AAHA 2021)",
 };
 
 function tierText(tier) {

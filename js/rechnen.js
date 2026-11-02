@@ -85,6 +85,7 @@ const QUELLEN = {
   untergrenze: "AAHA 2014 und 2021; Flanagan et al. 2018",
   leckerli: "AAHA 2014 und 2021; WSAVA 2025",
   kontrolle: "AAHA 2014: Kontrolle alle 2 Wochen, später monatlich",
+  diaetfutter: "AAHA 2021, Tabelle 8 (Adipositas): unter RER kein Handelsfutter",
 };
 
 // Ruheenergiebedarf (RER) in kcal pro Tag – NRC 2006. Für die Abnahme immer mit dem Zielgewicht rechnen.
@@ -147,8 +148,9 @@ export function gewichteBis(gewichte, stichtag) {
 
 // Alle Warnungen für einen Tag, die dringendsten zuerst. art: "sofort" | "achtung" | "hinweis".
 // tag/heute: "JJJJ-MM-TT"; kcal und leckerli: Summe des Tages; fruehereMahlzeiten: gab es vor "tag" schon Einträge?
+// normalesFutterKcal: kcal des Tages aus Futter, das kein Diätfutter ist (normalesFutterKcal in futterliste.js).
 // freigabe und gewichte so übergeben, wie sie an "tag" galten (aktuelleFreigabe mit Stichtag, gewichteBis).
-export function warnungen({ name, tag, heute, kcal, leckerli, freigabe, gewichte, fruehereMahlzeiten }) {
+export function warnungen({ name, tag, heute, kcal, leckerli, freigabe, gewichte, fruehereMahlzeiten, normalesFutterKcal = 0 }) {
   const liste = [];
   const neuestes = gewichteSortiert(gewichte)[0];
   const tagVorbei = tag < heute;
@@ -203,6 +205,21 @@ export function warnungen({ name, tag, heute, kcal, leckerli, freigabe, gewichte
       id: "leckerli",
       text: `Leckerlis: ${Math.round(leckerli)} kcal – mehr als 10 % der Tageskalorien.`,
       quelle: QUELLEN.leckerli,
+    });
+  }
+
+  // Bei einer Freigabe unter RER(Ziel) reicht normales Futter nicht mehr für Vitamine und Mineralstoffe.
+  const ruhebedarf = freigabe ? rer(freigabe.zielgewichtKg) : 0;
+  if (freigabe && freigabe.kcalProTag < ruhebedarf && normalesFutterKcal > 0) {
+    liste.push({
+      art: "hinweis",
+      id: "diaetfutter",
+      text:
+        `Die freigegebenen ${freigabe.kcalProTag} kcal liegen unter dem Ruhebedarf beim Zielgewicht ` +
+        `(${Math.round(ruhebedarf)} kcal). Dafür empfehlen die Leitlinien ein Diätfutter vom Tierarzt, weil normales ` +
+        `Futter dann zu wenig Vitamine und Mineralstoffe liefert. An diesem Tag kamen ${Math.round(normalesFutterKcal)} ` +
+        "kcal aus normalem Futter. Bitte mit dem Tierarzt besprechen.",
+      quelle: QUELLEN.diaetfutter,
     });
   }
 

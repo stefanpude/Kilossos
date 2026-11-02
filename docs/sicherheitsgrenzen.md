@@ -247,6 +247,9 @@ Kalorienbedarf [14], die WSAVA-Leitlinienseite [15] und die Zusammenfassung von 
 - **Neu und für Kito wichtig:** Die AAHA 2021 (Tab. 8, Adipositas) hält eine Restriktion **unter RER mit
   Handelsfutter** für nicht empfehlenswert; ab ≤ RER werden angereicherte Diätfutter empfohlen. Kitos Sheba und
   Purina ONE Light sind Handelsfutter. → stützt Frage 5 an den Tierarzt.
+  **In der App seit Version 0.6.2:** Hinweis „Diätfutter mit dem Tierarzt besprechen“, wenn die Freigabe unter
+  RER(Zielgewicht) liegt und an dem Tag Futter gegeben wurde, das kein Diätfutter der Futterliste ist (eigene
+  Sorten zählen dabei als normales Futter). Auch im Tierarzt-Bericht gezählt.
 - **Hinweis zum Zielgewicht:** Das Rechenbeispiel der AAHA 2014 zieht ab (45 kg bei BCS 8 → ≈ 32 kg). Die App teilt
   (KM ÷ 1,3) und landet damit beim vorsichtigeren, höheren Zielgewicht (B3, Punkt 4).
 - **WSAVA 2025:** Leckerlis „weniger als 10 %“; Tabelle bis 7 kg Körpergewicht (28 kcal/Tag aus Leckerlis).
