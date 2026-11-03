@@ -103,3 +103,54 @@ der Nachrechnung abweichen. Wo kein kcal-Wert veröffentlicht ist, steht die Nac
 **Offen für Runde 2 (auf 30–50 Sorten):** MAC's, Catz finefood, Hill's PD r/d und w/d, Royal Canin Light Weight Care in
 Gelee, weitere Leckerlis (Whiskas Temptations, Felix Crispies), Eigenmarken von Lidl/Aldi (Coshida, Cachet),
 Stichproben mit Packungsfotos von Stefan.
+
+---
+
+# Kilossos-Futterliste, zweite Runde (Stand 03.11.2026, Version 0.17.0)
+
+22 neue Sorten, zusammen 42. Gleiche Prüfung wie in Runde 1. **Neu: Feld `ean`** (Strichcode-Nummern, freiwillig, Grundlage
+für den späteren Scanner). Der Test prüft die Prüfziffer und dass keine EAN bei zwei Sorten steht.
+
+**Regeln für EANs:**
+- Nummern, die mit 2 beginnen (z. B. 2050000…), sind Hausnummern der Händler und stehen nicht auf der Packung. Sie werden nie übernommen.
+- Eine EAN wird nur eingetragen, wenn eine zweite Quelle sie demselben Produkt zuordnet (Suche nach der Nummer selbst).
+- Eine EAN gehört zu einer Packungsgröße. Welche, steht im Hinweis. Gleiche Rezeptur in anderer Größe hat eine andere EAN.
+
+| Sorte | Art | kcal/100 g | Status | NRC-Nachrechnung | EAN | Quelle |
+|---|---|---|---|---|---|---|
+| Hill's Prescription Diet r/d Weight Reduction mit Huhn (trocken) | trocken | 314,9 | Hersteller | 332 | 0052742918709 | zooplus.de; EAN von fressnapf.de |
+| Hill's Prescription Diet w/d Multi-Benefit mit Huhn (nass) | nass | 86 | geschätzt | 86 | 0052742053783 | fressnapf.de |
+| Royal Canin Light Weight Care in Gelee | nass | 71,3 | Hersteller | 71 | – | zooplus.de |
+| Purina ONE Sterilcat mit Huhn (trocken) | trocken | 370 | geschätzt | 370 | 8445290062802 | fressnapf.de, gleiche Werte auf zooplus.de |
+| Royal Canin Sterilised 37 (trocken) | trocken | 364 | Hersteller | 367 | 3182550737593 | zooplus.de; Rohfaser und EAN von fressnapf.de |
+| Hill's Science Plan Sterilised Cat Adult mit Huhn (trocken) | trocken | 357 | Hersteller | 380 | 0052742030272 | hillspet.de; EAN von fressnapf.de |
+| Whiskas Sterile mit Huhn (trocken) | trocken | 368 | Hersteller | 361 | 5900951259418 | zoofaster.de |
+| dm Dein Bestes Nassfutter Sensitive reich an Huhn | nass | 73 | geschätzt | 73 | 4058172100420 | dm.de |
+| Rossmann Winston Feine Häppchen in Gelee | nass | 84 | geschätzt | 84 | 4305615274683 | rossmann.de |
+| Gourmet Gold Feine Pastete | nass | 107 | geschätzt | 107 | 7613032985530 | fressnapf.de |
+| MAC's Cat Rind & Hühnerherzen (Dose) | nass | 97 | geschätzt | 97 | 4027245008192 | fressnapf.de |
+| Catz finefood Classic Rind & Kalb (Dose) | nass | 126 | geschätzt | 126 | – | fressnapf.de |
+| MjAMjAM Saftiges Huhn an leckeren Möhrchen (Dose) | nass | 106 | geschätzt | 106 | 4260512870065 | fressnapf.de |
+| animonda vom Feinsten Adult mit Huhn (Schale) | nass | 85 | geschätzt | 85 | – | fressnapf.de |
+| Bozita Sterilised Häppchen in Sauce mit viel Huhn | nass | 73,4 | Hersteller | 73 | 7300330649232 | fressnapf.de (307 kJ/100 g) |
+| Leonardo All Meat (Dose) | nass | 93 | geschätzt | 93 | – | bitiba.de |
+| Almo Nature HFC Natural Huhn & Garnelen (Ergänzungsfutter) | nass | 90 | geschätzt | 90 | 8001154007589 | fressnapf.de |
+| GranataPet Delicatessen Geflügel (trocken) | trocken | 396 | geschätzt | 396 | 4260165197229 | fressnapf.de |
+| Whiskas Knuspertaschen Huhn & Käse | leckerli | 411 | Hersteller | 410 | – | fressnapf.de |
+| Felix Crispies | leckerli | 394 | geschätzt | 394 | 7613038273495 | fressnapf.de |
+| Catisfactions mit Huhn | leckerli | 438 | Hersteller | 427 | – | animalvalley.nl (Händler, deutsche Produktseite) |
+| Vitakraft Cat Stick Geflügel & Leber | leckerli | 328 | geschätzt | 328 | 4008239601124 | fressnapf.de |
+
+**Nicht aufgenommen:**
+- Lidl Coshida und Aldi Cachet: Die offiziellen Seiten nennen keine Analysewerte, nur Blogs. → Packungsfotos von Stefan.
+- Felix Fantastic: ist die Auslandsbezeichnung von „Felix So gut wie es aussieht“ (schon in der Liste).
+- Hill's r/d nass, Whiskas Sterile nass, Felix Sterilised, Rossmann Winston trocken (Adult), Kitekat trocken: keine verlässliche Quelle gefunden.
+
+**Was auffällt:**
+- Hochwertiges Dosenfutter ist oft fettreich: Catz finefood Classic ≈ 126 kcal/100 g, MjAMjAM ≈ 106, Gourmet Gold ≈ 107,
+  also bis fast doppelt so viel wie Beutelfutter (≈ 70).
+- Ein Vitakraft Cat Stick (6 g) hat etwa 20 kcal. Das ist ungefähr die ganze Leckerli-Grenze (10 %) einer Katze mit 200 kcal am Tag.
+- Almo Nature HFC ist Ergänzungsfutter, kein Alleinfutter. Das steht im Namen und im Hinweis.
+- Die meisten Hersteller nennen keinen kcal-Wert. 15 der 22 neuen Werte sind deshalb „geschätzt“.
+
+**Offen für Runde 3:** EANs für die Sorten aus Runde 1, Lidl/Aldi über Packungsfotos, weitere Geschmacksrichtungen auf Nachfrage.
