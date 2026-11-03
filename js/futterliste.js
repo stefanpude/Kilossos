@@ -3,6 +3,7 @@
 // Jeder Eintrag nennt Quelle, Abrufdatum und Status:
 //   kcalQuelle "hersteller": kcal-Wert vom Hersteller (Website, Datenblatt oder Händlerseite mit der Deklaration)
 //   kcalQuelle "geschaetzt": kein kcal-Wert veröffentlicht, aus den Analytischen Bestandteilen berechnet (NRC 2006)
+//   ean (freiwillig): Strichcode-Nummern der Packungen, für den späteren Scanner. Eine Sorte kann mehrere haben.
 // Bei Abweichung gilt immer die Packung. Hintergrund und Rechenwege: docs/futter-recherche.md
 
 import { kcalAusBestandteilen, kcalFuer } from "./rechnen.js";
@@ -11,6 +12,7 @@ import { kcalAusBestandteilen, kcalFuer } from "./rechnen.js";
 export const FEUCHTE_TROCKEN_ANNAHME = 8;
 
 const ABGERUFEN = "2026-11-02";
+const ABGERUFEN_2 = "2026-11-03";
 
 export const FUTTERLISTE = [
   // ---------- Diätfutter vom Tierarzt ----------
@@ -93,6 +95,34 @@ export const FUTTERLISTE = [
     hinweis: "85-g-Beutel = 63,8 kcal.",
   },
 
+  {
+    id: "hills-rd-trocken",
+    name: "Hill's Prescription Diet r/d Weight Reduction mit Huhn (trocken)",
+    typ: "trocken",
+    diaet: true,
+    kcalPro100g: 314.9,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 36.9, fett: 10.5, asche: 5.9, faser: 12.9, feuchte: 6.0 },
+    ean: ["0052742918709"],
+    quelle: "zooplus.de; EAN von fressnapf.de",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_trockenfutter/hills_prescription_diet/gewichtsreduktion/459553",
+    abgerufen: ABGERUFEN_2,
+    hinweis: "Zum Abnehmen bei starkem Übergewicht. Fressnapf nennt leicht andere Werte (Fett 9,8 %, Faser 12,6 %).",
+  },
+  {
+    id: "hills-wd-nass",
+    name: "Hill's Prescription Diet w/d Multi-Benefit mit Huhn (nass)",
+    typ: "nass",
+    diaet: true,
+    kcalPro100g: 86,
+    kcalQuelle: "geschaetzt",
+    analyse: { protein: 8.1, fett: 2.6, asche: 1.7, faser: 1.4, feuchte: 77.4 },
+    ean: ["0052742053783"],
+    quelle: "fressnapf.de",
+    url: "https://www.fressnapf.de/p/hills-prescription-diet-nassfutter-katze-multi-benefit-wd-mit-huhn-12x85-g-1398161/",
+    abgerufen: ABGERUFEN_2,
+    hinweis: "Auch für Katzen mit Diabetes gedacht. 85-g-Beutel.",
+  },
   // ---------- Light-Futter aus dem Handel ----------
   {
     id: "royal-canin-light-weight-care-trocken",
@@ -147,6 +177,76 @@ export const FUTTERLISTE = [
     hinweis: "Die deutsche Packung nennt keine kcal.",
   },
 
+  {
+    id: "royal-canin-light-weight-care-gelee",
+    name: "Royal Canin Light Weight Care in Gelee",
+    typ: "nass",
+    diaet: false,
+    kcalPro100g: 71.3,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 11.0, fett: 2.2, asche: 1.6, faser: 1.0, feuchte: 82.1 },
+    quelle: "zooplus.de",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_dose/royal_canin_katzenfutter/royal_canin_adult/880109",
+    abgerufen: ABGERUFEN_2,
+    hinweis: "85-g-Beutel = 60,6 kcal. Fressnapf nennt 82,5 % Feuchte.",
+  },
+  // ---------- Für kastrierte Katzen ----------
+  {
+    id: "purina-one-sterilcat-trocken",
+    name: "Purina ONE Sterilcat mit Huhn (trocken)",
+    typ: "trocken",
+    diaet: false,
+    kcalPro100g: 370,
+    kcalQuelle: "geschaetzt",
+    analyse: { protein: 37, fett: 13, asche: 7.5, faser: 4, feuchte: null },
+    ean: ["8445290062802"],
+    quelle: "fressnapf.de, gleiche Werte auf zooplus.de",
+    url: "https://www.fressnapf.de/p/purina-one-bifensis-sterilcat-huhn-57-kg-1410726/",
+    abgerufen: ABGERUFEN_2,
+    hinweis: "Kein kcal-Wert auf deutschen Seiten. EAN gehört zur 5,7-kg-Packung.",
+  },
+  {
+    id: "royal-canin-sterilised-37-trocken",
+    name: "Royal Canin Sterilised 37 (trocken)",
+    typ: "trocken",
+    diaet: false,
+    kcalPro100g: 364,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 37, fett: 12, asche: 8.1, faser: 5.3, feuchte: 5.5 },
+    ean: ["3182550737593"],
+    quelle: "zooplus.de; Rohfaser und EAN von fressnapf.de",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_trockenfutter/royal_canin/sterilised/47442",
+    abgerufen: ABGERUFEN_2,
+    hinweis: "EAN gehört zur 2-kg-Packung.",
+  },
+  {
+    id: "hills-science-plan-sterilised-huhn-trocken",
+    name: "Hill's Science Plan Sterilised Cat Adult mit Huhn (trocken)",
+    typ: "trocken",
+    diaet: false,
+    kcalPro100g: 357,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 31.8, fett: 10.0, asche: 5.7, faser: 1.1, feuchte: 6 },
+    ean: ["0052742030272"],
+    quelle: "hillspet.de; EAN von fressnapf.de",
+    url: "https://www.hillspet.de/cat-food/science-plan-sterilised-cat-young-adult-chicken-dry",
+    abgerufen: ABGERUFEN_2,
+    hinweis: "EAN gehört zur 3-kg-Packung.",
+  },
+  {
+    id: "whiskas-sterile-huhn-trocken",
+    name: "Whiskas Sterile mit Huhn (trocken)",
+    typ: "trocken",
+    diaet: false,
+    kcalPro100g: 368,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 30.4, fett: 12.0, asche: 8.0, faser: 4.0, feuchte: null },
+    ean: ["5900951259418"],
+    quelle: "zoofaster.de",
+    url: "https://www.zoofaster.de/whiskas-sterile-mit-huhn-trockenfutter-f-r-sterilisierte-katzen-14kg-i131557",
+    abgerufen: ABGERUFEN_2,
+    hinweis: "EAN gehört zur 1,4-kg-Packung. Ein anderer Händler nennt 32 % Protein und 369 kcal.",
+  },
   // ---------- Gängige Sorten aus Supermarkt und Drogerie ----------
   {
     id: "sheba-fresh-fine-huhn-gefluegel-truthahn",
@@ -282,6 +382,15 @@ export const FUTTERLISTE = [
     hinweis: "Etwa 2 kcal pro Stück. Rind, Thunfisch und Katzenminze: 408 kcal/100 g.",
   },
 ];
+
+// EAN-13 oder EAN-8 mit richtiger Prüfziffer (Gewichte 3 und 1 von rechts).
+export function eanGueltig(ean) {
+  if (typeof ean !== "string" || !/^(\d{8}|\d{13})$/.test(ean)) return false;
+  const ziffern = [...ean].map(Number);
+  const pruef = ziffern.pop();
+  const summe = ziffern.reverse().reduce((s, z, i) => s + z * (i % 2 === 0 ? 3 : 1), 0);
+  return (10 - (summe % 10)) % 10 === pruef;
+}
 
 // kcal pro 100 g aus den Analytischen Bestandteilen, bei Trockenfutter ohne Feuchte mit der Annahme oben.
 export function nachrechnung(eintrag) {

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { FUTTERLISTE, nachrechnung, sucheFutter, ausListe, normalesFutterKcal } from "../js/futterliste.js";
+import { FUTTERLISTE, nachrechnung, sucheFutter, ausListe, normalesFutterKcal, eanGueltig } from "../js/futterliste.js";
 
 test("normalesFutterKcal zählt Handelsfutter und eigene Sorten, aber kein Diätfutter und keine Leckerlis", () => {
   const futter = new Map([
@@ -32,6 +32,26 @@ test("jeder Eintrag ist vollständig und hat eine Quelle mit Datum", () => {
     assert.match(e.url, /^https:\/\//, e.id);
     assert.match(e.abgerufen, /^\d{4}-\d{2}-\d{2}$/, e.id);
     assert.equal(typeof e.hinweis, "string", e.id);
+  }
+});
+
+test("eanGueltig prüft Länge und Prüfziffer (EAN-13 und EAN-8)", () => {
+  assert.equal(eanGueltig("4770608260286"), true); // Sheba Megapack
+  assert.equal(eanGueltig("4770608260287"), false);
+  assert.equal(eanGueltig("96385074"), true);
+  assert.equal(eanGueltig("477060826028"), false);
+  assert.equal(eanGueltig(4770608260286), false);
+});
+
+test("EAN-Nummern sind gültig und gehören nur zu einem Eintrag", () => {
+  const gesehen = new Map();
+  for (const e of FUTTERLISTE.filter((e) => e.ean !== undefined)) {
+    assert.ok(Array.isArray(e.ean) && e.ean.length > 0, e.id);
+    for (const ean of e.ean) {
+      assert.ok(eanGueltig(ean), `${e.id}: ${ean}`);
+      assert.ok(!gesehen.has(ean), `${ean} bei ${gesehen.get(ean)} und ${e.id}`);
+      gesehen.set(ean, e.id);
+    }
   }
 });
 
