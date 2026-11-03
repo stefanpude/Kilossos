@@ -15,11 +15,14 @@ _Angelegt 02.11.2026. Stefan hat die Fragen zum Start übersprungen; sie stehen 
    - Stefan schickt ein Foto von Kito (Kopf gut zu sehen, ruhiger Hintergrund).
    - Daraus: rundes Logo für die Willkommensseite und App-Symbole 192/512 px (auch „maskable“).
 
-## Offene Fragen (nicht vergessen, vor der Store-Fassung klären)
+## Geklärt (03.11.2026, gilt auch für die Store-Texte)
 
-- Was soll jemand aus einer Katzen-Gruppe in den ersten Sekunden sehen, fühlen, verstehen?
-- Kurzfassung der Geschichte: passen Ton und Länge? (Text ist neu geschrieben aus der freigegebenen Fassung.)
-- Soll die Seite später wieder aufrufbar sein (z. B. unter „Mehr“)?
-- Logo-Stil: echtes Foto rund zugeschnitten, gezeichnete Figur nach dem Foto, oder Schriftzug mit Kito-Kopf?
-- Wer ist die Zielgruppe der Willkommensseite genau: nur neue Nutzer im Store, oder auch Tierärzte, denen Stefan die App zeigt?
-- Was wäre ein Fehlschlag, auch wenn alles technisch klappt (z. B. wirkt zu werblich, zu medizinisch, zu lang)?
+- **Erster Eindruck:** Sicherheit. „Abnehmen ohne Fettleber-Risiko, nach Leitlinien der Tierärzte“ steht vorn; Geschichte, Einfachheit und „kostenlos, privat“ folgen.
+- **Ton:** passt so (Ich-Form, ehrlich, kurz). Im Store steht die Geschichte im zweiten Absatz, nicht ganz oben.
+- **Zielgruppe:** Katzenhalter mit übergewichtiger Katze. Tierärzte sind nicht die Leser, sollen den Text aber nicht peinlich finden.
+- **Fehlschlag wäre:** zu werblich, zu medizinisch, zu lang. Zusätzlich (Claude, wegen Google-Play-Regeln für Gesundheits-Apps): nie versprechen, dass die App die Diät macht oder den Tierarzt ersetzt.
+- **Logo-Stil:** erledigt mit 0.13.0 (Kito am Napf).
+
+## Noch offen
+
+- Soll die Willkommensseite später wieder aufrufbar sein (z. B. unter „Mehr“)? Die ganze Geschichte ist dort schon (`#geschichte`). Vorschlag Claude: reicht so, kein eigener Knopf.
