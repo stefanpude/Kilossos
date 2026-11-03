@@ -1443,7 +1443,9 @@ function willkommenGesehen() {
 
 // ---------- Wischen zwischen den Bereichen ----------
 
-wischenAnmelden(document.querySelector("main"), {
+// Auf der ganzen Seite, nicht nur auf <main>: Ist der Inhalt kürzer als der Bildschirm, liegt darunter
+// leere Fläche außerhalb von <main>, und auch dort soll Wischen klappen (Handy-Test 03.11.2026).
+wischenAnmelden(document, {
   leiste: () => [...document.querySelectorAll(".leiste button[data-ziel]")].map((knopf) => knopf.dataset.ziel),
   aktuell: () => document.querySelector(".ansicht:not([hidden])")?.dataset.ansicht,
   wechseln: zeigeAnsicht,

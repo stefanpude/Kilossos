@@ -38,7 +38,7 @@ function scrolltWaagrecht(el, grenze) {
   return false;
 }
 
-// bereich: Element, in dem gewischt wird. leiste(): Namen der Bereiche in Leistenreihenfolge.
+// bereich: Element oder document, in dem gewischt wird. leiste(): Namen der Bereiche in Leistenreihenfolge.
 // aktuell(): sichtbarer Bereich. wechseln(name, richtung): zeigt den Bereich. gesperrt(): z. B. Willkommensseite offen.
 export function wischenAnmelden(bereich, { leiste, aktuell, wechseln, gesperrt = () => false }) {
   let start = null;
