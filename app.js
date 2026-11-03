@@ -1353,6 +1353,8 @@ document.addEventListener("click", (ereignis) => {
       return $("dialog-warum").showModal();
     case "bcs-erklaerung":
       return $("dialog-bcs").showModal();
+    case "grenzen-erklaerung":
+      return $("dialog-grenzen").showModal();
     case "gramm-minus":
       return grammSchritt(-5);
     case "gramm-plus":

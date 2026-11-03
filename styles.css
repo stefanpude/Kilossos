@@ -90,10 +90,11 @@ body.willkommen-offen { overflow: hidden; }
   color: var(--akzent-stark); font-weight: 600; text-align: left; text-decoration: underline; text-underline-offset: 3px;
 }
 #dialog-warum p { margin: 0 0 10px; }
-#dialog-bcs p, #dialog-bcs ul { margin: 0 0 10px; }
-#dialog-bcs ul { padding-left: 20px; display: grid; gap: 6px; }
-#dialog-bcs h3 { margin: 4px 0 0; font-size: 1rem; }
-#dialog-bcs h2:focus { outline: none; }
+#dialog-bcs p, #dialog-bcs ul, #dialog-grenzen p, #dialog-grenzen ul { margin: 0 0 10px; }
+#dialog-bcs ul, #dialog-grenzen ul { padding-left: 20px; display: grid; gap: 6px; }
+#dialog-bcs h3, #dialog-grenzen h3 { margin: 4px 0 0; font-size: 1rem; }
+#dialog-bcs h2:focus, #dialog-grenzen h2:focus { outline: none; }
+#dialog-grenzen .leise a { color: inherit; font-weight: 600; }
 .kopf h1 { margin: 0; font-size: 0.8125rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--akzent-stark); }
 
 main {

@@ -166,6 +166,7 @@
         <p class="tipp">Zielgewicht und Tagesmenge legt nur der Tierarzt fest. Ohne Freigabe zeichnet Kilossos nur auf und warnt, schlägt aber keine Mengen vor.</p>
         <button type="button" class="knopf-zweit" data-aktion="warum-kein-ziel">Warum keine Futtermenge?</button>
         <button type="button" class="knopf-zweit" data-aktion="bcs-erklaerung">Was ist der BCS?</button>
+        <button type="button" class="knopf-zweit" data-aktion="grenzen-erklaerung">Welche Grenzen gelten?</button>
         <a class="knopf-zweit" id="praxis-anrufen" hidden></a>
       </div>
       <div class="karte">
@@ -230,10 +231,10 @@
           <strong>Frisst eine Katze einen Tag oder länger gar nicht, gehört sie sofort zum Tierarzt.</strong></p>
         <p class="leise"><strong>Datenschutz:</strong> keine Anmeldung, keine Cloud, keine Werbung, keine Auswertung.
           Alle Daten bleiben auf diesem Handy, bis du selbst eine Sicherung speicherst.</p>
-        <p class="leise"><strong>Grenzwerte:</strong> nach den Leitlinien von AAHA (2014, 2021) und WSAVA, mit allen Quellen in
-          <a href="https://github.com/stefanpude/Kilossos/blob/main/docs/sicherheitsgrenzen.md" target="_blank" rel="noopener">docs/sicherheitsgrenzen.md</a>.</p>
+        <p class="leise"><strong>Grenzwerte:</strong> nach den Leitlinien der Tierärzteverbände AAHA (2014, 2021) und WSAVA.</p>
+        <button type="button" class="knopf-zweit" data-aktion="grenzen-erklaerung">Welche Grenzen gelten?</button>
       </div>
-      <p class="fuss" id="version">Version 0.15.0</p>
+      <p class="fuss" id="version">Version 0.16.0</p>
     </section>
   </main>
 
@@ -445,6 +446,56 @@
         Darum trägst du in Kilossos nur den BCS ein, den der Tierarzt bestimmt hat. Er steht dann in der Freigabe,
         im Verlauf und in der Übersicht für den Tierarzt.</p>
       <p class="leise">Quelle: WSAVA, Body-Condition-Score- und Muscle-Condition-Score-Tafeln für Katzen.</p>
+      <div class="knoepfe">
+        <button value="abbrechen" class="knopf-haupt">Verstanden</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Erklärung der Sicherheitsgrenzen (Zahlen müssen zu GRENZEN in js/rechnen.js passen; Fachfassung: docs/sicherheitsgrenzen.md) -->
+  <dialog id="dialog-grenzen">
+    <form method="dialog">
+      <h2 tabindex="-1" autofocus>Welche Grenzen gelten?</h2>
+      <p>Kilossos prüft deine Einträge jeden Tag gegen feste Grenzen. Sie stammen aus den Leitlinien der
+        Tierärzteverbände AAHA und WSAVA und gelten für jede Katze gleich. Wie viel deine Katze fressen soll,
+        legt dein Tierarzt fest.</p>
+      <h3>Abnehmen</h3>
+      <ul>
+        <li><strong>0,5 bis 2 % des Gewichts pro Woche.</strong> Bei einer 6-kg-Katze sind das 30 bis 120 g.</li>
+        <li><strong>Zu schnell:</strong> Liegt die Abnahme im Mittel über zwei Wochen bei mehr als 2 %, warnt Kilossos.
+          Eine einzelne Wägung reicht dafür nicht, weil Waagen zu Hause schwanken.</li>
+        <li><strong>Stillstand:</strong> Gibt es eine Freigabe und sind es über vier Wochen weniger als 0,5 % pro Woche, rät Kilossos, den Plan beim
+          Tierarzt zu besprechen.</li>
+      </ul>
+      <h3>Fressen</h3>
+      <ul>
+        <li><strong>Zu wenig an einem Tag:</strong> Steht weniger als die Hälfte der Tagesmenge im Tagebuch, fragt
+          Kilossos nach. Frisst eine Katze 24 Stunden lang nichts oder kaum etwas, sofort zum Tierarzt:
+          Es droht eine Fettleber.</li>
+        <li><strong>Mit Freigabe:</strong> Liegt ein Tag mehr als 10 % unter oder über der freigegebenen Menge,
+          zeigt Kilossos einen Hinweis.</li>
+        <li><strong>Ohne Freigabe:</strong> Ohne Tierarzt kennt Kilossos kein Zielgewicht. Als Untergrenze gilt dann der
+          Ruhebedarf beim kleinsten Zielgewicht, das bei Übergewicht überhaupt in Frage kommt. Wer weniger füttert,
+          macht schon eine Diät ohne Plan.</li>
+        <li><strong>Leckerlis:</strong> höchstens 10 % der Tageskalorien.</li>
+      </ul>
+      <h3>Freigabe vom Tierarzt</h3>
+      <ul>
+        <li><strong>Sehr niedrige Menge:</strong> Liegt die Tagesmenge unter 60 % des Ruhebedarfs beim Zielgewicht,
+          fragt Kilossos beim Eintragen nach. So wenig empfehlen die Leitlinien nur mit einem Fachtierarzt
+          für Ernährung.</li>
+        <li><strong>Diätfutter:</strong> Liegt die Freigabe unter dem Ruhebedarf beim Zielgewicht, liefert normales
+          Futter zu wenig Vitamine und Mineralstoffe. Dann empfiehlt Kilossos, Diätfutter mit dem Tierarzt
+          zu besprechen.</li>
+        <li><strong>Kontrolle:</strong> Ist die Freigabe älter als drei Monate, erinnert Kilossos an einen Termin.</li>
+      </ul>
+      <h3>Was Kilossos nie tut</h3>
+      <p>Kilossos ändert keine Futtermenge und schlägt keine vor. Bei jeder Warnung gilt: mit dem Tierarzt sprechen,
+        nicht selbst kürzen.</p>
+      <p class="leise">Quellen: AAHA Weight Management Guidelines 2014; AAHA Nutrition and Weight Management Guidelines 2021;
+        WSAVA Nutritional Assessment Guidelines 2011 und Merkblatt Leckerlis 2025; Flanagan et al. 2018 (Studie mit
+        über 700 Katzen). Alle Rechnungen in der
+        <a href="https://github.com/stefanpude/Kilossos/blob/main/docs/sicherheitsgrenzen.md" target="_blank" rel="noopener">Fachfassung für Tierärzte</a>.</p>
       <div class="knoepfe">
         <button value="abbrechen" class="knopf-haupt">Verstanden</button>
       </div>
