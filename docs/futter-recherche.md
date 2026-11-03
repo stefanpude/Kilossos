@@ -28,8 +28,13 @@ Quellen: [zooplus.de, Sheba Fresh & Fine 50 g](https://www.zooplus.de/shop/katze
 (77 kcal), [Rossmann, Megapack Huhn, Geflügel & Truthahn](https://www.rossmann.de/de/tier-sheba-fresh-und-fine-in-sauce-huhn-gefluegel-und-truthahn-megapack/p/4770608260286).
 Abgerufen 01.11.2026.
 
-**Kito bekommt Rezeptur A** (von Stefan am 01.11.2026 bestätigt). Die App rechnet seit Version 0.5.0 mit
-71 kcal/100 g; vorher standen dort 77 kcal (Rezeptur B). Frühere Tage werden automatisch neu berechnet.
+**Korrektur 03.11.2026 (Version 0.19.0): Kitos Umkarton zeigt die Werte von Spalte B.** Das Megapack heißt
+„Huhn, Geflügel & Truthahn“ (EAN 4770608260286), die Rückseite nennt aber Protein 7,9 %, Fett 4,4 %, Asche 1,4 %,
+Faser 0,3 %, Feuchte 84,0 % und dieselben Zusatzstoffe wie Spalte B (Vitamin D3 200 IE, Taurin 573 mg, Kupfer 1,3 mg,
+Jod 0,34 mg, Eisen 16,2 mg, Mangan 3,4 mg, Zink 16 mg). kcal stehen nicht auf der Packung; nachgerechnet 76,6, in der App
+77 kcal/100 g („geschätzt“). Die Händlerangaben für Spalte A (zooplus 71, fressnapf 80 kcal/100 g) passen nicht zur Packung.
+Verlauf: bis 0.5.0 standen 77, von 0.6.0 bis 0.18.0 irrtümlich 71. Unveränderte 71 werden beim Start automatisch auf 77
+umgestellt, frühere Tage werden dadurch neu berechnet. **Bei Abweichung gilt die Packung.**
 
 ## Purina ONE Light (Trockenfutter)
 
@@ -49,10 +54,10 @@ abgerufen 01.11.2026.
 
 - Beide Sorten sind **Alleinfuttermittel für die Erhaltung**, kein Diätfutter. Ihre Fütterungsempfehlungen gelten
   für das Halten des Gewichts, nicht für eine Abnahme.
-- Sheba (Rezeptur A) nennt **keine zugesetzten Vitamine**. Das ist für ein Alleinfutter zulässig, verstärkt aber den
-  Punkt aus `sicherheitsgrenzen.md` (B4): Bei stark gekürzten Mengen ist die Versorgung mit Mikronährstoffen nicht mehr
-  durch die Deklaration abgesichert. → Frage 5 an den Tierarzt (Diätfutter).
-- Eiweiß je 100 kcal: Sheba A ≈ 10,8 g, Sheba B ≈ 10,3 g, Purina One Light ≈ 11,3 g.
+- Kitos Packung nennt nur Vitamin D3 als zugesetztes Vitamin (Händlerseiten für Spalte A: gar keine). Das ist für ein
+  Alleinfutter zulässig, verstärkt aber den Punkt aus `sicherheitsgrenzen.md` (B4): Bei stark gekürzten Mengen ist die
+  Versorgung mit Mikronährstoffen nicht mehr durch die Deklaration abgesichert. → Frage 5 an den Tierarzt (Diätfutter).
+- Eiweiß je 100 kcal: Kitos Sheba (Packung) ≈ 10,3 g, Purina One Light ≈ 11,3 g.
 
 ---
 
@@ -81,7 +86,7 @@ der Nachrechnung abweichen. Wo kein kcal-Wert veröffentlicht ist, steht die Nac
 | Hill's Science Plan Perfect Weight Huhn | trocken | 342,9 | Hersteller | 361 | hillspet.co.uk (DE ohne kcal) |
 | Purina ONE Light | trocken | 327,5 | Hersteller | 346 | purina.co.uk (siehe oben) |
 | **Supermarkt und Drogerie** | | | | | |
-| Sheba Fresh & Fine – Huhn, Geflügel & Truthahn | nass | 71 | Hersteller | 70,7 | siehe oben |
+| Sheba Fresh & Fine – Huhn, Geflügel & Truthahn | nass | 77 (seit 0.19.0, vorher 71) | geschätzt (Umkarton) | 76,6 | siehe oben |
 | Sheba Fresh & Fine – Huhn, Truthahn & Ente | nass | 77 | Hersteller | 76,6 | siehe oben |
 | Whiskas 1+ Frischebeutel | nass | 71 | Hersteller | 70,6 | zooplus.de |
 | Felix So gut wie es aussieht in Gelee | nass | 75 | Hersteller | 74,6 | zooplus.de (kcal nur bei einer Sorte) |
@@ -95,7 +100,7 @@ der Nachrechnung abweichen. Wo kein kcal-Wert veröffentlicht ist, steht die Nac
 
 **Was auffällt (für Kito):**
 - Diätfutter ist „verdünnter“: Die nassen Diätsorten haben 61–75 kcal/100 g und deutlich mehr Eiweiß je kcal
-  (Purina OM nass ≈ 14 g Protein je 100 kcal, Sheba A ≈ 10,8 g). Das passt zu Frage 5 an den Tierarzt
+  (Purina OM nass ≈ 14 g Protein je 100 kcal, Kitos Sheba ≈ 10,3 g). Das passt zu Frage 5 an den Tierarzt
   (Eiweiß ≈ 3,8 statt ≈ 5,2 g je kg Zielgewicht mit dem jetzigen Futter).
 - animonda Carny ist fettreich: ≈ 104 kcal/100 g, fast 50 % mehr als Beutelfutter.
 - Dreamies: ≈ 2 kcal pro Stück; 10 Stück ≈ 20 kcal, das sind schon 7 % von 290 kcal (Untergrenze ohne Freigabe).
@@ -190,9 +195,9 @@ Packungsgröße im Hinweis. Die Analysewerte auf der Fundstelle wurden mit der L
 - animonda Carny Adult Rind: keine Nummer gefunden, die eindeutig zur Sorte Rind gehört.
 - Dreamies mit Huhn: Fressnapf nennt je Packungsgröße andere Analysewerte (20 % und 31 % Protein), das passt nicht zusammen.
 
-**Abweichung bei Sheba Huhn, Geflügel & Truthahn:** Fressnapf nennt für das Megapack (EAN 4770608260286) 40 kcal je 50-g-Beutel (80 kcal/100 g;
-Protein 7,8 %, Fett 5,0 %, Asche 1,5 %, Faser 0,3 %, Feuchte 83,5 %). zooplus nennt weiter 71 kcal/100 g (Abruf 03.11.2026).
-Die Liste bleibt bei 71, bis die Angabe auf dem Umkarton geprüft ist. Bei Abweichung gilt die Packung.
+**Abweichung bei Sheba Huhn, Geflügel & Truthahn:** Fressnapf nennt für das Megapack (EAN 4770608260286) 40 kcal je 50-g-Beutel
+(80 kcal/100 g; Protein 7,8 %, Fett 5,0 %, Asche 1,5 %, Faser 0,3 %, Feuchte 83,5 %), zooplus 71 kcal/100 g. **Geklärt am
+03.11.2026 mit dem Umkarton:** Beide Händler liegen daneben, die Packung ergibt 77 kcal/100 g (siehe oben, Version 0.19.0).
 
 **Kleinere Abweichungen ohne Folgen:** Royal Canin Satiety in Soße bei Fressnapf 2,2 % Fett und 1,3 % Faser (Liste 2,3 und 1,1);
 Whiskas 1+ bei Fressnapf 7,3 % Protein, 0,25 % Faser, 84,5 % Feuchte, 61 kcal je 85 g (Liste 7,5 / 0,35 / 84,8 / 60,4).

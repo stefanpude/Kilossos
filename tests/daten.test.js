@@ -32,7 +32,7 @@ test("erster Start legt Kito und seine beiden Sorten an", () => {
   const daten = laden(speicher);
   assert.equal(daten.tiere.length, 1);
   assert.equal(daten.tiere[0].name, "Kito");
-  assert.deepEqual(daten.futter.map((f) => [f.kcalPro100g, f.kcalQuelle]), [[71, "hersteller"], [327.5, "hersteller"]]);
+  assert.deepEqual(daten.futter.map((f) => [f.kcalPro100g, f.kcalQuelle]), [[77, "geschaetzt"], [327.5, "hersteller"]]);
   assert.ok(istGueltig(daten));
 });
 
@@ -67,15 +67,66 @@ test("alte Purina-Startwerte (360 ungefähr, 346 geschätzt) werden durch die He
   }
 });
 
-test("alter Sheba-Startwert (77, Packung) wird durch Rezeptur „Huhn, Geflügel & Truthahn“ ersetzt", () => {
+test("alter Sheba-Startwert aus 0.5 (77, Packung) bleibt stehen, bekommt aber seine Kennung", () => {
   const speicher = testSpeicher();
   const daten = laden(speicher);
   const sheba = daten.futter.find((f) => f.name.startsWith("Sheba"));
   Object.assign(sheba, { kcalPro100g: 77, kcalQuelle: "packung", notiz: "" });
+  delete sheba.listeId;
   speichern(daten, speicher);
   const neu = laden(speicher).futter.find((f) => f.id === sheba.id);
-  assert.deepEqual([neu.kcalPro100g, neu.kcalQuelle], [71, "hersteller"]);
-  assert.match(neu.notiz, /4770608260286/);
+  assert.deepEqual([neu.kcalPro100g, neu.kcalQuelle, neu.notiz], [77, "packung", ""]);
+  assert.equal(neu.listeId, "sheba-fresh-fine-huhn-gefluegel-truthahn");
+});
+
+// Speichert Sheba mit den angegebenen Werten und lädt danach neu, wie beim nächsten App-Start.
+function shebaNachNeustart(werte, speicher = testSpeicher()) {
+  const daten = laden(speicher);
+  const sheba = daten.futter.find((f) => f.listeId === "sheba-fresh-fine-huhn-gefluegel-truthahn");
+  Object.assign(sheba, werte);
+  speichern(daten, speicher);
+  const neu = laden(speicher).futter.find((f) => f.id === sheba.id);
+  return neu;
+}
+
+const SHEBA_ZOOPLUS_START =
+  "Rezeptur „Huhn, Geflügel & Truthahn in Sauce“ (EAN 4770608260286), Angaben laut zooplus.de (11/2026): Protein 7,7 %, Fett 3,9 %, Asche 1,8 %, Faser 0,2 %, Feuchte 84,7 %; 35,5 kcal je 50-g-Beutel. Eigene Nachrechnung (NRC 2006): 70,7.";
+const SHEBA_ZOOPLUS_LISTE =
+  "Laut zooplus.de: Protein 7,7 %, Fett 3,9 %, Asche 1,8 %, Faser 0,2 %, Feuchte 84,7 %. Megapack, EAN 4770608260286. 50-g-Beutel = 35,5 kcal. Aus der Kilossos-Futterliste, Stand 01.11.2026. Bei Abweichung gilt die Packung.";
+
+test("Sheba mit dem alten zooplus-Wert (71) bekommt die Packungswerte (77)", () => {
+  for (const notiz of [SHEBA_ZOOPLUS_START, SHEBA_ZOOPLUS_LISTE]) {
+    const neu = shebaNachNeustart({ kcalPro100g: 71, kcalQuelle: "hersteller", notiz });
+    assert.deepEqual([neu.kcalPro100g, neu.kcalQuelle], [77, "geschaetzt"]);
+    assert.match(neu.notiz, /Umkarton/);
+    assert.match(neu.notiz, /Fett 4,4 %/);
+  }
+});
+
+test("selbst geänderte Sheba-Werte bleiben stehen", () => {
+  for (const werte of [
+    { kcalPro100g: 77, kcalQuelle: "packung", notiz: "selbst eingetragen" },
+    { kcalPro100g: 80, kcalQuelle: "hersteller", notiz: SHEBA_ZOOPLUS_START },
+    { kcalPro100g: 71, kcalQuelle: "hersteller", notiz: "eigene Notiz" },
+    { kcalPro100g: 71, kcalQuelle: "packung", notiz: SHEBA_ZOOPLUS_START },
+  ]) {
+    const neu = shebaNachNeustart(werte);
+    assert.deepEqual([neu.kcalPro100g, neu.kcalQuelle, neu.notiz], [werte.kcalPro100g, werte.kcalQuelle, werte.notiz]);
+  }
+});
+
+test("Sheba-Umstellung läuft nur einmal und lässt Mahlzeiten verknüpft", () => {
+  const speicher = testSpeicher();
+  const daten = laden(speicher);
+  const sheba = daten.futter.find((f) => f.listeId === "sheba-fresh-fine-huhn-gefluegel-truthahn");
+  Object.assign(sheba, { kcalPro100g: 71, kcalQuelle: "hersteller", notiz: SHEBA_ZOOPLUS_START });
+  daten.mahlzeiten.push({ id: "m1", tierId: daten.tiere[0].id, futterId: sheba.id, gramm: 50, zeitpunkt: "2026-11-03T08:00:00.000Z" });
+  speichern(daten, speicher);
+  const einmal = laden(speicher);
+  const zweimal = laden(speicher);
+  assert.deepEqual(zweimal, einmal);
+  assert.equal(zweimal.mahlzeiten[0].futterId, sheba.id);
+  assert.equal(zweimal.futter.find((f) => f.id === sheba.id).kcalPro100g, 77);
 });
 
 test("selbst geänderte Purina-Werte bleiben stehen", () => {

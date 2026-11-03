@@ -7,7 +7,7 @@ Zum Ausdrucken oder am Handy mitnehmen. Dazu: die Tierarzt-Übersicht als PDF au
 - Kito, Kater, kastriert, von Natur aus sehr groß
 - Gewicht: 9,32 kg (Praxis, Oktober 2026)
 - Wohnungskatze, wenig Bewegung (geht wegen der Baustelle nicht mehr raus)
-- Futter: Sheba Fresh & Fine „Huhn, Geflügel & Truthahn“ (71 kcal/100 g) und Purina ONE Light (trocken, ca. 327 kcal/100 g)
+- Futter: Sheba Fresh & Fine „Huhn, Geflügel & Truthahn“ (ca. 77 kcal/100 g, aus den Werten auf dem Umkarton berechnet, etwa 38,5 kcal je 50-g-Beutel) und Purina ONE Light (trocken, ca. 327 kcal/100 g)
 
 ## 1. Befund
 - [ ] Wie ist Kitos **Body Condition Score (BCS)**? (Skala 1–9)

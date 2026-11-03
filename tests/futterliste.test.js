@@ -77,10 +77,10 @@ test("geschätzte Werte sind genau die gerundete Nachrechnung", () => {
   }
 });
 
-test("Kitos Sorten stehen mit den bisherigen Werten in der Liste", () => {
+test("Kitos Sorten stehen mit den Werten ihrer Packungen in der Liste", () => {
   const sheba = FUTTERLISTE.find((e) => e.id === "sheba-fresh-fine-huhn-gefluegel-truthahn");
   const purina = FUTTERLISTE.find((e) => e.id === "purina-one-light-trocken");
-  assert.equal(sheba.kcalPro100g, 71);
+  assert.equal(sheba.kcalPro100g, 77); // Umkarton, Foto vom 03.11.2026
   assert.equal(purina.kcalPro100g, 327.5);
 });
 

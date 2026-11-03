@@ -35,7 +35,7 @@ const tagNr = (n) => new Date(start.getFullYear(), start.getMonth(), start.getDa
 
 const kito = { id: "kito", name: "Kito", art: "katze", geschlecht: "kater", kastriert: true };
 const futter = [
-  { id: "sheba", name: "Sheba Fresh n Fine in Sauce mit Geflügel", typ: "nass", kcalPro100g: 71, kcalQuelle: "hersteller", notiz: "Rezeptur Huhn, Geflügel & Truthahn" },
+  { id: "sheba", name: "Sheba Fresh n Fine in Sauce mit Geflügel", typ: "nass", kcalPro100g: 77, kcalQuelle: "geschaetzt", notiz: "Rezeptur Huhn, Geflügel & Truthahn (Werte vom Umkarton)" },
   { id: "purina", name: "Purina One Light", typ: "trocken", kcalPro100g: 327.5, kcalQuelle: "hersteller", notiz: "" },
   { id: "snack", name: "Leckerli (Simulation)", typ: "leckerli", kcalPro100g: 350, kcalQuelle: "packung", notiz: "" },
 ];
@@ -83,7 +83,7 @@ for (let n = 0; n <= WOCHEN * 7; n++) {
   const freigabe = aktuelleFreigabe(freigaben, tagSchluessel(tag));
   const ziel = freigabe.kcalProTag * zwischen(0.96, 1.04);
   const leckerli = zufall() < 3 / 7 ? Math.round(zwischen(2, 5)) : 0;
-  const trocken = Math.round((ziel - 71 - leckerli * 3.5) / 3.275);
+  const trocken = Math.round((ziel - 77 - leckerli * 3.5) / 3.275);
   const morgens = Math.round(trocken * 0.55);
   const neu = (futterId, gramm, stunde, minute) =>
     gramm > 0 && mahlzeiten.push({ id: `m-${mahlzeiten.length}`, tierId: kito.id, futterId, gramm, zeitpunkt: zeit(tag, stunde, minute) });

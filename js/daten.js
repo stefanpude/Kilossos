@@ -43,10 +43,10 @@ function startDaten() {
         listeId: "sheba-fresh-fine-huhn-gefluegel-truthahn",
         name: "Sheba Fresh n Fine in Sauce mit Geflügel",
         typ: "nass",
-        kcalPro100g: 71,
-        kcalQuelle: "hersteller",
+        kcalPro100g: 77,
+        kcalQuelle: "geschaetzt",
         notiz:
-          "Rezeptur „Huhn, Geflügel & Truthahn in Sauce“ (EAN 4770608260286), Angaben laut zooplus.de (11/2026): Protein 7,7 %, Fett 3,9 %, Asche 1,8 %, Faser 0,2 %, Feuchte 84,7 %; 35,5 kcal je 50-g-Beutel. Eigene Nachrechnung (NRC 2006): 70,7.",
+          "Rezeptur „Huhn, Geflügel & Truthahn in Sauce“ (EAN 4770608260286), Angaben vom Umkarton (Megapack, 11/2026): Protein 7,9 %, Fett 4,4 %, Asche 1,4 %, Faser 0,3 %, Feuchte 84,0 %. Die Packung nennt keine kcal; aus den Bestandteilen berechnet (NRC 2006): 76,6, also etwa 38,5 kcal je 50-g-Beutel.",
       },
       {
         id: neueId(),
@@ -159,15 +159,19 @@ function startwerteAktualisieren(daten) {
       futter.name === "Purina One Light" &&
       ((futter.kcalPro100g === 360 && futter.kcalQuelle === "ungefaehr") ||
         (futter.kcalPro100g === 346 && futter.kcalQuelle === "geschaetzt"));
-    // Bis 0.5.0 stand hier der Wert einer anderen Sheba-Rezeptur (77 kcal, "Huhn, Truthahn & Ente").
-    const altSheba =
-      futter.name === "Sheba Fresh n Fine in Sauce mit Geflügel" &&
-      futter.kcalPro100g === 77 &&
-      futter.kcalQuelle === "packung" &&
-      !futter.notiz;
-    const alt = altPurina || altSheba;
+    // Sheba: Bis 0.5.0 stand hier 77 kcal (Packung), von 0.6.0 bis 0.18.0 irrtümlich der zooplus-Wert 71.
+    // Kitos Umkarton bestätigt 77. Die 71 werden ersetzt (Startwert und Kopien aus der Futterliste), solange kcal,
+    // Quelle und Notiz unverändert sind; alte 77 bleiben stehen.
+    const zooplusSheba =
+      futter.listeId === "sheba-fresh-fine-huhn-gefluegel-truthahn" &&
+      futter.kcalPro100g === 71 &&
+      futter.kcalQuelle === "hersteller" &&
+      typeof futter.notiz === "string" &&
+      futter.notiz.includes("zooplus.de") &&
+      futter.notiz.includes("Protein 7,7 %");
+    const alt = altPurina || zooplusSheba;
     if (alt) {
-      const neu = neueStartwerte.find((f) => f.name === futter.name);
+      const neu = neueStartwerte.find((f) => (zooplusSheba ? f.listeId === futter.listeId : f.name === futter.name));
       Object.assign(futter, { kcalPro100g: neu.kcalPro100g, kcalQuelle: neu.kcalQuelle, notiz: neu.notiz });
       geaendert = true;
     }
