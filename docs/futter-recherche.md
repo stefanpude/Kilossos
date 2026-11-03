@@ -154,3 +154,45 @@ für den späteren Scanner). Der Test prüft die Prüfziffer und dass keine EAN 
 - Die meisten Hersteller nennen keinen kcal-Wert. 15 der 22 neuen Werte sind deshalb „geschätzt“.
 
 **Offen für Runde 3:** EANs für die Sorten aus Runde 1, Lidl/Aldi über Packungsfotos, weitere Geschmacksrichtungen auf Nachfrage.
+
+# EANs für die Sorten aus Runde 1 (Stand 03.11.2026, Version 0.18.0)
+
+13 der 20 Sorten haben jetzt EANs, zusammen 18 neue Nummern. Jetzt 29 von 42 Sorten mit EAN. Gleiche Regeln wie in Runde 2:
+jede Nummer von einer zweiten Quelle demselben Produkt zugeordnet (Suche nach der Nummer selbst), keine Hausnummern mit 2…,
+Packungsgröße im Hinweis. Die Analysewerte auf der Fundstelle wurden mit der Liste verglichen.
+
+| Sorte | EAN | Packung | Fundstelle | Bestätigt durch |
+|---|---|---|---|---|
+| Royal Canin Veterinary Satiety (trocken) | 3182550768474 | 1,5 kg | fressnapf.de | petzo.net, amanpetshop.com |
+| | 3182550815529 | 6 kg | fressnapf.de | pharmaleo.fr, proshop.se |
+| Royal Canin Veterinary Satiety in Soße | 9003579006146 | 12 × 85 g | fressnapf.de | direct-vet.ie, parafarmaciapet.com |
+| Royal Canin Light Weight Care (trocken) | 3182550706810 | 400 g | fressnapf.de | rozetka.com.ua, elmir.ua |
+| | 3182550903929 | 3 kg | fressnapf.de | thevetshed.com.au, arukereso.hu |
+| | 3182550902984 | 8 kg | fressnapf.de | zooline.az, petworlduae.com |
+| Royal Canin Light Weight Care in Soße | 9003579308707 | 12 × 85 g | zoolini.be | petnpony.co.uk, vetapotek.dk |
+| Hill's Science Plan Perfect Weight (trocken) | 0052742025827 | 2,5 kg | fressnapf.de | futterbutze.de, desjardins.fr |
+| Purina ONE Light (trocken) | 8445290067319 | 750 g | fressnapf.de | propet.sk, ebay.de |
+| Sheba Fresh & Fine Huhn, Geflügel & Truthahn | 4770608260286 | 50 × 50 g | fressnapf.de (stand schon im Hinweis) | Runde 1 |
+| Whiskas 1+ Frischebeutel | 8410136025792 | 12 × 85 g Geflügel-Auswahl in Sauce | fressnapf.de | globalfmcgwholesale.com, merkandi.com |
+| | 4008429170171 | 80 × 85 g Klassische Auswahl in Sauce | fressnapf.de | koelle-zoo.de |
+| Felix So gut wie es aussieht in Gelee | 7613036894548 | 12 × 85 g Geschmacksvielfalt vom Land | fressnapf.de | zoolini.de, tiernahrungsprofi.de |
+| Gourmet Perle Erlesene Streifen | 7613287882523 | 24 × 85 g in Sauce | fressnapf.de | rossmann.de, zoolini.ie |
+| Kitekat Frischebeutel in Soße | 4008429158995 | 12 × 85 g Klassische Auswahl | fressnapf.de | e-zooo.com, merkandi.com |
+| | 4008429158988 | 24 × 85 g Landpicknick | fressnapf.de | zoolini.ie, merkandi.us |
+| | 4008429159015 | 24 × 85 g Bunte Vielfalt | fressnapf.de | merkandi.com, tiernahrungsprofi.de |
+| Purina ONE Adult Huhn & Vollkorngetreide | 8445290062796 | 5,7 kg | lagerhaus.at | koelle-zoo.at, kaufland.de |
+| Whiskas 1+ mit Huhn (trocken) | 5900951258572 | 1,9 kg | lagerhaus.at | trendyfoods.lu, ehgoo.de |
+
+**Ohne EAN geblieben (7):**
+- Hill's Metabolic trocken und nass: Fressnapf nennt andere Analysewerte (trocken 13 % statt 11,7 % Fett; nass nur als Mischpackung mit Meeresfisch, die große Packung hat eine Hausnummer). Erst klären, welche Rezeptur aktuell ist.
+- Purina Pro Plan Veterinary Diets OM trocken und nass: keine deutsche Händlerseite mit EAN gefunden.
+- Sheba Huhn, Truthahn & Ente: Fressnapf zeigt nur eine Hausnummer; die Nummer 4770608266356 aus Runde 1 ließ sich nicht bestätigen.
+- animonda Carny Adult Rind: keine Nummer gefunden, die eindeutig zur Sorte Rind gehört.
+- Dreamies mit Huhn: Fressnapf nennt je Packungsgröße andere Analysewerte (20 % und 31 % Protein), das passt nicht zusammen.
+
+**Abweichung bei Sheba Huhn, Geflügel & Truthahn:** Fressnapf nennt für das Megapack (EAN 4770608260286) 40 kcal je 50-g-Beutel (80 kcal/100 g;
+Protein 7,8 %, Fett 5,0 %, Asche 1,5 %, Faser 0,3 %, Feuchte 83,5 %). zooplus nennt weiter 71 kcal/100 g (Abruf 03.11.2026).
+Die Liste bleibt bei 71, bis die Angabe auf dem Umkarton geprüft ist. Bei Abweichung gilt die Packung.
+
+**Kleinere Abweichungen ohne Folgen:** Royal Canin Satiety in Soße bei Fressnapf 2,2 % Fett und 1,3 % Faser (Liste 2,3 und 1,1);
+Whiskas 1+ bei Fressnapf 7,3 % Protein, 0,25 % Faser, 84,5 % Feuchte, 61 kcal je 85 g (Liste 7,5 / 0,35 / 84,8 / 60,4).
