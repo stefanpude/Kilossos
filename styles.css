@@ -570,6 +570,15 @@ dialog .gramm input { text-align: center; font-size: 1.75rem; font-weight: 700; 
 }
 
 /* Wer am Handy „Bewegung reduzieren“ eingeschaltet hat, bekommt keine Animationen. */
+/* Datenschutz, Impressum, Nutzungsbedingungen: eigene Seiten neben index.html. */
+.rechtstext { display: grid; gap: 14px; padding-top: 8px; padding-bottom: 32px; }
+.rechtstext .karte h3 { margin: 0; font-size: 1rem; }
+.rechtstext ul { margin: 0; padding-left: 20px; }
+.rechtstext a:not(.knopf-zweit) { color: var(--akzent-stark); }
+.platzhalter { background: var(--rand); border-radius: 4px; padding: 0 4px; font-style: italic; }
+.rechtslinks { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.rechtslinks a { color: var(--akzent-stark); min-height: 48px; display: inline-flex; align-items: center; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001s !important; animation-delay: 0s !important; transition-duration: 0.001s !important; }
 }

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="de" data-theme="hell">
+<head>
+  <meta charset="utf-8">
+  <meta name="theme-color" content="#fbf6f1" id="theme-farbe">
+  <!-- Hell/Dunkel wie in index.html, damit die Seite zur App passt. -->
+  <script>
+    try {
+      var w = localStorage.getItem("kilossos-anzeige");
+      var d = w === "dunkel" || (w === "handy" && matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.dataset.theme = d ? "dunkel" : "hell";
+      if (d) document.getElementById("theme-farbe").content = "#1c1714";
+    } catch (e) { document.documentElement.dataset.theme = "hell"; }
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Impressum – Kilossos</title>
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="kopf">
+    <h1>Kilossos</h1>
+  </header>
+  <main class="rechtstext">
+    <a class="knopf-zweit" href="./">Zurück zur App</a>
+    <div class="karte">
+      <h2>Impressum</h2>
+      <p>Angaben nach § 18 Abs. 1 Medienstaatsvertrag und § 5 Digitale-Dienste-Gesetz</p>
+      <p><span class="platzhalter">Name</span><br>
+        <span class="platzhalter">c/o Anschrift des Impressum-Service</span><br>
+        <span class="platzhalter">Straße, PLZ Ort</span></p>
+      <p>E-Mail: <span class="platzhalter">folgt</span></p>
+    </div>
+    <div class="karte">
+      <h3>Über dieses Angebot</h3>
+      <p>Kilossos ist ein privates, nicht gewerbliches Projekt. Die App ist kostenlos, ohne Werbung und ohne Konto.</p>
+      <p>Der Quellcode ist offen unter der Lizenz GNU GPL 3.0:
+        <a href="https://github.com/stefanpude/Kilossos" rel="noopener">github.com/stefanpude/Kilossos</a>.</p>
+      <p>Siehe auch <a href="datenschutz.html">Datenschutz</a> und <a href="nutzungsbedingungen.html">Nutzungsbedingungen</a>.</p>
+    </div>
+    <p class="fuss">Stand: 3. November 2026 · <a href="datenschutz.html">Datenschutz</a> · <a href="impressum.html">Impressum</a> · <a href="nutzungsbedingungen.html">Nutzungsbedingungen</a></p>
+  </main>
+</body>
+</html>

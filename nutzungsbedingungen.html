@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="de" data-theme="hell">
+<head>
+  <meta charset="utf-8">
+  <meta name="theme-color" content="#fbf6f1" id="theme-farbe">
+  <!-- Hell/Dunkel wie in index.html, damit die Seite zur App passt. -->
+  <script>
+    try {
+      var w = localStorage.getItem("kilossos-anzeige");
+      var d = w === "dunkel" || (w === "handy" && matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.dataset.theme = d ? "dunkel" : "hell";
+      if (d) document.getElementById("theme-farbe").content = "#1c1714";
+    } catch (e) { document.documentElement.dataset.theme = "hell"; }
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Nutzungsbedingungen – Kilossos</title>
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="kopf">
+    <h1>Kilossos</h1>
+  </header>
+  <main class="rechtstext">
+    <a class="knopf-zweit" href="./">Zurück zur App</a>
+    <div class="karte">
+      <h2>Nutzungsbedingungen</h2>
+      <p>Kilossos ist kostenlos. Du brauchst kein Konto. Anbieter ist die im <a href="impressum.html">Impressum</a> genannte Person.</p>
+    </div>
+    <div class="karte">
+      <h3>1. Kein Ersatz für den Tierarzt</h3>
+      <p>Kilossos zeichnet auf, rechnet nach und warnt nach festen Grenzen aus den Leitlinien der Tierärzteverbände AAHA und WSAVA.
+        <strong>Die App ersetzt keinen Tierarzt und ist kein Medizinprodukt.</strong> Zielgewicht und Tagesmenge legt
+        immer der Tierarzt fest. Kilossos schlägt keine Futtermengen vor.</p>
+      <p>Bei einer Warnung, bei einer kranken Katze oder wenn sie schlecht frisst: Sprich mit deinem Tierarzt.
+        Frisst eine Katze einen Tag oder länger gar nicht, gehört sie sofort zum Tierarzt.</p>
+    </div>
+    <div class="karte">
+      <h3>2. Futterwerte</h3>
+      <p>Die Werte der Futterliste stammen aus Herstellerangaben, von Händlerseiten oder sind aus den Analysewerten berechnet.
+        Die Quelle steht jeweils dabei. Hersteller ändern Rezepturen, und Händlerseiten enthalten Fehler.
+        Maßgeblich ist immer die Packung deines Futters. Prüfe die Werte damit.</p>
+    </div>
+    <div class="karte">
+      <h3>3. Deine Daten</h3>
+      <p>Deine Einträge liegen nur auf deinem Gerät. Gehen sie verloren, etwa durch Löschen, Gerätewechsel oder einen
+        Defekt, kann der Anbieter sie nicht wiederherstellen. Speichere deshalb regelmäßig eine Sicherung.</p>
+    </div>
+    <div class="karte">
+      <h3>4. Haftung</h3>
+      <p>Kilossos wird unentgeltlich bereitgestellt. Der Anbieter haftet unbeschränkt bei Vorsatz und grober Fahrlässigkeit,
+        bei Verletzung von Leben, Körper oder Gesundheit und nach dem Produkthaftungsgesetz. Im Übrigen ist die Haftung
+        ausgeschlossen, soweit das Gesetz es zulässt.</p>
+    </div>
+    <div class="karte">
+      <h3>5. Verfügbarkeit</h3>
+      <p>Es besteht kein Anspruch darauf, dass Kilossos jederzeit erreichbar ist oder weiterentwickelt wird.</p>
+    </div>
+    <div class="karte">
+      <h3>6. Quellcode</h3>
+      <p>Der Quellcode steht unter der Lizenz GNU GPL 3.0 (oder einer späteren Version):
+        <a href="https://github.com/stefanpude/Kilossos" rel="noopener">github.com/stefanpude/Kilossos</a>.</p>
+    </div>
+    <div class="karte">
+      <h3>7. Recht</h3>
+      <p>Es gilt deutsches Recht. Zwingende Verbraucherschutzvorschriften deines Wohnsitzlandes bleiben unberührt.</p>
+    </div>
+    <p class="fuss">Stand: 3. November 2026 · <a href="datenschutz.html">Datenschutz</a> · <a href="impressum.html">Impressum</a> · <a href="nutzungsbedingungen.html">Nutzungsbedingungen</a></p>
+  </main>
+</body>
+</html>

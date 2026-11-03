@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="de" data-theme="hell">
+<head>
+  <meta charset="utf-8">
+  <meta name="theme-color" content="#fbf6f1" id="theme-farbe">
+  <!-- Hell/Dunkel wie in index.html, damit die Seite zur App passt. -->
+  <script>
+    try {
+      var w = localStorage.getItem("kilossos-anzeige");
+      var d = w === "dunkel" || (w === "handy" && matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.dataset.theme = d ? "dunkel" : "hell";
+      if (d) document.getElementById("theme-farbe").content = "#1c1714";
+    } catch (e) { document.documentElement.dataset.theme = "hell"; }
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Datenschutz – Kilossos</title>
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="kopf">
+    <h1>Kilossos</h1>
+  </header>
+  <main class="rechtstext">
+    <a class="knopf-zweit" href="./">Zurück zur App</a>
+    <div class="karte">
+      <h2>Datenschutzerklärung</h2>
+      <p><strong>Kurz gesagt:</strong> Kilossos hat kein Konto, keine Cloud, keine Werbung und keine Auswertung.
+        Alles, was du einträgst, bleibt auf deinem Gerät. Der Anbieter bekommt diese Daten nie zu sehen.</p>
+    </div>
+    <div class="karte">
+      <h3>1. Verantwortlich</h3>
+      <p><span class="platzhalter">Name und Anschrift folgen</span><br>
+        E-Mail: <span class="platzhalter">folgt</span><br>
+        Ausführliche Angaben im <a href="impressum.html">Impressum</a>.</p>
+    </div>
+    <div class="karte">
+      <h3>2. Was auf deinem Gerät gespeichert wird</h3>
+      <p>Damit die App funktioniert, speichert sie deine Einträge im Speicher des Browsers bzw. der App auf deinem Gerät
+        (localStorage):</p>
+      <ul>
+        <li>Tiere mit Profil: Name, Art, Geschlecht, Geburtsdatum, Körperbau, Haltung, Gewicht in der schlanken Zeit,
+          Profilbild, Tierarztpraxis mit Telefonnummer, Wiegetag</li>
+        <li>Gewichte, Mahlzeiten, Futtersorten und Freigaben vom Tierarzt</li>
+        <li>Einstellungen wie die Darstellung (Hell/Dunkel)</li>
+      </ul>
+      <p>Damit die App auch ohne Internet läuft, legt sie außerdem ihre eigenen Programmdateien in einem Zwischenspeicher ab.
+        Darin stehen keine Einträge von dir.</p>
+      <p>Diese Daten verlassen dein Gerät nicht. Du löschst sie unter „Mehr“ → „Alle Daten löschen“, durch Löschen der
+        Website-Daten im Browser oder durch Deinstallieren der App.</p>
+    </div>
+    <div class="karte">
+      <h3>3. Sicherung und Übersicht für den Tierarzt</h3>
+      <p>Die Sicherung ist eine Datei mit allen deinen Einträgen. Die Übersicht für den Tierarzt erzeugt die App auf
+        deinem Gerät zum Drucken oder als PDF. Wo du beides speicherst und wem du es gibst, entscheidest du allein.
+        Der Anbieter erhält dabei nichts.</p>
+    </div>
+    <div class="karte">
+      <h3>4. Aufruf der App (Hosting)</h3>
+      <p>Die App wird über GitHub Pages ausgeliefert, einen Dienst der GitHub, Inc. (USA). Beim Laden der App und bei
+        Updates verarbeitet GitHub technisch nötige Daten, zum Beispiel deine IP-Adresse, Zeitpunkt, aufgerufene Datei
+        und Angaben zum Browser, und speichert sie in Server-Protokollen. Das dient einer sicheren und funktionierenden
+        Auslieferung (berechtigtes Interesse, Art. 6 Abs. 1 lit. f DSGVO). Dabei können Daten in die USA übermittelt
+        werden. Einzelheiten:
+        <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">Datenschutzerklärung von GitHub</a>.</p>
+      <p>Wenn du Kilossos über Google Play installierst, gelten für den Download und die Updates die Datenschutzbestimmungen von Google.</p>
+    </div>
+    <div class="karte">
+      <h3>5. Links und Anrufe</h3>
+      <p>Die Futterliste nennt Quellen mit Links zu Herstellern und Händlern. Der Knopf zum Anrufen der Tierarztpraxis
+        öffnet die Telefon-App deines Geräts. Erst wenn du darauf tippst, verlässt du Kilossos. Ab dann gelten die
+        Datenschutzbestimmungen der jeweiligen Seite bzw. deines Telefonanbieters.</p>
+    </div>
+    <div class="karte">
+      <h3>6. Was Kilossos nicht tut</h3>
+      <p>Keine Cookies, kein Tracking, keine Analyse, keine Werbung, keine Weitergabe von Daten an Dritte.</p>
+    </div>
+    <div class="karte">
+      <h3>7. Deine Rechte</h3>
+      <p>Du hast nach der DSGVO das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung,
+        Datenübertragbarkeit und Widerspruch. Du kannst dich außerdem bei einer Datenschutz-Aufsichtsbehörde beschweren
+        (Art. 77 DSGVO). Da der Anbieter keine Einträge von dir speichert, liegen sie nur bei dir. Auskunft und Löschung
+        erledigst du direkt in der App.</p>
+    </div>
+    <div class="karte">
+      <h3>8. Änderungen</h3>
+      <p>Ändert sich etwas an der App, das den Datenschutz betrifft, wird diese Erklärung angepasst.
+        Es gilt die Fassung mit dem neuesten Stand.</p>
+    </div>
+    <p class="fuss">Stand: 3. November 2026 · <a href="datenschutz.html">Datenschutz</a> · <a href="impressum.html">Impressum</a> · <a href="nutzungsbedingungen.html">Nutzungsbedingungen</a></p>
+  </main>
+</body>
+</html>
