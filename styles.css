@@ -124,7 +124,7 @@ main {
 }
 .karte h2 { margin: 0; font-size: 1.125rem; }
 .karte p { margin: 0; }
-.label { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-leise); font-weight: 600; }
+.label { font-size: 0.8125rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-leise); font-weight: 600; }
 
 .summe { text-align: center; }
 .gross { font-size: 2.5rem; font-weight: 700; color: var(--akzent-stark); }
@@ -214,7 +214,7 @@ main {
 
 /* Marken: Text immer in --text, die Farbe nur als Fläche */
 .marke {
-  flex: none; display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 3px 9px;
+  flex: none; display: inline-block; font-size: 0.8125rem; font-weight: 600; padding: 3px 9px;
   border-radius: 999px; background: var(--flaeche-2); color: var(--text); white-space: nowrap;
 }
 .marke-gut, .marke-packung, .marke-hersteller { background: var(--gut-hell); }
@@ -265,7 +265,7 @@ a.knopf-zweit[hidden] { display: none; }
 }
 .leiste button {
   min-height: 64px; border: none; background: transparent; color: var(--text-leise);
-  font-size: 0.75rem; font-weight: 600; cursor: pointer;
+  font-size: 0.8125rem; font-weight: 600; cursor: pointer;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   transition: color 0.2s;
 }
@@ -281,7 +281,7 @@ a.knopf-zweit[hidden] { display: none; }
   border-left: 5px solid var(--gefahr); font-size: 0.9375rem;
 }
 .warnung-sofort { font-weight: 600; }
-.warnung .quelle, .hinweis .quelle { display: block; margin-top: 4px; color: var(--text-leise); font-size: 0.75rem; font-weight: 400; }
+.warnung .quelle, .hinweis .quelle { display: block; margin-top: 4px; color: var(--text-leise); font-size: 0.8125rem; font-weight: 400; }
 .hinweis { background: var(--warnung-hell); border-radius: 18px; padding: 0 14px; }
 .hinweis > .aufklapp-kopf { padding: 12px 0; font-weight: 600; font-size: 0.9375rem; }
 .hinweis .punkt {
@@ -315,7 +315,7 @@ a.knopf-zweit[hidden] { display: none; }
 /* Zugeklappt: auch für Tastatur und Vorlesefunktion weg – erst nach der Zuklapp-Animation. */
 .aufklapp:not(.offen) .aufklapp-inhalt > div { visibility: hidden; transition: visibility 0s linear 0.35s; }
 .aufklapp.karte > .aufklapp-inhalt > div > :first-child { margin-top: 8px; }
-.gruppe-titel { font-size: 0.75rem; font-weight: 600; color: var(--text-leise); text-transform: uppercase; letter-spacing: 0.06em; margin: 14px 0 2px; }
+.gruppe-titel { font-size: 0.8125rem; font-weight: 600; color: var(--text-leise); text-transform: uppercase; letter-spacing: 0.06em; margin: 14px 0 2px; }
 
 /* Balken, die beim Aufklappen wachsen (Breite über --w) */
 .balken { flex: 1; height: 8px; border-radius: 99px; background: var(--flaeche-2); overflow: hidden; min-width: 40px; }
@@ -329,15 +329,18 @@ a.knopf-zweit[hidden] { display: none; }
 .balken.neutral > i { background: var(--text-leise); }
 
 /* ---------- Kalorien-Ring ---------- */
-.ring-zeile { display: flex; align-items: center; gap: 18px; }
-.ring { position: relative; width: 130px; height: 130px; flex: none; }
-.ring svg { transform: rotate(-90deg); display: block; }
+.ring-zeile { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 18px; }
+/* Bei großer Handy-Schrift rutscht die Tabelle unter den Ring statt über den Rand. */
+.ring-zeile > :last-child { flex: 1 1 10rem; min-width: 0; }
+/* Größe in rem, damit der Ring mit der Schriftgröße des Handys mitwächst. */
+.ring { position: relative; width: 8.125rem; height: 8.125rem; flex: none; }
+.ring svg { transform: rotate(-90deg); display: block; width: 100%; height: 100%; }
 .ring .bahn { stroke: var(--flaeche-2); }
 .ring .fuell { stroke: var(--gut); stroke-linecap: round; transition: stroke-dashoffset 1s var(--feder), stroke 0.3s; }
 .ring .fuell.ueber { stroke: var(--warnung); }
 .ring-mitte { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
 .ring-mitte b { font-size: 1.75rem; line-height: 1; font-variant-numeric: tabular-nums; }
-.ring-mitte small { font-size: 0.75rem; color: var(--text-leise); margin-top: 4px; }
+.ring-mitte small { font-size: 0.8125rem; color: var(--text-leise); margin: 4px auto 0; max-width: 4.5rem; line-height: 1.25; }
 .zahlen { flex: 1; font-size: 0.875rem; min-width: 0; }
 .zahlen div { display: flex; justify-content: space-between; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--rand); }
 .zahlen div:last-child { border: 0; }
@@ -390,9 +393,9 @@ a.knopf-zweit[hidden] { display: none; }
 .kurve .flaeche { animation: einblenden 1.1s ease both; }
 @keyframes einblenden { from { opacity: 0; } to { opacity: 1; } }
 .kurve .gitter { stroke: var(--rand); stroke-width: 1; }
-.kurve .achse { fill: var(--text-leise); font-size: 11px; font-variant-numeric: tabular-nums; }
+.kurve .achse { fill: var(--text-leise); font-size: 12.5px; font-variant-numeric: tabular-nums; }
 .kurve .ziel { stroke: var(--gut); stroke-width: 1.5; stroke-dasharray: 5 5; }
-.kurve .ziel-text { fill: var(--gut); font-size: 10px; }
+.kurve .ziel-text { fill: var(--gut); font-size: 12px; }
 .kurve .band { fill: var(--gut); opacity: 0.13; }
 .kurve .punkt { fill: var(--flaeche); stroke: var(--akzent); stroke-width: 2.5; }
 .kurve .hilfslinie { stroke: var(--text-leise); stroke-width: 1; stroke-dasharray: 3 3; }
@@ -404,14 +407,14 @@ a.knopf-zweit[hidden] { display: none; }
 .infoblase[hidden] { display: none; }
 .woche { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rand); font-size: 0.875rem; }
 .woche:last-child { border: 0; }
-.woche .tag { width: 46px; text-align: center; font-size: 0.7rem; color: var(--text-leise); line-height: 1.2; flex: none; }
+.woche .tag { width: 46px; text-align: center; font-size: 0.8125rem; color: var(--text-leise); line-height: 1.2; flex: none; }
 .woche .tag b { display: block; font-size: 1.05rem; color: var(--text); }
 .tag-klapp { border-bottom: 1px solid var(--rand); }
 .tag-klapp:last-child { border: 0; }
 .tag-klapp > .aufklapp-kopf { padding: 10px 0; font-size: 0.875rem; }
 .tag-klapp > .aufklapp-kopf .pfeil { width: 24px; height: 24px; font-size: 0.75rem; margin-left: 0; }
 .tag-klapp .tagname { width: 78px; flex: none; }
-.tag-klapp .tagname small { display: block; color: var(--text-leise); font-size: 0.75rem; }
+.tag-klapp .tagname small { display: block; color: var(--text-leise); font-size: 0.8125rem; }
 .tag-klapp .kcal { width: 66px; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; flex: none; }
 .tag-klapp .zeile { padding: 7px 0 7px 8px; }
 .tag-klapp .zeile .icon { width: 30px; height: 30px; font-size: 15px; border-radius: 10px; }
@@ -419,11 +422,11 @@ a.knopf-zweit[hidden] { display: none; }
 /* Diagramme im PDF-Bericht (unverändert seit 0.5) */
 .diagramm { width: 100%; height: auto; display: block; margin-top: 0.5rem; touch-action: pan-y; }
 .diagramm .gitter { stroke: var(--rand); stroke-width: 1; }
-.diagramm .achse { fill: var(--text-leise); font-size: 10px; font-variant-numeric: tabular-nums; }
-.diagramm .beschriftung { fill: var(--text-leise); font-size: 10px; }
+.diagramm .achse { fill: var(--text-leise); font-size: 12px; font-variant-numeric: tabular-nums; }
+.diagramm .beschriftung { fill: var(--text-leise); font-size: 11.5px; }
 .diagramm .beschriftung.stark { fill: var(--text); font-weight: 600; }
 .diagramm .band { fill: var(--gut); opacity: 0.12; }
-.diagramm .band-text { fill: var(--gut); font-size: 9px; }
+.diagramm .band-text { fill: var(--gut); font-size: 11px; }
 .diagramm .ziel { stroke: var(--text-leise); stroke-width: 1; }
 .diagramm .linie { fill: none; stroke: var(--reihe-1); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .diagramm .endpunkt { fill: var(--reihe-1); stroke: var(--flaeche); stroke-width: 2; }
@@ -481,7 +484,7 @@ dialog .gramm input { text-align: center; font-size: 1.75rem; font-weight: 700; 
 .auswahl-knopf:focus-visible, .auswahl.offen > .auswahl-knopf { border-color: var(--akzent); outline: none; }
 .auswahl-knopf .pfeil { margin-left: auto; color: var(--text-leise); transition: transform 0.25s; }
 .auswahl.offen > .auswahl-knopf .pfeil { transform: rotate(180deg); }
-.auswahl-knopf small, .auswahl-fest small, .auswahl-menue small { display: block; color: var(--text-leise); font-size: 0.75rem; }
+.auswahl-knopf small, .auswahl-fest small, .auswahl-menue small { display: block; color: var(--text-leise); font-size: 0.8125rem; }
 .auswahl-knopf .platzhalter { color: var(--text-leise); }
 .auswahl-menue {
   list-style: none; margin: 0; position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 3;

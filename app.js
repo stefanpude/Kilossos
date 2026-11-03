@@ -281,13 +281,13 @@ function zeichneHeute(vonNull = false) {
   zeichneRing(ring.anteil, Math.round(summe.kcal), ring.ueber, vonNull);
   const zeile = (titel, wert) => `<div><span>${titel}</span><b>${wert}</b></div>`;
   if (freigabe) {
-    $("ring-unter").textContent = `${ca}von ${zahl(freigabe.kcalProTag)} kcal`;
+    $("ring-unter").textContent = `${ca}von ${zahl(freigabe.kcalProTag)} kcal`;
     $("ring-rechts").innerHTML =
       zeile("Gefüttert", `${ca}${zahl(summe.kcal)} kcal`) +
       zeile("Freigabe", `${zahl(freigabe.kcalProTag)} kcal`) +
       (ring.darueber > 0 ? zeile("darüber", `${zahl(ring.darueber)} kcal`) : zeile("Noch offen", `${zahl(ring.offen)} kcal`));
   } else {
-    $("ring-unter").textContent = `${ca}kcal · ${zahl(summe.gramm)} g Futter`;
+    $("ring-unter").textContent = `${ca}kcal · ${zahl(summe.gramm)} g Futter`;
     $("ring-rechts").innerHTML =
       zeile("Gefüttert", `${ca}${zahl(summe.kcal)} kcal`) +
       zeile("Menge", `${zahl(summe.gramm)} g`) +
