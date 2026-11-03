@@ -1,6 +1,16 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { FUTTERLISTE, nachrechnung, sucheFutter, ausListe, normalesFutterKcal, eanGueltig } from "../js/futterliste.js";
+import {
+  FUTTERLISTE,
+  nachrechnung,
+  sucheFutter,
+  ausListe,
+  normalesFutterKcal,
+  eanGueltig,
+  eanAusEingabe,
+  findeNachEan,
+  eanBereinigen,
+} from "../js/futterliste.js";
 
 test("normalesFutterKcal zählt Handelsfutter und eigene Sorten, aber kein Diätfutter und keine Leckerlis", () => {
   const futter = new Map([
@@ -119,4 +129,82 @@ test("geschätzte Sorten sagen in der Notiz, dass der Wert berechnet ist", () =>
   assert.match(futter.notiz, /Feuchte 79 %/);
   assert.match(futter.notiz, /aus den Bestandteilen berechnet/);
   assert.doesNotMatch(futter.notiz, /Diätfutter/);
+});
+
+// ---------- Strichcode-Scanner (0.22.0) ----------
+
+test("eanAusEingabe macht aus Scan oder Eingabe eine gültige EAN-13 oder EAN-8, sonst null", () => {
+  assert.equal(eanAusEingabe("4770608260286"), "4770608260286");
+  assert.equal(eanAusEingabe(" 4 770608 260286 "), "4770608260286"); // abgetippt mit Leerzeichen
+  assert.equal(eanAusEingabe("4770608-260286"), "4770608260286");
+  assert.equal(eanAusEingabe("052742918709"), "0052742918709"); // UPC-A (12 Stellen) aus dem Scanner
+  assert.equal(eanAusEingabe("96385074"), "96385074");
+  assert.equal(eanAusEingabe("4770608260287"), null); // falsche Prüfziffer
+  assert.equal(eanAusEingabe("12345"), null);
+  assert.equal(eanAusEingabe(""), null);
+  assert.equal(eanAusEingabe(undefined), null);
+});
+
+test("findeNachEan findet Kitos Sheba zuerst in seiner eigenen Liste (Kopie über listeId)", () => {
+  const eigene = [{ id: "sheba", listeId: "sheba-fresh-fine-huhn-gefluegel-truthahn", name: "Sheba" }];
+  const treffer = findeNachEan("4770608260286", eigene);
+  assert.equal(treffer.art, "eigene");
+  assert.equal(treffer.futter.id, "sheba");
+  assert.equal(treffer.eintrag.id, "sheba-fresh-fine-huhn-gefluegel-truthahn");
+});
+
+test("findeNachEan findet eine Sorte der Futterliste, die noch nicht übernommen ist", () => {
+  const treffer = findeNachEan("4770608260286", []);
+  assert.equal(treffer.art, "liste");
+  assert.equal(treffer.eintrag.id, "sheba-fresh-fine-huhn-gefluegel-truthahn");
+  assert.equal(treffer.futter, undefined);
+});
+
+test("findeNachEan findet eine eigene Sorte über ihre gespeicherte Nummer", () => {
+  const eigene = [{ id: "coshida", name: "Coshida Huhn", ean: ["96385074"] }];
+  const treffer = findeNachEan("96385074", eigene);
+  assert.equal(treffer.art, "eigene");
+  assert.equal(treffer.futter.id, "coshida");
+  assert.equal(treffer.eintrag, undefined);
+});
+
+test("findeNachEan gibt null für unbekannte Nummern", () => {
+  assert.equal(findeNachEan("96385074", [{ id: "x", name: "ohne Nummer" }]), null);
+});
+
+test("jede Listen-Nummer wird gefunden", () => {
+  for (const e of FUTTERLISTE.filter((e) => e.ean)) {
+    for (const ean of e.ean) assert.equal(findeNachEan(ean, []).eintrag.id, e.id, ean);
+  }
+});
+
+test("EAN-Angaben stehen in eigenen Feldern, nicht in Quelle, Hinweis oder Notiz", () => {
+  for (const e of FUTTERLISTE) {
+    assert.doesNotMatch(e.quelle, /EAN/, e.id);
+    assert.doesNotMatch(e.hinweis, /EAN/, e.id);
+    assert.doesNotMatch(ausListe(e, "x").notiz, /EAN|Nummer gehört|Nummern gehören/, e.id);
+    for (const feld of ["eanQuelle", "eanHinweis"]) {
+      if (feld in e) {
+        assert.ok(e.ean, `${e.id}: ${feld} ohne ean`);
+        assert.ok(typeof e[feld] === "string" && e[feld].length > 3, `${e.id}: ${feld}`);
+      }
+    }
+  }
+});
+
+test("eanBereinigen entfernt ungültige Nummern aus einer eingelesenen Sicherung, der Rest bleibt", () => {
+  const daten = {
+    futter: [
+      { id: "a", name: "A", ean: ["96385074", "123", "<script>"] },
+      { id: "b", name: "B", ean: "96385074" },
+      { id: "c", name: "C", ean: ["4770608260287"] },
+      { id: "d", name: "D" },
+    ],
+  };
+  assert.equal(eanBereinigen(daten), 4);
+  assert.deepEqual(daten.futter[0].ean, ["96385074"]);
+  assert.equal("ean" in daten.futter[1], false);
+  assert.equal("ean" in daten.futter[2], false);
+  assert.equal("ean" in daten.futter[3], false);
+  assert.equal(eanBereinigen(daten), 0);
 });

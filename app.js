@@ -34,7 +34,16 @@ import {
 } from "./js/rechnen.js";
 import { zeichneVerlauf, glatt } from "./js/verlauf.js";
 import { berichtDaten, berichtHtml } from "./js/bericht.js";
-import { FUTTERLISTE, sucheFutter, ausListe, normalesFutterKcal } from "./js/futterliste.js";
+import {
+  FUTTERLISTE,
+  sucheFutter,
+  ausListe,
+  normalesFutterKcal,
+  eanAusEingabe,
+  findeNachEan,
+  eanBereinigen,
+} from "./js/futterliste.js";
+import { kameraScanMoeglich, starteScanner } from "./js/scanner.js";
 import { ringWerte, leckerliKachel, monatsGruppen } from "./js/zusammenfassung.js";
 import { leseAnzeige, merkeAnzeige, aufgeloest } from "./js/anzeige.js";
 import { aufklappKarte, merkeZustand, zustandVon, zustandVergessen, aufklappenAnmelden } from "./js/aufklappen.js";
@@ -797,7 +806,10 @@ function futterMenue(gewaehlt) {
       zusatz: `${TYP_NAMEN[f.typ]} · ${zahl(f.kcalPro100g, f.kcalPro100g % 1 ? 1 : 0)} kcal/100 g`,
     })),
     wert: gewaehlt,
-    extra: [{ text: "＋ Aus der Futterliste wählen", aktion: "liste-oeffnen" }],
+    extra: [
+      { text: "＋ Aus der Futterliste wählen", aktion: "liste-oeffnen" },
+      { text: "Strichcode scannen", aktion: "scanner-oeffnen" },
+    ],
   });
 }
 
@@ -954,8 +966,12 @@ const QUELLE_OPTIONEN = [
   { wert: "ungefaehr", text: "Ungefähr" },
 ];
 
-function oeffneFutter(futter) {
+// Nummer aus dem Scanner für eine neue eigene Sorte; wird beim Speichern an der Sorte gemerkt.
+let neueEan = null;
+
+function oeffneFutter(futter, ean = null) {
   bearbeitetesFutter = futter;
+  neueEan = ean;
   const form = $("form-futter");
   form.reset();
   zeigeFehler("futter-fehler", "");
@@ -969,6 +985,12 @@ function oeffneFutter(futter) {
   }
   $("futter-notiz").textContent = futter?.notiz ?? "";
   $("futter-notiz").hidden = !futter?.notiz;
+  $("futter-ean").textContent = ean
+    ? `Strichcode ${ean} wird mit der Sorte gespeichert. Beim nächsten Scan erkennt Kilossos den Beutel.`
+    : futter?.ean?.length
+      ? `Strichcode: ${futter.ean.join(", ")}`
+      : "";
+  $("futter-ean").hidden = !$("futter-ean").textContent;
   $("dialog-futter").showModal();
 }
 
@@ -983,7 +1005,13 @@ beimSpeichern("form-futter", "futter-fehler", (werte) => {
   if (bearbeitetesFutter) {
     Object.assign(bearbeitetesFutter, felder);
   } else {
-    daten.futter.push({ id: neueId(), notiz: "", ...felder });
+    const neu = { id: neueId(), notiz: "", ...felder, ...(neueEan ? { ean: [neueEan] } : {}) };
+    daten.futter.push(neu);
+    // Aus dem Mahlzeit-Blatt gescannt: die neue Sorte ist gleich gewählt.
+    if ($("dialog-mahlzeit").open) {
+      futterMenue(neu.id);
+      zeigeMahlzeitVorschau();
+    }
   }
   sichern();
 });
@@ -1061,11 +1089,105 @@ function uebernehmeAusListe(listeId) {
   daten.futter.push(neu);
   sichern();
   $("dialog-liste").close();
+  $("dialog-scanner").close();
   if ($("dialog-mahlzeit").open) {
     futterMenue(neu.id);
     zeigeMahlzeitVorschau();
   }
   zeigeToast(`✓ ${eintrag.name} übernommen`);
+}
+
+// ---------- Strichcode scannen ----------
+// Wurde der Scanner aus dem Mahlzeit-Blatt geöffnet, wird eine Sorte aus der eigenen Liste gleich gewählt.
+
+let scannerStopp = null;
+
+async function oeffneScanner() {
+  $("form-scanner").reset();
+  $("scanner-ergebnis").innerHTML = "";
+  $("scanner-bild").hidden = true;
+  $("scanner-tipp").textContent = "";
+  $("dialog-scanner").showModal();
+  if (!(await kameraScanMoeglich())) {
+    $("scanner-tipp").textContent =
+      "Dieses Gerät kann Strichcodes nicht mit der Kamera lesen. Tippe die Nummer unter dem Strichcode ein.";
+    return;
+  }
+  $("scanner-bild").hidden = false;
+  $("scanner-tipp").textContent = "Halte den Strichcode in den Rahmen. Danach schaltet sich die Kamera aus.";
+  try {
+    const stopp = await starteScanner($("scanner-video"), (nummer) => {
+      const ean = eanAusEingabe(nummer);
+      if (!ean) return false;
+      $("scanner-bild").hidden = true;
+      $("scanner-tipp").textContent = "";
+      $("scanner-nummer").value = ean;
+      navigator.vibrate?.(60);
+      zeigeScanErgebnis(ean);
+      return true;
+    });
+    if ($("dialog-scanner").open) scannerStopp = stopp;
+    else stopp();
+  } catch {
+    $("scanner-bild").hidden = true;
+    $("scanner-tipp").textContent =
+      "Kilossos darf die Kamera nicht nutzen. Du kannst es in den Einstellungen des Browsers erlauben oder die Nummer eintippen.";
+  }
+}
+
+$("dialog-scanner").addEventListener("close", () => {
+  scannerStopp?.();
+  scannerStopp = null;
+});
+
+// Enter im Nummernfeld sucht, statt das Blatt zu schließen.
+$("scanner-nummer").addEventListener("keydown", (ereignis) => {
+  if (ereignis.key !== "Enter") return;
+  ereignis.preventDefault();
+  scannerSuchen();
+});
+
+function scannerSuchen() {
+  const text = $("scanner-nummer").value;
+  const ean = eanAusEingabe(text);
+  if (ean) return zeigeScanErgebnis(ean);
+  $("scanner-ergebnis").innerHTML = `<p class="fehler">${
+    text.trim()
+      ? "Die Nummer stimmt nicht. Bitte prüfe die Ziffern unter dem Strichcode (meist 13)."
+      : "Bitte die Nummer unter dem Strichcode eintippen."
+  }</p>`;
+}
+
+const kcalText = (wert) => `${zahl(wert, wert % 1 ? 1 : 0)} kcal/100 g`;
+
+function zeigeScanErgebnis(ean) {
+  const treffer = findeNachEan(ean, daten.futter);
+  if (treffer?.art === "eigene" && $("dialog-mahlzeit").open) {
+    $("dialog-scanner").close();
+    futterMenue(treffer.futter.id);
+    zeigeMahlzeitVorschau();
+    return zeigeToast(`✓ ${treffer.futter.name} gewählt`);
+  }
+  let inhalt;
+  if (treffer?.art === "eigene") {
+    const f = treffer.futter;
+    inhalt = `<h3>${sicher(f.name)}</h3>
+      <p class="leise">Schon in deiner Liste · ${TYP_NAMEN[f.typ]} · ${kcalText(f.kcalPro100g)}</p>
+      <button type="button" class="knopf-haupt" data-aktion="scanner-ansehen" data-id="${sicher(f.id)}">Sorte ansehen</button>`;
+  } else if (treffer) {
+    const e = treffer.eintrag;
+    inhalt = `<h3>${sicher(e.name)}</h3>
+      <p class="leise">${TYP_NAMEN[e.typ]} · ${kcalText(e.kcalPro100g)}
+        <span class="marke marke-${e.kcalQuelle}">${QUELLE_NAMEN[e.kcalQuelle]}</span></p>
+      ${e.diaet ? '<p class="leise"><strong>Diätfutter vom Tierarzt:</strong> nur nach Rücksprache.</p>' : ""}
+      <p class="tipp">${e.eanHinweis ? `${sicher(e.eanHinweis)} ` : ""}Aus der Kilossos-Futterliste. Bei Abweichung gilt die Packung.</p>
+      <button type="button" class="knopf-haupt" data-aktion="liste-uebernehmen" data-id="${e.id}">Übernehmen</button>`;
+  } else {
+    inhalt = `<h3>Diese Sorte kennt Kilossos noch nicht</h3>
+      <p class="leise">Nummer ${ean}. Lege sie als eigene Sorte an. Kilossos merkt sich die Nummer und erkennt den Beutel beim nächsten Mal.</p>
+      <button type="button" class="knopf-haupt" data-aktion="scanner-eigene" data-id="${ean}">Als eigene Sorte anlegen</button>`;
+  }
+  $("scanner-ergebnis").innerHTML = `<div class="scanner-treffer">${inhalt}</div>`;
 }
 
 // ---------- Profilbild ----------
@@ -1212,10 +1334,10 @@ $("import-datei").addEventListener("change", async (ereignis) => {
     return;
   }
   const verworfen = fotoBereinigen(neu);
-  const profilFehler = profilBereinigen(neu, tagSchluessel(new Date())) + freigabenBereinigen(neu);
+  const profilFehler = profilBereinigen(neu, tagSchluessel(new Date())) + freigabenBereinigen(neu) + eanBereinigen(neu);
   const anzahl = `${neu.mahlzeiten.length} Mahlzeiten und ${neu.gewichte.length} Gewichte`;
   const fotoText = verworfen > 0 ? " Das Profilbild in der Datei war ungültig und wird nicht übernommen." : "";
-  const profilText = profilFehler > 0 ? " Einige Angaben im Profil oder in den Freigaben waren ungültig und werden nicht übernommen." : "";
+  const profilText = profilFehler > 0 ? " Einige Angaben im Profil, in den Freigaben oder bei den Strichcodes waren ungültig und werden nicht übernommen." : "";
   if (!confirm(`Sicherung mit ${anzahl} einlesen? Alle Einträge auf diesem Handy werden dadurch ersetzt.${fotoText}${profilText}`)) return;
   speichern(neu);
   location.reload();
@@ -1379,6 +1501,16 @@ document.addEventListener("click", (ereignis) => {
       return oeffneFutter(daten.futter.find((f) => f.id === id));
     case "liste-oeffnen":
       return oeffneListe();
+    case "scanner-oeffnen":
+      return oeffneScanner();
+    case "scanner-suchen":
+      return scannerSuchen();
+    case "scanner-ansehen":
+      $("dialog-scanner").close();
+      return oeffneFutter(daten.futter.find((f) => f.id === id));
+    case "scanner-eigene":
+      $("dialog-scanner").close();
+      return oeffneFutter(null, id);
     case "liste-uebernehmen":
       return uebernehmeAusListe(id);
     case "freigabe-neu":

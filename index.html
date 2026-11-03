@@ -147,6 +147,7 @@
     <!-- Futter -->
     <section class="ansicht" data-ansicht="futter" hidden>
       <button class="knopf-haupt" data-aktion="liste-oeffnen">Aus der Futterliste wählen</button>
+      <button class="knopf-zweit" data-aktion="scanner-oeffnen">Strichcode scannen</button>
       <button class="knopf-zweit" data-aktion="futter-neu">＋ Eigene Sorte anlegen</button>
       <p class="tipp">Tippe auf eine Sorte, um sie zu ändern – zum Beispiel, um den genauen kcal-Wert von der Packung einzutragen.</p>
       <div class="karte" id="futter-gruppen"></div>
@@ -236,7 +237,7 @@
         <p class="rechtslinks"><a href="datenschutz.html">Datenschutz</a> <a href="impressum.html">Impressum</a>
           <a href="nutzungsbedingungen.html">Nutzungsbedingungen</a></p>
       </div>
-      <p class="fuss" id="version">Version 0.21.0</p>
+      <p class="fuss" id="version">Version 0.22.0</p>
     </section>
   </main>
 
@@ -306,6 +307,7 @@
       </label>
       <div class="feld"><span id="label-quelle">Woher stammt der Wert?</span><div id="futter-quelle"></div></div>
       <p class="tipp" id="futter-notiz" hidden></p>
+      <p class="tipp" id="futter-ean" hidden></p>
       <p class="fehler" id="futter-fehler" hidden></p>
       <div class="knoepfe">
         <button value="loeschen" formnovalidate class="knopf-gefahr" id="futter-loeschen" hidden>Löschen</button>
@@ -325,6 +327,26 @@
         <input type="search" id="liste-suche" autocomplete="off" placeholder="z. B. Hill's oder Sheba">
       </label>
       <div class="liste-gruppen" id="liste-treffer"></div>
+      <div class="knoepfe">
+        <button value="abbrechen" formnovalidate class="knopf-zweit">Schließen</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Strichcode scannen -->
+  <dialog id="dialog-scanner">
+    <form method="dialog" id="form-scanner">
+      <h2 tabindex="-1" autofocus>Strichcode scannen</h2>
+      <div class="scanner-bild" id="scanner-bild" hidden>
+        <video id="scanner-video" playsinline muted></video>
+        <div class="scanner-rahmen" aria-hidden="true"></div>
+      </div>
+      <p class="tipp" id="scanner-tipp"></p>
+      <label>Nummer eintippen
+        <input id="scanner-nummer" inputmode="numeric" autocomplete="off" placeholder="Ziffern unter dem Strichcode">
+      </label>
+      <button type="button" class="knopf-zweit" data-aktion="scanner-suchen">Nummer suchen</button>
+      <div id="scanner-ergebnis" aria-live="polite"></div>
       <div class="knoepfe">
         <button value="abbrechen" formnovalidate class="knopf-zweit">Schließen</button>
       </div>

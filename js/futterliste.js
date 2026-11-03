@@ -3,7 +3,8 @@
 // Jeder Eintrag nennt Quelle, Abrufdatum und Status:
 //   kcalQuelle "hersteller": kcal-Wert vom Hersteller (Website, Datenblatt oder Händlerseite mit der Deklaration)
 //   kcalQuelle "geschaetzt": kein kcal-Wert veröffentlicht, aus den Analytischen Bestandteilen berechnet (NRC 2006)
-//   ean (freiwillig): Strichcode-Nummern der Packungen, für den späteren Scanner. Eine Sorte kann mehrere haben.
+//   ean (freiwillig): Strichcode-Nummern der Packungen für den Scanner. Eine Sorte kann mehrere haben.
+//   eanQuelle, eanHinweis (freiwillig): woher die Nummern stammen und zu welcher Packung sie gehören.
 // Bei Abweichung gilt immer die Packung. Hintergrund und Rechenwege: docs/futter-recherche.md
 
 import { kcalAusBestandteilen, kcalFuer } from "./rechnen.js";
@@ -25,10 +26,12 @@ export const FUTTERLISTE = [
     kcalQuelle: "hersteller",
     analyse: { protein: 34, fett: 9, asche: 8.6, faser: 14.6, feuchte: null },
     ean: ["3182550768474", "3182550815529"],
-    quelle: "zooplus.de, gleiche Werte auf royalcanin.com; EAN von fressnapf.de",
+    quelle: "zooplus.de, gleiche Werte auf royalcanin.com",
+    eanQuelle: "fressnapf.de",
     url: "https://www.zooplus.de/shop/katzen/katzenfutter_trockenfutter/royal_canin_veterinary_diet/obesity_management/301101",
     abgerufen: ABGERUFEN,
-    hinweis: "Sehr viel Rohfaser für mehr Sättigung. Die 3,5-kg-Packung nennt 309 kcal/100 g. EANs gehören zur 1,5-kg- und zur 6-kg-Packung.",
+    hinweis: "Sehr viel Rohfaser für mehr Sättigung. Die 3,5-kg-Packung nennt 309 kcal/100 g.",
+    eanHinweis: "Die Nummern gehören zur 1,5-kg- und zur 6-kg-Packung.",
   },
   {
     id: "royal-canin-satiety-nass",
@@ -39,10 +42,12 @@ export const FUTTERLISTE = [
     kcalQuelle: "hersteller",
     analyse: { protein: 7.6, fett: 2.3, asche: 1.7, faser: 1.1, feuchte: 84 },
     ean: ["9003579006146"],
-    quelle: "zooplus.de; EAN von fressnapf.de",
+    quelle: "zooplus.de",
+    eanQuelle: "fressnapf.de",
     url: "https://www.zooplus.de/shop/katzen/katzenfutter_dose/royal_canin_veterinary_diet_feline_nassfutter/obesity_management/849648",
     abgerufen: ABGERUFEN,
-    hinweis: "85-g-Beutel = 51,6 kcal. EAN gehört zur 12er-Packung.",
+    hinweis: "85-g-Beutel = 51,6 kcal.",
+    eanHinweis: "Die Nummer gehört zur 12er-Packung.",
   },
   {
     id: "hills-metabolic-trocken",
@@ -106,7 +111,8 @@ export const FUTTERLISTE = [
     kcalQuelle: "hersteller",
     analyse: { protein: 36.9, fett: 10.5, asche: 5.9, faser: 12.9, feuchte: 6.0 },
     ean: ["0052742918709"],
-    quelle: "zooplus.de; EAN von fressnapf.de",
+    quelle: "zooplus.de",
+    eanQuelle: "fressnapf.de",
     url: "https://www.zooplus.de/shop/katzen/katzenfutter_trockenfutter/hills_prescription_diet/gewichtsreduktion/459553",
     abgerufen: ABGERUFEN_2,
     hinweis: "Zum Abnehmen bei starkem Übergewicht. Fressnapf nennt leicht andere Werte (Fett 9,8 %, Faser 12,6 %).",
@@ -135,10 +141,12 @@ export const FUTTERLISTE = [
     kcalQuelle: "hersteller",
     analyse: { protein: 36, fett: 10, asche: 7.5, faser: 10.3, feuchte: null },
     ean: ["3182550706810", "3182550903929", "3182550902984"],
-    quelle: "zooplus.ie (deutsche Seiten nennen keine kcal, gleiche Analysewerte); EAN von fressnapf.de",
+    quelle: "zooplus.ie (deutsche Seiten nennen keine kcal, gleiche Analysewerte)",
+    eanQuelle: "fressnapf.de",
     url: "https://www.zooplus.ie/shop/cats/dry_cat_food/royal_canin/care_nutrition/126948",
     abgerufen: ABGERUFEN,
-    hinweis: "Alleinfutter mit L-Carnitin, kein Diätfutter. EANs gehören zur 400-g-, 3-kg- und 8-kg-Packung.",
+    hinweis: "Alleinfutter mit L-Carnitin, kein Diätfutter.",
+    eanHinweis: "Die Nummern gehören zur 400-g-, 3-kg- und 8-kg-Packung.",
   },
   {
     id: "royal-canin-light-weight-care-sosse",
@@ -149,10 +157,12 @@ export const FUTTERLISTE = [
     kcalQuelle: "geschaetzt",
     analyse: { protein: 10, fett: 2.1, asche: 1.7, faser: 1.2, feuchte: 82 },
     ean: ["9003579308707"],
-    quelle: "zooplus.de (ohne kcal-Angabe); EAN von zoolini.be",
+    quelle: "zooplus.de (ohne kcal-Angabe)",
+    eanQuelle: "zoolini.be",
     url: "https://www.zooplus.de/shop/katzen/katzenfutter_dose/royal_canin_katzenfutter/royal_canin_adult/879819",
     abgerufen: ABGERUFEN,
-    hinweis: "EAN gehört zur 12er-Packung.",
+    hinweis: "",
+    eanHinweis: "Die Nummer gehört zur 12er-Packung.",
   },
   {
     id: "hills-perfect-weight-trocken",
@@ -163,10 +173,12 @@ export const FUTTERLISTE = [
     kcalQuelle: "hersteller",
     analyse: { protein: 37.1, fett: 13, asche: 6.1, faser: 8.8, feuchte: 6 },
     ean: ["0052742025827"],
-    quelle: "hillspet.co.uk (deutsche Seiten nennen keine kcal); EAN von fressnapf.de",
+    quelle: "hillspet.co.uk (deutsche Seiten nennen keine kcal)",
+    eanQuelle: "fressnapf.de",
     url: "https://www.hillspet.co.uk/cat-food/sp-feline-science-plan-adult-perfect-weight-with-chicken-dry",
     abgerufen: ABGERUFEN,
-    hinweis: "Die deutsche Deklaration weicht leicht ab: Protein 37,6 %, Fett 12,7 %, Faser 8,9 %. EAN gehört zur 2,5-kg-Packung.",
+    hinweis: "Die deutsche Deklaration weicht leicht ab: Protein 37,6 %, Fett 12,7 %, Faser 8,9 %.",
+    eanHinweis: "Die Nummer gehört zur 2,5-kg-Packung.",
   },
   {
     id: "purina-one-light-trocken",
@@ -177,10 +189,12 @@ export const FUTTERLISTE = [
     kcalQuelle: "hersteller",
     analyse: { protein: 37, fett: 9.5, asche: 7.5, faser: 6, feuchte: null },
     ean: ["8445290067319"],
-    quelle: "purina.co.uk, Analysewerte gleich wie auf zooplus.de; EAN von fressnapf.de",
+    quelle: "purina.co.uk, Analysewerte gleich wie auf zooplus.de",
+    eanQuelle: "fressnapf.de",
     url: "https://www.zooplus.de/shop/katzen/katzenfutter_trockenfutter/purina_one/purinaone_spezialfutter/194144",
     abgerufen: "2026-11-01",
-    hinweis: "Die deutsche Packung nennt keine kcal. EAN gehört zur 750-g-Packung (Purina ONE Bifensis Light).",
+    hinweis: "Die deutsche Packung nennt keine kcal.",
+    eanHinweis: "Die Nummer gehört zur 750-g-Packung (Purina ONE Bifensis Light).",
   },
 
   {
@@ -209,7 +223,8 @@ export const FUTTERLISTE = [
     quelle: "fressnapf.de, gleiche Werte auf zooplus.de",
     url: "https://www.fressnapf.de/p/purina-one-bifensis-sterilcat-huhn-57-kg-1410726/",
     abgerufen: ABGERUFEN_2,
-    hinweis: "Kein kcal-Wert auf deutschen Seiten. EAN gehört zur 5,7-kg-Packung.",
+    hinweis: "Kein kcal-Wert auf deutschen Seiten.",
+    eanHinweis: "Die Nummer gehört zur 5,7-kg-Packung.",
   },
   {
     id: "royal-canin-sterilised-37-trocken",
@@ -220,10 +235,12 @@ export const FUTTERLISTE = [
     kcalQuelle: "hersteller",
     analyse: { protein: 37, fett: 12, asche: 8.1, faser: 5.3, feuchte: 5.5 },
     ean: ["3182550737593"],
-    quelle: "zooplus.de; Rohfaser und EAN von fressnapf.de",
+    quelle: "zooplus.de; Rohfaser von fressnapf.de",
+    eanQuelle: "fressnapf.de",
     url: "https://www.zooplus.de/shop/katzen/katzenfutter_trockenfutter/royal_canin/sterilised/47442",
     abgerufen: ABGERUFEN_2,
-    hinweis: "EAN gehört zur 2-kg-Packung.",
+    hinweis: "",
+    eanHinweis: "Die Nummer gehört zur 2-kg-Packung.",
   },
   {
     id: "hills-science-plan-sterilised-huhn-trocken",
@@ -234,10 +251,12 @@ export const FUTTERLISTE = [
     kcalQuelle: "hersteller",
     analyse: { protein: 31.8, fett: 10.0, asche: 5.7, faser: 1.1, feuchte: 6 },
     ean: ["0052742030272"],
-    quelle: "hillspet.de; EAN von fressnapf.de",
+    quelle: "hillspet.de",
+    eanQuelle: "fressnapf.de",
     url: "https://www.hillspet.de/cat-food/science-plan-sterilised-cat-young-adult-chicken-dry",
     abgerufen: ABGERUFEN_2,
-    hinweis: "EAN gehört zur 3-kg-Packung.",
+    hinweis: "",
+    eanHinweis: "Die Nummer gehört zur 3-kg-Packung.",
   },
   {
     id: "whiskas-sterile-huhn-trocken",
@@ -251,7 +270,8 @@ export const FUTTERLISTE = [
     quelle: "zoofaster.de",
     url: "https://www.zoofaster.de/whiskas-sterile-mit-huhn-trockenfutter-f-r-sterilisierte-katzen-14kg-i131557",
     abgerufen: ABGERUFEN_2,
-    hinweis: "EAN gehört zur 1,4-kg-Packung. Ein anderer Händler nennt 32 % Protein und 369 kcal.",
+    hinweis: "Ein anderer Händler nennt 32 % Protein und 369 kcal.",
+    eanHinweis: "Die Nummer gehört zur 1,4-kg-Packung.",
   },
   // ---------- Gängige Sorten aus Supermarkt und Drogerie ----------
   {
@@ -290,10 +310,12 @@ export const FUTTERLISTE = [
     kcalQuelle: "hersteller",
     analyse: { protein: 7.5, fett: 4, asche: 1.6, faser: 0.35, feuchte: 84.8 },
     ean: ["8410136025792", "4008429170171"],
-    quelle: "zooplus.de; EAN von fressnapf.de",
+    quelle: "zooplus.de",
+    eanQuelle: "fressnapf.de",
     url: "https://www.zooplus.de/shop/katzen/katzenfutter_dose/whiskas_katzenfutter/adult/443954",
     abgerufen: ABGERUFEN,
-    hinweis: "Gilt für Sauce und Gelee. 85-g-Beutel = 60,4 kcal. EANs gehören zur 12er-Packung Geflügel-Auswahl und zur 80er-Packung Klassische Auswahl, beide in Sauce.",
+    hinweis: "Gilt für Sauce und Gelee. 85-g-Beutel = 60,4 kcal.",
+    eanHinweis: "Die Nummern gehören zur 12er-Packung Geflügel-Auswahl und zur 80er-Packung Klassische Auswahl, beide in Sauce.",
   },
   {
     id: "felix-so-gut-gelee",
@@ -304,11 +326,13 @@ export const FUTTERLISTE = [
     kcalQuelle: "hersteller",
     analyse: { protein: 11.5, fett: 2.5, asche: 2.5, faser: 0.05, feuchte: 82 },
     ean: ["7613036894548"],
-    quelle: "zooplus.de; EAN von fressnapf.de",
+    quelle: "zooplus.de",
+    eanQuelle: "fressnapf.de",
     url: "https://www.zooplus.de/shop/katzen/katzenfutter_dose/felix/felix_so_gut/397041",
     abgerufen: ABGERUFEN,
     hinweis:
-      "Der kcal-Wert steht nur bei „Huhn, Lachs, Kabeljau, Ente“; die anderen Sorten haben dieselben Analysewerte. 85-g-Beutel = 63,8 kcal. EAN gehört zur 12er-Packung Geschmacksvielfalt vom Land.",
+      "Der kcal-Wert steht nur bei „Huhn, Lachs, Kabeljau, Ente“; die anderen Sorten haben dieselben Analysewerte. 85-g-Beutel = 63,8 kcal.",
+    eanHinweis: "Die Nummer gehört zur 12er-Packung Geschmacksvielfalt vom Land.",
   },
   {
     id: "gourmet-perle-erlesene-streifen",
@@ -319,10 +343,12 @@ export const FUTTERLISTE = [
     kcalQuelle: "geschaetzt",
     analyse: { protein: 12.5, fett: 2.5, asche: 2.5, faser: 0.05, feuchte: 80 },
     ean: ["7613287882523"],
-    quelle: "zooplus.de (ohne kcal-Angabe); EAN von fressnapf.de",
+    quelle: "zooplus.de (ohne kcal-Angabe)",
+    eanQuelle: "fressnapf.de",
     url: "https://www.zooplus.de/shop/katzen/katzenfutter_dose/gourmet_perle/gourmet_perle/1281616",
     abgerufen: ABGERUFEN,
-    hinweis: "Gilt für die Fleisch- und Fischsorten; „mit Gemüse/Spinat“ haben 12 % Protein. EAN gehört zur 24er-Packung in Sauce.",
+    hinweis: "Gilt für die Fleisch- und Fischsorten; „mit Gemüse/Spinat“ haben 12 % Protein.",
+    eanHinweis: "Die Nummer gehört zur 24er-Packung in Sauce.",
   },
   {
     id: "kitekat-frischebeutel-sosse",
@@ -333,10 +359,12 @@ export const FUTTERLISTE = [
     kcalQuelle: "hersteller",
     analyse: { protein: 6.4, fett: 4.1, asche: 1.5, faser: 0.15, feuchte: 84.5 },
     ean: ["4008429158995", "4008429158988", "4008429159015"],
-    quelle: "zooplus.de, gleicher Wert bei dm.de und rossmann.de (62 kcal je Beutel); EAN von fressnapf.de",
+    quelle: "zooplus.de, gleicher Wert bei dm.de und rossmann.de (62 kcal je Beutel)",
+    eanQuelle: "fressnapf.de",
     url: "https://www.zooplus.de/shop/katzen/katzenfutter_dose/kitekat/566939",
     abgerufen: ABGERUFEN,
-    hinweis: "Bunte Vielfalt, Landpicknick und Klassische Auswahl. 85-g-Beutel = 62 kcal. EANs gehören zu diesen drei Multipacks (12er und 24er).",
+    hinweis: "Bunte Vielfalt, Landpicknick und Klassische Auswahl. 85-g-Beutel = 62 kcal.",
+    eanHinweis: "Die Nummern gehören zu den Multipacks Bunte Vielfalt, Landpicknick und Klassische Auswahl (12er und 24er).",
   },
   {
     id: "animonda-carny-adult-rind",
@@ -360,10 +388,12 @@ export const FUTTERLISTE = [
     kcalQuelle: "geschaetzt",
     analyse: { protein: 30, fett: 11.5, asche: 9.1, faser: 1.9, feuchte: null },
     ean: ["5900951258572"],
-    quelle: "zooplus.de (ohne kcal-Angabe); EAN von lagerhaus.at",
+    quelle: "zooplus.de (ohne kcal-Angabe)",
+    eanQuelle: "lagerhaus.at",
     url: "https://www.zooplus.de/shop/katzen/katzenfutter_trockenfutter/whiskas/whiskas_trockenfutter_adult/173449",
     abgerufen: ABGERUFEN,
-    hinweis: "Einige Händler nennen 376–378 kcal/100 g, ohne Beleg vom Hersteller. EAN gehört zur 1,9-kg-Packung.",
+    hinweis: "Einige Händler nennen 376–378 kcal/100 g, ohne Beleg vom Hersteller.",
+    eanHinweis: "Die Nummer gehört zur 1,9-kg-Packung.",
   },
   {
     id: "purina-one-adult-huhn-trocken",
@@ -374,10 +404,12 @@ export const FUTTERLISTE = [
     kcalQuelle: "geschaetzt",
     analyse: { protein: 34, fett: 14, asche: 7.5, faser: 2.5, feuchte: null },
     ean: ["8445290062796"],
-    quelle: "zooplus.de (ohne kcal-Angabe); EAN von lagerhaus.at",
+    quelle: "zooplus.de (ohne kcal-Angabe)",
+    eanQuelle: "lagerhaus.at",
     url: "https://www.zooplus.de/shop/katzen/katzenfutter_trockenfutter/purina_one/purina_one_adult/194025",
     abgerufen: ABGERUFEN,
-    hinweis: "Stiftung Warentest nennt 395 kcal/100 g. EAN gehört zur 5,7-kg-Packung.",
+    hinweis: "Stiftung Warentest nennt 395 kcal/100 g.",
+    eanHinweis: "Die Nummer gehört zur 5,7-kg-Packung.",
   },
 
   {
@@ -406,7 +438,8 @@ export const FUTTERLISTE = [
     quelle: "rossmann.de",
     url: "https://www.rossmann.de/de/tier-winston-feine-haeppchen-in-gelee-multipack/p/4305615274683",
     abgerufen: ABGERUFEN_2,
-    hinweis: "Drogerie-Eigenmarke. Im Multipack haben die Sorten 4,5 bis 5 % Fett. EAN gehört zum Multipack.",
+    hinweis: "Drogerie-Eigenmarke. Im Multipack haben die Sorten 4,5 bis 5 % Fett.",
+    eanHinweis: "Die Nummer gehört zum Multipack.",
   },
   {
     id: "gourmet-gold-feine-pastete",
@@ -420,7 +453,8 @@ export const FUTTERLISTE = [
     quelle: "fressnapf.de",
     url: "https://www.fressnapf.de/p/gourmet-gold-feine-pastete-8-x-85-g-1003050001/",
     abgerufen: ABGERUFEN_2,
-    hinweis: "Werte der Sorte Thunfisch, andere Sorten ähnlich. 85-g-Dose. EAN gehört zur 8er-Packung.",
+    hinweis: "Werte der Sorte Thunfisch, andere Sorten ähnlich. 85-g-Dose.",
+    eanHinweis: "Die Nummer gehört zur 8er-Packung.",
   },
   // ---------- Zoohandel und online ----------
   {
@@ -435,7 +469,8 @@ export const FUTTERLISTE = [
     quelle: "fressnapf.de",
     url: "https://www.fressnapf.de/p/macs-nassfutter-katze-adult-rind-und-huehnerherzen-6x400-g-1929268/",
     abgerufen: ABGERUFEN_2,
-    hinweis: "Kein kcal-Wert veröffentlicht. EAN gehört zur 400-g-Dose.",
+    hinweis: "Kein kcal-Wert veröffentlicht.",
+    eanHinweis: "Die Nummer gehört zur 400-g-Dose.",
   },
   {
     id: "catz-finefood-classic-rind-kalb",
@@ -462,7 +497,8 @@ export const FUTTERLISTE = [
     quelle: "fressnapf.de",
     url: "https://www.fressnapf.de/p/mjamjam-nassfutter-katze-adult-huhn-an-moehrchen-6x400-g-1298068/",
     abgerufen: ABGERUFEN_2,
-    hinweis: "EAN gehört zur 400-g-Dose.",
+    hinweis: "",
+    eanHinweis: "Die Nummer gehört zur 400-g-Dose.",
   },
   {
     id: "animonda-vom-feinsten-adult-huhn",
@@ -489,7 +525,8 @@ export const FUTTERLISTE = [
     quelle: "fressnapf.de (307 kJ/100 g)",
     url: "https://www.fressnapf.de/p/bozita-nassfutter-katze-sterilised-haeppchen-in-sauce-mit-viel-huhn-6x370-g-1965170/",
     abgerufen: ABGERUFEN_2,
-    hinweis: "Für kastrierte Katzen. EAN gehört zur 370-g-Packung.",
+    hinweis: "Für kastrierte Katzen.",
+    eanHinweis: "Die Nummer gehört zur 370-g-Packung.",
   },
   {
     id: "leonardo-all-meat-dose",
@@ -516,7 +553,8 @@ export const FUTTERLISTE = [
     quelle: "fressnapf.de",
     url: "https://www.fressnapf.de/p/almo-nature-hfc-natural-nassfutter-katze-huhn-und-garnelen-24x70-g-1099593/",
     abgerufen: ABGERUFEN_2,
-    hinweis: "Ergänzungsfutter, kein Alleinfutter: nicht als einziges Futter geben. EAN gehört zur 70-g-Dose.",
+    hinweis: "Ergänzungsfutter, kein Alleinfutter: nicht als einziges Futter geben.",
+    eanHinweis: "Die Nummer gehört zur 70-g-Dose.",
   },
   {
     id: "granatapet-delicatessen-gefluegel-trocken",
@@ -571,7 +609,8 @@ export const FUTTERLISTE = [
     quelle: "fressnapf.de",
     url: "https://www.fressnapf.de/p/felix-crispies-8x45g-1101443/",
     abgerufen: ABGERUFEN_2,
-    hinweis: "Laut Hersteller etwa 1 kcal pro Stück. EAN gehört zur 180-g-Packung Rind & Huhn.",
+    hinweis: "Laut Hersteller etwa 1 kcal pro Stück.",
+    eanHinweis: "Die Nummer gehört zur 180-g-Packung Rind & Huhn.",
   },
   {
     id: "catisfactions-huhn",
@@ -609,6 +648,39 @@ export function eanGueltig(ean) {
   const pruef = ziffern.pop();
   const summe = ziffern.reverse().reduce((s, z, i) => s + z * (i % 2 === 0 ? 3 : 1), 0);
   return (10 - (summe % 10)) % 10 === pruef;
+}
+
+// Nummer aus dem Scanner oder dem Eingabefeld: Leerzeichen und Striche weg, UPC-A (12 Stellen) mit 0 vorn zu EAN-13.
+// Ergebnis ist eine gültige EAN oder null.
+export function eanAusEingabe(text) {
+  if (typeof text !== "string") return null;
+  let ean = text.replace(/[\s-]/g, "");
+  if (/^\d{12}$/.test(ean)) ean = `0${ean}`;
+  return eanGueltig(ean) ? ean : null;
+}
+
+// Sucht eine Nummer zuerst in den eigenen Sorten (Kopie aus der Liste über listeId oder eigene Sorte mit "ean"),
+// dann in der Futterliste. { art: "eigene", futter, eintrag? } | { art: "liste", eintrag } | null
+export function findeNachEan(ean, eigeneFutter, liste = FUTTERLISTE) {
+  const eintrag = liste.find((e) => e.ean?.includes(ean));
+  const kopie = eintrag && eigeneFutter.find((f) => f.listeId === eintrag.id);
+  if (kopie) return { art: "eigene", futter: kopie, eintrag };
+  const eigene = eigeneFutter.find((f) => Array.isArray(f.ean) && f.ean.includes(ean));
+  if (eigene) return { art: "eigene", futter: eigene };
+  return eintrag ? { art: "liste", eintrag } : null;
+}
+
+// Entfernt ungültige Nummern an eigenen Sorten (z. B. aus einer eingelesenen Sicherung); gibt die Anzahl zurück.
+export function eanBereinigen(daten) {
+  let entfernt = 0;
+  for (const futter of daten.futter) {
+    if (!("ean" in futter)) continue;
+    const gueltig = Array.isArray(futter.ean) ? futter.ean.filter(eanGueltig) : [];
+    entfernt += Array.isArray(futter.ean) ? futter.ean.length - gueltig.length : 1;
+    if (gueltig.length > 0) futter.ean = gueltig;
+    else delete futter.ean;
+  }
+  return entfernt;
 }
 
 // kcal pro 100 g aus den Analytischen Bestandteilen, bei Trockenfutter ohne Feuchte mit der Annahme oben.
