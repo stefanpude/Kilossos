@@ -1,7 +1,7 @@
-# Handy-Test 0.26.0 bis 0.30.0
+# Handy-Test 0.26.0 bis 0.31.0
 
 Nach dem Hochladen etwa 1 Minute warten. Dann die App einmal ganz schließen und neu öffnen.
-Dann **Mehr** ganz nach unten scrollen: Die letzte Zeile (mit dem i-Zeichen) zeigt die Version, dort muss **Version 0.30.0** stehen.
+Dann **Mehr** ganz nach unten scrollen: Die letzte Zeile (mit dem i-Zeichen) zeigt die Version, dort muss **Version 0.31.0** stehen.
 „Über Kilossos“ ist nur eine Überschrift, die Versionszeile nur zum Lesen: Antippen bewirkt bei beiden nichts.
 Steht dort noch eine alte Version, die App noch einmal schließen und öffnen.
 
@@ -70,6 +70,16 @@ Ergebnis 04.11.2026: D1 und D2 bestanden. D3 (Symbol) in den nächsten Tagen beo
 - [ ] Beide Seiten einmal in Ruhe lesen: Klingt etwas falsch, zu streng oder unverständlich? Unten notieren.
 
 Der Knopf „Warum nimmt meine Katze nicht ab?“ im Hinweis „Abnahme stockt“ auf **Heute** erscheint erst mit einer Freigabe und vier Wochen ohne Abnahme. Dafür ist nichts zu tun.
+
+## H. Neu in 0.31.0: Gewicht ändern (Demo in Chrome, deine echten Daten bleiben unberührt)
+
+- [ ] https://stefanpude.github.io/Kilossos/?demo öffnen → **Gewicht** → in der Liste auf eine Wägung tippen, und zwar auf Gewicht und Datum, **nicht** auf das Kreuz rechts. Das Fenster „Gewicht von Kito ändern“ öffnet sich, Gewicht und Datum stehen schon drin.
+- [ ] Einmal auf „−10 g“ tippen, dann **Speichern**: In der Liste steht das neue Gewicht, und es ist keine zweite Wägung dazugekommen (die Zahl „… Wägungen“ über dem Monat bleibt gleich).
+- [ ] Dieselbe Wägung noch einmal antippen, das Datum auf einen Tag im Vormonat stellen, **Speichern**: Der Vormonat klappt auf, die Wägung steht jetzt dort.
+- [ ] Noch einmal antippen, etwas ändern und dann **Abbrechen**: Nichts ändert sich.
+- [ ] Ganz unten auf „Gewicht eintragen“ tippen: Das Fenster heißt wie immer „Gewicht von Kito“, das Gewichtsfeld ist leer. **Abbrechen**.
+
+Danach oben „Demo beenden“ antippen oder den Tab schließen.
 
 ## Was mir auffällt
 

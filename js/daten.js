@@ -36,6 +36,12 @@ export function neueId() {
   return crypto.randomUUID();
 }
 
+// „Gewicht ändern“ (0.31.0): ändert die gespeicherte Wägung selbst, statt eine zweite anzulegen.
+// Kennung, Tier und Monatsfoto bleiben; die Notiz wird wie beim Eintragen ohne Leerzeichen am Rand gespeichert.
+export function waegungAendern(waegung, { kg, datum, notiz }) {
+  Object.assign(waegung, { kg, datum, notiz: String(notiz ?? "").trim() });
+}
+
 // Die beiden Sorten, mit denen Installationen bis 0.26.0 starteten (Kitos Futter). Seit 0.27.0 legt eine
 // frische Installation kein Futter mehr an; die Liste wird nur noch gebraucht, um alte Stände umzustellen
 // (startwerteAktualisieren) und in den Tests. Jeder Aufruf liefert neue Kennungen.

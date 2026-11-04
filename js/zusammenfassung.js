@@ -167,9 +167,11 @@ const kurzTag = (iso) => `${iso.slice(8, 10)}.${iso.slice(5, 7)}.`;
 // über 2 % pro Woche immer markiert, „sicher“ und „langsamer“ nur, wenn die letzte Messung nach der ersten
 // Freigabe liegt. Bewertet nur zur Information – gewarnt wird weiterhin erst über das Mittel von zwei Wochen.
 // bewertung: "gut" | "langsam" | "zunahme" | "zu-schnell" | "neutral". prozent: positiv = Abnahme.
-export function tempoRueckmeldung({ gewichte, freigaben, kg, datum }) {
+// ohneId (seit 0.31.0, „Gewicht ändern“): diese Wägung zählt nicht mit, sonst vergliche sie sich mit sich selbst.
+export function tempoRueckmeldung({ gewichte, freigaben, kg, datum, ohneId }) {
   if (!kg || !datum) return null;
-  const vorher = gewichteSortiert(gewichte).find((g) => g.datum < datum);
+  const andere = ohneId === undefined ? gewichte : gewichte.filter((g) => g.id !== ohneId);
+  const vorher = gewichteSortiert(andere).find((g) => g.datum < datum);
   if (!vorher) return null;
   const wochen = tageZwischen(vorher.datum, datum) / 7;
   const diffKg = kg - vorher.kg;

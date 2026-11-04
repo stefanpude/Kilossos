@@ -14,6 +14,7 @@ import {
   MCS,
   istErsterStart,
   ersteDaten,
+  waegungAendern,
 } from "./js/daten.js";
 import {
   leseZahl,
@@ -552,8 +553,10 @@ function zeichneGewicht() {
           const bild = fotoGueltig(g.foto)
             ? `<button type="button" class="waegung-foto-knopf" data-aktion="waegung-foto-ansehen" data-id="${g.id}" aria-label="Foto vom ${datumText(g.datum)} ansehen"><img class="waegung-foto" src="${sicher(g.foto)}" alt=""></button>`
             : "";
-          return `<div class="zeile">${bild}<span class="name"><b>${zahl(g.kg, 2)} kg</b><small>${datumText(g.datum)}${g.notiz ? " · " + sicher(g.notiz) : ""}</small></span>
-            ${marke}
+          // Gewicht, Datum, Notiz und Marke sind ein Knopf „ändern“ (seit 0.31.0); Foto und Kreuz bleiben eigene Knöpfe daneben.
+          return `<div class="zeile">${bild}<button type="button" class="waegung-knopf tippbar" data-aktion="gewicht-bearbeiten" data-id="${sicher(g.id)}">
+            <span class="name"><b>${zahl(g.kg, 2)} kg</b><small>${datumText(g.datum)}${g.notiz ? " · " + sicher(g.notiz) : ""}</small></span>
+            ${marke}<span class="nur-vorlesen">, ändern</span></button>
             <button type="button" class="knopf-loeschen" data-aktion="gewicht-loeschen" data-id="${g.id}" aria-label="Gewicht vom ${datumText(g.datum)} löschen">${SYMBOL.loeschen}</button></div>`;
         })
         .join("");
@@ -1124,6 +1127,9 @@ beimSpeichern("form-mahlzeit", "mahlzeit-fehler", (werte) => {
 // ±10 g startet bei leerem Feld vom letzten Gewicht.
 // Foto im Gewicht-Dialog: erst beim Speichern übernommen, Abbrechen verwirft es.
 let gewichtFoto = null;
+// Ohne Wägung: neu eintragen. Mit Wägung: Gewicht, Datum und Notiz nachträglich ändern (seit 0.31.0, Plan .planning/gewicht-aendern.md).
+let bearbeiteteWaegung = null;
+let kgVorbelegt = ""; // Inhalt des kg-Felds beim Öffnen (beim Ändern das gespeicherte Gewicht), für die Arm-Rücknahme
 let fotoNachgeholt = false; // „Monatsfoto nachholen“ angetippt
 let fotoLauf = 0; // zählt Dialog-Öffnungen und Bildauswahlen, damit ein spät fertiges Bild nicht im falschen Dialog landet
 
@@ -1140,6 +1146,11 @@ function zeigeGewichtFoto() {
 // Foto-Feld offen nur am Foto-Tag (letzter Wiegetag im Monat, Datum im Dialog); sonst höchstens ein ruhiger Link, solange das Monatsfoto fehlt.
 // Ein schon gewähltes Foto bleibt sichtbar, damit man es wieder entfernen kann.
 function zeigeFotoAngebot() {
+  // Beim Ändern kein Foto-Bereich: Das Foto einer Wägung ändert man über das kleine Bild in der Liste.
+  if (bearbeiteteWaegung) {
+    for (const id of ["gewicht-foto-bereich", "gewicht-foto-nachholen", "gewicht-foto-wiegetag-tipp"]) $(id).hidden = true;
+    return;
+  }
   const angebot = fotoAngebot({ gewichte: daten.gewichte, tierId: tier.id, datum: $("form-gewicht").datum.value, wiegetag: tier.wiegetag });
   const offen = angebot === "fototag" || Boolean(gewichtFoto) || (angebot === "nachholen" && fotoNachgeholt);
   $("gewicht-foto-bereich").hidden = !offen;
@@ -1178,20 +1189,28 @@ function eigeneGewichte() {
   return daten.gewichte.filter((g) => g.tierId === tier.id);
 }
 
-function oeffneGewicht() {
+function oeffneGewicht(waegung = null) {
+  bearbeiteteWaegung = waegung;
   const form = $("form-gewicht");
   form.reset();
-  $("gewicht-titel").textContent = `Gewicht von ${tier.name}`;
+  $("gewicht-titel").textContent = waegung ? `Gewicht von ${tier.name} ändern` : `Gewicht von ${tier.name}`;
   zeigeFehler("gewicht-fehler", "");
-  form.datum.value = tagSchluessel(new Date());
+  form.datum.value = waegung ? waegung.datum : tagSchluessel(new Date());
   form.datum.max = tagSchluessel(new Date());
-  const letzte = gewichteSortiert(eigeneGewichte())[0];
-  form.kg.placeholder = letzte ? zahl(letzte.kg, 2) : "0,00";
+  // Bezug für Platzhalter, ±10 g und die Zahlen im Arm-Bereich: beim Ändern die Wägung selbst, sonst die letzte.
+  const bezug = waegung ?? gewichteSortiert(eigeneGewichte())[0];
+  form.kg.placeholder = bezug ? zahl(bezug.kg, 2) : "0,00";
+  if (waegung) {
+    // Wie in der Liste mit zwei Nachkommastellen („7,20“); eine dritte bleibt stehen, damit Speichern nichts still rundet.
+    form.kg.value = waegung.kg.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 3 });
+    form.notiz.value = waegung.notiz ?? "";
+  }
+  kgVorbelegt = form.kg.value;
   gewichtFoto = null;
   fotoNachgeholt = false;
   fotoLauf += 1;
   zeigeGewichtFoto();
-  armZuruecksetzen(letzte);
+  armZuruecksetzen(bezug);
   zeigeGewichtRueckmeldung();
   $("dialog-gewicht").showModal();
 }
@@ -1247,8 +1266,9 @@ function armRechnen(fehlerZeigen) {
       armNotizGesetzt = true;
     }
   } else {
-    // Ein Wert, den der Bereich selbst eingetragen hat, passt nicht mehr: wieder leeren. Eigene Eingaben bleiben.
-    if (armKg && form.kg.value === armKg) form.kg.value = "";
+    // Ein Wert, den der Bereich selbst eingetragen hat, passt nicht mehr: zurück zum Stand beim Öffnen
+    // (leer beim Eintragen, das gespeicherte Gewicht beim Ändern). Eigene Eingaben bleiben.
+    if (armKg && form.kg.value === armKg) form.kg.value = kgVorbelegt;
     armKg = "";
     // Ebenso die vorgeschlagene Notiz, sonst stünde beim Tierarzt eine falsche Herkunft des Werts.
     if (armNotizGesetzt && form.notiz.value === ARM_NOTIZ) form.notiz.value = "";
@@ -1281,6 +1301,7 @@ function zeigeGewichtRueckmeldung() {
           freigaben: daten.freigaben.filter((f) => f.tierId === tier.id),
           kg,
           datum: form.datum.value,
+          ohneId: bearbeiteteWaegung?.id, // beim Ändern nicht mit sich selbst vergleichen
         })
       : null;
   feld.hidden = !r;
@@ -1292,8 +1313,9 @@ function zeigeGewichtRueckmeldung() {
 
 function kgSchritt(schritt) {
   const form = $("form-gewicht");
-  const letzte = gewichteSortiert(eigeneGewichte())[0];
-  const jetzt = leseZahl(form.kg.value) ?? letzte?.kg ?? null;
+  // Leeres Feld: beim Ändern von der Wägung selbst aus, sonst vom letzten Gewicht.
+  const bezug = bearbeiteteWaegung ?? gewichteSortiert(eigeneGewichte())[0];
+  const jetzt = leseZahl(form.kg.value) ?? bezug?.kg ?? null;
   if (jetzt === null) return form.kg.focus();
   const neu = Math.min(20, Math.max(0.5, Math.round((jetzt + schritt) * 100) / 100));
   form.kg.value = zahl(neu, 2);
@@ -1304,10 +1326,23 @@ $("form-gewicht").addEventListener("input", zeigeGewichtRueckmeldung);
 // Anderes Datum = evtl. Foto-Tag oder anderer Foto-Zeitraum.
 $("form-gewicht").datum.addEventListener("change", zeigeFotoAngebot);
 $("form-gewicht").datum.addEventListener("input", zeigeFotoAngebot);
+// Sicherheitsnetz: Nach dem Schließen gilt das Fenster wieder als „neu eintragen“. Sonst überschriebe ein späteres
+// Öffnen ohne oeffneGewicht() beim Speichern eine alte Wägung. (Das close-Ereignis kommt erst nach dem Speichern.)
+$("dialog-gewicht").addEventListener("close", () => {
+  bearbeiteteWaegung = null;
+});
 
 beimSpeichern("form-gewicht", "gewicht-fehler", (werte) => {
   const kg = leseZahl(werte.get("kg"));
   if (!kg || kg < 0.5 || kg > 20) return "Bitte ein Gewicht zwischen 0,5 und 20 kg eingeben, z. B. 9,32.";
+  // Ändern: dieselbe Wägung, das Foto bleibt. Speicher voll: sichern() lädt den gespeicherten Stand neu und meldet es
+  // (wie bei „Mahlzeit ändern“).
+  if (bearbeiteteWaegung) {
+    waegungAendern(bearbeiteteWaegung, { kg, datum: werte.get("datum"), notiz: werte.get("notiz") });
+    // Zielmonat aufklappen: Rutscht die Wägung in einen zugeklappten Monat, sieht man sie dort, und der Fokus findet sie.
+    merkeZustand("monat-" + bearbeiteteWaegung.datum.slice(0, 7), true);
+    return sichern();
+  }
   const eintrag = { id: neueId(), tierId: tier.id, kg, datum: werte.get("datum"), notiz: werte.get("notiz").trim() };
   // Höchstens ein Monatsfoto (Zeitraum ab dem letzten Wiegetag im Monat): das neue ersetzt nach Rückfrage das alte, sonst ohne Foto.
   let ersetzt = null;
@@ -2119,6 +2154,10 @@ document.addEventListener("click", (ereignis) => {
       return;
     case "gewicht-neu":
       return oeffneGewicht();
+    case "gewicht-bearbeiten": {
+      const waegung = daten.gewichte.find((g) => g.id === id);
+      return waegung ? oeffneGewicht(waegung) : undefined;
+    }
     case "waegung-foto-ansehen":
       return oeffneFoto(daten.gewichte.find((g) => g.id === id));
     case "waegung-foto-entfernen":

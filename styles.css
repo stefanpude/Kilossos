@@ -301,6 +301,17 @@ main {
 .zeile .kcal { font-family: var(--serif); font-size: 0.9375rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .tippbar { cursor: pointer; }
 .tippbar:active { background: var(--flaeche-2); }
+/* Wägung antippen = ändern (seit 0.31.0): Gewicht, Datum, Notiz und Marke als ein Knopf zwischen Foto und Kreuz.
+   Mindestens 48 px hoch zum Tippen. Rand und Polster heben sich auf (7 px wie das Polster von .tag-klapp .zeile):
+   Zeile und Text bleiben, wo sie vorher waren, der Knopf füllt die ganze Zeilenhöhe.
+   Fokus-Rahmen nach innen, sonst schneidet die aufklappbare Monatskarte ihn oben und unten ab. */
+.waegung-knopf {
+  flex: 1; min-width: 0; min-height: 48px; margin: -7px -4px; padding: 7px 4px;
+  display: flex; align-items: center; gap: 12px;
+  background: none; border: 0; border-radius: var(--rund-klein); color: var(--text); text-align: left;
+  position: relative; /* Halt für den versteckten Vorlese-Zusatz */
+}
+.waegung-knopf:focus-visible { outline-offset: -3px; }
 
 .knopf-loeschen {
   flex: none; width: 48px; height: 48px; margin: -6px -10px -6px 0; border: none; border-radius: var(--rund-klein);

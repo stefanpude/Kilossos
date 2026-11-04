@@ -19,6 +19,7 @@ import {
   istErsterStart,
   ersteDaten,
   alteStartsorten,
+  waegungAendern,
 } from "../js/daten.js";
 
 // Ersatz für den Browserspeicher, damit die Tests ohne Browser laufen.
@@ -355,4 +356,18 @@ test("befundText: BCS und MCS in Worten, leer ohne Angaben", () => {
   assert.equal(befundText(fr({ mcs: "normal" })), "normale Muskeln");
   assert.equal(befundText(fr()), "");
   assert.deepEqual(Object.keys(MCS), ["normal", "leicht", "maessig", "stark"]);
+});
+
+// „Gewicht ändern“ (0.31.0): Antippen einer Wägung ändert genau diese, statt eine zweite anzulegen.
+test("waegungAendern: ändert Gewicht, Datum und Notiz der Wägung selbst; Kennung, Tier und Foto bleiben", () => {
+  const foto = "data:image/jpeg;base64,/9j/AAAA";
+  const waegung = { id: "g1", tierId: "k", kg: 9.32, datum: "2026-10-28", notiz: "Tierarzt", foto };
+  waegungAendern(waegung, { kg: 9.23, datum: "2026-10-27", notiz: "  nachgewogen  " });
+  assert.deepEqual(waegung, { id: "g1", tierId: "k", kg: 9.23, datum: "2026-10-27", notiz: "nachgewogen", foto });
+});
+
+test("waegungAendern: fehlende Notiz wird leer, wie beim Eintragen", () => {
+  const waegung = { id: "g2", tierId: "k", kg: 9.32, datum: "2026-10-28" }; // alte Sicherung ohne Notiz
+  waegungAendern(waegung, { kg: 9.3, datum: "2026-10-28", notiz: null });
+  assert.deepEqual(waegung, { id: "g2", tierId: "k", kg: 9.3, datum: "2026-10-28", notiz: "" });
 });

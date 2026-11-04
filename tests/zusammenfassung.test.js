@@ -157,6 +157,15 @@ test("tempoRueckmeldung: vergleicht mit der letzten Messung vor dem Datum", () =
   assert.equal(tempoRueckmeldung({ gewichte: zwei, freigaben: [], kg: 9.3, datum: "2026-10-05" }).seit, "2026-10-01");
 });
 
+test("tempoRueckmeldung beim Ändern (0.31.0): nie mit der Wägung vergleichen, die gerade geändert wird", () => {
+  // Wägung vom 08.10. (9,25 kg) bekommt das Datum 15.10.: Vergleich mit dem 01.10. (9,32 kg), nicht mit sich selbst.
+  const r = tempoRueckmeldung({ gewichte: zwei, freigaben: [], kg: 9.25, datum: "2026-10-15", ohneId: "2026-10-08" });
+  assert.equal(r.seit, "2026-10-01");
+  nahe(r.diffKg, -0.07);
+  // Wägung vom 01.10. rückt auf den 05.10.: davor liegt dann keine andere Wägung, also keine Rückmeldung.
+  assert.equal(tempoRueckmeldung({ gewichte: zwei, freigaben: [], kg: 9.32, datum: "2026-10-05", ohneId: "2026-10-01" }), null);
+});
+
 test("tempoRueckmeldung: sicher/langsamer nur nach einer Freigabe (wie wochenRaten)", () => {
   assert.equal(tempoRueckmeldung({ gewichte: zwei, freigaben: [], kg: 9.18, datum: "2026-10-15" }).bewertung, "neutral");
   const ohne = tempoRueckmeldung({ gewichte: zwei, freigaben: [], kg: 9.18, datum: "2026-10-15" });
