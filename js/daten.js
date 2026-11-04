@@ -25,6 +25,8 @@ export const VERSION = 1;
 
 // Im Demo-Modus (Link mit "?demo") gehen alle Lese- und Schreibzugriffe in einen eigenen Speicherplatz.
 // Die echten Einträge unter "kilossos-daten" werden dabei nie angefasst.
+// Einträge, die laden() als beschädigt aussortiert hat (nur zur Sicherheit aufgehoben, die App liest sie nicht).
+export const ENTFERNT_SCHLUESSEL = "kilossos-entfernt";
 let schluessel = SCHLUESSEL;
 export function demoModus(an) {
   schluessel = an ? DEMO_SCHLUESSEL : SCHLUESSEL;
@@ -86,6 +88,54 @@ export function istGueltig(daten) {
     ["tiere", "futter", "mahlzeiten", "gewichte", "freigaben"].every((feld) => Array.isArray(daten[feld])) &&
     daten.tiere.length > 0
   );
+}
+
+// ---------- Einträge prüfen (Sicherungen können von irgendwoher kommen) ----------
+// Wirft Einträge raus, deren Pflichtfelder fehlen oder den falschen Typ haben. Sonst stürzt das Zeichnen ab
+// (Fund 04.11.2026: ein null in "gewichte" legte „Heute“ lahm). Gibt die Zahl der Änderungen zurück.
+const istObjekt = (x) => x !== null && typeof x === "object" && !Array.isArray(x);
+const istText = (x) => typeof x === "string" && x.length > 0;
+const istZahl = (x) => typeof x === "number" && Number.isFinite(x) && x > 0;
+const istTag = (x) => typeof x === "string" && /^\d{4}-\d{2}-\d{2}$/.test(x) && !Number.isNaN(Date.parse(x));
+const istZeitpunkt = (x) => typeof x === "string" && !Number.isNaN(Date.parse(x));
+
+const PFLICHT = {
+  tiere: (t) => istText(t.id), // Name wird unten repariert: wegen eines kaputten Namens darf kein Tier samt Einträgen verschwinden.
+  futter: (f) => istText(f.id) && typeof f.name === "string" && istZahl(f.kcalPro100g),
+  // futterId darf fehlen oder null sein (vor 0.7.0 möglich); die App zeigt dann „Gelöschte Sorte“.
+  mahlzeiten: (m) => istText(m.id) && istText(m.tierId) && istZahl(m.gramm) && istZeitpunkt(m.zeitpunkt),
+  gewichte: (g) => istText(g.id) && istText(g.tierId) && istZahl(g.kg) && istTag(g.datum),
+  freigaben: (f) => istText(f.id) && istText(f.tierId) && istTag(f.datum) && istZahl(f.zielgewichtKg) && istZahl(f.kcalProTag),
+};
+
+// entfernt: optionale Liste, in die die verworfenen Einträge kommen (laden() hebt sie auf, damit nichts still verloren geht).
+export function eintraegeBereinigen(daten, entfernt = []) {
+  let geaendert = 0;
+  for (const [feld, gueltig] of Object.entries(PFLICHT)) {
+    const behalten = [];
+    for (const e of daten[feld]) {
+      if (istObjekt(e) && gueltig(e)) behalten.push(e);
+      else entfernt.push({ feld, eintrag: e });
+    }
+    geaendert += daten[feld].length - behalten.length;
+    daten[feld] = behalten;
+    if (feld === "tiere") {
+      for (const t of daten.tiere) {
+        if (typeof t.name !== "string" || !t.name.trim()) {
+          t.name = "Tier"; // wie profilBereinigen in js/profil.js
+          geaendert += 1;
+        }
+      }
+    }
+    // Notizen werden als Text angezeigt: alles andere wird geleert statt den Eintrag zu verwerfen.
+    for (const e of daten[feld]) {
+      if ("notiz" in e && typeof e.notiz !== "string") {
+        e.notiz = "";
+        geaendert += 1;
+      }
+    }
+  }
+  return geaendert;
 }
 
 // Profilbild: nur echte JPEG- oder PNG-Bilder und nicht zu groß – eine Sicherungsdatei kann von irgendwoher kommen.
@@ -153,6 +203,20 @@ export function laden(speicher = localStorage) {
   // Gespeichert wird erst, wenn der Halter in der Einrichtung seine Katze angelegt hat (app.js).
   if (text === null) return ersteDaten({ name: "Deine Katze", kastriert: false });
   const daten = JSON.parse(text);
+  // Kaputte Einträge (z. B. aus einer Sicherung, die vor 0.28.2 eingelesen wurde) nicht anzeigen.
+  // Was dabei wegfällt, kommt unter einen eigenen Schlüssel, damit es nicht still verloren geht.
+  if (istGueltig(daten)) {
+    const entfernt = [];
+    eintraegeBereinigen(daten, entfernt);
+    if (entfernt.length) {
+      try {
+        const alt = JSON.parse(speicher.getItem(ENTFERNT_SCHLUESSEL) ?? "[]");
+        speicher.setItem(ENTFERNT_SCHLUESSEL, JSON.stringify([...alt, ...entfernt]));
+      } catch {
+        // Speicher voll oder gesperrt: dann nur nicht anzeigen.
+      }
+    }
+  }
   if (!istGueltig(daten)) {
     throw new Error("Die gespeicherten Daten haben ein unbekanntes Format.");
   }

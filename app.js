@@ -13,6 +13,7 @@ import {
   SICHERUNG_ALLE_TAGE,
   fotoGueltig,
   fotoBereinigen,
+  eintraegeBereinigen,
   freigabenBereinigen,
   MCS,
   istErsterStart,
@@ -1697,13 +1698,20 @@ $("import-datei").addEventListener("change", async (ereignis) => {
     alert("Diese Datei ist keine gültige Kilossos-Sicherung.");
     return;
   }
+  // Zuerst kaputte Einträge entfernen: Die übrigen Prüfungen erwarten echte Einträge.
+  const kaputt = eintraegeBereinigen(neu);
+  if (!istGueltig(neu)) {
+    alert("Diese Datei ist keine gültige Kilossos-Sicherung.");
+    return;
+  }
   const verworfen = fotoBereinigen(neu);
   const profilFehler = profilBereinigen(neu, tagSchluessel(new Date())) + freigabenBereinigen(neu) + eanBereinigen(neu);
   const anzahl = `${neu.mahlzeiten.length} Mahlzeiten und ${neu.gewichte.length} Gewichte`;
   const fotoText = verworfen > 0 ? " Ein Foto in der Datei war ungültig und wird nicht übernommen." : "";
   const profilText = profilFehler > 0 ? " Einige Angaben im Profil, in den Freigaben oder bei den Strichcodes waren ungültig und werden nicht übernommen." : "";
+  const kaputtText = kaputt > 0 ? ` ${kaputt === 1 ? "Ein Eintrag war" : `${kaputt} Einträge waren`} beschädigt und ${kaputt === 1 ? "wird" : "werden"} entfernt oder repariert.` : "";
   const ersetzen = einrichtungLaeuft ? "" : " Alle Einträge auf diesem Handy werden dadurch ersetzt.";
-  if (!confirm(`Sicherung mit ${anzahl} einlesen?${ersetzen}${fotoText}${profilText}`)) return;
+  if (!confirm(`Sicherung mit ${anzahl} einlesen?${ersetzen}${kaputtText}${fotoText}${profilText}`)) return;
   try {
     // Auch während der Einrichtung erlaubt: Die Sicherung ersetzt den Platzhalter vollständig.
     speichernInSpeicher(neu);
