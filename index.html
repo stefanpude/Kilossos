@@ -249,6 +249,16 @@
         </button>
       </div>
 
+      <h3 class="gruppe-titel">Wissen</h3>
+      <div class="liste">
+        <button type="button" class="eintrag" data-aktion="begriffe-erklaerung">
+          <span data-symbol="buch"></span><span class="text">Begriffe kurz erklärt</span><span class="weiter" data-symbol="weiter"></span>
+        </button>
+        <button type="button" class="eintrag" data-aktion="warum-nicht-ab">
+          <span data-symbol="frage"></span><span class="text">Warum nimmt meine Katze nicht ab?</span><span class="weiter" data-symbol="weiter"></span>
+        </button>
+      </div>
+
       <h3 class="gruppe-titel">Einstellungen</h3>
       <div class="liste">
         <div class="eintrag eintrag-auswahl">
@@ -315,7 +325,7 @@
           <span data-symbol="dokument"></span><span class="text">Nutzungsbedingungen</span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.29.4</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.30.0</span>
         </div>
       </div>
     </section>
@@ -662,6 +672,68 @@
         WSAVA Nutritional Assessment Guidelines 2011 und Merkblatt Leckerlis 2025; Flanagan et al. 2018 (Studie mit
         über 700 Katzen). Alle Rechnungen in der
         <a href="https://github.com/stefanpude/Kilossos/blob/main/docs/sicherheitsgrenzen.md" target="_blank" rel="noopener">Fachfassung für Tierärzte</a>.</p>
+      <div class="knoepfe">
+        <button value="abbrechen" class="knopf-haupt">Verstanden</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Erklärseite „Begriffe kurz erklärt“: Begriffe, Texte und Quellen in js/wissen.js (Plan: .planning/erklaerseiten.md) -->
+  <dialog id="dialog-begriffe">
+    <form method="dialog">
+      <h2 tabindex="-1" autofocus>Begriffe kurz erklärt</h2>
+      <p class="tipp">Tippe auf einen Begriff, um die Erklärung zu öffnen. Unter jeder Erklärung steht ihre Quelle.</p>
+      <div id="begriffe-liste"></div>
+      <div class="knoepfe">
+        <button value="abbrechen" class="knopf-haupt">Verstanden</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Erklärseite „Warum nimmt meine Katze nicht ab?“ (Plan und Quellen: .planning/erklaerseiten.md).
+       Keine Futtermengen. Der Kasten zur Fettleber bleibt immer sichtbar, nie zugeklappt. -->
+  <dialog id="dialog-nicht-ab">
+    <form method="dialog">
+      <h2 tabindex="-1" autofocus>Warum nimmt meine Katze nicht ab?</h2>
+      <p>Sicher sind bei Katzen 0,5 bis 2&nbsp;% des Gewichts pro Woche, und einzelne Wägungen schwanken.
+        Bleibt die Kurve über mehrere Wochen flach, steckt oft eine dieser Ursachen dahinter.</p>
+      <p class="notfall-hinweis"><strong>Bitte nie hungern lassen.</strong> Der alte Rat, einfach nur das neue Futter
+        hinzustellen, weil eine Katze vor vollem Napf nicht verhungert, ist gefährlich. Frisst eine Katze nicht, kann sie
+        in wenigen Tagen eine Fettleber bekommen. Stelle neues Futter deshalb über mindestens eine Woche langsam um und biete es zuerst neben dem gewohnten an.
+        Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort zum Tierarzt.</p>
+      <h3>Eine andere Katze frisst mit</h3>
+      <p>Füttere die Katzen getrennt und zu festen Zeiten, jede in einem eigenen Raum oder an einem Platz, den die
+        andere nicht erreicht. Ein Futterautomat, der nur beim Chip der richtigen Katze öffnet, hilft ebenfalls.
+        Manchmal ist es einfacher, wenn alle Katzen dasselbe Futter bekommen; ob das Diätfutter auch für die andere
+        Katze passt, klärt der Tierarzt.</p>
+      <h3>Nicht alle machen mit</h3>
+      <p>Sprich den Plan mit allen ab, die deine Katze füttern: Familie, Mitbewohner und bei Freigängern auch die
+        Nachbarn. Am einfachsten wiegst du morgens das Futter für den ganzen Tag ab, und alle füttern nur daraus.</p>
+      <h3>Leckerlis und Reste zählen mit</h3>
+      <p>Leckerlis, Tischreste und das Häppchen für die Tablette sollen zusammen höchstens 10&nbsp;% der Tageskalorien
+        ausmachen. Trag sie als Leckerli ein, damit Kilossos sie mitzählt. Für Training und Belohnung nimmst du am
+        besten ein paar Stück von der Tagesmenge, zum Beispiel vom Trockenfutter, und trägst sie als Mahlzeit mit
+        dieser Sorte ein.</p>
+      <h3>Sie bettelt</h3>
+      <p>Betteln ist bei Katzen meist Gewohnheit oder der Wunsch nach Aufmerksamkeit. Spielen, Streicheln oder ein
+        Futterspielzeug helfen dann oft mehr als ein Extra-Happen. Auch mehrere kleine Mahlzeiten über den Tag verteilt
+        machen es leichter.</p>
+      <h3>Ungenau abgemessen</h3>
+      <p>Messbecher sind ungenau, gerade bei den kleinen Mengen für Katzen. Wiege das Futter deshalb mit der
+        Küchenwaage, bevor du Wasser oder Brühe dazugibst.</p>
+      <h3>Gefüttert wird nach der Packung</h3>
+      <p>Die Fütterungstabelle auf der Packung gibt einen Startwert für eine durchschnittliche Katze, die ihr Gewicht
+        halten soll. Zum Abnehmen legt der Tierarzt die Tagesmenge fest und rechnet dabei mit dem Zielgewicht.</p>
+      <h3>Die Abnahme wird langsamer</h3>
+      <p>Mit jedem Kilo weniger braucht der Körper weniger Energie, und auch Krankheiten können die Abnahme bremsen.
+        Gibt es eine Freigabe und sind es vier Wochen lang weniger als 0,5&nbsp;% pro Woche, zeigt Kilossos auf „Heute“
+        einen Hinweis. Besprich dann den Plan mit dem Tierarzt, nur er passt die Menge an.</p>
+      <h3>Bitte nicht selbst kürzen</h3>
+      <p>Weniger Futter auf eigene Faust kann eine Fettleber auslösen. Nimmt deine Katze trotz allem nicht ab, sprich
+        mit dem Tierarzt, denn nur er ändert die Tagesmenge.</p>
+      <p class="leise">Quellen: AAHA Weight Management Guidelines 2014, Tabelle 3; AAFP/ISFM-Konsens zur Fütterung von
+        Katzen 2018; German et al. 2011 (Messbecher); WSAVA-Merkblatt Leckerlis 2025; Cornell Feline Health Center
+        und Merck Veterinary Manual (Fettleber); Armstrong 2011 (WSAVA).</p>
       <div class="knoepfe">
         <button value="abbrechen" class="knopf-haupt">Verstanden</button>
       </div>

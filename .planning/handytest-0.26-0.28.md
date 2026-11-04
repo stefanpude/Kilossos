@@ -1,7 +1,7 @@
-# Handy-Test 0.26.0 bis 0.29.4
+# Handy-Test 0.26.0 bis 0.30.0
 
 Nach dem Hochladen etwa 1 Minute warten. Dann die App einmal ganz schließen und neu öffnen.
-Dann **Mehr** ganz nach unten scrollen: Die letzte Zeile (mit dem i-Zeichen) zeigt die Version, dort muss **Version 0.29.4** stehen.
+Dann **Mehr** ganz nach unten scrollen: Die letzte Zeile (mit dem i-Zeichen) zeigt die Version, dort muss **Version 0.30.0** stehen.
 „Über Kilossos“ ist nur eine Überschrift, die Versionszeile nur zum Lesen: Antippen bewirkt bei beiden nichts.
 Steht dort noch eine alte Version, die App noch einmal schließen und öffnen.
 
@@ -59,6 +59,17 @@ Ergebnis 04.11.2026: D1 und D2 bestanden. D3 (Symbol) in den nächsten Tagen beo
 
 - [ ] https://stefanpude.github.io/Kilossos/?demo öffnen → **Verlauf**: Direkt unter der Gewichtskurve und ihrer Legende steht klein und grau „Tippe auf die Kurve, um Datum und Gewicht zu sehen …“, noch in derselben Karte.
 - [ ] Weiter nach unten scrollen: erst „Tempo pro Woche“, dann „Futter pro Tag“, dann „Befunde vom Tierarzt“, ganz unten „Vorher / Nachher“.
+
+## G. Neu in 0.30.0 (normaler Tab, nur lesen, nichts eintragen)
+
+- [ ] **Mehr** öffnen: Unter „Übersicht für den Tierarzt“ steht eine neue Gruppe **Wissen** mit „Begriffe kurz erklärt“ und „Warum nimmt meine Katze nicht ab?“.
+- [ ] „Begriffe kurz erklärt“ antippen: Ein Blatt mit 12 Begriffen öffnet sich, von „Alleinfutter und Ergänzungsfutter“ bis „Zielgewicht“, alle zugeklappt. Einen Begriff antippen: Die Erklärung klappt auf, darunter klein die Quelle. Noch einmal antippen: Sie klappt wieder zu.
+- [ ] „BCS und MCS“ aufklappen und den grünen Link „Mehr zum BCS“ antippen: Das Blatt „Was ist der BCS?“ legt sich darüber. Dort „Verstanden“ antippen: Du bist wieder bei den Begriffen.
+- [ ] Unten „Verstanden“ antippen: Das Blatt schließt, du bist wieder unter **Mehr**.
+- [ ] „Warum nimmt meine Katze nicht ab?“ antippen: Nach zwei Sätzen kommt der Kasten „Bitte nie hungern lassen.“ mit einem Strich links, darunter 8 Abschnitte, ganz unten klein die Quellen.
+- [ ] Beide Seiten einmal in Ruhe lesen: Klingt etwas falsch, zu streng oder unverständlich? Unten notieren.
+
+Der Knopf „Warum nimmt meine Katze nicht ab?“ im Hinweis „Abnahme stockt“ auf **Heute** erscheint erst mit einer Freigabe und vier Wochen ohne Abnahme. Dafür ist nichts zu tun.
 
 ## Was mir auffällt
 

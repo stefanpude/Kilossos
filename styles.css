@@ -159,6 +159,19 @@ body.willkommen-offen { overflow: hidden; }
 #dialog-bcs h3, #dialog-grenzen h3 { margin: 4px 0 0; font-size: 1.0625rem; }
 #dialog-bcs h2:focus, #dialog-grenzen h2:focus, #dialog-geschichte h2:focus { outline: none; }
 #dialog-grenzen .leise a { color: inherit; font-weight: 700; }
+/* Erklärseiten ab 0.30.0: „Warum nimmt meine Katze nicht ab?“ wie „Welche Grenzen gelten?“,
+   „Begriffe kurz erklärt“ als ruhige Liste mit Trennlinien, Begriff halbfett, Quelle klein darunter. */
+#dialog-nicht-ab p { margin: 0 0 10px; }
+#dialog-nicht-ab h3 { margin: 4px 0 0; font-size: 1.0625rem; }
+#dialog-nicht-ab .notfall-hinweis { margin: 0 0 12px; }
+#dialog-begriffe h2:focus, #dialog-nicht-ab h2:focus { outline: none; }
+#begriffe-liste { margin: 0 0 12px; border-top: 1px solid var(--rand); }
+.begriff { border-bottom: 1px solid var(--rand); }
+.begriff > .aufklapp-kopf .zusammen { font-weight: 600; }
+.begriff .aufklapp-inhalt p { margin: 0 0 4px; }
+.begriff .knopf-text { display: block; }
+.begriff .quelle { display: block; color: var(--text-leise); font-size: 0.8125rem; }
+.begriff.offen .aufklapp-inhalt > div { padding-bottom: 12px; }
 
 main {
   max-width: 560px;

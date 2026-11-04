@@ -48,6 +48,7 @@ import { ringWerte, leckerliKachel, monatsGruppen, tempoRueckmeldung, achtWochen
 import { SYMBOL } from "./js/symbole.js";
 import { leseAnzeige, merkeAnzeige, aufgeloest } from "./js/anzeige.js";
 import { aufklappKarte, merkeZustand, zustandVon, zustandVergessen, aufklappenAnmelden } from "./js/aufklappen.js";
+import { begriffeHtml, hinweisKnopf } from "./js/wissen.js";
 import { auswahlFeld, auswahlAnmelden } from "./js/auswahl.js";
 import { alterText, telefonLink, telefonGueltig, istWiegetag, WOCHENTAGE, HALTUNG } from "./js/profil.js";
 import { aktivesTier, leseAktivesTier, merkeAktivesTier, neuesTier, eintraegeVon, tierEntfernen } from "./js/tiere.js";
@@ -429,7 +430,7 @@ function zeichneHeute(vonNull = false) {
             id: "hinweis-" + w.id,
             klasse: "hinweis",
             kopf: `<span class="punkt" aria-hidden="true">i</span><span class="zusammen">${sicher(HINWEIS_TITEL[w.id] ?? "Hinweis")}</span>`,
-            inhalt: `<p>${sicher(w.text)}</p><span class="quelle">Quelle: ${sicher(w.quelle)}</span>`,
+            inhalt: `<p>${sicher(w.text)}</p>${hinweisKnopf(w.id)}<span class="quelle">Quelle: ${sicher(w.quelle)}</span>`,
           })}</li>`
         : `<li class="warnung warnung-${w.art}">${sicher(w.text)}<span class="quelle">Quelle: ${sicher(w.quelle)}</span></li>`
     )
@@ -935,6 +936,12 @@ for (const dialog of document.querySelectorAll("dialog")) {
       knopf?.focus({ preventScroll: true });
     });
   });
+}
+
+// Erklärseite „Begriffe kurz erklärt“: einmal beim Start einsetzen, die Begriffe ändern sich nicht.
+{
+  const ort = $("begriffe-liste");
+  if (ort) ort.innerHTML = begriffeHtml();
 }
 
 // Jedes Blatt heißt wie seine Überschrift: Die Vorlesefunktion sagt dann beim Öffnen „Gewicht eintragen, Dialog“.
@@ -2092,6 +2099,10 @@ document.addEventListener("click", (ereignis) => {
       return $("dialog-bcs").showModal();
     case "grenzen-erklaerung":
       return $("dialog-grenzen").showModal();
+    case "begriffe-erklaerung":
+      return $("dialog-begriffe").showModal();
+    case "warum-nicht-ab":
+      return $("dialog-nicht-ab").showModal();
     case "gramm-minus":
       return grammSchritt(-5);
     case "gramm-plus":
