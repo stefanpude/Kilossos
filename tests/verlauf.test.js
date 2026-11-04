@@ -101,12 +101,25 @@ test("zeichneVerlauf: Karte „Befunde vom Tierarzt“ nur mit Freigaben, mit BC
   assert.ok(mit.indexOf("15.10.") < mit.indexOf("8.10."));
 });
 
-test("zeichneVerlauf: Vorher/Nachher-Karte steht direkt unter der Gewichtskarte (0.25.0)", () => {
-  const html = zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [], futterNachId: new Map(), zeitraum: "3m", heute: "2026-10-20", kopf: "", fotos: "<section id=\"fotos-test\"></section>" });
-  const kurve = html.indexOf('aria-label="Gewicht"');
+test("zeichneVerlauf: Vorher/Nachher-Karte steht ganz am Ende, hinter den Befunden (0.29.4)", () => {
+  const html = zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [freigabe], futterNachId: new Map(), zeitraum: "3m", heute: "2026-10-20", kopf: "", fotos: "<section id=\"fotos-test\"></section>" });
+  const tempo = html.indexOf("Tempo pro Woche");
+  const befunde = html.indexOf("Befunde vom Tierarzt");
   const fotos = html.indexOf('id="fotos-test"');
-  assert.ok(kurve >= 0 && fotos > kurve);
-  assert.ok(fotos < html.indexOf("Tempo pro Woche"));
+  assert.ok(tempo >= 0 && befunde > tempo && fotos > befunde);
+  assert.ok(html.trimEnd().endsWith('<section id="fotos-test"></section>'));
+});
+
+test("zeichneVerlauf: Tipp zur Kurve steht in der Gewichtskarte unter der Legende (0.29.4)", () => {
+  const html = zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [], futterNachId: new Map(), zeitraum: "3m", heute: "2026-10-20", kopf: "" });
+  const legende = html.indexOf('class="legende-zeile"');
+  const tipp = html.indexOf("Tippe auf die Kurve");
+  assert.ok(legende >= 0 && tipp > legende);
+  assert.ok(tipp < html.indexOf("</section>", legende)); // noch in der Gewichtskarte
+  assert.ok(tipp < html.indexOf("Tempo pro Woche"));
+  // Zeitraum ohne Kurve: kein Tipp zur Kurve
+  const ohneKurve = zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [], futterNachId: new Map(), zeitraum: "1m", heute: "2026-11-24", kopf: "" });
+  assert.doesNotMatch(ohneKurve, /Tippe auf die Kurve/);
 });
 
 test("zeichneVerlauf: Fotos erscheinen auch, wenn es noch keinen Verlauf gibt", () => {

@@ -477,7 +477,7 @@ function befundKarte(freigaben) {
   });
 }
 
-// fotos: fertige Vorher/Nachher-Karte aus app.js (ab 0.25.0), steht unter der Gewichtskarte.
+// fotos: fertige Vorher/Nachher-Karte aus app.js (ab 0.25.0), steht seit 0.29.4 ganz am Ende (freiwillig, ändert sich selten).
 export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, futterNachId, zeitraum, heute, kopf, fotos = "" }) {
   if (gewichte.length < 2) {
     return `${kopf}<p class="leer">Sobald mindestens zwei Gewichte eingetragen sind, erscheint hier der Verlauf.</p>${fotos}`;
@@ -499,7 +499,8 @@ export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, futterNachId, 
   const kurve =
     imZeitraum.length >= 2
       ? `<div class="papier"><div class="kurve-feld">${weicheKurve(gewichte, freigaben, von)}<div class="infoblase" id="infoblase" hidden></div></div></div>
-         ${legende(freigaben, von, aktuell.datum)}`
+         ${legende(freigaben, von, aktuell.datum)}
+         <p class="tipp">Tippe auf die Kurve, um Datum und Gewicht zu sehen. Alle Gewichte als Liste stehen unter „Gewicht“.</p>`
       : `<p class="leer">Im gewählten Zeitraum gibt es weniger als zwei Wägungen.</p>`;
   const gewichtKarte = `<section class="karte" aria-label="Gewicht">
     <div class="diagramm-kopf">
@@ -514,10 +515,9 @@ export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, futterNachId, 
     (imZeitraum.length >= 2 ? eckdaten(imZeitraum, freigaben) : "") +
     umschalter +
     gewichtKarte +
-    fotos +
     tempoKarte(gewichte, freigaben, von) +
     (mahlzeiten.length ? futterKarte(mahlzeiten, futterNachId, freigaben, von, heute) : "") +
     befundKarte(freigaben) +
-    `<p class="tipp">Tippe auf die Kurve, um Datum und Gewicht zu sehen. Alle Gewichte als Liste stehen unter „Gewicht“.</p>`
+    fotos
   );
 }

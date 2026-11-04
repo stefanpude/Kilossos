@@ -1,7 +1,7 @@
-# Handy-Test 0.26.0 bis 0.29.3
+# Handy-Test 0.26.0 bis 0.29.4
 
 Nach dem Hochladen etwa 1 Minute warten. Dann die App einmal ganz schließen und neu öffnen.
-Dann **Mehr** ganz nach unten scrollen: Die letzte Zeile (mit dem i-Zeichen) zeigt die Version, dort muss **Version 0.29.3** stehen.
+Dann **Mehr** ganz nach unten scrollen: Die letzte Zeile (mit dem i-Zeichen) zeigt die Version, dort muss **Version 0.29.4** stehen.
 „Über Kilossos“ ist nur eine Überschrift, die Versionszeile nur zum Lesen: Antippen bewirkt bei beiden nichts.
 Steht dort noch eine alte Version, die App noch einmal schließen und öffnen.
 
@@ -54,6 +54,11 @@ Ergebnis 04.11.2026: D1 und D2 bestanden. D3 (Symbol) in den nächsten Tagen beo
 - [ ] Oben links steht „Kilossos“ größer und dunkel, nicht mehr klein und grau.
 - [ ] Auf **Heute** steht neben Kitos Namen kein Pfeil mehr. Einen Pfeil gibt es nur, wenn mehrere Tiere angelegt sind.
 - [ ] **Mehr** öffnen und die Seite aktualisieren (oder die App kurz im Hintergrund lassen): Die App bleibt auf **Mehr**. Wird sie ganz geschlossen (aus den offenen Apps wegwischen) und neu geöffnet, beginnt sie auf **Heute**.
+
+## F. Neu in 0.29.4 (Demo in Chrome, deine echten Daten bleiben unberührt)
+
+- [ ] https://stefanpude.github.io/Kilossos/?demo öffnen → **Verlauf**: Direkt unter der Gewichtskurve und ihrer Legende steht klein und grau „Tippe auf die Kurve, um Datum und Gewicht zu sehen …“, noch in derselben Karte.
+- [ ] Weiter nach unten scrollen: erst „Tempo pro Woche“, dann „Futter pro Tag“, dann „Befunde vom Tierarzt“, ganz unten „Vorher / Nachher“.
 
 ## Was mir auffällt
 

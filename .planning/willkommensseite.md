@@ -23,6 +23,12 @@ _Angelegt 02.11.2026. Stefan hat die Fragen zum Start übersprungen; sie stehen 
 - **Fehlschlag wäre:** zu werblich, zu medizinisch, zu lang. Zusätzlich (Claude, wegen Google-Play-Regeln für Gesundheits-Apps): nie versprechen, dass die App die Diät macht oder den Tierarzt ersetzt.
 - **Logo-Stil:** erledigt mit 0.13.0 (Kito am Napf).
 
+## Geklärt (04.11.2026): Geschichte bleibt, wie sie ist
+
+- Verglichen wurden drei Fassungen: heute (zwei Sätze und „Ganze Geschichte lesen“), A (Karte „Aus eigener Not entstanden“ auf Seite 1) und B (eigene Seite, Einrichtung mit vier Schritten). Stefan: Die heutige Fassung gefällt besser.
+- **Warum:** Sicherheit bleibt der erste Eindruck. Seite 1 hat keinen Platz für mehr Text: Schon bei A musste der Text gekürzt werden, sonst rutscht „Weiter“ auf einem 375 × 812 px großen Handy aus dem Bild. B macht die Einrichtung einen Schritt länger. Die ganze Geschichte ist einen Tipp entfernt (auch unter „Mehr“) und steht im Store-Text im zweiten Absatz.
+- Nicht wieder vorschlagen, außer Stefan fragt danach.
+
 ## Noch offen
 
 - Soll die Willkommensseite später wieder aufrufbar sein (z. B. unter „Mehr“)? Die ganze Geschichte ist dort schon (`#geschichte`). Vorschlag Claude: reicht so, kein eigener Knopf.
