@@ -16,6 +16,9 @@ import {
   bcsGueltig,
   befundText,
   freigabenBereinigen,
+  istErsterStart,
+  ersteDaten,
+  alteStartsorten,
 } from "../js/daten.js";
 
 // Ersatz für den Browserspeicher, damit die Tests ohne Browser laufen.
@@ -27,13 +30,57 @@ function testSpeicher() {
   };
 }
 
-test("erster Start legt Kito und seine beiden Sorten an", () => {
+// Stand einer Installation vor 0.27.0: Kito mit seinen beiden Startsorten, so wie ihn die App damals angelegt hat.
+function alterStand(speicher = testSpeicher()) {
+  const daten = {
+    version: 1,
+    tiere: [{ id: "kito", name: "Kito", art: "katze", geschlecht: "kater", kastriert: true }],
+    futter: alteStartsorten(),
+    mahlzeiten: [],
+    gewichte: [],
+    freigaben: [],
+  };
+  speichern(daten, speicher);
+  return laden(speicher);
+}
+
+test("erster Start (0.27.0): kein Kito, kein Futter, nichts gespeichert", () => {
   const speicher = testSpeicher();
+  assert.equal(istErsterStart(speicher), true);
   const daten = laden(speicher);
   assert.equal(daten.tiere.length, 1);
-  assert.equal(daten.tiere[0].name, "Kito");
-  assert.deepEqual(daten.futter.map((f) => [f.kcalPro100g, f.kcalQuelle]), [[77, "geschaetzt"], [327.5, "hersteller"]]);
+  assert.notEqual(daten.tiere[0].name, "Kito");
+  assert.equal(daten.futter.length, 0);
   assert.ok(istGueltig(daten));
+  assert.equal(speicher.getItem("kilossos-daten"), null);
+  assert.equal(istErsterStart(speicher), true);
+});
+
+test("ersteDaten legt genau die eingegebene Katze an, alle Listen leer", () => {
+  const daten = ersteDaten({ name: "Mia", geschlecht: "katze", kastriert: true, wiegetag: 3 });
+  assert.ok(istGueltig(daten));
+  assert.equal(daten.tiere.length, 1);
+  const { id, ...rest } = daten.tiere[0];
+  assert.equal(typeof id, "string");
+  assert.deepEqual(rest, { name: "Mia", art: "katze", geschlecht: "katze", kastriert: true, wiegetag: 3 });
+  for (const feld of ["futter", "mahlzeiten", "gewichte", "freigaben"]) assert.deepEqual(daten[feld], []);
+});
+
+test("ersteDaten ohne Wiegetag und Foto lässt die Schlüssel ganz weg, mit Foto übernimmt es das Foto", () => {
+  const ohne = ersteDaten({ name: "Max", geschlecht: "kater", kastriert: false });
+  assert.equal("wiegetag" in ohne.tiere[0], false);
+  assert.equal("foto" in ohne.tiere[0], false);
+  const mit = ersteDaten({ name: "Max", geschlecht: "kater", kastriert: false, foto: "data:image/jpeg;base64,AAAA", wiegetag: 0 });
+  assert.equal(mit.tiere[0].foto, "data:image/jpeg;base64,AAAA");
+  assert.equal(mit.tiere[0].wiegetag, 0);
+});
+
+test("bestehende Daten (Kito) sind kein erster Start und bleiben beim Laden unverändert", () => {
+  const speicher = testSpeicher();
+  const vorher = alterStand(speicher);
+  assert.equal(istErsterStart(speicher), false);
+  assert.deepEqual(laden(speicher), vorher);
+  assert.equal(laden(speicher).tiere[0].name, "Kito");
 });
 
 test("gespeicherte Einträge kommen beim nächsten Start unverändert zurück", () => {
@@ -47,7 +94,7 @@ test("gespeicherte Einträge kommen beim nächsten Start unverändert zurück", 
 // Speichert Purina mit den angegebenen Werten und lädt danach neu, wie beim nächsten App-Start.
 function purinaNachNeustart(werte) {
   const speicher = testSpeicher();
-  const daten = laden(speicher);
+  const daten = alterStand(speicher);
   const purina = daten.futter.find((f) => f.name === "Purina One Light");
   Object.assign(purina, werte);
   speichern(daten, speicher);
@@ -69,7 +116,7 @@ test("alte Purina-Startwerte (360 ungefähr, 346 geschätzt) werden durch die He
 
 test("alter Sheba-Startwert aus 0.5 (77, Packung) bleibt stehen, bekommt aber seine Kennung", () => {
   const speicher = testSpeicher();
-  const daten = laden(speicher);
+  const daten = alterStand(speicher);
   const sheba = daten.futter.find((f) => f.name.startsWith("Sheba"));
   Object.assign(sheba, { kcalPro100g: 77, kcalQuelle: "packung", notiz: "" });
   delete sheba.listeId;
@@ -81,7 +128,7 @@ test("alter Sheba-Startwert aus 0.5 (77, Packung) bleibt stehen, bekommt aber se
 
 // Speichert Sheba mit den angegebenen Werten und lädt danach neu, wie beim nächsten App-Start.
 function shebaNachNeustart(werte, speicher = testSpeicher()) {
-  const daten = laden(speicher);
+  const daten = alterStand(speicher);
   const sheba = daten.futter.find((f) => f.listeId === "sheba-fresh-fine-huhn-gefluegel-truthahn");
   Object.assign(sheba, werte);
   speichern(daten, speicher);
@@ -117,7 +164,7 @@ test("selbst geänderte Sheba-Werte bleiben stehen", () => {
 
 test("Sheba-Umstellung läuft nur einmal und lässt Mahlzeiten verknüpft", () => {
   const speicher = testSpeicher();
-  const daten = laden(speicher);
+  const daten = alterStand(speicher);
   const sheba = daten.futter.find((f) => f.listeId === "sheba-fresh-fine-huhn-gefluegel-truthahn");
   Object.assign(sheba, { kcalPro100g: 71, kcalQuelle: "hersteller", notiz: SHEBA_ZOOPLUS_START });
   daten.mahlzeiten.push({ id: "m1", tierId: daten.tiere[0].id, futterId: sheba.id, gramm: 50, zeitpunkt: "2026-11-03T08:00:00.000Z" });
@@ -136,7 +183,7 @@ test("selbst geänderte Purina-Werte bleiben stehen", () => {
 
 test("Startsorten aus älteren Versionen bekommen ihre Kennung in der Futterliste, eigene Sorten nicht", () => {
   const speicher = testSpeicher();
-  const daten = laden(speicher);
+  const daten = alterStand(speicher);
   for (const futter of daten.futter) delete futter.listeId;
   daten.futter.push({ id: "eigen", name: "Selbst gekocht", typ: "nass", kcalPro100g: 90, kcalQuelle: "ungefaehr", notiz: "" });
   speichern(daten, speicher);

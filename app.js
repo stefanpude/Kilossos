@@ -1,6 +1,6 @@
 import {
   laden,
-  speichern,
+  speichern as speichernInSpeicher,
   istGueltig,
   neueId,
   dauerhaftSpeichern,
@@ -15,6 +15,8 @@ import {
   fotoBereinigen,
   freigabenBereinigen,
   MCS,
+  istErsterStart,
+  ersteDaten,
 } from "./js/daten.js";
 import {
   leseZahl,
@@ -101,6 +103,14 @@ wendeAnzeigeAn(leseAnzeige());
 // Demo-Modus (Link mit "?demo"): lädt bei jedem Öffnen frisch die Simulation aus werkzeuge/erzeuge-testdaten.js,
 // verschoben auf heute, in einen eigenen Speicherplatz. Die echten Einträge bleiben unberührt.
 const demo = new URLSearchParams(location.search).has("demo");
+
+// Erster Start (noch nichts gespeichert): Willkommen und Einrichtung, siehe unten. Bis dahin darf nichts gespeichert
+// werden, sonst stünde der Platzhalter „Deine Katze“ im Speicher. Alle Schreibwege laufen über speichern().
+let einrichtungLaeuft = false;
+function speichern(neueDaten) {
+  if (einrichtungLaeuft) throw new Error("Während der Einrichtung wird nichts gespeichert.");
+  speichernInSpeicher(neueDaten);
+}
 if (demo) {
   demoModus(true);
   $("demo-leiste").hidden = false;
@@ -125,6 +135,7 @@ if (demo) {
 
 let daten;
 try {
+  einrichtungLaeuft = !demo && istErsterStart();
   daten = laden();
 } catch (fehler) {
   document.querySelector("main").innerHTML =
@@ -140,6 +151,8 @@ let zeitraum = "3m";
 // statt sie nur im Arbeitsspeicher zu halten und beim nächsten Öffnen still zu verlieren.
 let speicherFehler = false;
 function sichern() {
+  // Während der Einrichtung gibt es nur einen Platzhalter, der nie gespeichert werden darf.
+  if (einrichtungLaeuft) return false;
   try {
     speichern(daten);
   } catch {
@@ -1606,8 +1619,15 @@ $("import-datei").addEventListener("change", async (ereignis) => {
   const anzahl = `${neu.mahlzeiten.length} Mahlzeiten und ${neu.gewichte.length} Gewichte`;
   const fotoText = verworfen > 0 ? " Ein Foto in der Datei war ungültig und wird nicht übernommen." : "";
   const profilText = profilFehler > 0 ? " Einige Angaben im Profil, in den Freigaben oder bei den Strichcodes waren ungültig und werden nicht übernommen." : "";
-  if (!confirm(`Sicherung mit ${anzahl} einlesen? Alle Einträge auf diesem Handy werden dadurch ersetzt.${fotoText}${profilText}`)) return;
-  speichern(neu);
+  const ersetzen = einrichtungLaeuft ? "" : " Alle Einträge auf diesem Handy werden dadurch ersetzt.";
+  if (!confirm(`Sicherung mit ${anzahl} einlesen?${ersetzen}${fotoText}${profilText}`)) return;
+  try {
+    // Auch während der Einrichtung erlaubt: Die Sicherung ersetzt den Platzhalter vollständig.
+    speichernInSpeicher(neu);
+  } catch {
+    alert("Die Sicherung passt nicht in den Speicher dieses Browsers (oder er ist gesperrt, z. B. im privaten Modus). Es wurde nichts geändert.");
+    return;
+  }
   location.reload();
 });
 
@@ -1679,33 +1699,145 @@ document.addEventListener("change", (ereignis) => {
   wendeAnzeigeAn(ereignis.target.value);
 });
 
-// ---------- Willkommensseite ----------
+// ---------- Willkommen und Einrichtung (nur beim ersten Start) ----------
 
-// Einmal beim ersten Öffnen, nie in der Demo. „Alle Daten löschen“ entfernt den Schlüssel, dann erscheint sie wieder.
-// Neuer Name (0.13.2), damit sie nach dem Logo-Wechsel auf jedem Gerät noch einmal erscheint.
-const WILLKOMMEN_SCHLUESSEL = "kilossos-willkommen-2";
+// Seit 0.27.0: Wer noch keine Daten hat (frische Installation oder nach „Alle Daten löschen“), sieht drei Schritte
+// und legt dabei seine eigene Katze an. Bis „Los geht's“ liegt nur ein Platzhalter im Arbeitsspeicher; sichern()
+// speichert in dieser Zeit nichts. Wer die App mittendrin schließt, beginnt beim nächsten Öffnen von vorn.
+// Bestehende Nutzer sehen nichts davon. Der alte Schlüssel der früheren Willkommensseite wird aufgeräumt.
+let einrichtungFoto = null;
+let einrichtungFotoLauf = 0;
 
-function willkommenZeigen() {
+// Alles hinter der Fläche ist für Tastatur und Vorlesefunktion gesperrt (inert), nicht nur verdeckt.
+function hintergrundSperren(an) {
+  for (const kind of document.body.children) {
+    if (kind.id !== "willkommen" && kind.id !== "toast" && kind.tagName !== "SCRIPT" && kind.tagName !== "DIALOG") kind.inert = an;
+  }
+}
+
+function einrichtungZeigen() {
   $("willkommen").hidden = false;
   document.body.classList.add("willkommen-offen");
-  $("willkommen-titel").focus();
+  hintergrundSperren(true);
+  $("einrichtung-geschlecht").innerHTML = auswahlFeld({
+    name: "einrichtung-geschlecht",
+    beschriftung: "label-einrichtung-geschlecht",
+    optionen: [
+      { wert: "kater", text: "Kater" },
+      { wert: "katze", text: "Katze" },
+    ],
+  });
+  $("einrichtung-kastriert").innerHTML = auswahlFeld({
+    name: "einrichtung-kastriert",
+    beschriftung: "label-einrichtung-kastriert",
+    optionen: [
+      { wert: "ja", text: "ja" },
+      { wert: "nein", text: "nein" },
+    ],
+  });
+  $("einrichtung-wiegetag").innerHTML = auswahlFeld({
+    name: "einrichtung-wiegetag",
+    beschriftung: "label-einrichtung-wiegetag",
+    // Montag zuerst, wie im deutschen Kalender
+    optionen: [{ wert: "", text: "Kein fester Tag" }, ...[1, 2, 3, 4, 5, 6, 0].map((t) => ({ wert: String(t), text: WOCHENTAGE[t] }))],
+    wert: "",
+  });
+  einrichtungSchritt(1);
 }
 
-function willkommenSchliessen() {
+function einrichtungSchritt(nummer) {
+  for (const n of [1, 2, 3]) $(`willkommen-${n}`).hidden = n !== nummer;
+  $("willkommen").scrollTop = 0;
+  $(nummer === 1 ? "willkommen-titel" : `willkommen-titel-${nummer}`).focus();
+}
+
+function zeigeEinrichtungFoto() {
+  const name = $("form-einrichtung").name.value;
+  const initiale = sicher((name.trim()[0] ?? "?").toLocaleUpperCase("de-DE"));
+  $("einrichtung-avatar").innerHTML = einrichtungFoto
+    ? `<img src="${sicher(einrichtungFoto)}" alt="">`
+    : `<span class="initiale" aria-hidden="true">${initiale}</span>`;
+  $("einrichtung-foto-knopf").textContent = einrichtungFoto ? "Anderes Foto" : "Foto wählen";
+}
+
+$("form-einrichtung").name.addEventListener("input", () => {
+  if (!einrichtungFoto) zeigeEinrichtungFoto();
+});
+
+$("einrichtung-foto-datei").addEventListener("change", async (ereignis) => {
+  const datei = ereignis.target.files[0];
+  ereignis.target.value = "";
+  if (!datei) return;
+  const lauf = ++einrichtungFotoLauf;
   try {
-    localStorage.setItem(WILLKOMMEN_SCHLUESSEL, "gesehen");
+    const foto = await fotoZuschneiden(datei);
+    if (lauf !== einrichtungFotoLauf) return;
+    einrichtungFoto = foto;
+    zeigeFehler("einrichtung-fehler", "");
   } catch {
-    // Speicher gesperrt: dann erscheint die Seite beim nächsten Öffnen noch einmal.
+    if (lauf !== einrichtungFotoLauf) return;
+    zeigeFehler("einrichtung-fehler", "Dieses Bild lässt sich nicht öffnen. Bitte ein anderes Foto wählen, oder ohne Foto weiter.");
   }
+  zeigeEinrichtungFoto();
+});
+
+$("form-einrichtung").addEventListener("submit", (ereignis) => {
+  ereignis.preventDefault();
+  const werte = new FormData(ereignis.target);
+  const name = werte.get("name").trim();
+  const geschlecht = werte.get("einrichtung-geschlecht");
+  const kastriert = werte.get("einrichtung-kastriert");
+  const wiegetag = werte.get("einrichtung-wiegetag");
+  const fehler = !name
+    ? ["Bitte gib den Namen deiner Katze ein.", ereignis.target.name]
+    : !geschlecht
+      ? ["Bitte wähle Kater oder Katze.", $("auswahl-einrichtung-geschlecht")]
+      : !kastriert
+        ? ["Bitte gib an, ob deine Katze kastriert ist.", $("auswahl-einrichtung-kastriert")]
+        : null;
+  if (fehler) {
+    zeigeFehler("einrichtung-fehler", fehler[0]);
+    return fehler[1].focus();
+  }
+  const neu = ersteDaten({
+    name,
+    geschlecht,
+    kastriert: kastriert === "ja",
+    ...(einrichtungFoto && { foto: einrichtungFoto }),
+    ...(wiegetag !== "" && { wiegetag: Number(wiegetag) }),
+  });
+  try {
+    speichernInSpeicher(neu);
+  } catch {
+    // Speicher gesperrt oder voll (z. B. privater Modus): ohne Foto noch einmal, sonst ehrlich melden.
+    zeigeFehler(
+      "einrichtung-fehler",
+      einrichtungFoto
+        ? "Das Foto passt nicht in den Speicher. Bitte ohne Foto weiter, du kannst es später im Profil setzen."
+        : "Kilossos kann auf diesem Gerät nichts speichern. Ist der private Modus des Browsers an?",
+    );
+    return;
+  }
+  einrichtungLaeuft = false;
+  daten = neu;
+  tier = daten.tiere[0];
+  merkeAktivesTier(tier.id, demo);
   $("willkommen").hidden = true;
   document.body.classList.remove("willkommen-offen");
-}
+  hintergrundSperren(false);
+  zeichneAlles();
+  zeigeAnsicht("heute");
+  zeigeToast(`Willkommen, ${name}!`);
+  // Der Knopf „Los geht's“ ist weg: Fokus an den Anfang der App statt ins Leere.
+  $("profil")?.focus();
+});
 
-function willkommenGesehen() {
+// Alter Schlüssel der Willkommensseite bis 0.26.0: wird nicht mehr gebraucht.
+if (!demo) {
   try {
-    return localStorage.getItem(WILLKOMMEN_SCHLUESSEL) !== null;
+    localStorage.removeItem("kilossos-willkommen-2");
   } catch {
-    return true;
+    // Speicher gesperrt: nichts zu tun.
   }
 }
 
@@ -1840,8 +1972,15 @@ document.addEventListener("click", (ereignis) => {
       return window.print();
     case "export":
       return exportieren();
-    case "willkommen-weiter":
-      return willkommenSchliessen();
+    case "einrichtung-weiter":
+      zeigeFehler("einrichtung-fehler", "");
+      return einrichtungSchritt(Number(ziel.dataset.schritt));
+    case "einrichtung-geschichte":
+      return $("dialog-geschichte").showModal();
+    case "einrichtung-foto":
+      return $("einrichtung-foto-datei").click();
+    case "einrichtung-sicherung":
+      return $("import-datei").click();
     case "gewicht-foto-waehlen":
       return $("gewicht-foto-datei").click();
     case "gewicht-foto-nachholen":
@@ -1859,10 +1998,6 @@ document.addEventListener("click", (ereignis) => {
     }
     case "geschichte-oeffnen":
       return $("dialog-geschichte").showModal();
-    case "willkommen-geschichte":
-      willkommenSchliessen();
-      zeigeAnsicht("mehr");
-      return $("dialog-geschichte").showModal();
   }
 });
 
@@ -1872,4 +2007,4 @@ for (const platz of document.querySelectorAll("[data-symbol]:empty")) platz.inne
 zeichneAlles();
 zeichneHeute(true);
 zeigeSpeicherStatus();
-if (!demo && !willkommenGesehen()) willkommenZeigen();
+if (einrichtungLaeuft) einrichtungZeigen();

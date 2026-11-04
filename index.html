@@ -23,32 +23,73 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Willkommensseite: erscheint einmal beim ersten Öffnen (app.js, Schlüssel kilossos-willkommen-2). -->
+  <!-- Willkommen und Einrichtung: nur beim ersten Start (noch keine Daten gespeichert), nie in der Demo (app.js).
+       Drei Schritte auf derselben Fläche; gespeichert wird erst mit „Los geht's“ in Schritt 3. -->
   <section class="willkommen" id="willkommen" hidden aria-labelledby="willkommen-titel">
-    <div class="willkommen-inhalt">
-      <img class="willkommen-logo" src="icons/icon-512.png" alt="" width="128" height="128">
-      <h1 id="willkommen-titel" tabindex="-1">Willkommen bei Kilossos</h1>
-      <p class="willkommen-unter">Sicher abnehmen für übergewichtige Katzen</p>
+    <div class="willkommen-inhalt willkommen-schritt" id="willkommen-1">
+      <img class="willkommen-logo" src="icons/icon-512.png" alt="" width="112" height="112">
+      <h1 id="willkommen-titel" tabindex="-1">Kilossos</h1>
+      <p class="willkommen-unter">Sicher abnehmen, ohne Fettleber-Risiko</p>
+      <ul class="willkommen-punkte">
+        <li><span data-symbol="futter"></span><span>Futter in Gramm und Kalorien, für jede Sorte</span></li>
+        <li><span data-symbol="waage"></span><span>Gewicht und Tempo im Blick, mit Warnung außerhalb der sicheren Grenzen</span></li>
+        <li><span data-symbol="sichern"></span><span>Kostenlos, ohne Anmeldung. Deine Daten bleiben auf dem Handy.</span></li>
+      </ul>
+      <p class="leise willkommen-geschichte">Entstanden ist Kilossos für meine Katzen Kito und Zuki. Beide sollen abnehmen,
+        und ich wollte sicher sein, dass ich nichts falsch mache.</p>
+      <button type="button" class="knopf-text" data-aktion="einrichtung-geschichte">Ganze Geschichte lesen</button>
+      <p class="willkommen-schritte">Schritt 1 von 3</p>
+      <button type="button" class="knopf-haupt" data-aktion="einrichtung-weiter" data-schritt="2">Weiter</button>
+    </div>
+
+    <div class="willkommen-inhalt willkommen-schritt" id="willkommen-2" hidden>
+      <h1 id="willkommen-titel-2" tabindex="-1">Immer mit dem Tierarzt</h1>
       <div class="karte">
-        <p>Kilossos ist aus eigener Not entstanden. Mein Kater Kito wog beim Tierarzt 9,32 kg und soll abnehmen.
-          Bei Katzen ist das heikler, als man denkt: Bekommt eine übergewichtige Katze zu wenig Futter,
-          kann sie lebensgefährlich krank werden (Fettleber).</p>
-        <p class="leise">Kilossos rechnet Futter in Gramm und Kalorien mit, behält das Gewicht im Blick und warnt,
-          wenn etwas aus dem sicheren Bereich läuft. Die Grenzen stammen aus den Leitlinien der Tierärzteverbände AAHA und WSAVA.</p>
-        <button type="button" class="knopf-zweit" data-aktion="willkommen-geschichte">Ganze Geschichte lesen</button>
+        <p>Lass deine Katze untersuchen, bevor sie abnimmt. <strong>Zielgewicht und Tagesmenge legt der Tierarzt fest.</strong>
+          Kilossos vergleicht deine Fütterung mit diesen Werten, schlägt aber nie selbst Mengen vor.</p>
+        <p class="leise">Warum? Bekommt eine übergewichtige Katze zu wenig Futter, kann sie lebensgefährlich krank werden (Fettleber).
+          Eine Formel kennt deine Katze nicht.</p>
+        <p class="leise">Ist deine Katze krank (zum Beispiel Diabetes, Nieren-, Schilddrüsen- oder Lebererkrankung),
+          besprich jede Änderung am Futter vorher mit dem Tierarzt.</p>
+        <p class="willkommen-notfall"><strong>Frisst deine Katze einen Tag oder länger gar nicht, gehört sie sofort zum Tierarzt.</strong></p>
+        <p class="leise">Kilossos ist kein Medizinprodukt und keine tierärztliche Beratung.</p>
       </div>
-      <div class="karte">
-        <h2>Wichtig: Immer mit dem Tierarzt</h2>
-        <p class="leise">Kilossos ersetzt keinen Tierarzt und ist kein Medizinprodukt. Lass deine Katze untersuchen, bevor sie abnimmt.
-          Zielgewicht und Tagesmenge legt immer der Tierarzt fest. Kilossos vergleicht deine Fütterung dann mit diesen Werten,
-          schlägt aber nie selbst Mengen vor. Ohne Freigabe zeichnet die App nur auf und warnt.
-          Warum? Eine Formel kennt deine Katze nicht, und bei Katzen sind zu viel und zu wenig Futter riskant.</p>
-        <p class="leise"><strong>Ist deine Katze krank</strong> (zum Beispiel Diabetes, Nieren-, Schilddrüsen- oder Lebererkrankung) oder frisst sie
-          plötzlich schlecht, besprich jede Änderung am Futter vorher mit deinem Tierarzt.
-          <strong>Frisst eine Katze einen Tag oder länger gar nicht, gehört sie sofort zum Tierarzt.</strong></p>
+      <p class="willkommen-schritte">Schritt 2 von 3</p>
+      <div class="knoepfe">
+        <button type="button" class="knopf-zweit" data-aktion="einrichtung-weiter" data-schritt="1">Zurück</button>
+        <button type="button" class="knopf-haupt" data-aktion="einrichtung-weiter" data-schritt="3">Verstanden</button>
       </div>
-      <p class="leise willkommen-daten">Keine Anmeldung, keine Cloud, keine Werbung. Alle Daten bleiben auf deinem Handy.</p>
-      <button type="button" class="knopf-haupt" data-aktion="willkommen-weiter">Los geht's</button>
+    </div>
+
+    <div class="willkommen-inhalt willkommen-schritt" id="willkommen-3" hidden>
+      <h1 id="willkommen-titel-3" tabindex="-1">Deine Katze</h1>
+      <form id="form-einrichtung" novalidate>
+        <div class="einrichtung-foto">
+          <span class="avatar" id="einrichtung-avatar"><span class="initiale" aria-hidden="true">?</span></span>
+          <div>
+            <button type="button" class="knopf-zweit" data-aktion="einrichtung-foto"><span data-symbol="kamera"></span><span id="einrichtung-foto-knopf">Foto wählen</span></button>
+            <p class="tipp">Freiwillig. Geht auch später im Profil.</p>
+          </div>
+          <input type="file" accept="image/*" id="einrichtung-foto-datei" class="nur-vorlesen" tabindex="-1" aria-hidden="true">
+        </div>
+        <label>Name
+          <input name="name" autocomplete="off" maxlength="40" required>
+        </label>
+        <div class="zwei-spalten">
+          <div class="feld"><span id="label-einrichtung-geschlecht">Kater oder Katze?</span><div id="einrichtung-geschlecht"></div></div>
+          <div class="feld"><span id="label-einrichtung-kastriert">Kastriert?</span><div id="einrichtung-kastriert"></div></div>
+        </div>
+        <div class="feld"><span id="label-einrichtung-wiegetag">Wiegetag (freiwillig)</span><div id="einrichtung-wiegetag"></div></div>
+        <p class="tipp">Am besten einmal pro Woche wiegen: gleicher Tag, gleiche Uhrzeit, gleiche Waage.</p>
+        <p class="fehler" id="einrichtung-fehler" role="alert" hidden></p>
+        <p class="willkommen-schritte">Schritt 3 von 3</p>
+        <div class="knoepfe">
+          <button type="button" class="knopf-zweit" data-aktion="einrichtung-weiter" data-schritt="2">Zurück</button>
+          <button type="submit" class="knopf-haupt">Los geht's</button>
+        </div>
+      </form>
+      <p class="leise willkommen-daten">Du hast schon eine Sicherung?
+        <button type="button" class="knopf-text" data-aktion="einrichtung-sicherung">Sicherung einlesen</button></p>
     </div>
   </section>
 
@@ -274,7 +315,7 @@
           <span data-symbol="dokument"></span><span class="text">Nutzungsbedingungen</span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.26.0</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.27.0</span>
         </div>
       </div>
     </section>

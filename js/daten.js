@@ -1,4 +1,5 @@
 // Alle Daten von Kilossos liegen als ein JSON-Dokument im Speicher des Geräts (kein Server, keine Cloud).
+// Seit 0.27.0 wird erst gespeichert, wenn der Halter beim ersten Start seine Katze angelegt hat (ohne Startfutter).
 // Aufbau (Version 1):
 //   tiere:      { id, name, art, geschlecht, kastriert, foto?, geburtsdatum?, koerperbau?, haltung?, schlankKg?,
 //                 tierarzt?: { praxis?, telefon? }, wiegetag? }
@@ -33,37 +34,48 @@ export function neueId() {
   return crypto.randomUUID();
 }
 
-function startDaten() {
-  const kitoId = neueId();
-  return {
-    version: VERSION,
-    tiere: [{ id: kitoId, name: "Kito", art: "katze", geschlecht: "kater", kastriert: true }],
-    futter: [
-      {
-        id: neueId(),
-        listeId: "sheba-fresh-fine-huhn-gefluegel-truthahn",
-        name: "Sheba Fresh n Fine in Sauce mit Geflügel",
-        typ: "nass",
-        kcalPro100g: 77,
-        kcalQuelle: "geschaetzt",
-        notiz:
-          "Rezeptur „Huhn, Geflügel & Truthahn in Sauce“ (EAN 4770608260286), Angaben vom Umkarton (Megapack, 11/2026): Protein 7,9 %, Fett 4,4 %, Asche 1,4 %, Faser 0,3 %, Feuchte 84,0 %. Die Packung nennt keine kcal; aus den Bestandteilen berechnet (NRC 2006): 76,6, also etwa 38,5 kcal je 50-g-Beutel.",
-      },
-      {
-        id: neueId(),
-        listeId: "purina-one-light-trocken",
-        name: "Purina One Light",
-        typ: "trocken",
-        kcalPro100g: 327.5,
-        kcalQuelle: "hersteller",
-        notiz:
-          "Herstellerangabe purina.co.uk (11/2026), gleiche Nährwerte wie die deutsche Packung (Protein 37 %, Fett 9,5 %, Asche 7,5 %, Faser 6 %). Die Packung selbst nennt keine kcal. Eigene Nachrechnung (NRC 2006): 339–353.",
-      },
-    ],
-    mahlzeiten: [],
-    gewichte: [],
-    freigaben: [],
-  };
+// Die beiden Sorten, mit denen Installationen bis 0.26.0 starteten (Kitos Futter). Seit 0.27.0 legt eine
+// frische Installation kein Futter mehr an; die Liste wird nur noch gebraucht, um alte Stände umzustellen
+// (startwerteAktualisieren) und in den Tests. Jeder Aufruf liefert neue Kennungen.
+export function alteStartsorten() {
+  return [
+    {
+      id: neueId(),
+      listeId: "sheba-fresh-fine-huhn-gefluegel-truthahn",
+      name: "Sheba Fresh n Fine in Sauce mit Geflügel",
+      typ: "nass",
+      kcalPro100g: 77,
+      kcalQuelle: "geschaetzt",
+      notiz:
+        "Rezeptur „Huhn, Geflügel & Truthahn in Sauce“ (EAN 4770608260286), Angaben vom Umkarton (Megapack, 11/2026): Protein 7,9 %, Fett 4,4 %, Asche 1,4 %, Faser 0,3 %, Feuchte 84,0 %. Die Packung nennt keine kcal; aus den Bestandteilen berechnet (NRC 2006): 76,6, also etwa 38,5 kcal je 50-g-Beutel.",
+    },
+    {
+      id: neueId(),
+      listeId: "purina-one-light-trocken",
+      name: "Purina One Light",
+      typ: "trocken",
+      kcalPro100g: 327.5,
+      kcalQuelle: "hersteller",
+      notiz:
+        "Herstellerangabe purina.co.uk (11/2026), gleiche Nährwerte wie die deutsche Packung (Protein 37 %, Fett 9,5 %, Asche 7,5 %, Faser 6 %). Die Packung selbst nennt keine kcal. Eigene Nachrechnung (NRC 2006): 339–353.",
+    },
+  ];
+}
+
+// Neue Daten mit genau einem Tier, so wie es der Halter in der Einrichtung beim ersten Start angibt.
+// Kein Futter vorbelegt (seit 0.27.0). Wiegetag und Foto sind freiwillig und fehlen dann ganz.
+export function ersteDaten({ name, geschlecht, kastriert, foto, wiegetag }) {
+  const tier = { id: neueId(), name, art: "katze" };
+  if (geschlecht !== undefined) tier.geschlecht = geschlecht;
+  tier.kastriert = kastriert;
+  if (foto !== undefined) tier.foto = foto;
+  if (wiegetag !== undefined) tier.wiegetag = wiegetag;
+  return { version: VERSION, tiere: [tier], futter: [], mahlzeiten: [], gewichte: [], freigaben: [] };
+}
+
+// Noch nichts gespeichert: frische Installation (oder nach „Alle Daten löschen“). Dann zeigt die App die Einrichtung.
+export function istErsterStart(speicher = localStorage) {
+  return speicher.getItem(schluessel) === null;
 }
 
 export function istGueltig(daten) {
@@ -137,11 +149,9 @@ export function befundText(freigabe) {
 
 export function laden(speicher = localStorage) {
   const text = speicher.getItem(schluessel);
-  if (text === null) {
-    const daten = startDaten();
-    speichern(daten, speicher);
-    return daten;
-  }
+  // Erster Start: nur ein Platzhalter im Arbeitsspeicher, nichts wird gespeichert.
+  // Gespeichert wird erst, wenn der Halter in der Einrichtung seine Katze angelegt hat (app.js).
+  if (text === null) return ersteDaten({ name: "Deine Katze", kastriert: false });
   const daten = JSON.parse(text);
   if (!istGueltig(daten)) {
     throw new Error("Die gespeicherten Daten haben ein unbekanntes Format.");
@@ -153,7 +163,7 @@ export function laden(speicher = localStorage) {
 // Ersetzt veraltete Startwerte aus früheren Versionen – aber nur, wenn sie noch unverändert sind.
 // Was Stefan selbst geändert hat, bleibt immer stehen.
 function startwerteAktualisieren(daten) {
-  const neueStartwerte = startDaten().futter;
+  const neueStartwerte = alteStartsorten();
   let geaendert = false;
   for (const futter of daten.futter) {
     const altPurina =

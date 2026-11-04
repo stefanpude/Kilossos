@@ -117,7 +117,7 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 500; }
   margin: 0; font-size: 0.875rem; font-weight: 500; letter-spacing: 0.04em; color: var(--text-leise);
 }
 
-/* ---------- Willkommensseite (einmal beim ersten Öffnen) ---------- */
+/* ---------- Willkommen und Einrichtung (nur beim ersten Start, drei Schritte) ---------- */
 .willkommen {
   position: fixed; inset: 0; z-index: 8; overflow-y: auto; background: var(--hintergrund);
   padding: calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
@@ -130,6 +130,23 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 500; }
 .willkommen-unter { margin: -8px 0 4px; text-align: center; color: var(--text-leise); }
 .willkommen .karte p { margin: 0 0 10px; }
 .willkommen-daten { margin: 0; text-align: center; }
+.willkommen-daten .knopf-text { padding: 12px 4px; }
+.willkommen-schritt[hidden] { display: none; }
+.willkommen-schritt > h1:not(#willkommen-titel) { text-align: left; font-size: 1.5rem; margin-top: 0; }
+.willkommen-punkte { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.willkommen-punkte li { display: flex; gap: 12px; align-items: flex-start; }
+.willkommen-punkte .ico { flex: none; width: 1.5rem; height: 1.5rem; color: var(--akzent-stark); margin-top: 1px; }
+.willkommen-geschichte { margin: 0; }
+.willkommen-schritt > .knopf-text { justify-self: start; margin: -10px 0; }
+.willkommen-schritte { margin: 4px 0 -6px; text-align: center; font-size: 0.8125rem; color: var(--text-leise); }
+.willkommen-schritt > .knopf-haupt { width: 100%; }
+.willkommen .knoepfe > button { flex: 1; }
+.willkommen-notfall { padding-left: 10px; border-left: 3px solid var(--warnung); }
+.einrichtung-foto { position: relative; display: flex; gap: 14px; align-items: center; }
+.einrichtung-foto .avatar { width: 72px; height: 72px; }
+.einrichtung-foto .avatar .initiale { font-size: 1.75rem; }
+.einrichtung-foto .knopf-zweit { display: inline-flex; gap: 8px; align-items: center; }
+.einrichtung-foto .tipp { margin-top: 4px; }
 body.willkommen-offen { overflow: hidden; }
 .knopf-text {
   border: 0; background: none; padding: 12px 0; min-height: 48px; cursor: pointer;
@@ -647,15 +664,15 @@ dialog h2 { touch-action: none; }
 dialog::backdrop { background: rgb(29 43 42 / 0.4); animation: einblenden 0.3s ease; }
 @keyframes einblenden { from { opacity: 0; } to { opacity: 1; } }
 
-dialog form { display: grid; gap: 14px; }
+dialog form, .willkommen form { display: grid; gap: 14px; }
 dialog h2 { margin: 0; font-size: 1.3125rem; }
-dialog label, .feld { display: grid; gap: 4px; font-weight: 400; font-size: 0.875rem; color: var(--text-leise); }
-dialog label > input, .feld > div { color: var(--text); font-size: 1rem; }
-dialog input:not([type="radio"]):not([type="hidden"]) {
+dialog label, .willkommen label, .feld { display: grid; gap: 4px; font-weight: 400; font-size: 0.875rem; color: var(--text-leise); }
+dialog label > input, .willkommen label > input, .feld > div { color: var(--text); font-size: 1rem; }
+dialog input:not([type="radio"]):not([type="hidden"]), .willkommen input:not([type="hidden"]):not([type="file"]) {
   min-height: 48px; padding: 0 12px; border: 1px solid var(--feldrand); border-radius: var(--rund-klein);
   background: var(--hintergrund); font-weight: 400; font-size: 1.0625rem; width: 100%; color: var(--text);
 }
-dialog input:focus-visible { outline: 3px solid var(--fokus); outline-offset: 1px; border-color: var(--akzent); }
+dialog input:focus-visible, .willkommen input:focus-visible { outline: 3px solid var(--fokus); outline-offset: 1px; border-color: var(--akzent); }
 
 /* Gewicht eintragen: große Zahl mit ±10 g */
 .waage { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
