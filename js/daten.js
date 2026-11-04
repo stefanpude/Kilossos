@@ -9,7 +9,8 @@
 //               kcalQuelle: "packung" (genau abgelesen) | "hersteller" (Herstellerangabe, z. B. Website)
 //                         | "geschaetzt" (aus Bestandteilen berechnet) | "ungefaehr"
 //   mahlzeiten: { id, tierId, futterId, gramm, zeitpunkt (ISO-Zeit) }
-//   gewichte:   { id, tierId, kg, datum ("JJJJ-MM-TT"), notiz }
+//   gewichte:   { id, tierId, kg, datum ("JJJJ-MM-TT"), notiz, foto? }
+//               foto: optional, wie beim Tier (256 × 256 px JPEG), höchstens eins je Tier und Woche (js/fotos.js, seit 0.25.0)
 //   freigaben:  { id, tierId, datum, zielgewichtKg, kcalProTag, tierarzt, notiz, bcs?, mcs? }
 //               bcs: optional, Body Condition Score vom Tierarzt, ganze Zahl 1–9 (seit 0.12.0)
 //               mcs: optional, Muscle Condition Score vom Tierarzt, Schlüssel aus MCS (seit 0.12.0)
@@ -85,12 +86,12 @@ export function fotoGueltig(foto) {
   return typeof foto === "string" && foto.length <= FOTO_MAX_ZEICHEN && FOTO_MUSTER.test(foto);
 }
 
-// Entfernt ungültige Profilbilder (z. B. aus einer eingelesenen Sicherung); alle anderen Daten bleiben.
+// Entfernt ungültige Fotos an Tieren und Wägungen (z. B. aus einer eingelesenen Sicherung); alle anderen Daten bleiben.
 export function fotoBereinigen(daten) {
   let entfernt = 0;
-  for (const tier of daten.tiere) {
-    if ("foto" in tier && !fotoGueltig(tier.foto)) {
-      delete tier.foto;
+  for (const eintrag of [...daten.tiere, ...daten.gewichte]) {
+    if (eintrag && typeof eintrag === "object" && "foto" in eintrag && !fotoGueltig(eintrag.foto)) {
+      delete eintrag.foto;
       entfernt += 1;
     }
   }

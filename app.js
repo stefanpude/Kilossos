@@ -52,6 +52,7 @@ import { profilBereinigen, alterText, telefonLink, telefonGueltig, istWiegetag, 
 import { aktivesTier, leseAktivesTier, merkeAktivesTier, neuesTier, eintraegeVon, tierEntfernen } from "./js/tiere.js";
 import { wischenAnmelden } from "./js/wischen.js";
 import { datumText, freigabeTafel } from "./js/mehr.js";
+import { fotoInWoche, vorherNachher } from "./js/fotos.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
 if ("serviceWorker" in navigator) {
@@ -127,9 +128,22 @@ let tier = aktivesTier(daten, leseAktivesTier(demo));
 let gewaehlterTag = new Date();
 let zeitraum = "3m";
 
+// Speicher voll (z. B. durch viele Fotos): Änderung verwerfen, gespeicherten Stand neu laden und deutlich melden,
+// statt sie nur im Arbeitsspeicher zu halten und beim nächsten Öffnen still zu verlieren.
+let speicherFehler = false;
 function sichern() {
-  speichern(daten);
+  try {
+    speichern(daten);
+  } catch {
+    speicherFehler = true;
+    daten = laden();
+    tier = aktivesTier(daten, tier.id);
+    zeichneAlles();
+    zeigeToast("Der Speicher ist voll: Die letzte Änderung wurde nicht gespeichert. Bitte speichere eine Sicherung.", 6000);
+    return false;
+  }
   zeichneAlles();
+  return true;
 }
 
 function wechsleTier(id) {
@@ -402,7 +416,8 @@ function zeichneGewicht() {
             g100 === null
               ? ""
               : `<span class="marke">${g100 < 0 ? "−" : g100 > 0 ? "+" : "±"}${zahl(Math.abs(g100))} g</span>`; // neutral, siehe verlauf.js
-          return `<div class="zeile"><span class="name"><b>${zahl(g.kg, 2)} kg</b><small>${datumText(g.datum)}${g.notiz ? " · " + sicher(g.notiz) : ""}</small></span>
+          const bild = fotoGueltig(g.foto) ? `<img class="waegung-foto" src="${sicher(g.foto)}" alt="Foto vom ${datumText(g.datum)}">` : "";
+          return `<div class="zeile">${bild}<span class="name"><b>${zahl(g.kg, 2)} kg</b><small>${datumText(g.datum)}${g.notiz ? " · " + sicher(g.notiz) : ""}</small></span>
             ${marke}
             <button type="button" class="knopf-loeschen" data-aktion="gewicht-loeschen" data-id="${g.id}" aria-label="Gewicht löschen">${SYMBOL.loeschen}</button></div>`;
         })
@@ -640,6 +655,26 @@ function verlaufKopf() {
   return `<div class="verlauf-kopf">${profilHtml(tier, "klein")}<div><h2>Verlauf</h2><p>${sicher(tier.name)}${seit}</p></div></div>`;
 }
 
+// Vorher/Nachher: ältestes und neuestes Foto an Wägungen; fehlt eins, steht der gezeichnete Katzenkopf da.
+function vorherNachherKarte() {
+  const { vorher, nachher } = vorherNachher(daten.gewichte, tier.id);
+  const seite = (titel, w, leer) =>
+    `<figure class="vn-seite">
+      ${w ? `<img src="${sicher(w.foto)}" alt="${titel}: ${sicher(tier.name)} am ${datumText(w.datum)}">` : `<div class="vn-platzhalter" role="img" aria-label="${titel}: noch kein Foto">${SYMBOL.katzenkopf}<span>Noch kein Foto</span></div>`}
+      <figcaption><span class="label">${titel}</span>${w ? `<b>${zahl(w.kg, 2)} kg</b><small>${datumText(w.datum)}</small>` : `<small>${leer}</small>`}</figcaption>
+    </figure>`;
+  const diff = vorher && nachher ? vorher.kg - nachher.kg : null;
+  const satz =
+    diff === null
+      ? "Füge beim Wiegen ab und zu ein Foto hinzu, am besten immer aus der gleichen Richtung."
+      : `${diff >= 0 ? "Abgenommen" : "Zugenommen"} zwischen den Fotos: ${zahl(Math.abs(diff), 2)} kg.`;
+  return `<section class="karte vorher-nachher" aria-label="Vorher und Nachher">
+    <span class="label">Vorher / Nachher</span>
+    <div class="vn-paar">${seite("Vorher", vorher, "erstes Foto")}${seite("Nachher", nachher, "neuestes Foto")}</div>
+    <p class="tipp">${satz}</p>
+  </section>`;
+}
+
 function zeichneVerlaufAnsicht() {
   $("verlauf-inhalt").innerHTML = zeichneVerlauf({
     gewichte: daten.gewichte.filter((g) => g.tierId === tier.id),
@@ -649,6 +684,7 @@ function zeichneVerlaufAnsicht() {
     zeitraum,
     heute: tagSchluessel(new Date()),
     kopf: verlaufKopf(),
+    fotos: vorherNachherKarte(),
   });
 }
 
@@ -810,12 +846,14 @@ function zeigeFehler(id, text) {
 function beimSpeichern(formId, fehlerId, pruefenUndSpeichern) {
   $(formId).addEventListener("submit", (ereignis) => {
     if (ereignis.submitter?.value !== "speichern") return;
-    const fehler = pruefenUndSpeichern(new FormData($(formId)));
-    if (fehler) {
+    speicherFehler = false;
+    // Rückgabe: Fehlertext (Dialog bleibt offen) oder { toast } für eine eigene Erfolgsmeldung.
+    const ergebnis = pruefenUndSpeichern(new FormData($(formId)));
+    if (typeof ergebnis === "string") {
       ereignis.preventDefault();
-      zeigeFehler(fehlerId, fehler);
-    } else {
-      zeigeToast("✓ Gespeichert");
+      zeigeFehler(fehlerId, ergebnis);
+    } else if (!speicherFehler) {
+      zeigeToast(ergebnis?.toast ?? "✓ Gespeichert");
     }
   });
 }
@@ -897,6 +935,36 @@ beimSpeichern("form-mahlzeit", "mahlzeit-fehler", (werte) => {
 // Gewicht eintragen: große Zahl, ±10 g, sofortige Rückmeldung zum Tempo.
 // Das Feld bleibt leer (das letzte Gewicht steht nur als Platzhalter da), damit nie ungewogen gespeichert wird.
 // ±10 g startet bei leerem Feld vom letzten Gewicht.
+// Foto im Gewicht-Dialog: erst beim Speichern übernommen, Abbrechen verwirft es.
+let gewichtFoto = null;
+let fotoLauf = 0; // zählt Dialog-Öffnungen und Bildauswahlen, damit ein spät fertiges Bild nicht im falschen Dialog landet
+
+function zeigeGewichtFoto() {
+  const vorschau = $("gewicht-foto-vorschau");
+  vorschau.hidden = !gewichtFoto;
+  if (gewichtFoto) vorschau.src = gewichtFoto;
+  else vorschau.removeAttribute("src");
+  $("gewicht-foto-entfernen").hidden = !gewichtFoto;
+  $("gewicht-foto-knopf").textContent = gewichtFoto ? "Anderes Foto" : "Foto hinzufügen";
+}
+
+$("gewicht-foto-datei").addEventListener("change", async (ereignis) => {
+  const datei = ereignis.target.files[0];
+  ereignis.target.value = "";
+  if (!datei) return;
+  const lauf = ++fotoLauf;
+  try {
+    const foto = await fotoZuschneiden(datei);
+    if (lauf !== fotoLauf) return;
+    gewichtFoto = foto;
+    zeigeFehler("gewicht-fehler", "");
+  } catch {
+    if (lauf !== fotoLauf) return;
+    zeigeFehler("gewicht-fehler", "Dieses Bild lässt sich nicht öffnen. Bitte ein anderes Foto wählen.");
+  }
+  zeigeGewichtFoto();
+});
+
 function eigeneGewichte() {
   return daten.gewichte.filter((g) => g.tierId === tier.id);
 }
@@ -910,6 +978,9 @@ function oeffneGewicht() {
   form.datum.max = tagSchluessel(new Date());
   const letzte = gewichteSortiert(eigeneGewichte())[0];
   form.kg.placeholder = letzte ? zahl(letzte.kg, 2) : "0,00";
+  gewichtFoto = null;
+  fotoLauf += 1;
+  zeigeGewichtFoto();
   zeigeGewichtRueckmeldung();
   $("dialog-gewicht").showModal();
 }
@@ -949,14 +1020,35 @@ $("form-gewicht").addEventListener("input", zeigeGewichtRueckmeldung);
 beimSpeichern("form-gewicht", "gewicht-fehler", (werte) => {
   const kg = leseZahl(werte.get("kg"));
   if (!kg || kg < 0.5 || kg > 20) return "Bitte ein Gewicht zwischen 0,5 und 20 kg eingeben, z. B. 9,32.";
-  daten.gewichte.push({
-    id: neueId(),
-    tierId: tier.id,
-    kg,
-    datum: werte.get("datum"),
-    notiz: werte.get("notiz").trim(),
-  });
-  sichern();
+  const eintrag = { id: neueId(), tierId: tier.id, kg, datum: werte.get("datum"), notiz: werte.get("notiz").trim() };
+  // Höchstens ein Foto je Woche: das neue ersetzt nach Rückfrage das alte, sonst wird ohne Foto gespeichert.
+  let ersetzt = null;
+  if (gewichtFoto) {
+    const vorhanden = fotoInWoche(daten.gewichte, tier.id, eintrag.datum);
+    const ersetzen =
+      !vorhanden ||
+      confirm(`In dieser Woche gibt es schon ein Foto (vom ${datumText(vorhanden.datum)}). Soll das neue Foto es ersetzen?\n\n„Abbrechen“ speichert das Gewicht ohne das neue Foto.`);
+    if (ersetzen) {
+      eintrag.foto = gewichtFoto;
+      if (vorhanden) {
+        ersetzt = { waegung: vorhanden, foto: vorhanden.foto };
+        delete vorhanden.foto;
+      }
+    }
+  }
+  daten.gewichte.push(eintrag);
+  try {
+    speichern(daten);
+  } catch {
+    // Speicher voll: alles zurücknehmen, nichts halb speichern.
+    daten.gewichte.pop();
+    if (ersetzt) ersetzt.waegung.foto = ersetzt.foto;
+    return eintrag.foto
+      ? "Das Foto passt nicht mehr in den Speicher. Entferne das Foto und speichere das Gewicht ohne Foto."
+      : "Der Speicher ist voll, das Gewicht wurde nicht gespeichert. Bitte speichere zuerst eine Sicherung.";
+  }
+  zeichneAlles();
+  if (gewichtFoto && !eintrag.foto) return { toast: "✓ Gespeichert, ohne das neue Foto" };
 });
 
 // BCS 1–9 mit grober Einordnung als Hilfe beim Abschreiben – den Wert selbst legt nur der Tierarzt fest.
@@ -1402,7 +1494,7 @@ $("import-datei").addEventListener("change", async (ereignis) => {
   const verworfen = fotoBereinigen(neu);
   const profilFehler = profilBereinigen(neu, tagSchluessel(new Date())) + freigabenBereinigen(neu) + eanBereinigen(neu);
   const anzahl = `${neu.mahlzeiten.length} Mahlzeiten und ${neu.gewichte.length} Gewichte`;
-  const fotoText = verworfen > 0 ? " Das Profilbild in der Datei war ungültig und wird nicht übernommen." : "";
+  const fotoText = verworfen > 0 ? " Ein Foto in der Datei war ungültig und wird nicht übernommen." : "";
   const profilText = profilFehler > 0 ? " Einige Angaben im Profil, in den Freigaben oder bei den Strichcodes waren ungültig und werden nicht übernommen." : "";
   if (!confirm(`Sicherung mit ${anzahl} einlesen? Alle Einträge auf diesem Handy werden dadurch ersetzt.${fotoText}${profilText}`)) return;
   speichern(neu);
@@ -1634,6 +1726,11 @@ document.addEventListener("click", (ereignis) => {
       return exportieren();
     case "willkommen-weiter":
       return willkommenSchliessen();
+    case "gewicht-foto-waehlen":
+      return $("gewicht-foto-datei").click();
+    case "gewicht-foto-entfernen":
+      gewichtFoto = null;
+      return zeigeGewichtFoto();
     case "geschichte-oeffnen":
       return $("dialog-geschichte").showModal();
     case "willkommen-geschichte":

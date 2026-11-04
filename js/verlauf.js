@@ -477,9 +477,10 @@ function befundKarte(freigaben) {
   });
 }
 
-export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, futterNachId, zeitraum, heute, kopf }) {
+// fotos: fertige Vorher/Nachher-Karte aus app.js (ab 0.25.0), steht unter der Gewichtskarte.
+export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, futterNachId, zeitraum, heute, kopf, fotos = "" }) {
   if (gewichte.length < 2) {
-    return `${kopf}<p class="leer">Sobald mindestens zwei Gewichte eingetragen sind, erscheint hier der Verlauf.</p>`;
+    return `${kopf}<p class="leer">Sobald mindestens zwei Gewichte eingetragen sind, erscheint hier der Verlauf.</p>${fotos}`;
   }
   const von = zeitraumStart(zeitraum, heute);
   const umschalter = `<div class="umschalter" role="group" aria-label="Zeitraum">
@@ -513,6 +514,7 @@ export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, futterNachId, 
     (imZeitraum.length >= 2 ? eckdaten(imZeitraum, freigaben) : "") +
     umschalter +
     gewichtKarte +
+    fotos +
     tempoKarte(gewichte, freigaben, von) +
     (mahlzeiten.length ? futterKarte(mahlzeiten, futterNachId, freigaben, von, heute) : "") +
     befundKarte(freigaben) +

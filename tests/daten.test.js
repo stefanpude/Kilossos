@@ -235,6 +235,25 @@ test("fotoBereinigen verwirft ungültige Fotos, der Rest bleibt", () => {
   assert.equal(daten.tiere[0].foto, "data:image/jpeg;base64,AAAA");
 });
 
+test("fotoBereinigen verwirft ungültige Wägungsfotos, die Wägung bleibt (0.25.0)", () => {
+  const daten = laden(testSpeicher());
+  daten.gewichte.push(
+    { id: "w1", tierId: daten.tiere[0].id, kg: 9.32, datum: "2026-11-02", notiz: "", foto: '"><img src=x onerror=alert(1)>' },
+    { id: "w2", tierId: daten.tiere[0].id, kg: 9.2, datum: "2026-11-09", notiz: "", foto: "data:image/jpeg;base64,AAAA" },
+  );
+  assert.equal(fotoBereinigen(daten), 1);
+  assert.equal(daten.gewichte.length, 2);
+  assert.equal("foto" in daten.gewichte.find((g) => g.id === "w1"), false);
+  assert.equal(daten.gewichte.find((g) => g.id === "w2").foto, "data:image/jpeg;base64,AAAA");
+  assert.ok(istGueltig(daten));
+});
+
+test("fotoBereinigen stürzt bei kaputten Einträgen nicht ab", () => {
+  const daten = laden(testSpeicher());
+  daten.gewichte.push(null, "kaputt", 5);
+  assert.equal(fotoBereinigen(daten), 0);
+});
+
 test("alte Sicherung ohne foto bleibt gültig", () => {
   const daten = laden(testSpeicher());
   delete daten.tiere[0].foto;

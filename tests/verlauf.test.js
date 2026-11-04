@@ -100,3 +100,17 @@ test("zeichneVerlauf: Karte „Befunde vom Tierarzt“ nur mit Freigaben, mit BC
   // neueste Freigabe zuerst
   assert.ok(mit.indexOf("15.10.") < mit.indexOf("8.10."));
 });
+
+test("zeichneVerlauf: Vorher/Nachher-Karte steht direkt unter der Gewichtskarte (0.25.0)", () => {
+  const html = zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [], futterNachId: new Map(), zeitraum: "3m", heute: "2026-10-20", kopf: "", fotos: "<section id=\"fotos-test\"></section>" });
+  const kurve = html.indexOf('aria-label="Gewicht"');
+  const fotos = html.indexOf('id="fotos-test"');
+  assert.ok(kurve >= 0 && fotos > kurve);
+  assert.ok(fotos < html.indexOf("Tempo pro Woche"));
+});
+
+test("zeichneVerlauf: Fotos erscheinen auch, wenn es noch keinen Verlauf gibt", () => {
+  const html = zeichneVerlauf({ gewichte: gewichte.slice(0, 1), mahlzeiten: [], freigaben: [], futterNachId: new Map(), zeitraum: "3m", heute: "2026-10-20", kopf: "", fotos: "<section id=\"fotos-test\"></section>" });
+  assert.match(html, /Sobald mindestens zwei Gewichte/);
+  assert.match(html, /id="fotos-test"/);
+});

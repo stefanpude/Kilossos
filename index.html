@@ -264,7 +264,7 @@
           <span data-symbol="dokument"></span><span class="text">Nutzungsbedingungen</span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.24.1</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.25.0</span>
         </div>
       </div>
     </section>
@@ -323,6 +323,15 @@
       <label>Notiz (optional)
         <input name="notiz" autocomplete="off" placeholder="z. B. Tierarzt">
       </label>
+      <div class="feld"><span id="label-gewicht-foto">Foto (freiwillig)</span>
+        <div class="gewicht-foto">
+          <img id="gewicht-foto-vorschau" alt="Vorschau des Fotos" hidden>
+          <button type="button" class="knopf-zweit" data-aktion="gewicht-foto-waehlen" aria-describedby="label-gewicht-foto"><span data-symbol="kamera"></span><span id="gewicht-foto-knopf">Foto hinzufügen</span></button>
+          <button type="button" class="knopf-text" data-aktion="gewicht-foto-entfernen" id="gewicht-foto-entfernen" hidden>Entfernen</button>
+          <input type="file" accept="image/*" id="gewicht-foto-datei" class="nur-vorlesen" tabindex="-1" aria-hidden="true">
+        </div>
+        <p class="tipp">Ein Foto pro Woche reicht, am besten immer aus der gleichen Richtung. Es bleibt auf diesem Handy.</p>
+      </div>
       <p class="fehler" id="gewicht-fehler" hidden></p>
       <div class="knoepfe">
         <button value="abbrechen" formnovalidate class="knopf-zweit">Abbrechen</button>

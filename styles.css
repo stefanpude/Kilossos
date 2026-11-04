@@ -308,6 +308,7 @@ a.knopf-zweit[hidden] { display: none; }
   text-align: left; text-decoration: none; margin: 0;
 }
 button.eintrag, a.eintrag, label.eintrag { cursor: pointer; }
+label.eintrag { position: relative; }
 button.eintrag:active, a.eintrag:active, label.eintrag:active { background: var(--flaeche-2); }
 .liste > :first-child, .liste > :first-child > .eintrag:first-child { border-top-left-radius: var(--rund); border-top-right-radius: var(--rund); }
 .liste > :last-child, .liste > :last-child > .eintrag:last-child { border-bottom-left-radius: var(--rund); border-bottom-right-radius: var(--rund); }
@@ -341,6 +342,25 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .freigabe-tafel .eckdaten { margin: 0; }
 .karte > h4.label { margin: 0; }
 .mehr-hinweis { margin: 6px 2px 0; }
+
+/* ---------- Fotos an Wägungen (ab 0.25.0) ---------- */
+.gewicht-foto { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; position: relative; }
+.gewicht-foto img { width: 72px; height: 72px; border-radius: var(--rund-klein); object-fit: cover; border: 1px solid var(--rand); }
+.gewicht-foto .knopf-zweit { display: inline-flex; align-items: center; gap: 8px; }
+.waegung-foto { width: 40px; height: 40px; border-radius: var(--rund-klein); object-fit: cover; flex: none; border: 1px solid var(--rand); }
+.vorher-nachher { gap: 10px; }
+.vn-paar { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.vn-seite { margin: 0; display: grid; gap: 6px; min-width: 0; align-content: start; }
+.vn-seite img, .vn-platzhalter { width: 100%; aspect-ratio: 1; border-radius: var(--rund-klein); object-fit: cover; display: block; }
+.vn-seite img { border: 1px solid var(--rand); }
+.vn-platzhalter {
+  display: grid; place-content: center; justify-items: center; gap: 6px; color: var(--text-leise);
+  background: var(--flaeche-2); border: 1px dashed var(--rand-stark); font-size: 0.8125rem;
+}
+.vn-platzhalter .ico { width: 56px; height: 56px; stroke-width: 1.2; }
+.vn-seite figcaption { display: grid; gap: 1px; }
+.vn-seite figcaption b { font-family: var(--serif); font-weight: 500; font-size: 1.125rem; font-variant-numeric: tabular-nums; }
+.vn-seite figcaption small { color: var(--text-leise); font-size: 0.8125rem; }
 .zwei-spalten { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
 /* ---------- Untere Leiste ---------- */

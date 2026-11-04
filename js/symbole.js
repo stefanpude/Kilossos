@@ -33,6 +33,8 @@ export const SYMBOL = {
   sichern: ico('<path d="M12 4v10M8 10l4 4 4-4M5 16v3h14v-3"/>'),
   einlesen: ico('<path d="M12 14V4M8 8l4-4 4 4M5 16v3h14v-3"/>'),
   buch: ico('<path d="M5 5.5A1.5 1.5 0 0 1 6.5 4H12v15.5H6.5A1.5 1.5 0 0 0 5 21zM12 4h5.5A1.5 1.5 0 0 1 19 5.5V21a1.5 1.5 0 0 0-1.5-1.5H12"/>'),
+  // Platzhalter, solange eine Wägung kein Foto hat (ab 0.25.0)
+  katzenkopf: ico('<circle cx="12" cy="13.5" r="7"/><path d="M6.4 9.2 5.6 3.8l4.3 3.4M17.6 9.2l.8-5.4-4.3 3.4M11.2 15.3h1.6L12 16.3z"/><circle cx="9.4" cy="12.6" r=".5"/><circle cx="14.6" cy="12.6" r=".5"/><path d="M2.8 14.4l4.4.6M3.2 17.4l4-1M21.2 14.4l-4.4.6M20.8 17.4l-4-1"/>'),
   info: ico('<circle cx="12" cy="12" r="8"/><path d="M12 11v5.5M12 7.8v.1"/>'),
   waage: ico('<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8.5 11a3.5 3.5 0 0 1 7 0M12 11l1.6-2"/>'),
 };
