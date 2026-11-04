@@ -1,7 +1,9 @@
-# Handy-Test 0.26.0 bis 0.28.0
+# Handy-Test 0.26.0 bis 0.29.2
 
 Nach dem Hochladen etwa 1 Minute warten. Dann die App einmal ganz schließen und neu öffnen.
-Unter „Mehr“ → „Über Kilossos“ muss **Version 0.28.0** stehen. Steht dort noch eine alte Version, die App noch einmal schließen und öffnen.
+Dann **Mehr** ganz nach unten scrollen: Die letzte Zeile (mit dem i-Zeichen) zeigt die Version, dort muss **Version 0.29.2** stehen.
+„Über Kilossos“ ist nur eine Überschrift, die Versionszeile nur zum Lesen: Antippen bewirkt bei beiden nichts.
+Steht dort noch eine alte Version, die App noch einmal schließen und öffnen.
 
 Bitte nichts eintragen, was du nicht behalten willst. Testeinträge danach wieder löschen.
 Keine Test-Freigabe speichern.
@@ -29,10 +31,15 @@ Keine Test-Freigabe speichern.
 
 ## C. Neu in 0.28.3 bis 0.28.5 (normaler Tab)
 
-- [ ] **Mehr** → „Über Kilossos“ zeigt Version 0.28.5.
 - [ ] **Heute**: Eine Mahlzeit antippen öffnet „Mahlzeit ändern“ wie vorher; nach „Speichern“ sieht alles aus wie vorher.
 - [ ] **Futter**: Eine eigene Sorte antippen öffnet „Sorte ändern“ wie vorher.
 - [ ] Freiwillig, 2 Minuten: TalkBack einschalten (Einstellungen → Bedienungshilfen → TalkBack). Auf eine Mahlzeit tippen: TalkBack liest Uhrzeit, Sorte, Menge und „ändern“. Doppeltippen öffnet das Blatt, TalkBack nennt dessen Titel. TalkBack danach wieder ausschalten.
+
+## D. Neu in 0.29.0 bis 0.29.2 (normaler Tab)
+
+- [ ] **Futter** → „Aus der Futterliste wählen“ → ins Suchfeld „sterilised“ tippen: 7 Sorten erscheinen, darunter Perfect Fit, Pro Plan und Select Gold. Nichts übernehmen.
+- [ ] **Heute** → Mahlzeit eintragen: Unter „Menge in Gramm“ steht der Hinweis „Wiege das Futter, bevor du Wasser oder Brühe dazugibst …“. Danach **Abbrechen**.
+- [ ] Symbol auf dem Startbildschirm: Chrome tauscht das Symbol der installierten App nicht sofort aus, sondern prüft das höchstens etwa einmal am Tag beim Öffnen. Kann sein, dass Chrome dabei fragt, ob das geänderte Symbol übernommen werden soll: bestätigen. Danach sollten beide Ohren und der Napf ganz zu sehen sein. Ist es nach zwei Tagen noch das alte, ist das kein Fehler der App.
 
 ## Was mir auffällt
 
