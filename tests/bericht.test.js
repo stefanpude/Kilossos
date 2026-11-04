@@ -143,3 +143,21 @@ test("berichtHtml: Fotos nur auf Wunsch, erstes und letztes Foto im Zeitraum mit
   // kein Foto im Zeitraum: Satz statt Bildern
   assert.match(html(true, gewichte), /Im Zeitraum gibt es kein Foto/);
 });
+
+test("berichtHtml: Legende „Freigabe“ nur, wenn das Diagramm eine Freigabe-Linie zeichnet", () => {
+  const html = (frs) =>
+    berichtHtml(berichtDaten({ ...eingabe, freigaben: frs }), {
+      tier: { name: "Kito" }, gewichte, mahlzeiten, freigaben: frs,
+      futterNachId: new Map(futter.map((f) => [f.id, f])), erstellt: "2026-11-04", demo: false,
+    });
+  const legende = /<span class="schluessel strich"><\/span>Freigabe/;
+  assert.match(html([freigabe]), legende);
+  assert.match(html([freigabe]), /class="freigabe-linie"/);
+  assert.doesNotMatch(html([]), legende);
+  // Freigabe erst nach dem gezeigten Zeitraum: keine Linie, also auch keine Legende
+  const spaeter = { ...freigabe, datum: "2026-12-01" };
+  assert.doesNotMatch(html([spaeter]), /class="freigabe-linie"/);
+  assert.doesNotMatch(html([spaeter]), legende);
+  // Futter und Leckerli stehen immer in der Legende
+  assert.match(html([]), /reihe-1"><\/span>Futter<\/li><li><span class="schluessel reihe-2"><\/span>Leckerli/);
+});

@@ -250,9 +250,14 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
       return t >= f.von && t <= f.bis;
     });
     if (mz.length) {
+      const diagramm = kcalDiagramm(mz, futterNachId, freigaben);
+      // „Freigabe“ nur in der Legende, wenn das Diagramm die Linie auch zeichnet (ohne Freigabe im Zeitraum keine).
+      const linie = diagramm.includes('class="freigabe-linie"')
+        ? `<li><span class="schluessel strich"></span>Freigabe</li>`
+        : "";
       teile.push(`<h3>Kalorien pro Tag, Durchschnitt je Woche</h3>
-        <ul class="legende"><li><span class="schluessel reihe-1"></span>Futter</li><li><span class="schluessel reihe-2"></span>Leckerli</li><li><span class="schluessel strich"></span>Freigabe</li></ul>
-        ${kcalDiagramm(mz, futterNachId, freigaben)}`);
+        <ul class="legende"><li><span class="schluessel reihe-1"></span>Futter</li><li><span class="schluessel reihe-2"></span>Leckerli</li>${linie}</ul>
+        ${diagramm}`);
     }
   } else {
     teile.push(`<p>Im Zeitraum sind keine Mahlzeiten an abgeschlossenen Tagen eingetragen.</p>`);
