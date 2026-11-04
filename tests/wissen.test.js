@@ -166,6 +166,13 @@ test("app.js: öffnet beide Blätter, setzt die Begriffe ein, Knopf im Hinweis",
   assert.match(js, /hinweisKnopf\(w\.id\)/);
 });
 
+test("Willkommensseite verspricht nichts, was die App nicht halten kann (Stefan, 04.11.2026)", () => {
+  const html = lies("index.html");
+  assert.match(html, /<p class="willkommen-unter">Sicher abnehmen nach den Leitlinien der Tierärzte<\/p>/);
+  assert.match(html, /<span>Du wiegst das Futter, Kilossos rechnet die Kalorien<\/span>/);
+  assert.doesNotMatch(html, /ohne Fettleber-Risiko|für jede Sorte/);
+});
+
 test("Version 0.30.0: Cache v56 mit js/wissen.js, Versionszeile unter „Mehr“", () => {
   const sw = lies("sw.js");
   assert.match(sw, /const CACHE_NAME = "kilossos-v56";/);

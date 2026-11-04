@@ -32,3 +32,13 @@ _Angelegt 02.11.2026. Stefan hat die Fragen zum Start übersprungen; sie stehen 
 ## Noch offen
 
 - Soll die Willkommensseite später wieder aufrufbar sein (z. B. unter „Mehr“)? Die ganze Geschichte ist dort schon (`#geschichte`). Vorschlag Claude: reicht so, kein eigener Knopf.
+
+## Geändert (04.11.2026, 0.30.0): Unterzeile und Futter-Zeile
+
+- Unterzeile „Sicher abnehmen, ohne Fettleber-Risiko“ → „Sicher abnehmen nach den Leitlinien der Tierärzte“.
+  **Warum:** „ohne Risiko“ verspricht mehr, als eine App halten kann (Kilossos warnt nur). Für die Store-Kurzbeschreibung
+  war die Formulierung aus demselben Grund schon am 03.11. verworfen (`store-texte.md`).
+- Zeile „Futter in Gramm und Kalorien, für jede Sorte“ → „Du wiegst das Futter, Kilossos rechnet die Kalorien“.
+  **Warum:** Stefan las „für jede Sorte“ so, als hätte die App alle Futtersorten gespeichert. Die neue Zeile sagt, wer was macht.
+- Platz: „Weiter“ endet bei 375 × 812 jetzt bei 643 px (vorher 612), weit vor der Grenze von etwa 790 px.
+- Test in `tests/wissen.test.js`: Die alten Formulierungen dürfen nicht zurückkommen.
