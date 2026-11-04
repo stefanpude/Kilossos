@@ -1,7 +1,7 @@
-# Handy-Test 0.26.0 bis 0.29.2
+# Handy-Test 0.26.0 bis 0.29.3
 
 Nach dem Hochladen etwa 1 Minute warten. Dann die App einmal ganz schließen und neu öffnen.
-Dann **Mehr** ganz nach unten scrollen: Die letzte Zeile (mit dem i-Zeichen) zeigt die Version, dort muss **Version 0.29.2** stehen.
+Dann **Mehr** ganz nach unten scrollen: Die letzte Zeile (mit dem i-Zeichen) zeigt die Version, dort muss **Version 0.29.3** stehen.
 „Über Kilossos“ ist nur eine Überschrift, die Versionszeile nur zum Lesen: Antippen bewirkt bei beiden nichts.
 Steht dort noch eine alte Version, die App noch einmal schließen und öffnen.
 
@@ -49,9 +49,15 @@ Ergebnis 04.11.2026: C1 und C2 bestanden (C1 mit einer Testmahlzeit, danach gel�
 
 Ergebnis 04.11.2026: D1 und D2 bestanden. D3 (Symbol) in den nächsten Tagen beobachten.
 
+## E. Neu in 0.29.3 (normaler Tab)
+
+- [ ] Oben links steht „Kilossos“ größer und dunkel, nicht mehr klein und grau.
+- [ ] Auf **Heute** steht neben Kitos Namen kein Pfeil mehr. Einen Pfeil gibt es nur, wenn mehrere Tiere angelegt sind.
+- [ ] **Mehr** öffnen und die Seite aktualisieren (oder die App kurz im Hintergrund lassen): Die App bleibt auf **Mehr**. Wird sie ganz geschlossen (aus den offenen Apps wegwischen) und neu geöffnet, beginnt sie auf **Heute**.
+
 ## Was mir auffällt
 
 (Hier notieren, was komisch aussieht oder sich falsch anfühlt, am besten mit Screenshot.)
 
-- **Aktualisieren springt immer auf „Heute“** (04.11.2026): Wer zum Beispiel unter „Mehr“ die Seite aktualisiert, landet wieder auf „Heute“, egal in welchem Bereich. Ursache: Die App merkt sich den offenen Bereich nicht (`zeigeAnsicht` in `app.js`; beim Laden ist nur „Heute“ sichtbar). Das trifft auch, wenn Android die App im Hintergrund beendet und beim Zurückkehren neu lädt. Plan: Bereich in `sessionStorage` merken und beim Aktualisieren wiederherstellen; ein frischer Start der App beginnt weiter auf „Heute“.
-- **Pfeil neben dem Namen auf „Heute“ tut nichts** (04.11.2026): Neben „Kito“ steht ein Pfeil nach unten, Antippen bewirkt nichts. Der Pfeil soll nur bei mehr als einem Tier erscheinen (dann öffnet er das Menü zum Wechseln). `app.js` setzt bei einem Tier `hidden` und sperrt den Knopf, aber `styles.css` (`.tier-wechsel .pfeil { display: inline-block }`) hebt `hidden` auf. Plan: Regel `.tier-wechsel .pfeil[hidden] { display: none; }`, im Browser mit einem und mit zwei Tieren prüfen.
+- **Aktualisieren springt immer auf „Heute“** (04.11.2026): Wer zum Beispiel unter „Mehr“ die Seite aktualisiert, landet wieder auf „Heute“, egal in welchem Bereich. Ursache: Die App merkt sich den offenen Bereich nicht (`zeigeAnsicht` in `app.js`; beim Laden ist nur „Heute“ sichtbar). Das trifft auch, wenn Android die App im Hintergrund beendet und beim Zurückkehren neu lädt. Plan: Bereich in `sessionStorage` merken und beim Aktualisieren wiederherstellen; ein frischer Start der App beginnt weiter auf „Heute“. **Behoben in 0.29.3.**
+- **Pfeil neben dem Namen auf „Heute“ tut nichts** (04.11.2026): Neben „Kito“ steht ein Pfeil nach unten, Antippen bewirkt nichts. Der Pfeil soll nur bei mehr als einem Tier erscheinen (dann öffnet er das Menü zum Wechseln). `app.js` setzt bei einem Tier `hidden` und sperrt den Knopf, aber `styles.css` (`.tier-wechsel .pfeil { display: inline-block }`) hebt `hidden` auf. Plan: Regel `.tier-wechsel .pfeil[hidden] { display: none; }`, im Browser mit einem und mit zwei Tieren prüfen. **Behoben in 0.29.3.**

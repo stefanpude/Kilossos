@@ -269,8 +269,32 @@ function zeigeToast(text, dauerMs = 1800) {
 
 // ---------- Ansichten ----------
 
+// Offener Bereich, damit Aktualisieren dort bleibt (Handy-Test 04.11.2026). sessionStorage gilt nur für diesen Tab:
+// Ein frischer Start der App beginnt wieder auf „Heute“. Den Bericht gibt es nur aus „Mehr“ heraus.
+const ANSICHT_SCHLUESSEL = demo ? "kilossos-demo-ansicht" : "kilossos-ansicht";
+
+function merkeAnsicht(name) {
+  try {
+    sessionStorage.setItem(ANSICHT_SCHLUESSEL, name === "bericht" ? "mehr" : name);
+  } catch {
+    // Speicher gesperrt: Nach dem Aktualisieren kommt dann eben „Heute“.
+  }
+}
+
+function gemerkteAnsichtZeigen() {
+  let name = null;
+  try {
+    name = sessionStorage.getItem(ANSICHT_SCHLUESSEL);
+  } catch {
+    return;
+  }
+  const erlaubt = [...document.querySelectorAll(".leiste button[data-ziel]")].map((knopf) => knopf.dataset.ziel);
+  if (name && name !== "heute" && erlaubt.includes(name)) zeigeAnsicht(name);
+}
+
 // richtung: 1/-1 nach einem Wischen, dann gleitet der Bereich von der Seite herein.
 function zeigeAnsicht(name, richtung = 0) {
+  merkeAnsicht(name);
   document.querySelectorAll(".ansicht").forEach((el) => {
     el.hidden = el.dataset.ansicht !== name;
     el.classList.remove("rein", "rein-rechts", "rein-links");
@@ -2197,3 +2221,4 @@ zeichneAlles();
 zeichneHeute(true);
 zeigeSpeicherStatus();
 if (einrichtungLaeuft) einrichtungZeigen();
+else gemerkteAnsichtZeigen();

@@ -113,8 +113,9 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 500; }
   max-width: 560px;
   margin: 0 auto;
 }
+/* Schriftzug ab 0.29.3 größer und in Tinte (vorher 0.875rem, grau: „klein und schmächtig“, Handy-Test 04.11.2026) */
 .kopf h1 {
-  margin: 0; font-size: 0.875rem; font-weight: 500; letter-spacing: 0.04em; color: var(--text-leise);
+  margin: 0; font-size: 1.25rem; font-weight: 600; letter-spacing: 0.02em; color: var(--text);
 }
 
 /* ---------- Willkommen und Einrichtung (nur beim ersten Start, drei Schritte) ---------- */
@@ -243,6 +244,7 @@ main {
 }
 .tier-wechsel:disabled { cursor: default; }
 .tier-wechsel .pfeil { color: var(--text-leise); display: inline-block; vertical-align: middle; }
+.tier-wechsel .pfeil[hidden] { display: none; } /* bei nur einem Tier: kein Pfeil, der Knopf ist gesperrt */
 .tier-wechsel .pfeil .ico { width: 1.1rem; height: 1.1rem; }
 .tier-menue { left: 0; right: auto; min-width: 190px; }
 .auswahl-menue.tier-menue .haken { opacity: 1; }
