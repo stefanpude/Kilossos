@@ -1,0 +1,64 @@
+# Fragen für den Tierarzttermin: Zuki
+
+Zum Ausdrucken oder am Handy mitnehmen. Dazu die Futterpackungen oder Fotos davon. Ist Zuki in der App angelegt,
+auch die Tierarzt-Übersicht als PDF („Mehr“ → „Übersicht für den Tierarzt“ → „Übersicht öffnen“).
+Die Liste für Kito: [tierarzt-fragen-kito.md](tierarzt-fragen-kito.md). Fragen zur App selbst stehen dort.
+
+## Ausgangslage
+- Zuki, zierlich gebaut, im Verhältnis aber noch dicker als Kito
+- Geschlecht und kastriert: bitte ergänzen
+- Alter oder Geburtsdatum: bitte ergänzen
+- Gewicht: noch nicht gewogen, bitte in der Praxis wiegen lassen
+- Futter: bitte ergänzen
+- Wird getrennt von Kito gefüttert
+
+## 1. Befund
+- [ ] Wie viel wiegt Zuki? (Startgewicht für die App)
+- [ ] Wie ist Zukis **Body Condition Score (BCS)**? (Skala 1–9)
+- [ ] Wie ist Zukis **Muskelzustand (MCS)**?
+- [ ] Sind vorher Blutwerte nötig (z. B. Schilddrüse, Zucker, Leber, Nieren)?
+- [ ] Gibt es Gründe, die gegen eine Abnahme sprechen?
+
+## 2. Ziel und Menge (das trägt nur der Tierarzt in die App ein)
+- [ ] Welches **Zielgewicht** ist für Zuki realistisch, bei dem zierlichen Körperbau?
+- [ ] Wie viele **kcal pro Tag** soll Zuki bekommen?
+- [ ] Wie schnell soll Zuki abnehmen? Die App warnt ab mehr als 2 % pro Woche.
+      Sinnvoll sind 0,5–2 % des Körpergewichts pro Woche.
+- [ ] Ab welcher Abnahme pro Woche soll ich mich melden?
+
+## 3. Futter
+- [ ] Reicht unser **Handelsfutter**, oder braucht Zuki ein **Diätfutter**?
+      Hintergrund: Wenn die kcal pro Tag niedrig angesetzt werden, bekommt Zuki mit normalem Futter
+      womöglich zu wenig Eiweiß, Vitamine und Mineralstoffe.
+- [ ] Wie soll ich Nass- und Trockenfutter aufteilen?
+- [ ] Wie viele Leckerlis sind erlaubt? (Die App warnt ab 10 % der Tageskalorien.)
+- [ ] Kito und Zuki fressen getrennt. Worauf soll ich achten, damit keiner beim anderen mitfrisst?
+
+## 4. Sicherheit
+- [ ] Woran erkenne ich früh eine **Fettleber** (hepatische Lipidose)? Was tue ich, wenn Zuki nicht frisst?
+- [ ] Wie lange darf Zuki höchstens ohne Futter sein, bevor ich anrufen muss?
+- [ ] Wie wichtig ist Zukis **Wasseraufnahme** beim Abnehmen? Katzen nehmen einen großen Teil ihres Wassers
+      über Nassfutter auf; weniger Futter heißt auch weniger Wasser. Sollen wir etwas beachten
+      (z. B. Wasser ins Nassfutter, Trinkbrunnen), und sollen die Nierenwerte vorher bestimmt werden?
+
+## 5. Kontrolle
+- [ ] Wie oft soll ich Zuki zum Wiegen in die Praxis bringen? (Zu Hause wiege ich 1× pro Woche,
+      gleicher Tag, gleiche Uhrzeit, gleiche Waage.)
+- [ ] Wann ist der nächste Kontrolltermin, und in welchem **Abstand** sollen wir danach zur Kontrolle kommen?
+      (Die App könnte dann daran erinnern.)
+- [ ] Welche **Ausnahmen** soll ich in der App festhalten, damit Sie sie bei der Kontrolle sehen? Geplant ist ein
+      Eintrag „Besonderer Tag“: mehr Bewegung, weniger Bewegung, krank, Futter verweigert, Sonstiges.
+      Fehlt etwas (zum Beispiel Futterumstellung), oder ist etwas davon unwichtig?
+
+## Antworten
+| Frage | Antwort |
+|---|---|
+| Gewicht | |
+| BCS | |
+| MCS | |
+| Zielgewicht | |
+| kcal pro Tag | |
+| Diätfutter? | |
+| Nächster Termin | |
+| Abstand der Kontrollen | |
+| Ausnahmen für die App | |
