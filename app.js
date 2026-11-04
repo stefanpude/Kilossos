@@ -1,7 +1,6 @@
 import {
   laden,
   speichern as speichernInSpeicher,
-  istGueltig,
   neueId,
   dauerhaftSpeichern,
   futterNachId,
@@ -12,9 +11,6 @@ import {
   sicherungsHinweis,
   SICHERUNG_ALLE_TAGE,
   fotoGueltig,
-  fotoBereinigen,
-  eintraegeBereinigen,
-  freigabenBereinigen,
   MCS,
   istErsterStart,
   ersteDaten,
@@ -46,7 +42,6 @@ import {
   normalesFutterKcal,
   eanAusEingabe,
   findeNachEan,
-  eanBereinigen,
 } from "./js/futterliste.js";
 import { kameraScanMoeglich, starteScanner } from "./js/scanner.js";
 import { ringWerte, leckerliKachel, monatsGruppen, tempoRueckmeldung, achtWochen } from "./js/zusammenfassung.js";
@@ -54,12 +49,13 @@ import { SYMBOL } from "./js/symbole.js";
 import { leseAnzeige, merkeAnzeige, aufgeloest } from "./js/anzeige.js";
 import { aufklappKarte, merkeZustand, zustandVon, zustandVergessen, aufklappenAnmelden } from "./js/aufklappen.js";
 import { auswahlFeld, auswahlAnmelden } from "./js/auswahl.js";
-import { profilBereinigen, alterText, telefonLink, telefonGueltig, istWiegetag, WOCHENTAGE, HALTUNG } from "./js/profil.js";
+import { alterText, telefonLink, telefonGueltig, istWiegetag, WOCHENTAGE, HALTUNG } from "./js/profil.js";
 import { aktivesTier, leseAktivesTier, merkeAktivesTier, neuesTier, eintraegeVon, tierEntfernen } from "./js/tiere.js";
 import { wischenAnmelden } from "./js/wischen.js";
 import { datumText, freigabeTafel } from "./js/mehr.js";
 import { fotoImZeitraum, fotoAngebot, istFotoTag, vorherNachher } from "./js/fotos.js";
 import { belegteZeichen, speicherAnzeige } from "./js/speicher.js";
+import { sicherungPruefen } from "./js/sicherung.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
 if ("serviceWorker" in navigator) {
@@ -1694,18 +1690,12 @@ $("import-datei").addEventListener("change", async (ereignis) => {
     alert("Diese Datei ist keine Kilossos-Sicherung.");
     return;
   }
-  if (!istGueltig(neu)) {
+  const pruefung = sicherungPruefen(neu, tagSchluessel(new Date()));
+  if (!pruefung) {
     alert("Diese Datei ist keine gültige Kilossos-Sicherung.");
     return;
   }
-  // Zuerst kaputte Einträge entfernen: Die übrigen Prüfungen erwarten echte Einträge.
-  const kaputt = eintraegeBereinigen(neu);
-  if (!istGueltig(neu)) {
-    alert("Diese Datei ist keine gültige Kilossos-Sicherung.");
-    return;
-  }
-  const verworfen = fotoBereinigen(neu);
-  const profilFehler = profilBereinigen(neu, tagSchluessel(new Date())) + freigabenBereinigen(neu) + eanBereinigen(neu);
+  const { kaputt, fotos: verworfen, angaben: profilFehler } = pruefung;
   const anzahl = `${neu.mahlzeiten.length} Mahlzeiten und ${neu.gewichte.length} Gewichte`;
   const fotoText = verworfen > 0 ? " Ein Foto in der Datei war ungültig und wird nicht übernommen." : "";
   const profilText = profilFehler > 0 ? " Einige Angaben im Profil, in den Freigaben oder bei den Strichcodes waren ungültig und werden nicht übernommen." : "";

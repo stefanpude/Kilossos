@@ -1,0 +1,221 @@
+{
+  "version": 1,
+  "tiere": [
+    {
+      "id": "a1a1a1a1-0000-4000-8000-000000000001",
+      "name": "Mika",
+      "art": "katze",
+      "geschlecht": "kater",
+      "kastriert": true,
+      "foto": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAQABADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwCeiiioMD//2Q==",
+      "geburtsdatum": "2018-05-01",
+      "koerperbau": "groß und kräftig",
+      "haltung": "wohnung",
+      "schlankKg": 7.2,
+      "tierarzt": {
+        "praxis": "Tierarztpraxis Beispiel",
+        "telefon": "01234 567890"
+      },
+      "wiegetag": 3
+    },
+    {
+      "id": "b2b2b2b2-0000-4000-8000-000000000002",
+      "name": "Luna",
+      "art": "katze",
+      "geschlecht": "katze",
+      "kastriert": true
+    }
+  ],
+  "futter": [
+    {
+      "id": "f0000000-0000-4000-8000-00000000000a",
+      "listeId": "sheba-fresh-fine-huhn-gefluegel-truthahn",
+      "name": "Sheba Fresh n Fine in Sauce mit Geflügel",
+      "typ": "nass",
+      "kcalPro100g": 71,
+      "kcalQuelle": "hersteller",
+      "notiz": "Rezeptur „Huhn, Geflügel & Truthahn in Sauce“ (EAN 4770608260286), Angaben laut zooplus.de (11/2026): Protein 7,7 %, Fett 3,9 %, Asche 1,8 %, Faser 0,2 %, Feuchte 84,7 %; 35,5 kcal je 50-g-Beutel. Eigene Nachrechnung (NRC 2006): 70,7."
+    },
+    {
+      "id": "f0000000-0000-4000-8000-00000000000b",
+      "listeId": "purina-one-light-trocken",
+      "name": "Purina One Light",
+      "typ": "trocken",
+      "kcalPro100g": 327.5,
+      "kcalQuelle": "hersteller",
+      "notiz": "Herstellerangabe purina.co.uk (11/2026), gleiche Nährwerte wie die deutsche Packung (Protein 37 %, Fett 9,5 %, Asche 7,5 %, Faser 6 %). Die Packung selbst nennt keine kcal. Eigene Nachrechnung (NRC 2006): 339–353."
+    },
+    {
+      "id": "f0000000-0000-4000-8000-00000000000c",
+      "name": "Knabberstangen",
+      "typ": "leckerli",
+      "kcalPro100g": 300,
+      "kcalQuelle": "packung",
+      "notiz": ""
+    },
+    {
+      "id": "f0000000-0000-4000-8000-00000000000d",
+      "listeId": "royal-canin-satiety-nass",
+      "name": "Royal Canin Veterinary Satiety Weight Management in Soße",
+      "typ": "nass",
+      "kcalPro100g": 60.7,
+      "kcalQuelle": "hersteller",
+      "notiz": "Diätfutter – nur nach Rücksprache mit dem Tierarzt. Laut zooplus.de: Protein 7,6 %, Fett 2,3 %, Asche 1,7 %, Faser 1,1 %, Feuchte 84 %. 85-g-Beutel = 51,6 kcal. Aus der Kilossos-Futterliste, Stand 02.11.2026. Bei Abweichung gilt die Packung."
+    }
+  ],
+  "mahlzeiten": [
+    {
+      "id": "m-1",
+      "tierId": "a1a1a1a1-0000-4000-8000-000000000001",
+      "futterId": "f0000000-0000-4000-8000-00000000000a",
+      "gramm": 50,
+      "zeitpunkt": "2026-10-21T06:15:00.000Z"
+    },
+    {
+      "id": "m-2",
+      "tierId": "a1a1a1a1-0000-4000-8000-000000000001",
+      "futterId": "f0000000-0000-4000-8000-00000000000b",
+      "gramm": 25,
+      "zeitpunkt": "2026-10-21T17:15:00.000Z"
+    },
+    {
+      "id": "m-3",
+      "tierId": "a1a1a1a1-0000-4000-8000-000000000001",
+      "futterId": "f0000000-0000-4000-8000-00000000000c",
+      "gramm": 3,
+      "zeitpunkt": "2026-10-21T19:15:00.000Z"
+    },
+    {
+      "id": "m-4",
+      "tierId": "b2b2b2b2-0000-4000-8000-000000000002",
+      "futterId": "f0000000-0000-4000-8000-00000000000a",
+      "gramm": 40,
+      "zeitpunkt": "2026-10-21T07:15:00.000Z"
+    },
+    {
+      "id": "m-5",
+      "tierId": "a1a1a1a1-0000-4000-8000-000000000001",
+      "futterId": "f0000000-0000-4000-8000-00000000000a",
+      "gramm": 50,
+      "zeitpunkt": "2026-10-22T06:15:00.000Z"
+    },
+    {
+      "id": "m-6",
+      "tierId": "a1a1a1a1-0000-4000-8000-000000000001",
+      "futterId": "f0000000-0000-4000-8000-00000000000b",
+      "gramm": 25,
+      "zeitpunkt": "2026-10-22T17:15:00.000Z"
+    },
+    {
+      "id": "m-7",
+      "tierId": "a1a1a1a1-0000-4000-8000-000000000001",
+      "futterId": "f0000000-0000-4000-8000-00000000000c",
+      "gramm": 3,
+      "zeitpunkt": "2026-10-22T19:15:00.000Z"
+    },
+    {
+      "id": "m-8",
+      "tierId": "b2b2b2b2-0000-4000-8000-000000000002",
+      "futterId": "f0000000-0000-4000-8000-00000000000a",
+      "gramm": 40,
+      "zeitpunkt": "2026-10-22T07:15:00.000Z"
+    },
+    {
+      "id": "m-9",
+      "tierId": "a1a1a1a1-0000-4000-8000-000000000001",
+      "futterId": "f0000000-0000-4000-8000-00000000000a",
+      "gramm": 50,
+      "zeitpunkt": "2026-10-28T06:15:00.000Z"
+    },
+    {
+      "id": "m-10",
+      "tierId": "a1a1a1a1-0000-4000-8000-000000000001",
+      "futterId": "f0000000-0000-4000-8000-00000000000b",
+      "gramm": 25,
+      "zeitpunkt": "2026-10-28T17:15:00.000Z"
+    },
+    {
+      "id": "m-11",
+      "tierId": "a1a1a1a1-0000-4000-8000-000000000001",
+      "futterId": "f0000000-0000-4000-8000-00000000000c",
+      "gramm": 3,
+      "zeitpunkt": "2026-10-28T19:15:00.000Z"
+    },
+    {
+      "id": "m-12",
+      "tierId": "b2b2b2b2-0000-4000-8000-000000000002",
+      "futterId": "f0000000-0000-4000-8000-00000000000a",
+      "gramm": 40,
+      "zeitpunkt": "2026-10-28T07:15:00.000Z"
+    },
+    {
+      "id": "m-13",
+      "tierId": "a1a1a1a1-0000-4000-8000-000000000001",
+      "futterId": "f0000000-0000-4000-8000-00000000000a",
+      "gramm": 50,
+      "zeitpunkt": "2026-10-29T06:15:00.000Z"
+    },
+    {
+      "id": "m-14",
+      "tierId": "a1a1a1a1-0000-4000-8000-000000000001",
+      "futterId": "f0000000-0000-4000-8000-00000000000b",
+      "gramm": 25,
+      "zeitpunkt": "2026-10-29T17:15:00.000Z"
+    },
+    {
+      "id": "m-15",
+      "tierId": "a1a1a1a1-0000-4000-8000-000000000001",
+      "futterId": "f0000000-0000-4000-8000-00000000000c",
+      "gramm": 3,
+      "zeitpunkt": "2026-10-29T19:15:00.000Z"
+    },
+    {
+      "id": "m-16",
+      "tierId": "b2b2b2b2-0000-4000-8000-000000000002",
+      "futterId": "f0000000-0000-4000-8000-00000000000a",
+      "gramm": 40,
+      "zeitpunkt": "2026-10-29T07:15:00.000Z"
+    }
+  ],
+  "gewichte": [
+    {
+      "id": "g-1",
+      "tierId": "a1a1a1a1-0000-4000-8000-000000000001",
+      "kg": 9.32,
+      "datum": "2026-10-14",
+      "notiz": "Tierarzt"
+    },
+    {
+      "id": "g-2",
+      "tierId": "a1a1a1a1-0000-4000-8000-000000000001",
+      "kg": 9.25,
+      "datum": "2026-10-21",
+      "notiz": ""
+    },
+    {
+      "id": "g-3",
+      "tierId": "a1a1a1a1-0000-4000-8000-000000000001",
+      "kg": 9.18,
+      "datum": "2026-10-28",
+      "notiz": ""
+    },
+    {
+      "id": "g-4",
+      "tierId": "b2b2b2b2-0000-4000-8000-000000000002",
+      "kg": 5.4,
+      "datum": "2026-10-28",
+      "notiz": ""
+    }
+  ],
+  "freigaben": [
+    {
+      "id": "r-1",
+      "tierId": "a1a1a1a1-0000-4000-8000-000000000001",
+      "datum": "2026-10-20",
+      "zielgewichtKg": 7.5,
+      "kcalProTag": 230,
+      "tierarzt": "Dr. Beispiel",
+      "notiz": ""
+    }
+  ]
+}

@@ -230,6 +230,13 @@ function startwerteAktualisieren(daten) {
   const neueStartwerte = alteStartsorten();
   let geaendert = false;
   for (const futter of daten.futter) {
+    // Seit 0.6.0 wissen die beiden Startsorten, zu welchem Eintrag der Futterliste sie gehören.
+    // Zuerst, damit eine Sicherung aus 0.5 (Sheba 71, noch ohne listeId) gleich beim ersten Laden umgestellt wird.
+    const start = neueStartwerte.find((f) => f.name === futter.name);
+    if (start && !futter.listeId) {
+      futter.listeId = start.listeId;
+      geaendert = true;
+    }
     const altPurina =
       futter.name === "Purina One Light" &&
       ((futter.kcalPro100g === 360 && futter.kcalQuelle === "ungefaehr") ||
@@ -248,12 +255,6 @@ function startwerteAktualisieren(daten) {
     if (alt) {
       const neu = neueStartwerte.find((f) => (zooplusSheba ? f.listeId === futter.listeId : f.name === futter.name));
       Object.assign(futter, { kcalPro100g: neu.kcalPro100g, kcalQuelle: neu.kcalQuelle, notiz: neu.notiz });
-      geaendert = true;
-    }
-    // Seit 0.6.0 wissen die beiden Startsorten, zu welchem Eintrag der Futterliste sie gehören.
-    const start = neueStartwerte.find((f) => f.name === futter.name);
-    if (start && !futter.listeId) {
-      futter.listeId = start.listeId;
       geaendert = true;
     }
   }
