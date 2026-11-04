@@ -1,7 +1,7 @@
 // Prüfkette für eine eingelesene Sicherungsdatei (vorher direkt in app.js, seit 0.28.3 hier, damit sie testbar ist).
 // Eine Sicherung kann aus jeder früheren Version stammen oder von irgendwoher kommen: Ungültiges wird entfernt
 // oder repariert, alles Gültige bleibt. Beispiel-Sicherungen aller Versionen liegen in tests/sicherungen/.
-import { istGueltig, eintraegeBereinigen, fotoBereinigen, freigabenBereinigen } from "./daten.js";
+import { istGueltig, eintraegeBereinigen, fotoBereinigen, freigabenBereinigen, analyseBereinigen } from "./daten.js";
 import { profilBereinigen } from "./profil.js";
 import { eanBereinigen } from "./futterliste.js";
 
@@ -13,7 +13,7 @@ export function sicherungPruefen(neu, heute) {
   const kaputt = eintraegeBereinigen(neu);
   if (!istGueltig(neu)) return null;
   const fotos = fotoBereinigen(neu);
-  const angaben = profilBereinigen(neu, heute) + freigabenBereinigen(neu) + eanBereinigen(neu);
+  const angaben = profilBereinigen(neu, heute) + freigabenBereinigen(neu) + eanBereinigen(neu) + analyseBereinigen(neu);
   return { kaputt, fotos, angaben };
 }
 
@@ -27,7 +27,7 @@ export function einleseFrage(neu, { kaputt, fotos, angaben }, ersetzen) {
   const fotoText = fotos > 0 ? " Ein Foto in der Datei war ungültig und wird nicht übernommen." : "";
   const angabenText =
     angaben > 0
-      ? " Einige Angaben im Profil, in den Freigaben oder bei den Strichcodes waren ungültig und werden nicht übernommen."
+      ? " Einige Angaben im Profil, in den Freigaben, bei den Strichcodes oder bei den Analysewerten waren ungültig und werden nicht übernommen."
       : "";
   return `Sicherung mit ${anzahl} einlesen?${ersetzen}${kaputtText}${fotoText}${angabenText}`;
 }

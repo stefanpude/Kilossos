@@ -15,6 +15,7 @@ import {
   istErsterStart,
   ersteDaten,
   waegungAendern,
+  analyseGueltig,
 } from "./js/daten.js";
 import {
   leseZahl,
@@ -33,6 +34,11 @@ import {
   armGewicht,
   prozentInGramm,
   menschVergleich,
+  kcalKasten,
+  rechnerPruefen,
+  kcalPruefen,
+  RECHNER_FELDER,
+  FEUCHTE_TROCKEN_ANNAHME,
 } from "./js/rechnen.js";
 import { zeichneVerlauf } from "./js/verlauf.js";
 import { berichtDaten, berichtHtml } from "./js/bericht.js";
@@ -49,7 +55,7 @@ import { ringWerte, leckerliKachel, monatsGruppen, tempoRueckmeldung, achtWochen
 import { SYMBOL } from "./js/symbole.js";
 import { leseAnzeige, merkeAnzeige, aufgeloest } from "./js/anzeige.js";
 import { aufklappKarte, merkeZustand, zustandVon, zustandVergessen, aufklappenAnmelden } from "./js/aufklappen.js";
-import { begriffeHtml, hinweisKnopf } from "./js/wissen.js";
+import { begriffeHtml, hinweisKnopf, kcalSpanne } from "./js/wissen.js";
 import { auswahlFeld, auswahlAnmelden } from "./js/auswahl.js";
 import { alterText, telefonLink, telefonGueltig, istWiegetag, WOCHENTAGE, HALTUNG } from "./js/profil.js";
 import { aktivesTier, leseAktivesTier, merkeAktivesTier, neuesTier, eintraegeVon, tierEntfernen } from "./js/tiere.js";
@@ -1507,6 +1513,220 @@ const QUELLE_OPTIONEN = [
 // Nummer aus dem Scanner für eine neue eigene Sorte; wird beim Speichern an der Sorte gemerkt.
 let neueEan = null;
 
+// ---------- kJ-Schutz und kcal-Rechner (0.32.0, Plan .planning/kcal-rechner-kj.md) ----------
+// Beide Merker gelten nur, solange das Fenster offen ist, und nur für genau diesen Wert und diese Art.
+let kcalBestaetigt = null; // { text, typ }: „Dort steht kcal pro 100 g“ getippt
+// { text, typ, ausRechner }: Wert kam aus dem Rechner oder einer Umrechnung, die Einheit stimmt sicher.
+// Eine Umrechnung zählt nur, wenn ihr Ergebnis selbst zur Art passt (Review 05.11.: 3430 kJ pro kg → „pro kg“ → 343).
+let kcalVertraut = null;
+let kcalMeldung = null; // { text, fuer: { text, typ } }: ruhige Zeile unter dem Feld
+const gleicherWert = (merker, text, typ) => !!merker && merker.text === text && merker.typ === typ;
+const mitKomma = (wert) => String(wert).replace(".", ",");
+
+function kcalLage() {
+  const form = $("form-futter");
+  const text = form.kcal.value.trim();
+  const typ = form.typ.value;
+  const kcal = leseZahl(text);
+  let kasten = typ ? kcalKasten(kcal ?? Number.NaN, typ, kcalSpanne(typ)) : null;
+  const bestaetigt = gleicherWert(kcalBestaetigt, text, typ);
+  if (kasten?.stufe === "rueckfrage" && (bestaetigt || gleicherWert(kcalVertraut, text, typ))) kasten = null;
+  return { text, typ, kcal, kasten, bestaetigt };
+}
+
+const KASTEN_FEHLER = "Bitte zuerst die Frage im roten Kasten beantworten.";
+
+// Zeigt oder entfernt den roten Kasten; derselbe Kasten ploppt nicht noch einmal auf.
+function zeigeKcalKasten() {
+  const lage = kcalLage();
+  // Wert oder Art geändert: Bestätigung und Herkunft gelten nicht mehr, auch nicht beim Zurückändern.
+  if (!gleicherWert(kcalBestaetigt, lage.text, lage.typ)) kcalBestaetigt = null;
+  if (!gleicherWert(kcalVertraut, lage.text, lage.typ)) kcalVertraut = null;
+  const feld = $("form-futter").kcal;
+  const ort = $("kcal-kasten");
+  if (!lage.kasten) {
+    ort.innerHTML = "";
+    if ($("futter-fehler").textContent === KASTEN_FEHLER) zeigeFehler("futter-fehler", "");
+    feld.removeAttribute("aria-invalid");
+    feld.setAttribute("aria-describedby", "kcal-satz");
+  } else {
+    const schluessel = `${lage.text}|${lage.typ}`;
+    if (ort.firstElementChild?.dataset.schluessel !== schluessel) {
+      const k = lage.kasten;
+      const knoepfe = k.antworten
+        .map((a) => `<button type="button" class="antwort" data-aktion="${a.aktion}">${sicher(a.titel)}<small>${sicher(a.klein)}</small></button>`)
+        .join("");
+      ort.innerHTML = `<div class="warnung warnung-sofort kcal-kasten plopp" role="alert" data-schluessel="${sicher(schluessel)}">
+        <p>${sicher(k.ueberschrift)}</p>${k.saetze.map((s) => `<p class="w-text">${sicher(s)}</p>`).join("")}
+        ${knoepfe ? `<div class="w-knoepfe">${knoepfe}</div>` : ""}</div>`;
+    }
+    feld.setAttribute("aria-invalid", "true");
+    feld.setAttribute("aria-describedby", "kcal-satz kcal-kasten");
+  }
+  if (lage.bestaetigt) {
+    kcalMeldung = { text: `Bestätigt: ${mitKomma(lage.kcal)} kcal pro 100 g stehen so auf der Packung.`, fuer: { text: lage.text, typ: lage.typ } };
+  }
+  if (kcalMeldung && !gleicherWert(kcalMeldung.fuer, lage.text, lage.typ)) kcalMeldung = null;
+  if ($("kcal-meldung").textContent !== (kcalMeldung?.text ?? "")) $("kcal-meldung").textContent = kcalMeldung?.text ?? "";
+  return lage;
+}
+
+// Kurzes Aufleuchten des Felds, wenn Kilossos einen Wert eingetragen hat.
+function frisch(feld) {
+  feld.classList.remove("frisch");
+  void feld.offsetWidth;
+  feld.classList.add("frisch");
+}
+
+function kcalAntwort(aktion) {
+  const lage = kcalLage();
+  const form = $("form-futter");
+  zeigeFehler("futter-fehler", "");
+  if (aktion === "kcal-stimmt") {
+    kcalBestaetigt = { text: lage.text, typ: lage.typ };
+  } else {
+    const antwort = lage.kasten?.antworten.find((a) => a.aktion === aktion);
+    if (!antwort) return;
+    const neu = mitKomma(antwort.wert);
+    form.kcal.value = neu;
+    frisch(form.kcal);
+    const fuer = { text: neu, typ: lage.typ };
+    kcalVertraut = kcalPruefen(antwort.wert, lage.typ).stufe === "ok" ? fuer : null;
+    const einheit = aktion === "kcal-kj" ? "kJ" : "kcal pro kg";
+    kcalMeldung = { text: `✓ ${mitKomma(lage.kcal)} ${einheit} umgerechnet: ${neu} kcal pro 100 g.`, fuer };
+  }
+  zeigeKcalKasten();
+  // Der getippte Knopf ist weg: Fokus auf die Rückmeldung statt ins Leere (öffnet keine Tastatur).
+  $("kcal-meldung").focus();
+}
+
+function rechnerEingaben() {
+  const form = $("form-futter");
+  return Object.fromEntries(RECHNER_FELDER.map((f) => [f.name, form.elements[`analyse-${f.name}`]?.value ?? ""]));
+}
+
+function rechnerHtml(analyse) {
+  const felder = RECHNER_FELDER.map(
+    (f) => `<label class="wert-feld">${f.text} <small>oft „${f.packung}“</small>
+      <span class="wert-eingabe"><input name="analyse-${f.name}" inputmode="decimal" autocomplete="off"
+        value="${analyse && analyse[f.name] != null ? sicher(mitKomma(analyse[f.name])) : ""}"><span class="einheit" aria-hidden="true">%</span></span></label>`,
+  ).join("");
+  return aufklappKarte({
+    id: "kcal-rechner",
+    kopf: `<span class="zusammen">Keine kcal auf der Packung?<small>Aus den Analytischen Bestandteilen berechnen</small></span>`,
+    inhalt: `<div class="rechner-inhalt">
+      <p class="tipp">Tippe die Prozentwerte von der Packung ab. Du findest sie unter „Analytische Bestandteile“.</p>
+      <div class="werte">${felder}</div>
+      <div class="rechner-ausgabe" id="rechner-ausgabe" aria-live="polite"></div></div>`,
+    offen: !!analyse,
+    klasse: "rechner",
+  });
+}
+
+const ART_DATIV = { nass: "Nassfutter", trocken: "Trockenfutter", leckerli: "Leckerli" };
+const roterHinweis = (zeile, rest) =>
+  `<div class="warnung warnung-sofort"><p>${zeile}</p><p class="w-text">${rest}</p></div>`;
+
+function zeichneRechnerAusgabe() {
+  const ausgabe = $("rechner-ausgabe");
+  if (!ausgabe) return;
+  const form = $("form-futter");
+  const typ = form.typ.value;
+  const r = rechnerPruefen(rechnerEingaben(), typ);
+  const falsch = r.art === "keineZahl" ? r.felder : r.art === "feuchteFehlt" ? ["feuchte"] : [];
+  for (const f of RECHNER_FELDER) {
+    const feld = form.elements[`analyse-${f.name}`];
+    if (falsch.includes(f.name)) feld.setAttribute("aria-invalid", "true");
+    else feld.removeAttribute("aria-invalid");
+  }
+  const p = (text) => `<p>${text}</p>`;
+  const html = {
+    nichts: "",
+    keineZahl: p("Bitte nur die Zahl eintragen."),
+    leer: r.art === "leer" ? p(`Noch leer: ${r.leer.join(", ")}.`) : "",
+    feuchteFehlt: roterHinweis(
+      "Bei Nassfutter steht die Feuchte immer auf der Packung.",
+      "Bitte trag sie ein, ohne sie stimmt die Rechnung nicht.",
+    ),
+    zuViel: roterHinweis(
+      `Zusammen sind das ${mitKomma(r.summe)}&nbsp;%${r.angenommen ? ` (mit ${FEUCHTE_TROCKEN_ANNAHME}&nbsp;% angenommener Feuchte)` : ""}, mehr als 100&nbsp;% geht nicht.`,
+      "Steht bei einem Wert das Komma an der falschen Stelle? Vergleiche die Zahlen bitte mit der Packung.",
+    ),
+    feuchte100: roterHinweis("Die Feuchte kann nicht 100&nbsp;% sein.", "Vergleiche die Zahlen bitte mit der Packung."),
+  }[r.art];
+  const neu = r.art !== "ergebnis" ? html : ergebnisHtml(r, typ);
+  if (neu !== letzteAusgabe) {
+    ausgabe.innerHTML = neu;
+    letzteAusgabe = neu;
+  }
+}
+
+let letzteAusgabe = null;
+
+function ergebnisHtml(r, typ) {
+  return `<div class="ergebnis">
+    <p class="ergebnis-zahl">etwa ${r.kcal}&nbsp;<small>kcal pro 100&nbsp;g</small></p>
+    ${r.angenommen ? `<p class="annahme">Die Feuchte steht nicht auf der Packung. Das ist erlaubt, wenn sie unter 14&nbsp;% liegt. Kilossos nimmt deshalb ${FEUCHTE_TROCKEN_ANNAHME}&nbsp;% an.</p>` : ""}
+    ${r.viel && ART_DATIV[typ] ? `<p class="annahme">Das ist viel für ${ART_DATIV[typ]}. Stimmen Feuchte und Fett?</p>` : ""}
+    <p>Geschätzt: Die Rechnung kann bis etwa 10&nbsp;% vom echten Wert abweichen. Nennt der Hersteller einen Wert, zum Beispiel auf seiner Website, nimm lieber den.</p>
+    ${r.uebernehmbar
+      ? `<button type="button" class="knopf-haupt" data-aktion="rechner-uebernehmen">${r.kcal}&nbsp;kcal übernehmen</button>`
+      : `<p class="annahme">Das passt zu keinem Katzenfutter. Vergleiche die Zahlen bitte mit der Packung.</p>`}
+  </div>`;
+}
+
+// Klappt den Rechner auf und setzt den Fokus auf das erste Feld, das fehlt oder nicht stimmt.
+function zeigeRechnerFeld() {
+  const karte = document.querySelector("#futter-rechner .aufklapp");
+  if (karte && !karte.classList.contains("offen")) karte.querySelector(".aufklapp-kopf").click();
+  const form = $("form-futter");
+  const felder = RECHNER_FELDER.map((f) => form.elements[`analyse-${f.name}`]);
+  (felder.find((el) => el.getAttribute("aria-invalid") === "true") ?? felder.find((el) => !el.value.trim()) ?? felder[0])?.focus();
+}
+
+function rechnerUebernehmen() {
+  const form = $("form-futter");
+  const typ = form.typ.value;
+  const r = rechnerPruefen(rechnerEingaben(), typ);
+  if (r.art !== "ergebnis" || !r.uebernehmbar) return;
+  const neu = String(r.kcal);
+  form.kcal.value = neu;
+  frisch(form.kcal);
+  kcalVertraut = { text: neu, typ, ausRechner: true };
+  $("futter-quelle").innerHTML = auswahlFeld({ name: "quelle", beschriftung: "label-quelle", optionen: QUELLE_OPTIONEN, wert: "geschaetzt" });
+  zeigeFehler("futter-fehler", "");
+  zeigeKcalKasten();
+  const ergebnis = $("rechner-ausgabe").querySelector(".ergebnis");
+  ergebnis.querySelector(".uebernommen")?.remove();
+  ergebnis.insertAdjacentHTML(
+    "beforeend",
+    `<p class="uebernommen">✓ ${r.kcal}&nbsp;kcal eingetragen, Quelle „Aus den Bestandteilen berechnet“.</p>`,
+  );
+}
+
+// Kasten beim Verlassen des kcal-Felds und beim Wechsel der Art, nicht bei jedem Tastendruck.
+// Das Feld wird über focusout geprüft, nicht über change: change kommt im Browser vor focusout, und nur focusout weiß,
+// wohin der Fokus geht. Geht er direkt auf Speichern, Abbrechen oder Löschen, wird nicht neu gezeichnet; sonst springt
+// der Knopf unter dem Finger weg und der Tipp geht ins Leere (Review 05.11.). Speichern prüft ohnehin selbst.
+$("form-futter").kcal.addEventListener("focusout", (ereignis) => {
+  if (ereignis.relatedTarget?.closest?.("#form-futter .knoepfe")) return;
+  zeigeKcalKasten();
+});
+$("form-futter").addEventListener("change", (ereignis) => {
+  if (ereignis.target.name !== "typ") return;
+  zeigeKcalKasten();
+  zeichneRechnerAusgabe();
+});
+$("form-futter").addEventListener("input", (ereignis) => {
+  if (!ereignis.target.name?.startsWith("analyse-")) return;
+  zeichneRechnerAusgabe();
+  // Rechner-Werte geändert: Ein übernommener Wert stimmt nicht mehr sicher (Review 05.11.: Feuchte 48 statt 84).
+  if (kcalVertraut?.ausRechner) {
+    kcalVertraut = null;
+    zeigeKcalKasten();
+  }
+});
+
 function oeffneFutter(futter, ean = null) {
   bearbeitetesFutter = futter;
   neueEan = ean;
@@ -1521,6 +1741,16 @@ function oeffneFutter(futter, ean = null) {
     form.name.value = futter.name;
     form.kcal.value = String(futter.kcalPro100g).replace(".", ",");
   }
+  // Rückfrage bei jedem Öffnen neu (lieber einmal zu oft); der Rechner ist nur mit gespeicherten Werten aufgeklappt.
+  kcalBestaetigt = kcalVertraut = kcalMeldung = null;
+  letzteAusgabe = null;
+  $("kcal-kasten").innerHTML = "";
+  $("kcal-meldung").textContent = "";
+  form.kcal.removeAttribute("aria-invalid");
+  form.kcal.setAttribute("aria-describedby", "kcal-satz");
+  zustandVergessen("kcal-rechner");
+  $("futter-rechner").innerHTML = rechnerHtml(futter && analyseGueltig(futter.analyse) ? futter.analyse : null);
+  zeichneRechnerAusgabe();
   $("futter-notiz").textContent = futter?.notiz ?? "";
   $("futter-notiz").hidden = !futter?.notiz;
   $("futter-ean").textContent = ean
@@ -1534,14 +1764,29 @@ function oeffneFutter(futter, ean = null) {
 
 beimSpeichern("form-futter", "futter-fehler", (werte) => {
   const name = werte.get("name").trim();
-  const kcal = leseZahl(werte.get("kcal"));
+  const typ = werte.get("typ");
   if (!name) return "Bitte einen Namen eingeben.";
-  if (!werte.get("typ")) return "Bitte die Art wählen.";
+  if (!typ) return "Bitte die Art wählen.";
+  const rechner = rechnerPruefen(rechnerEingaben(), typ);
+  const lage = zeigeKcalKasten();
+  if (!lage.text && rechner.art === "ergebnis") return `Tippe im Rechner auf „${rechner.kcal} kcal übernehmen“ oder trag den Wert oben ein.`;
+  if (lage.kasten) {
+    ($("kcal-kasten").querySelector(".antwort") ?? $("form-futter").kcal).focus();
+    return KASTEN_FEHLER;
+  }
+  const kcal = lage.kcal;
   if (!kcal || kcal < 20 || kcal > 700) return "Bitte einen kcal-Wert zwischen 20 und 700 pro 100 g eingeben.";
   if (!werte.get("quelle")) return "Bitte angeben, woher der Wert stammt.";
-  const felder = { name, typ: werte.get("typ"), kcalPro100g: kcal, kcalQuelle: werte.get("quelle") };
+  if (rechner.art !== "nichts" && rechner.art !== "ergebnis") {
+    zeigeRechnerFeld();
+    return "Im Rechner fehlen noch Werte oder einer stimmt nicht. Ergänze sie oder leere die Felder.";
+  }
+  const felder = { name, typ, kcalPro100g: kcal, kcalQuelle: werte.get("quelle") };
+  // Die Packungswerte werden auch gespeichert, wenn die kcal von woanders stammen; leere Felder entfernen sie.
+  if (rechner.art === "ergebnis") felder.analyse = rechner.analyse;
   if (bearbeitetesFutter) {
     Object.assign(bearbeitetesFutter, felder);
+    if (rechner.art === "nichts") delete bearbeitetesFutter.analyse;
   } else {
     const neu = { id: neueId(), notiz: "", ...felder, ...(neueEan ? { ean: [neueEan] } : {}) };
     daten.futter.push(neu);
@@ -2174,6 +2419,12 @@ document.addEventListener("click", (ereignis) => {
       return oeffneFutter(null);
     case "futter-bearbeiten":
       return oeffneFutter(daten.futter.find((f) => f.id === id));
+    case "kcal-kj":
+    case "kcal-kg":
+    case "kcal-stimmt":
+      return kcalAntwort(ziel.dataset.aktion);
+    case "rechner-uebernehmen":
+      return rechnerUebernehmen();
     case "liste-oeffnen":
       return oeffneListe();
     case "scanner-oeffnen":

@@ -825,6 +825,52 @@ dialog .gramm input { text-align: center; font-family: var(--serif); font-size: 
 .vorschau { margin: 0; text-align: center; font-family: var(--serif); font-size: 1.25rem; font-weight: 500; color: var(--text); min-height: 1.5em; }
 .fehler { margin: 0; color: var(--gefahr); font-weight: 700; }
 .fehler[hidden] { display: none; }
+
+/* ---------- Fenster „Eigene Sorte“: kJ-Schutz und kcal-Rechner (0.32.0) ---------- */
+/* Satz, roter Kasten und Rückmeldung hängen am kcal-Feld; leere Teile nehmen keinen Platz weg. */
+.kcal-hilfe { display: grid; margin-top: -8px; }
+.kcal-hilfe > :not(:first-child):not(:empty) { margin-top: 8px; }
+.kcal-meldung { color: var(--text); }
+dialog input[aria-invalid="true"]:not([type="hidden"]) { border-color: var(--gefahr); box-shadow: 0 0 0 1px var(--gefahr); }
+.kcal-kasten, .rechner-ausgabe .warnung { display: grid; gap: 8px; }
+.kcal-kasten p, .rechner-ausgabe .warnung p { margin: 0; }
+.kcal-kasten .w-text, .rechner-ausgabe .warnung .w-text { font-weight: 400; }
+.w-knoepfe { display: grid; gap: 8px; margin-top: 4px; }
+/* Alle Antworten gleich gestaltet: keine wird hervorgehoben, damit niemand zur falschen Umrechnung gelenkt wird. */
+.antwort {
+  display: grid; gap: 2px; text-align: left; padding: 9px 12px; min-height: 52px; border-radius: var(--rund-klein);
+  border: 1px solid var(--rand-stark); background: var(--flaeche); color: var(--text); font: inherit; font-weight: 700; cursor: pointer;
+}
+.antwort small { font-weight: 400; color: var(--text-leise); font-size: 0.875rem; }
+.antwort:active { background: var(--flaeche-2); }
+.antwort:focus-visible { outline: 3px solid var(--fokus); outline-offset: 1px; }
+.plopp { animation: plopp 0.38s var(--feder) both; }
+@keyframes plopp { from { opacity: 0; transform: translateY(-8px) scale(0.97); } to { opacity: 1; transform: none; } }
+dialog input.frisch { animation: frisch 1.2s ease; }
+@keyframes frisch { from { background: var(--gut-hell); } to { background: var(--hintergrund); } }
+
+.rechner { border: 1px solid var(--rand-stark); border-radius: var(--rund); padding: 0 14px; background: var(--flaeche); }
+.rechner > .aufklapp-kopf { padding: 12px 0; font-size: 0.9375rem; color: var(--text); }
+.rechner > .aufklapp-kopf .zusammen { font-weight: 700; }
+.rechner-inhalt { display: grid; gap: 10px; padding-bottom: 14px; }
+.werte { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+.wert-feld small { color: var(--text-leise); font-size: 0.75rem; }
+.wert-eingabe { position: relative; display: block; }
+dialog .wert-eingabe input:not([type="hidden"]) { padding-right: calc(12px + 1.4rem); text-align: right; font-variant-numeric: tabular-nums; }
+.wert-eingabe .einheit {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--text-leise); font-size: 1rem; pointer-events: none;
+}
+.rechner-ausgabe > p { margin: 0; font-size: 0.875rem; color: var(--text-leise); }
+.ergebnis { border-radius: var(--rund-klein); background: var(--flaeche-2); padding: 12px 14px; display: grid; gap: 8px; }
+.ergebnis p { margin: 0; font-size: 0.875rem; color: var(--text-leise); }
+.ergebnis .ergebnis-zahl {
+  font-family: var(--serif); font-size: 1.75rem; font-weight: 500; line-height: 1.1; color: var(--text); font-variant-numeric: tabular-nums;
+}
+.ergebnis .ergebnis-zahl small { font-family: var(--sans); font-size: 0.9375rem; color: var(--text-leise); font-weight: 400; }
+.ergebnis .annahme { color: var(--text); background: var(--warnung-hell); border-left: 3px solid var(--warnung); padding: 6px 10px; border-radius: 4px; }
+.ergebnis .knopf-haupt { width: 100%; }
+.ergebnis .uebernommen { color: var(--gut); font-weight: 700; }
 .knoepfe { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
 .fuss { margin: 0; text-align: center; color: var(--text-leise); font-size: 0.8125rem; }
 

@@ -7,10 +7,8 @@
 //   eanQuelle, eanHinweis (freiwillig): woher die Nummern stammen und zu welcher Packung sie gehören.
 // Bei Abweichung gilt immer die Packung. Hintergrund und Rechenwege: docs/futter-recherche.md
 
-import { kcalAusBestandteilen, kcalFuer } from "./rechnen.js";
-
-// Trockenfutter nennt die Feuchte oft nicht. Für die Nachrechnung wird dann dieser Wert angenommen.
-export const FEUCHTE_TROCKEN_ANNAHME = 8;
+// FEUCHTE_TROCKEN_ANNAHME steht seit 0.32.0 in rechnen.js (der Rechner im Fenster „Eigene Sorte“ braucht sie auch).
+import { kcalAusBestandteilen, kcalFuer, FEUCHTE_TROCKEN_ANNAHME } from "./rechnen.js";
 
 const ABGERUFEN = "2026-11-02";
 const ABGERUFEN_2 = "2026-11-03";

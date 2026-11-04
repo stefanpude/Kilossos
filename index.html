@@ -325,7 +325,7 @@
           <span data-symbol="dokument"></span><span class="text">Nutzungsbedingungen</span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.31.0</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.32.0</span>
         </div>
       </div>
     </section>
@@ -453,9 +453,16 @@
         <input name="name" autocomplete="off" required>
       </label>
       <div class="feld"><span id="label-typ">Art</span><div id="futter-typ"></div></div>
+      <!-- Kein „required“: Bei leerem Feld und fertigem Rechner soll die eigene Meldung kommen, nicht die Browser-Blase. -->
       <label>kcal pro 100 g
-        <input name="kcal" inputmode="decimal" autocomplete="off" required>
+        <input name="kcal" inputmode="decimal" autocomplete="off" aria-required="true" aria-describedby="kcal-satz">
       </label>
+      <div class="kcal-hilfe">
+        <p class="tipp" id="kcal-satz">Bitte die kcal-Zahl eintragen, nicht kJ.</p>
+        <div id="kcal-kasten"></div>
+        <p class="tipp kcal-meldung" id="kcal-meldung" tabindex="-1"></p>
+      </div>
+      <div id="futter-rechner"></div>
       <div class="feld"><span id="label-quelle">Woher stammt der Wert?</span><div id="futter-quelle"></div></div>
       <p class="tipp" id="futter-notiz" hidden></p>
       <p class="tipp" id="futter-ean" hidden></p>

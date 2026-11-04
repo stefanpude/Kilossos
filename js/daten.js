@@ -7,6 +7,9 @@
 //               übrige Profilfelder: siehe js/profil.js (dort auch die Prüfung beim Einlesen)
 //   futter:     { id, name, typ: "nass" | "trocken" | "leckerli", kcalPro100g, kcalQuelle, notiz, listeId? }
 //               listeId: Kennung in der Kilossos-Futterliste (js/futterliste.js), wenn die Sorte von dort stammt
+//               analyse: optional, { protein, fett, asche, faser, feuchte } in % von der Packung, feuchte null = nicht
+//                        angegeben; aus dem Rechner im Fenster „Eigene Sorte“ (seit 0.32.0). Ältere Sorten haben das Feld
+//                        nicht, Kopien aus der Futterliste auch nicht (dort stehen die Werte in der Notiz).
 //               kcalQuelle: "packung" (genau abgelesen) | "hersteller" (Herstellerangabe, z. B. Website)
 //                         | "geschaetzt" (aus Bestandteilen berechnet) | "ungefaehr"
 //   mahlzeiten: { id, tierId, futterId, gramm, zeitpunkt (ISO-Zeit) }
@@ -166,6 +169,30 @@ export function fotoBereinigen(daten) {
   return entfernt;
 }
 
+// Analytische Bestandteile einer eigenen Sorte (seit 0.32.0): vier Zahlen von 0 bis 100, Feuchte fehlt (null) oder
+// liegt unter 100, zusammen höchstens 100 (fehlende Feuchte als 0; auf 0,01 gerundet wegen Kommazahlen).
+const istProzent = (x) => typeof x === "number" && Number.isFinite(x) && x >= 0 && x <= 100;
+
+export function analyseGueltig(a) {
+  if (!istObjekt(a)) return false;
+  if (![a.protein, a.fett, a.asche, a.faser].every(istProzent)) return false;
+  if (a.feuchte != null && !(istProzent(a.feuchte) && a.feuchte < 100)) return false;
+  const summe = a.protein + a.fett + a.asche + a.faser + (a.feuchte ?? 0);
+  return Math.round(summe * 100) / 100 <= 100;
+}
+
+// Entfernt ungültige Analysewerte an Sorten (z. B. aus einer eingelesenen Sicherung); die Sorte selbst bleibt.
+export function analyseBereinigen(daten) {
+  let entfernt = 0;
+  for (const futter of daten.futter) {
+    if ("analyse" in futter && !analyseGueltig(futter.analyse)) {
+      delete futter.analyse;
+      entfernt += 1;
+    }
+  }
+  return entfernt;
+}
+
 // ---------- BCS und MCS (nur vom Tierarzt, keine Selbst-Einstufung) ----------
 // Stufen des Muscle Condition Score nach der WSAVA-Tafel.
 export const MCS = {
@@ -214,6 +241,7 @@ export function laden(speicher = localStorage) {
   if (istGueltig(daten)) {
     const entfernt = [];
     eintraegeBereinigen(daten, entfernt);
+    analyseBereinigen(daten); // nur im Arbeitsspeicher; der Rechner zeigt sonst Unsinn an
     if (entfernt.length) {
       try {
         const alt = JSON.parse(speicher.getItem(ENTFERNT_SCHLUESSEL) ?? "[]");

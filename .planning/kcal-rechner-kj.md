@@ -1,4 +1,4 @@
-# kJ-Schutz und kcal-Rechner im Fenster „Eigene Sorte“ (geplant für 0.32.0)
+# kJ-Schutz und kcal-Rechner im Fenster „Eigene Sorte“ (gebaut als 0.32.0, 05.11.2026)
 
 _Version verschoben am 04.11.2026: 0.31.0 wurde „Gewicht ändern“ (`.planning/gewicht-aendern.md`), dieser Bau wird 0.32.0 mit Cache v58._
 

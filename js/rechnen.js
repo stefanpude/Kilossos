@@ -24,6 +24,114 @@ export function kcalAusBestandteilen({ protein, fett, asche, faser, feuchte }) {
   return verdaulicheEnergie - 0.77 * protein;
 }
 
+// Trockenfutter nennt die Feuchte oft nicht. Für die Nachrechnung wird dann dieser Wert angenommen.
+export const FEUCHTE_TROCKEN_ANNAHME = 8;
+
+// ---------- kJ-Schutz im Fenster „Eigene Sorte“ (seit 0.32.0, Plan .planning/kcal-rechner-kj.md) ----------
+// Höchstwerte der Kilossos-Futterliste: Nass 126, Trocken 396, Leckerli 438. Kleinster kJ-Wert bei Nassfutter 254,
+// kleinster kcal-pro-kg-Wert 607: beide liegen über 150. Ein Wert genau auf der Grenze ist in Ordnung.
+export const KCAL_GRENZEN = { min: 20, max: 700, nass: 150, trocken: 450, leckerli: 450 };
+export const KJ_PRO_KCAL = 4.184; // thermochemische Kilokalorie
+
+const NBSP = " ";
+const komma = (zahl) => String(zahl).replace(".", ",");
+const eineStelle = (zahl) => Math.round(zahl * 10) / 10;
+const passend = (kcal) => kcal >= KCAL_GRENZEN.min && kcal <= KCAL_GRENZEN.max;
+const ART_NAME = { nass: "Nassfutter", trocken: "Trockenfutter", leckerli: "Leckerli" };
+
+// Passt der kcal-Wert pro 100 g zur Art? Ohne Art wird nicht nach der Einheit gefragt (beim Speichern kommt vorher
+// „Bitte die Art wählen.“). kj und proKg: der umgerechnete Wert, wenn dort kJ bzw. kcal pro kg stünde; null, wenn er
+// nicht zwischen 20 und 700 läge.
+export function kcalPruefen(kcal, typ) {
+  if (typeof kcal !== "number" || !Number.isFinite(kcal) || kcal < KCAL_GRENZEN.min) return { stufe: "fehler" };
+  if (!Object.hasOwn(ART_NAME, typ) || kcal <= KCAL_GRENZEN[typ]) return { stufe: "ok" };
+  const kj = eineStelle(kcal / KJ_PRO_KCAL);
+  const proKg = eineStelle(kcal / 10);
+  return {
+    stufe: kcal <= KCAL_GRENZEN.max ? "rueckfrage" : "unmoeglich",
+    kj: passend(kj) ? kj : null,
+    proKg: passend(proKg) ? proKg : null,
+  };
+}
+
+// Texte und Antworten für den roten Kasten; null, wenn es nichts zu fragen gibt.
+// spanne: [kleinster, größter] kcal-Wert der Art in der Futterliste (kcalSpanne in js/wissen.js, übergibt app.js).
+export function kcalKasten(kcal, typ, spanne) {
+  const pruefung = kcalPruefen(kcal, typ);
+  if (pruefung.stufe !== "rueckfrage" && pruefung.stufe !== "unmoeglich") return null;
+  const wert = komma(kcal);
+  const art = ART_NAME[typ];
+  const antworten = [];
+  if (pruefung.kj !== null)
+    antworten.push({ aktion: "kcal-kj", wert: pruefung.kj, titel: "Dort steht kJ", klein: `Kilossos trägt ${komma(pruefung.kj)}${NBSP}kcal ein` });
+  if (pruefung.proKg !== null)
+    antworten.push({ aktion: "kcal-kg", wert: pruefung.proKg, titel: "Dort steht kcal pro kg", klein: `Kilossos trägt ${komma(pruefung.proKg)}${NBSP}kcal ein` });
+  if (pruefung.stufe === "unmoeglich") {
+    return {
+      stufe: "unmoeglich",
+      ueberschrift: `Mehr als ${KCAL_GRENZEN.max}${NBSP}kcal pro 100${NBSP}g kann Kilossos nicht speichern.`,
+      saetze: [antworten.length ? `Was steht auf der Packung hinter der ${wert}?` : "Diese Zahl passt zu keiner Einheit. Bitte vergleiche sie mit der Packung."],
+      antworten,
+    };
+  }
+  antworten.push({ aktion: "kcal-stimmt", titel: `Dort steht kcal pro 100${NBSP}g`, klein: `Die ${wert} stimmen, so speichern` });
+  const saetze = [
+    `${art} ${typ === "leckerli" ? "haben" : "hat"} in der Kilossos-Futterliste ${spanne[0]} bis ${spanne[1]}${NBSP}kcal. ` +
+      `Was steht auf der Packung hinter der ${wert}?`,
+  ];
+  if (typ === "nass" && kcal <= KCAL_GRENZEN.trocken) saetze.push("Ist es Trockenfutter? Dann ändere oben die Art.");
+  return { stufe: "rueckfrage", ueberschrift: `${wert}${NBSP}kcal pro 100${NBSP}g sind für ${art} viel zu viel.`, saetze, antworten };
+}
+
+// ---------- Rechner „Keine kcal auf der Packung?“ ----------
+export const RECHNER_FELDER = [
+  { name: "protein", text: "Protein", packung: "Rohprotein" },
+  { name: "fett", text: "Fett", packung: "Fettgehalt" },
+  { name: "asche", text: "Asche", packung: "Rohasche" },
+  { name: "faser", text: "Faser", packung: "Rohfaser" },
+  { name: "feuchte", text: "Feuchte", packung: "Feuchtigkeit" },
+];
+const PFLICHT_FELDER = RECHNER_FELDER.slice(0, 4);
+
+// Prüft die fünf getippten Prozentwerte (Text, Komma oder Punkt, „%“ am Ende erlaubt) und rechnet, wenn alles passt.
+// Ergebnis: { art: "nichts" | "keineZahl" | "leer" | "feuchteFehlt" | "zuViel" | "feuchte100" | "ergebnis", … }
+// Bei "zuViel": summe (auf 0,1 aufgerundet, damit nie „100 %, mehr als 100 %“ dasteht), angenommen (8 % Feuchte dabei).
+// Bei "ergebnis": kcal (ganz, wie in der Futterliste), analyse zum Speichern (feuchte null = nicht angegeben),
+// angenommen (Feuchte 8 % angenommen), viel (über der Grenze der Art, Übernehmen bleibt möglich),
+// uebernehmbar (nur 20 bis 700 kcal passen ins Feld).
+export function rechnerPruefen(eingaben, typ) {
+  // „7,“ beim Tippen gilt schon als 7, sonst blinkt bei jedem Komma kurz ein Fehler auf.
+  const text = Object.fromEntries(
+    RECHNER_FELDER.map((f) => [f.name, String(eingaben[f.name] ?? "").trim().replace(/\s*%$/, "").replace(/[.,]$/, "")]),
+  );
+  if (RECHNER_FELDER.every((f) => text[f.name] === "")) return { art: "nichts" };
+  const lies = (t) => {
+    const z = leseZahl(t);
+    return z !== null && Number.isFinite(z) ? z : null;
+  };
+  const zahl = Object.fromEntries(RECHNER_FELDER.map((f) => [f.name, text[f.name] === "" ? null : lies(text[f.name])]));
+  const keineZahl = RECHNER_FELDER.filter((f) => text[f.name] !== "" && zahl[f.name] === null).map((f) => f.name);
+  if (keineZahl.length) return { art: "keineZahl", felder: keineZahl };
+  const leer = PFLICHT_FELDER.filter((f) => zahl[f.name] === null).map((f) => f.text);
+  if (leer.length) return { art: "leer", leer };
+  const angenommen = zahl.feuchte === null;
+  if (angenommen && typ === "nass") return { art: "feuchteFehlt" };
+  const werte = { ...zahl, feuchte: angenommen ? FEUCHTE_TROCKEN_ANNAHME : zahl.feuchte };
+  // Auf 0,01 gerundet: 10,3 + 5,9 + 2,1 + 0,3 + 81,4 ergibt sonst 100,00000000000001.
+  const hundertstel = Math.round(RECHNER_FELDER.reduce((s, f) => s + werte[f.name], 0) * 100);
+  if (hundertstel > 10000) return { art: "zuViel", summe: Math.ceil(hundertstel / 10) / 10, angenommen };
+  if (werte.feuchte >= 100) return { art: "feuchte100" };
+  const kcal = Math.round(kcalAusBestandteilen(werte));
+  return {
+    art: "ergebnis",
+    kcal,
+    analyse: zahl,
+    angenommen,
+    viel: kcal > (typ === "nass" ? KCAL_GRENZEN.nass : KCAL_GRENZEN.trocken),
+    uebernehmbar: passend(kcal),
+  };
+}
+
 // Quellen, deren kcal-Wert als genau gilt. Alles andere macht eine Summe zu "ca.".
 const GENAUE_QUELLEN = ["packung", "hersteller"];
 
