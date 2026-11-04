@@ -160,75 +160,86 @@
 
     <!-- Mehr -->
     <section class="ansicht" data-ansicht="mehr" hidden>
+      <!-- Ruhige Einstellungsliste (ab 0.24.0). Icons füllt app.js über data-symbol aus js/symbole.js. -->
       <h3 class="gruppe-titel">Tiere</h3>
-      <div class="tiere-liste" id="tiere-liste"></div>
-      <button type="button" class="knopf-zweit" data-aktion="tier-neu">Tier hinzufügen</button>
+      <div class="liste">
+        <div id="tiere-liste"></div>
+        <button type="button" class="eintrag" data-aktion="tier-neu">
+          <span data-symbol="plus"></span><span class="text">Tier hinzufügen</span>
+        </button>
+      </div>
 
       <h3 class="gruppe-titel" id="titel-tierarzt">Tierarzt</h3>
       <div class="karte">
-        <h2>Freigabe vom Tierarzt</h2>
-        <p class="leise" id="freigabe-text"></p>
-        <button class="knopf-haupt" data-aktion="freigabe-neu">Freigabe eintragen</button>
+        <h4 class="label">Freigabe vom Tierarzt</h4>
+        <div class="freigabe-tafel" id="freigabe-tafel"></div>
         <p class="tipp">Zielgewicht und Tagesmenge legt nur der Tierarzt fest. Ohne Freigabe zeichnet Kilossos nur auf und warnt, schlägt aber keine Mengen vor.</p>
-        <button type="button" class="knopf-zweit" data-aktion="warum-kein-ziel">Warum keine Futtermenge?</button>
-        <button type="button" class="knopf-zweit" data-aktion="bcs-erklaerung">Was ist der BCS?</button>
-        <button type="button" class="knopf-zweit" data-aktion="grenzen-erklaerung">Welche Grenzen gelten?</button>
-        <a class="knopf-zweit" id="praxis-anrufen" hidden></a>
+        <button class="knopf-haupt" data-aktion="freigabe-neu">Freigabe eintragen</button>
       </div>
-      <div class="karte">
-        <h2>Übersicht für den Tierarzt</h2>
-        <p class="leise">Gewicht, Fütterung, Freigaben und Auffälligkeiten auf einen Blick – zum Ausdrucken oder als PDF zum Mitnehmen.</p>
-        <div class="feld"><span id="label-bericht-zeitraum">Zeitraum</span><div id="bericht-zeitraum-feld"></div></div>
-        <button class="knopf-haupt" data-aktion="bericht-oeffnen">Übersicht öffnen</button>
+      <div class="liste">
+        <a class="eintrag" id="praxis-anrufen" hidden></a>
+        <button type="button" class="eintrag" data-aktion="warum-kein-ziel">
+          <span data-symbol="frage"></span><span class="text">Warum keine Futtermenge?</span><span class="weiter" data-symbol="weiter"></span>
+        </button>
+        <button type="button" class="eintrag" data-aktion="bcs-erklaerung">
+          <span data-symbol="frage"></span><span class="text">Was ist der BCS?</span><span class="weiter" data-symbol="weiter"></span>
+        </button>
+        <button type="button" class="eintrag" data-aktion="grenzen-erklaerung">
+          <span data-symbol="frage"></span><span class="text">Welche Grenzen gelten?</span><span class="weiter" data-symbol="weiter"></span>
+        </button>
       </div>
+
+      <h3 class="gruppe-titel">Übersicht für den Tierarzt</h3>
+      <div class="liste">
+        <div class="eintrag eintrag-auswahl">
+          <span data-symbol="kalender"></span><span class="text" id="label-bericht-zeitraum">Zeitraum</span>
+          <div id="bericht-zeitraum-feld"></div>
+        </div>
+        <button type="button" class="eintrag" data-aktion="bericht-oeffnen">
+          <span data-symbol="dokument"></span>
+          <span class="text">Übersicht öffnen
+            <small>Gewicht, Fütterung, Freigaben und Auffälligkeiten auf einen Blick – zum Ausdrucken oder als PDF zum Mitnehmen.</small></span>
+          <span class="weiter" data-symbol="weiter"></span>
+        </button>
+      </div>
+
       <h3 class="gruppe-titel">Einstellungen</h3>
-      <div class="karte">
-        <h2 id="label-wiegetag">Wiegetag</h2>
-        <div id="wiegetag-feld"></div>
-        <p class="tipp">Am besten immer am gleichen Wochentag, zur gleichen Uhrzeit, mit der gleichen Waage. An diesem Tag erinnert „Heute“ daran.</p>
+      <div class="liste">
+        <div class="eintrag eintrag-auswahl">
+          <span data-symbol="waage"></span><span class="text" id="label-wiegetag">Wiegetag</span>
+          <div id="wiegetag-feld"></div>
+        </div>
+        <div class="eintrag eintrag-auswahl">
+          <span data-symbol="darstellung"></span>
+          <span class="text"><span id="label-anzeige">Darstellung</span><small>Gilt nur für dieses Gerät.</small></span>
+          <div id="anzeige-feld"></div>
+        </div>
       </div>
-      <div class="karte">
-        <h2 id="label-anzeige">Darstellung</h2>
-        <div id="anzeige-feld"></div>
-        <p class="tipp">Gilt nur für dieses Gerät.</p>
-      </div>
+      <p class="tipp mehr-hinweis">Am besten immer am gleichen Wochentag, zur gleichen Uhrzeit, mit der gleichen Waage. An diesem Tag erinnert „Heute“ daran.</p>
 
       <h3 class="gruppe-titel">Daten</h3>
-      <div class="karte">
-        <h2>Sicherung</h2>
-        <p class="leise">Alle Einträge liegen nur auf diesem Handy. Speichere regelmäßig eine Sicherung, zum Beispiel in deinem Cloud-Ordner oder per Mail an dich selbst.</p>
-        <p class="leise" id="sicherung-datum"></p>
-        <button class="knopf-haupt" data-aktion="export">Sicherung speichern</button>
-        <label class="knopf-zweit">
-          Sicherung einlesen
-          <input type="file" accept="application/json,.json" id="import-datei" hidden>
+      <p class="leise mehr-hinweis">Alle Einträge liegen nur auf diesem Handy. Speichere regelmäßig eine Sicherung, zum Beispiel in deinem Cloud-Ordner oder per Mail an dich selbst.</p>
+      <div class="liste">
+        <button type="button" class="eintrag" data-aktion="export">
+          <span data-symbol="sichern"></span>
+          <span class="text">Sicherung speichern<small id="sicherung-datum"></small></span>
+          <span class="weiter" data-symbol="weiter"></span>
+        </button>
+        <label class="eintrag">
+          <span data-symbol="einlesen"></span><span class="text">Sicherung einlesen</span>
+          <span class="weiter" data-symbol="weiter"></span>
+          <input type="file" accept="application/json,.json" id="import-datei" class="nur-vorlesen">
         </label>
-        <p class="hinweis-text-klein" id="speicher-status"></p>
       </div>
-      <div class="karte">
-        <h2>Alle Daten löschen</h2>
-        <p class="leise">Löscht alle Einträge, das Profil und die Einstellungen auf diesem Handy. Speichere vorher eine Sicherung, wenn du die Daten noch brauchst.</p>
-        <button type="button" class="knopf-gefahr" data-aktion="alles-loeschen">Alle Daten löschen</button>
+      <p class="hinweis-text-klein mehr-hinweis" id="speicher-status"></p>
+      <div class="liste">
+        <button type="button" class="eintrag gefahr" data-aktion="alles-loeschen">
+          <span data-symbol="loeschen"></span><span class="text">Alle Daten löschen</span>
+        </button>
       </div>
+      <p class="tipp mehr-hinweis">Löscht alle Einträge, das Profil und die Einstellungen auf diesem Handy. Speichere vorher eine Sicherung, wenn du die Daten noch brauchst.</p>
 
       <h3 class="gruppe-titel">Über Kilossos</h3>
-      <div class="karte" id="geschichte">
-        <h2>Wie Kilossos entstanden ist</h2>
-        <p>Kilossos ist aus eigener Not entstanden.</p>
-        <p class="leise">Kito ist mein Kater: kastriert, von Natur aus sehr groß – und inzwischen zu schwer.
-          Seit vor unserer Tür eine Baustelle ist, kann er nicht mehr nach draußen. Weniger Bewegung, gleiches Futter,
-          und die Waage beim Tierarzt zeigte 9,32 kg. Zuki, unsere zweite Katze, ist zierlich gebaut,
-          aber im Verhältnis sogar noch dicker als Kito. Beide fressen getrennt, beide brauchen etwas anderes.</p>
-        <p class="leise">Also wollte ich Kito beim Abnehmen helfen. Schnell habe ich gemerkt: Bei Katzen ist das heikler, als man denkt.
-          Bekommt eine übergewichtige Katze zu wenig Futter, kann sie lebensgefährlich krank werden (Fettleber).
-          Zu langsam bringt aber auch nichts. Meine Excel-Tabellen mit Futtersorten, Gramm und Kalorien wurden immer länger –
-          und trotzdem war ich mir nie sicher, ob ich alles richtig mache.</p>
-        <p class="leise">Daraus ist Kilossos geworden: eine App, die Futter in Gramm und Kalorien mitrechnet, das Gewicht im Blick behält
-          und rechtzeitig warnt, wenn etwas aus dem sicheren Bereich läuft. Die Grenzen dafür stammen aus den Leitlinien
-          der Tierärzteverbände AAHA und WSAVA.</p>
-        <p class="leise">Der Name? <strong>Ki</strong>to + <strong>Kolossos</strong> (altgriechisch für „riesig“) + englisch <strong>loss</strong> (Verlust). Kilossos eben.
-          Kito stand Pate, weil es einfach zu gut passte. Abnehmen müssen beide.</p>
-      </div>
       <div class="karte">
         <p class="leise">Kilossos begleitet die Abnahme von Kito und anderen Katzen: Es zeichnet auf, rechnet nach und warnt.
           <strong>Es ersetzt keinen Tierarzt</strong> und ist kein Medizinprodukt. Zielgewicht und Tagesmenge legt immer der Tierarzt fest.</p>
@@ -238,11 +249,24 @@
         <p class="leise"><strong>Datenschutz:</strong> keine Anmeldung, keine Cloud, keine Werbung, keine Auswertung.
           Alle Daten bleiben auf diesem Handy, bis du selbst eine Sicherung speicherst.</p>
         <p class="leise"><strong>Grenzwerte:</strong> nach den Leitlinien der Tierärzteverbände AAHA (2014, 2021) und WSAVA.</p>
-        <button type="button" class="knopf-zweit" data-aktion="grenzen-erklaerung">Welche Grenzen gelten?</button>
-        <p class="rechtslinks"><a href="datenschutz.html">Datenschutz</a> <a href="impressum.html">Impressum</a>
-          <a href="nutzungsbedingungen.html">Nutzungsbedingungen</a></p>
       </div>
-      <p class="fuss" id="version">Version 0.23.0</p>
+      <div class="liste">
+        <button type="button" class="eintrag" data-aktion="geschichte-oeffnen">
+          <span data-symbol="buch"></span><span class="text">Wie Kilossos entstanden ist</span><span class="weiter" data-symbol="weiter"></span>
+        </button>
+        <a class="eintrag" href="datenschutz.html">
+          <span data-symbol="dokument"></span><span class="text">Datenschutz</span><span class="weiter" data-symbol="weiter"></span>
+        </a>
+        <a class="eintrag" href="impressum.html">
+          <span data-symbol="dokument"></span><span class="text">Impressum</span><span class="weiter" data-symbol="weiter"></span>
+        </a>
+        <a class="eintrag" href="nutzungsbedingungen.html">
+          <span data-symbol="dokument"></span><span class="text">Nutzungsbedingungen</span><span class="weiter" data-symbol="weiter"></span>
+        </a>
+        <div class="eintrag">
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.24.0</span>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -535,6 +559,30 @@
         <a href="https://github.com/stefanpude/Kilossos/blob/main/docs/sicherheitsgrenzen.md" target="_blank" rel="noopener">Fachfassung für Tierärzte</a>.</p>
       <div class="knoepfe">
         <button value="abbrechen" class="knopf-haupt">Verstanden</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Blatt: Wie Kilossos entstanden ist (aus „Mehr“ und von der Willkommensseite) -->
+  <dialog id="dialog-geschichte">
+    <form method="dialog">
+      <h2 tabindex="-1" autofocus>Wie Kilossos entstanden ist</h2>
+      <p>Kilossos ist aus eigener Not entstanden.</p>
+      <p class="leise">Kito ist mein Kater: kastriert, von Natur aus sehr groß – und inzwischen zu schwer.
+        Seit vor unserer Tür eine Baustelle ist, kann er nicht mehr nach draußen. Weniger Bewegung, gleiches Futter,
+        und die Waage beim Tierarzt zeigte 9,32 kg. Zuki, unsere zweite Katze, ist zierlich gebaut,
+        aber im Verhältnis sogar noch dicker als Kito. Beide fressen getrennt, beide brauchen etwas anderes.</p>
+      <p class="leise">Also wollte ich Kito beim Abnehmen helfen. Schnell habe ich gemerkt: Bei Katzen ist das heikler, als man denkt.
+        Bekommt eine übergewichtige Katze zu wenig Futter, kann sie lebensgefährlich krank werden (Fettleber).
+        Zu langsam bringt aber auch nichts. Meine Excel-Tabellen mit Futtersorten, Gramm und Kalorien wurden immer länger –
+        und trotzdem war ich mir nie sicher, ob ich alles richtig mache.</p>
+      <p class="leise">Daraus ist Kilossos geworden: eine App, die Futter in Gramm und Kalorien mitrechnet, das Gewicht im Blick behält
+        und rechtzeitig warnt, wenn etwas aus dem sicheren Bereich läuft. Die Grenzen dafür stammen aus den Leitlinien
+        der Tierärzteverbände AAHA und WSAVA.</p>
+      <p class="leise">Der Name? <strong>Ki</strong>to + <strong>Kolossos</strong> (altgriechisch für „riesig“) + englisch <strong>loss</strong> (Verlust). Kilossos eben.
+        Kito stand Pate, weil es einfach zu gut passte. Abnehmen müssen beide.</p>
+      <div class="knoepfe">
+        <button value="abbrechen" class="knopf-haupt">Schließen</button>
       </div>
     </form>
   </dialog>

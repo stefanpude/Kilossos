@@ -26,5 +26,14 @@ export const SYMBOL = {
   weiter: ico('<path d="M9.5 6l6 6-6 6"/>'),
   runter: ico('<path d="M6 9.5l6 6 6-6"/>'),
   haken: ico('<path d="M5.5 12.5l4 4 9-9"/>'),
+  // „Mehr“ (ab 0.24.0)
+  kalender: ico('<rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/>'),
+  darstellung: ico('<circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z"/>'),
+  dokument: ico('<path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4M9.5 12h6M9.5 15.5h6"/>'),
+  sichern: ico('<path d="M12 4v10M8 10l4 4 4-4M5 16v3h14v-3"/>'),
+  einlesen: ico('<path d="M12 14V4M8 8l4-4 4 4M5 16v3h14v-3"/>'),
+  buch: ico('<path d="M5 5.5A1.5 1.5 0 0 1 6.5 4H12v15.5H6.5A1.5 1.5 0 0 0 5 21zM12 4h5.5A1.5 1.5 0 0 1 19 5.5V21a1.5 1.5 0 0 0-1.5-1.5H12"/>'),
+  info: ico('<circle cx="12" cy="12" r="8"/><path d="M12 11v5.5M12 7.8v.1"/>'),
   waage: ico('<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8.5 11a3.5 3.5 0 0 1 7 0M12 11l1.6-2"/>'),
 };
+SYMBOL.frage = SYMBOL.unbekannt;

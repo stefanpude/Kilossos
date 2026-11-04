@@ -14,7 +14,6 @@ import {
   fotoGueltig,
   fotoBereinigen,
   freigabenBereinigen,
-  befundText,
   MCS,
 } from "./js/daten.js";
 import {
@@ -52,6 +51,7 @@ import { auswahlFeld, auswahlAnmelden } from "./js/auswahl.js";
 import { profilBereinigen, alterText, telefonLink, telefonGueltig, istWiegetag, WOCHENTAGE, HALTUNG } from "./js/profil.js";
 import { aktivesTier, leseAktivesTier, merkeAktivesTier, neuesTier, eintraegeVon, tierEntfernen } from "./js/tiere.js";
 import { wischenAnmelden } from "./js/wischen.js";
+import { datumText, freigabeTafel } from "./js/mehr.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
 if ("serviceWorker" in navigator) {
@@ -448,10 +448,6 @@ function zeichneFutter() {
       .join("") || '<p class="leer">Noch keine Sorte angelegt.</p>';
 }
 
-function datumText(iso) {
-  const [j, m, t] = iso.split("-").map(Number);
-  return new Date(j, m - 1, t).toLocaleDateString("de-DE", { day: "numeric", month: "short", year: "numeric" });
-}
 
 function freigabeVonTier(stichtag) {
   return aktuelleFreigabe(daten.freigaben.filter((f) => f.tierId === tier.id), stichtag);
@@ -460,16 +456,20 @@ function freigabeVonTier(stichtag) {
 function zeichneFreigabe() {
   const freigabe = freigabeVonTier();
   $("titel-tierarzt").textContent = daten.tiere.length > 1 ? `Tierarzt · ${tier.name}` : "Tierarzt";
-  $("freigabe-text").textContent = freigabe
-    ? `${zahl(freigabe.zielgewichtKg, 1)} kg Zielgewicht · ${zahl(freigabe.kcalProTag)} kcal pro Tag · ` +
-      `${befundText(freigabe) ? befundText(freigabe) + " · " : ""}` +
-      `${freigabe.tierarzt}, ${datumText(freigabe.datum)}${freigabe.notiz ? " · " + freigabe.notiz : ""}`
-    : "Noch keine Freigabe eingetragen.";
+  const tafel = freigabeTafel(freigabe);
+  $("freigabe-tafel").innerHTML = tafel
+    ? `<div class="eckdaten">${tafel.felder
+        .map((f) => `<div><span class="label">${sicher(f.titel)}</span><strong>${sicher(f.wert)}</strong></div>`)
+        .join("")}</div>
+      <p class="leise">${[tafel.zeile, tafel.befund, tafel.notiz].filter(Boolean).map(sicher).join(" · ")}</p>`
+    : '<p class="leise">Noch keine Freigabe eingetragen.</p>';
   const link = telefonLink(tier.tierarzt?.telefon);
   $("praxis-anrufen").hidden = !link;
   if (link) {
     $("praxis-anrufen").href = link;
-    $("praxis-anrufen").innerHTML = `${SYMBOL.telefon}${sicher(tier.tierarzt.praxis ?? "Praxis")} anrufen`;
+    $("praxis-anrufen").innerHTML = `<span data-symbol="telefon">${SYMBOL.telefon}</span>` +
+      `<span class="text">${sicher(tier.tierarzt.praxis ?? "Praxis")} anrufen</span>` +
+      `<span class="weiter" data-symbol="weiter">${SYMBOL.weiter}</span>`;
   }
 }
 
@@ -484,7 +484,7 @@ function profilZusammenfassung(einTier) {
   return [geschlecht, alter, HALTUNG[einTier.haltung]].filter(Boolean).join(" · ");
 }
 
-// „Mehr“ → Tiere: eine Karte je Tier, Antippen öffnet sein Profil.
+// „Mehr“ → Tiere: ein Eintrag je Tier, Antippen öffnet sein Profil.
 function zeichneTiere() {
   const mehrere = daten.tiere.length > 1;
   $("tiere-liste").innerHTML = daten.tiere
@@ -492,9 +492,9 @@ function zeichneTiere() {
       const zusammen = profilZusammenfassung(t);
       const fehlt = !t.geburtsdatum && !t.tierarzt && !t.koerperbau;
       const aktiv = mehrere && t === tier ? '<small class="aktiv-marke">wird gerade angezeigt</small>' : "";
-      return `<button type="button" class="karte profil-karte" data-aktion="profil-oeffnen" data-id="${t.id}" aria-label="Profil von ${sicher(t.name)} bearbeiten">
+      return `<button type="button" class="eintrag eintrag-tier" data-aktion="profil-oeffnen" data-id="${t.id}" aria-label="Profil von ${sicher(t.name)} bearbeiten">
         ${profilHtml(t, "klein")}
-        <span class="profil-text"><b>${sicher(t.name)}</b>
+        <span class="text"><b>${sicher(t.name)}</b>
           <small>${sicher(zusammen || "Profil")}</small>
           ${fehlt ? "<small>Profil ergänzen: Alter, Körperbau, Tierarzt</small>" : ""}${aktiv}</span>
         <span class="weiter" aria-hidden="true">${SYMBOL.weiter}</span></button>`;
@@ -1634,12 +1634,17 @@ document.addEventListener("click", (ereignis) => {
       return exportieren();
     case "willkommen-weiter":
       return willkommenSchliessen();
+    case "geschichte-oeffnen":
+      return $("dialog-geschichte").showModal();
     case "willkommen-geschichte":
       willkommenSchliessen();
       zeigeAnsicht("mehr");
-      return $("geschichte").scrollIntoView();
+      return $("dialog-geschichte").showModal();
   }
 });
+
+// Icons im festen Markup („Mehr“): <span data-symbol="name"> bekommt das SVG aus js/symbole.js.
+for (const platz of document.querySelectorAll("[data-symbol]:empty")) platz.innerHTML = SYMBOL[platz.dataset.symbol] ?? "";
 
 zeichneAlles();
 zeichneHeute(true);
