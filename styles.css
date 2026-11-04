@@ -267,6 +267,14 @@ main {
   border-bottom: 1px solid var(--rand);
 }
 .zeile:last-child { border-bottom: 0; }
+/* Antippbare Zeilen (eigene Sorten, Futterliste) sind echte Knöpfe, damit Tastatur und Vorlesefunktion sie erreichen. */
+.zeile-knopf {
+  width: 100%; margin: 0; background: none; border: 0; border-bottom: 1px solid var(--rand); border-radius: 0;
+  color: var(--text); font: inherit; text-align: left; cursor: pointer;
+}
+.zeile-knopf, .protokoll-knopf { position: relative; } /* Halt für den versteckten Vorlese-Zusatz */
+.zeile-knopf:focus-visible { outline-offset: -3px; }
+.protokoll-knopf:focus-visible { outline-offset: 3px; }
 .zeile .icon, .aufklapp-kopf > .icon {
   width: 36px; height: 36px; border-radius: var(--rund-klein); display: grid; place-items: center;
   background: var(--flaeche-2); color: var(--text); flex: none;
@@ -506,15 +514,20 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 /* Protokoll-Liste der Mahlzeiten: Uhrzeit | Futter | Gramm und kcal | Löschen */
 .protokoll { list-style: none; margin: 0; padding: 0; }
 .protokoll li {
-  display: grid; grid-template-columns: 3.25rem 1fr auto auto; gap: 10px; align-items: center;
+  display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;
   padding: 8px 0; border-top: 1px solid var(--rand); font-size: 0.9375rem;
+}
+/* Die Zeile ist ein Knopf (seit 0.28.5, vorher nur antippbar): Zeit, Sorte und Menge stehen darin. */
+.protokoll-knopf {
+  display: grid; grid-template-columns: 3.25rem 1fr auto; gap: 10px; align-items: center;
+  width: 100%; min-height: 52px; padding: 0; margin: 0; background: none; border: 0; border-radius: var(--rund-klein);
+  color: var(--text); font: inherit; text-align: left; cursor: pointer;
 }
 .protokoll li:first-child { border-top: 0; }
 .protokoll .zeit { color: var(--text-leise); font-family: var(--serif); font-variant-numeric: tabular-nums; }
 .protokoll .was { min-width: 0; overflow-wrap: anywhere; }
 .protokoll .wert { text-align: right; font-family: var(--serif); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .protokoll small { display: block; color: var(--text-leise); font-size: 0.8125rem; font-family: var(--sans); }
-.protokoll li.tippbar { min-height: 52px; }
 .protokoll li .knopf-loeschen { margin: -6px -10px -6px -4px; }
 
 /* Gewicht auf „Heute“: Mini-Kurve der letzten 8 Wochen */

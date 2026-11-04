@@ -443,11 +443,12 @@ function zeichneHeute(vonNull = false) {
       .map((m) => {
         const f = futter.get(m.futterId);
         const kcal = f ? `${zahl(kcalFuer(m.gramm, f.kcalPro100g))} kcal` : "kcal unbekannt";
-        return `<li class="tippbar" data-aktion="mahlzeit-bearbeiten" data-id="${m.id}">
+        // Die Zeile selbst ist ein Knopf (Tastatur, Vorlesefunktion); Löschen bleibt ein eigener Knopf daneben.
+        return `<li><button type="button" class="protokoll-knopf tippbar" data-aktion="mahlzeit-bearbeiten" data-id="${m.id}">
           <span class="zeit">${uhr(m)}</span>
           <span class="was">${sicher(f ? f.name : "Gelöschte Sorte")}<small>${f ? TYP_NAMEN[f.typ] : "Sorte fehlt"}</small></span>
-          <span class="wert">${zahl(m.gramm)} g<small>${kcal}</small></span>
-          <button type="button" class="knopf-loeschen" data-aktion="mahlzeit-loeschen" data-id="${m.id}" aria-label="Mahlzeit um ${uhr(m)} löschen">${SYMBOL.loeschen}</button></li>`;
+          <span class="wert">${zahl(m.gramm)} g<small>${kcal}</small></span><span class="nur-vorlesen">, ändern</span></button>
+          <button type="button" class="knopf-loeschen" data-aktion="mahlzeit-loeschen" data-id="${m.id}" aria-label="Mahlzeit um ${uhr(m)}, ${sicher(f ? f.name : "Gelöschte Sorte")}, löschen">${SYMBOL.loeschen}</button></li>`;
       })
       .join("");
     $("heute-mahlzeiten").innerHTML = `<ul class="protokoll">${zeilen}</ul>`;
@@ -528,7 +529,7 @@ function zeichneGewicht() {
             : "";
           return `<div class="zeile">${bild}<span class="name"><b>${zahl(g.kg, 2)} kg</b><small>${datumText(g.datum)}${g.notiz ? " · " + sicher(g.notiz) : ""}</small></span>
             ${marke}
-            <button type="button" class="knopf-loeschen" data-aktion="gewicht-loeschen" data-id="${g.id}" aria-label="Gewicht löschen">${SYMBOL.loeschen}</button></div>`;
+            <button type="button" class="knopf-loeschen" data-aktion="gewicht-loeschen" data-id="${g.id}" aria-label="Gewicht vom ${datumText(g.datum)} löschen">${SYMBOL.loeschen}</button></div>`;
         })
         .join("");
       const anzahl = monat.eintraege.length === 1 ? "1 Wägung" : `${monat.eintraege.length} Wägungen`;
@@ -546,11 +547,11 @@ function zeichneGewicht() {
 // ---------- Futter ----------
 
 function sortenZeile(f) {
-  return `<div class="zeile tippbar" data-aktion="futter-bearbeiten" data-id="${f.id}">
+  return `<button type="button" class="zeile zeile-knopf tippbar" data-aktion="futter-bearbeiten" data-id="${f.id}">
     <span class="icon" aria-hidden="true">${TYP_SYMBOL[f.typ]}</span>
     <span class="name">${sicher(f.name)}<small>${TYP_NAMEN[f.typ]} · ${zahl(f.kcalPro100g, f.kcalPro100g % 1 ? 1 : 0)} kcal/100 g</small></span>
-    <span class="marke marke-${f.kcalQuelle}">${QUELLE_NAMEN[f.kcalQuelle]}</span>
-  </div>`;
+    <span class="marke marke-${f.kcalQuelle}">${QUELLE_NAMEN[f.kcalQuelle]}</span><span class="nur-vorlesen">, ändern</span>
+  </button>`;
 }
 
 function zeichneFutter() {
@@ -892,6 +893,33 @@ $("verlauf-inhalt").addEventListener("pointerleave", versteckeInfoblase);
 
 aufklappenAnmelden(document);
 auswahlAnmelden(document);
+
+// Nach dem Schließen eines Blatts zurück zu dem Knopf, der es geöffnet hat. Wurde die Liste dahinter neu gezeichnet
+// (z. B. nach dem Speichern einer Mahlzeit), ist der alte Knopf weg: dann den neuen mit gleicher Aktion und Kennung
+// suchen. Sonst stünde der Fokus am Seitenanfang und die Vorlesefunktion finge oben wieder an.
+let oeffner = null;
+for (const dialog of document.querySelectorAll("dialog")) {
+  dialog.addEventListener("close", () => {
+    const merk = oeffner;
+    requestAnimationFrame(() => {
+      // Beim close-Ereignis steht der Fokus oft noch im (jetzt geschlossenen) Blatt, danach fällt er auf body.
+      const fokus = document.activeElement;
+      const verloren = !fokus || fokus === document.body || !fokus.isConnected || fokus.closest("dialog:not([open])");
+      if (!merk?.aktion || !verloren) return;
+      const passend = [...document.querySelectorAll(`[data-aktion="${CSS.escape(merk.aktion)}"]`)].filter((el) => el.getClientRects().length);
+      const knopf = passend.find((el) => el.dataset.id === merk.id) ?? passend[0];
+      knopf?.focus({ preventScroll: true });
+    });
+  });
+}
+
+// Jedes Blatt heißt wie seine Überschrift: Die Vorlesefunktion sagt dann beim Öffnen „Gewicht eintragen, Dialog“.
+for (const dialog of document.querySelectorAll("dialog")) {
+  const titel = dialog.querySelector("h2");
+  if (!titel || dialog.hasAttribute("aria-labelledby") || dialog.hasAttribute("aria-label")) continue;
+  titel.id ||= `${dialog.id}-titel`;
+  dialog.setAttribute("aria-labelledby", titel.id);
+}
 
 // Antippen des abgedunkelten Hintergrunds schließt das Blatt wie „Abbrechen“; gespeichert wird nichts.
 // Nur wenn Drücken UND Loslassen draußen waren – wer Text in einem Feld markiert und dabei über den
@@ -1497,11 +1525,12 @@ function zeichneListe() {
     const zeilen = eintraege
       .map((e) => {
         const drin = vorhanden.has(e.id);
-        return `<div class="zeile${drin ? "" : " tippbar"}" ${drin ? "" : `data-aktion="liste-uebernehmen" data-id="${e.id}"`}>
+        const tag = drin ? "div" : "button";
+        return `<${tag} ${drin ? 'class="zeile"' : `type="button" class="zeile zeile-knopf tippbar" data-aktion="liste-uebernehmen" data-id="${e.id}"`}>
           <span class="icon" aria-hidden="true">${TYP_SYMBOL[e.typ]}</span>
           <span class="name">${sicher(e.name)}<small>${TYP_NAMEN[e.typ]} · ${zahl(e.kcalPro100g, e.kcalPro100g % 1 ? 1 : 0)} kcal/100 g</small></span>
-          ${drin ? '<span class="marke">in deiner Liste</span>' : `<span class="marke marke-${e.kcalQuelle}">${QUELLE_NAMEN[e.kcalQuelle]}</span>`}
-        </div>`;
+          ${drin ? '<span class="marke">in deiner Liste</span>' : `<span class="marke marke-${e.kcalQuelle}">${QUELLE_NAMEN[e.kcalQuelle]}</span><span class="nur-vorlesen">, übernehmen</span>`}
+        </${tag}>`;
       })
       .join("");
     return aufklappKarte({
@@ -2019,6 +2048,7 @@ document.addEventListener("click", (ereignis) => {
   const ziel = ereignis.target.closest("[data-ziel], [data-aktion]");
   if (!ziel) return;
   if (ziel.dataset.ziel) return zeigeAnsicht(ziel.dataset.ziel);
+  if (!ziel.closest("dialog")) oeffner = { aktion: ziel.dataset.aktion, id: ziel.dataset.id };
 
   const id = ziel.dataset.id;
   switch (ziel.dataset.aktion) {

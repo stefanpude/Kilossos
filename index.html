@@ -315,7 +315,7 @@
           <span data-symbol="dokument"></span><span class="text">Nutzungsbedingungen</span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.28.4</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.28.5</span>
         </div>
       </div>
     </section>
@@ -357,7 +357,8 @@
   <!-- Formular: Gewicht -->
   <dialog id="dialog-gewicht">
     <form method="dialog" id="form-gewicht">
-      <h2 id="gewicht-titel">Gewicht eintragen</h2>
+      <!-- Fokus auf die Überschrift: sonst landet er auf „10 Gramm weniger“ und die Vorlesefunktion beginnt dort -->
+      <h2 id="gewicht-titel" tabindex="-1" autofocus>Gewicht eintragen</h2>
       <div class="waage">
         <button type="button" class="stufe" data-aktion="kg-minus" aria-label="10 Gramm weniger">−10 g</button>
         <div class="waage-anzeige">
