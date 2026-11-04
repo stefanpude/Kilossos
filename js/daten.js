@@ -10,7 +10,7 @@
 //                         | "geschaetzt" (aus Bestandteilen berechnet) | "ungefaehr"
 //   mahlzeiten: { id, tierId, futterId, gramm, zeitpunkt (ISO-Zeit) }
 //   gewichte:   { id, tierId, kg, datum ("JJJJ-MM-TT"), notiz, foto? }
-//               foto: optional, wie beim Tier (256 × 256 px JPEG), höchstens eins je Tier und Woche (js/fotos.js, seit 0.25.0)
+//               foto: optional, wie beim Tier (256 × 256 px JPEG), Monatsfoto, Regeln in js/fotos.js (seit 0.25.0, monatlich seit 0.26.0)
 //   freigaben:  { id, tierId, datum, zielgewichtKg, kcalProTag, tierarzt, notiz, bcs?, mcs? }
 //               bcs: optional, Body Condition Score vom Tierarzt, ganze Zahl 1–9 (seit 0.12.0)
 //               mcs: optional, Muscle Condition Score vom Tierarzt, Schlüssel aus MCS (seit 0.12.0)

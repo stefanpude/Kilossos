@@ -117,3 +117,29 @@ test("berichtHtml: Freigaben-Tabelle zeigt BCS und MCS, ohne Angabe einen Strich
   assert.match(mit, /<td>8<\/td><td>leichter Muskelabbau<\/td>/);
   assert.match(html(freigabe), /<td>–<\/td><td>–<\/td>/);
 });
+
+test("berichtHtml: Fotos nur auf Wunsch, erstes und letztes Foto im Zeitraum mit Datum und kg", () => {
+  const A = "data:image/jpeg;base64,AAAA";
+  const B = "data:image/jpeg;base64,BBBB";
+  const mitFotos = [
+    { kg: 9.4, datum: "2026-10-25", foto: "data:image/jpeg;base64,ALT" }, // vor dem Zeitraum
+    { kg: 9.32, datum: "2026-11-01", foto: A },
+    { kg: 9.3, datum: "2026-11-02", foto: "kaputt" },
+    { kg: 9.28, datum: "2026-11-04", foto: B },
+  ];
+  const html = (fotos, gw = mitFotos) =>
+    berichtHtml(berichtDaten({ ...eingabe, gewichte: gw }), {
+      tier: { name: "Kito" }, gewichte: gw, mahlzeiten, freigaben: [freigabe],
+      futterNachId: new Map(futter.map((f) => [f.id, f])), erstellt: "2026-11-04", demo: false, fotos,
+    });
+  assert.doesNotMatch(html(false), /bericht-vn/);
+  const mit = html(true);
+  assert.match(mit, /<h2>Fotos<\/h2>/);
+  assert.match(mit, /src="data:image\/jpeg;base64,AAAA"[\s\S]*01\.11\.2026 · 9,32 kg[\s\S]*src="data:image\/jpeg;base64,BBBB"[\s\S]*9,28 kg/);
+  assert.doesNotMatch(mit, /ALT|kaputt/);
+  // nur ein Foto im Zeitraum: einzeln
+  const eins = html(true, [{ kg: 9.32, datum: "2026-11-01", foto: A }]);
+  assert.equal((eins.match(/class="bericht-vn-bild"/g) ?? []).length, 1);
+  // kein Foto im Zeitraum: Satz statt Bildern
+  assert.match(html(true, gewichte), /Im Zeitraum gibt es kein Foto/);
+});

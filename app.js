@@ -52,7 +52,8 @@ import { profilBereinigen, alterText, telefonLink, telefonGueltig, istWiegetag, 
 import { aktivesTier, leseAktivesTier, merkeAktivesTier, neuesTier, eintraegeVon, tierEntfernen } from "./js/tiere.js";
 import { wischenAnmelden } from "./js/wischen.js";
 import { datumText, freigabeTafel } from "./js/mehr.js";
-import { fotoInWoche, vorherNachher } from "./js/fotos.js";
+import { fotoImZeitraum, fotoAngebot, istFotoTag, vorherNachher } from "./js/fotos.js";
+import { belegteZeichen, speicherAnzeige } from "./js/speicher.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
 if ("serviceWorker" in navigator) {
@@ -112,6 +113,13 @@ if (demo) {
     speichern(verschiebeDaten(simulation, tage));
   } catch (fehler) {
     console.error("Demo-Daten konnten nicht geladen werden:", fehler);
+  }
+} else {
+  // Die Demo lädt bei jedem Öffnen frisch; ihr alter Stand würde sonst dauerhaft Speicher belegen (Speicheranzeige).
+  try {
+    localStorage.removeItem("kilossos-demo");
+  } catch {
+    // Speicher gesperrt: nichts zu tun.
   }
 }
 
@@ -274,7 +282,10 @@ function zeichneHeute(vonNull = false) {
   // Wiegetag: nur am heutigen Tag und nur, solange heute noch kein Gewicht eingetragen ist.
   const wiegen = tag === heute && istWiegetag(tier, heute) && !gewichte.some((g) => g.datum === heute);
   $("wiegetag-hinweis").hidden = !wiegen;
-  if (wiegen) $("wiegetag-hinweis-text").textContent = `Heute ist Wiegetag für ${tier.name}. Am besten zur gewohnten Uhrzeit mit der gleichen Waage.`;
+  if (wiegen)
+    $("wiegetag-hinweis-text").textContent =
+      `Heute ist Wiegetag für ${tier.name}. Am besten zur gewohnten Uhrzeit mit der gleichen Waage.` +
+      (istFotoTag(heute, tier.wiegetag) ? " Heute ist auch Foto-Tag: Wenn du magst, mach das Monatsfoto." : "");
   $("kopf-datum").textContent = new Date().toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "short" });
   $("tag-titel").textContent = tagTitel(gewaehlterTag);
   document.querySelector('[data-aktion="tag-vor"]').disabled = tag >= heute;
@@ -416,7 +427,9 @@ function zeichneGewicht() {
             g100 === null
               ? ""
               : `<span class="marke">${g100 < 0 ? "−" : g100 > 0 ? "+" : "±"}${zahl(Math.abs(g100))} g</span>`; // neutral, siehe verlauf.js
-          const bild = fotoGueltig(g.foto) ? `<img class="waegung-foto" src="${sicher(g.foto)}" alt="Foto vom ${datumText(g.datum)}">` : "";
+          const bild = fotoGueltig(g.foto)
+            ? `<button type="button" class="waegung-foto-knopf" data-aktion="waegung-foto-ansehen" data-id="${g.id}" aria-label="Foto vom ${datumText(g.datum)} ansehen"><img class="waegung-foto" src="${sicher(g.foto)}" alt=""></button>`
+            : "";
           return `<div class="zeile">${bild}<span class="name"><b>${zahl(g.kg, 2)} kg</b><small>${datumText(g.datum)}${g.notiz ? " · " + sicher(g.notiz) : ""}</small></span>
             ${marke}
             <button type="button" class="knopf-loeschen" data-aktion="gewicht-loeschen" data-id="${g.id}" aria-label="Gewicht löschen">${SYMBOL.loeschen}</button></div>`;
@@ -698,6 +711,19 @@ function zeichneAlles() {
   zeichneWiegetag();
   zeichneSicherung();
   zeichneVerlaufAnsicht();
+  zeichneSpeicherBelegt();
+}
+
+// Füllstand unter „Mehr“ → „Daten“; ab 70 % mit Hinweis (Fotos sind der größte Teil).
+function zeichneSpeicherBelegt() {
+  const anzeige = speicherAnzeige(belegteZeichen(localStorage));
+  $("speicher-belegt").hidden = !anzeige;
+  if (!anzeige) return;
+  $("speicher-belegt").className = `speicher-belegt mehr-hinweis ${anzeige.stufe}`;
+  $("speicher-balken-wert").style.width = `${anzeige.prozent}%`;
+  $("speicher-belegt-text").textContent = anzeige.text;
+  $("speicher-belegt-hinweis").hidden = !anzeige.hinweis;
+  $("speicher-belegt-hinweis").textContent = anzeige.hinweis;
 }
 
 function zeichneBericht() {
@@ -728,6 +754,7 @@ function zeichneBericht() {
     futterNachId: futterNachId(daten),
     erstellt: heute,
     demo,
+    fotos: $("bericht-fotos").checked,
   });
 }
 
@@ -937,6 +964,7 @@ beimSpeichern("form-mahlzeit", "mahlzeit-fehler", (werte) => {
 // ±10 g startet bei leerem Feld vom letzten Gewicht.
 // Foto im Gewicht-Dialog: erst beim Speichern übernommen, Abbrechen verwirft es.
 let gewichtFoto = null;
+let fotoNachgeholt = false; // „Monatsfoto nachholen“ angetippt
 let fotoLauf = 0; // zählt Dialog-Öffnungen und Bildauswahlen, damit ein spät fertiges Bild nicht im falschen Dialog landet
 
 function zeigeGewichtFoto() {
@@ -946,6 +974,27 @@ function zeigeGewichtFoto() {
   else vorschau.removeAttribute("src");
   $("gewicht-foto-entfernen").hidden = !gewichtFoto;
   $("gewicht-foto-knopf").textContent = gewichtFoto ? "Anderes Foto" : "Foto hinzufügen";
+  zeigeFotoAngebot();
+}
+
+// Foto-Feld offen nur am Foto-Tag (letzter Wiegetag im Monat, Datum im Dialog); sonst höchstens ein ruhiger Link, solange das Monatsfoto fehlt.
+// Ein schon gewähltes Foto bleibt sichtbar, damit man es wieder entfernen kann.
+function zeigeFotoAngebot() {
+  const angebot = fotoAngebot({ gewichte: daten.gewichte, tierId: tier.id, datum: $("form-gewicht").datum.value, wiegetag: tier.wiegetag });
+  const offen = angebot === "fototag" || Boolean(gewichtFoto) || (angebot === "nachholen" && fotoNachgeholt);
+  $("gewicht-foto-bereich").hidden = !offen;
+  $("gewicht-foto-nachholen").hidden = offen || angebot !== "nachholen";
+  $("gewicht-foto-wiegetag-tipp").hidden = Number.isInteger(tier.wiegetag) || angebot === "keins";
+  // Foto gewählt, und der Foto-Zeitraum hat schon eins: vorher sagen, nicht erst beim Speichern.
+  const belegt = gewichtFoto ? fotoImZeitraum(daten.gewichte, tier.id, $("form-gewicht").datum.value, tier.wiegetag) : null;
+  $("gewicht-foto-belegt").hidden = !belegt;
+  if (belegt) $("gewicht-foto-belegt").textContent = `Seit dem letzten Foto-Tag gibt es schon ein Monatsfoto (vom ${datumText(belegt.datum)}). Beim Speichern fragt die App, ob das neue es ersetzen soll.`;
+}
+
+function fotoNachholen() {
+  fotoNachgeholt = true;
+  zeigeFotoAngebot();
+  $("gewicht-foto-bereich").querySelector('[data-aktion="gewicht-foto-waehlen"]').focus();
 }
 
 $("gewicht-foto-datei").addEventListener("change", async (ereignis) => {
@@ -979,6 +1028,7 @@ function oeffneGewicht() {
   const letzte = gewichteSortiert(eigeneGewichte())[0];
   form.kg.placeholder = letzte ? zahl(letzte.kg, 2) : "0,00";
   gewichtFoto = null;
+  fotoNachgeholt = false;
   fotoLauf += 1;
   zeigeGewichtFoto();
   zeigeGewichtRueckmeldung();
@@ -1016,18 +1066,21 @@ function kgSchritt(schritt) {
 }
 
 $("form-gewicht").addEventListener("input", zeigeGewichtRueckmeldung);
+// Anderes Datum = evtl. Foto-Tag oder anderer Foto-Zeitraum.
+$("form-gewicht").datum.addEventListener("change", zeigeFotoAngebot);
+$("form-gewicht").datum.addEventListener("input", zeigeFotoAngebot);
 
 beimSpeichern("form-gewicht", "gewicht-fehler", (werte) => {
   const kg = leseZahl(werte.get("kg"));
   if (!kg || kg < 0.5 || kg > 20) return "Bitte ein Gewicht zwischen 0,5 und 20 kg eingeben, z. B. 9,32.";
   const eintrag = { id: neueId(), tierId: tier.id, kg, datum: werte.get("datum"), notiz: werte.get("notiz").trim() };
-  // Höchstens ein Foto je Woche: das neue ersetzt nach Rückfrage das alte, sonst wird ohne Foto gespeichert.
+  // Höchstens ein Monatsfoto (Zeitraum ab dem letzten Wiegetag im Monat): das neue ersetzt nach Rückfrage das alte, sonst ohne Foto.
   let ersetzt = null;
   if (gewichtFoto) {
-    const vorhanden = fotoInWoche(daten.gewichte, tier.id, eintrag.datum);
+    const vorhanden = fotoImZeitraum(daten.gewichte, tier.id, eintrag.datum, tier.wiegetag);
     const ersetzen =
       !vorhanden ||
-      confirm(`In dieser Woche gibt es schon ein Foto (vom ${datumText(vorhanden.datum)}). Soll das neue Foto es ersetzen?\n\n„Abbrechen“ speichert das Gewicht ohne das neue Foto.`);
+      confirm(`Seit dem letzten Foto-Tag gibt es schon ein Monatsfoto (vom ${datumText(vorhanden.datum)}). Soll das neue Foto es ersetzen?\n\n„Abbrechen“ speichert das Gewicht ohne das neue Foto.`);
     if (ersetzen) {
       eintrag.foto = gewichtFoto;
       if (vorhanden) {
@@ -1049,6 +1102,63 @@ beimSpeichern("form-gewicht", "gewicht-fehler", (werte) => {
   }
   zeichneAlles();
   if (gewichtFoto && !eintrag.foto) return { toast: "✓ Gespeichert, ohne das neue Foto" };
+});
+
+// Foto einer Wägung groß ansehen und einzeln entfernen (die Wägung bleibt).
+let angesehen = null;
+let tauschLauf = 0; // wie fotoLauf: nur die zuletzt gewählte Datei im selben geöffneten Dialog zählt
+
+function oeffneFoto(waegung) {
+  if (!waegung || !fotoGueltig(waegung.foto)) return;
+  angesehen = waegung;
+  $("foto-titel").textContent = `Foto vom ${datumText(waegung.datum)}`;
+  $("foto-gross").src = waegung.foto;
+  $("foto-gross").alt = `${tier.name} am ${datumText(waegung.datum)}, ${zahl(waegung.kg, 2)} kg`;
+  zeigeFehler("foto-fehler", "");
+  tauschLauf += 1;
+  $("dialog-foto").showModal();
+}
+
+// Falsches Foto erwischt: direkt austauschen, Gewicht und Datum bleiben.
+$("foto-tauschen-datei").addEventListener("change", async (ereignis) => {
+  const datei = ereignis.target.files[0];
+  ereignis.target.value = "";
+  const waegung = angesehen;
+  if (!datei || !waegung) return;
+  const lauf = ++tauschLauf;
+  let foto;
+  try {
+    foto = await fotoZuschneiden(datei);
+  } catch {
+    if (lauf !== tauschLauf) return;
+    return zeigeFehler("foto-fehler", "Dieses Bild lässt sich nicht öffnen. Bitte ein anderes Foto wählen.");
+  }
+  if (lauf !== tauschLauf || angesehen !== waegung) return; // inzwischen anderes Bild gewählt oder Dialog zu
+  waegung.foto = foto;
+  if (!sichern()) return $("dialog-foto").close(); // Speicher voll: alter Stand ist wieder geladen, sichern() meldet es
+  $("foto-gross").src = foto;
+  zeigeFehler("foto-fehler", "");
+  zeigeToast("✓ Foto ausgetauscht");
+});
+
+function fotoEntfernen() {
+  const waegung = angesehen;
+  if (!waegung) return;
+  if (!confirm("Dieses Foto entfernen? Das Gewicht bleibt gespeichert. Das Foto lässt sich nicht zurückholen, außer aus einer Sicherung.")) return;
+  delete waegung.foto;
+  $("dialog-foto").close();
+  if (sichern()) zeigeToast("✓ Foto entfernt");
+  // Der Knopf mit dem Vorschaubild ist weg: Fokus auf die Wägungsliste statt ins Leere.
+  const liste = $("gewicht-monate");
+  liste.tabIndex = -1;
+  liste.addEventListener("blur", () => liste.removeAttribute("tabindex"), { once: true });
+  liste.focus({ preventScroll: true });
+}
+
+$("dialog-foto").addEventListener("close", () => {
+  angesehen = null;
+  tauschLauf += 1;
+  $("foto-gross").removeAttribute("src");
 });
 
 // BCS 1–9 mit grober Einordnung als Hilfe beim Abschreiben – den Wert selbst legt nur der Tierarzt fest.
@@ -1653,6 +1763,12 @@ document.addEventListener("click", (ereignis) => {
       return;
     case "gewicht-neu":
       return oeffneGewicht();
+    case "waegung-foto-ansehen":
+      return oeffneFoto(daten.gewichte.find((g) => g.id === id));
+    case "waegung-foto-entfernen":
+      return fotoEntfernen();
+    case "waegung-foto-tauschen":
+      return $("foto-tauschen-datei").click();
     case "gewicht-loeschen":
       if (confirm("Diesen Gewichtseintrag löschen?")) {
         daten.gewichte = daten.gewichte.filter((g) => g.id !== id);
@@ -1728,9 +1844,19 @@ document.addEventListener("click", (ereignis) => {
       return willkommenSchliessen();
     case "gewicht-foto-waehlen":
       return $("gewicht-foto-datei").click();
-    case "gewicht-foto-entfernen":
+    case "gewicht-foto-nachholen":
+      return fotoNachholen();
+    case "gewicht-foto-entfernen": {
       gewichtFoto = null;
-      return zeigeGewichtFoto();
+      zeigeGewichtFoto();
+      // Der Knopf verschwindet: Fokus auf das nächste sichtbare Bedienelement, nicht ins Leere.
+      const ziel = !$("gewicht-foto-bereich").hidden
+        ? $("gewicht-foto-bereich").querySelector('[data-aktion="gewicht-foto-waehlen"]')
+        : !$("gewicht-foto-nachholen").hidden
+          ? $("gewicht-foto-nachholen")
+          : $("form-gewicht").datum;
+      return ziel.focus();
+    }
     case "geschichte-oeffnen":
       return $("dialog-geschichte").showModal();
     case "willkommen-geschichte":

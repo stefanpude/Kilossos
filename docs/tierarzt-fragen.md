@@ -32,11 +32,15 @@ Zum Ausdrucken oder am Handy mitnehmen. Dazu: die Tierarzt-Übersicht als PDF au
 ## 4. Sicherheit
 - [ ] Woran erkenne ich früh eine **Fettleber** (hepatische Lipidose)? Was tue ich, wenn er nicht frisst?
 - [ ] Wie lange darf er höchstens ohne Futter sein, bevor ich anrufen muss?
+- [ ] Wie wichtig ist Kitos **Wasseraufnahme** beim Abnehmen? Katzen nehmen einen großen Teil ihres Wassers
+      über Nassfutter auf; weniger Futter heißt auch weniger Wasser. Sollen wir etwas beachten
+      (z. B. Wasser ins Nassfutter, Trinkbrunnen), und sollen die Nierenwerte vorher bestimmt werden?
 
 ## 5. Kontrolle
 - [ ] Wie oft soll ich zum Wiegen in die Praxis kommen? (Zu Hause wiege ich 1× pro Woche,
       gleicher Tag, gleiche Uhrzeit, gleiche Waage.)
-- [ ] Wann ist der nächste Kontrolltermin?
+- [ ] Wann ist der nächste Kontrolltermin, und in welchem **Abstand** sollen wir danach zur Kontrolle kommen?
+      (Die App könnte dann daran erinnern.)
 
 ## 6. Zur App (optional)
 - [ ] Würden Sie sich die Grenzwerte der App ansehen? (Quellen: AAHA- und WSAVA-Leitlinien,

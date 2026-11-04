@@ -176,7 +176,22 @@ function profilZeile(tier, heute) {
   return teile.length ? `<p>${teile.map(sicher).join(" · ")}</p>` : "";
 }
 
-export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNachId, erstellt, demo }) {
+function fotoTeil(gewichte, von, bis) {
+  const liste = gewichte
+    .filter((g) => typeof g.datum === "string" && g.datum >= von && g.datum <= bis && fotoGueltig(g.foto))
+    .sort((x, y) => x.datum.localeCompare(y.datum));
+  const auswahl = liste.length > 1 ? [liste[0], liste.at(-1)] : liste;
+  const bild = (g) => `<figure class="bericht-vn-seite"><img class="bericht-vn-bild" src="${sicher(g.foto)}" alt="">
+      <figcaption>${datum(g.datum)} · ${zahl(g.kg, 2)} kg</figcaption></figure>`;
+  return `<section class="bericht-teil bericht-vn"><h2>Fotos</h2>${
+    auswahl.length
+      ? `<p class="bericht-klein">${auswahl.length > 1 ? "Erstes und letztes Foto im Zeitraum." : "Ein Foto im Zeitraum."} Vom Halter zu Hause aufgenommen.</p>
+    <div class="bericht-vn-paar">${auswahl.map(bild).join("")}</div>`
+      : "<p>Im Zeitraum gibt es kein Foto.</p>"
+  }</section>`;
+}
+
+export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNachId, erstellt, demo, fotos = false }) {
   const teile = [];
   teile.push(`<header class="bericht-kopf">
     ${fotoGueltig(tier.foto) ? `<img class="bericht-foto" src="${sicher(tier.foto)}" alt="">` : ""}
@@ -211,6 +226,9 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
     teile.push(`<p>Im Zeitraum ist kein Gewicht eingetragen.</p>`);
   }
   teile.push(`</section>`);
+
+  // Fotos (nur auf Wunsch, ab 0.26.0): erstes und letztes Foto im Zeitraum, zum Vergleich.
+  if (fotos) teile.push(fotoTeil(gewichte, b.von, b.bis));
 
   // Fütterung
   const f = b.fuetterung;

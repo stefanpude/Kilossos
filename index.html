@@ -195,6 +195,11 @@
           <span data-symbol="kalender"></span><span class="text" id="label-bericht-zeitraum">Zeitraum</span>
           <div id="bericht-zeitraum-feld"></div>
         </div>
+        <label class="eintrag eintrag-haken">
+          <span data-symbol="kamera"></span>
+          <span class="text">Fotos mitnehmen<small>Erstes und letztes Foto im Zeitraum, zum Vergleich.</small></span>
+          <input type="checkbox" id="bericht-fotos">
+        </label>
         <button type="button" class="eintrag" data-aktion="bericht-oeffnen">
           <span data-symbol="dokument"></span>
           <span class="text">Übersicht öffnen
@@ -215,7 +220,7 @@
           <div id="anzeige-feld"></div>
         </div>
       </div>
-      <p class="tipp mehr-hinweis">Am besten immer am gleichen Wochentag, zur gleichen Uhrzeit, mit der gleichen Waage. An diesem Tag erinnert „Heute“ daran.</p>
+      <p class="tipp mehr-hinweis">Am besten immer am gleichen Wochentag, zur gleichen Uhrzeit, mit der gleichen Waage. An diesem Tag erinnert „Heute“ daran, am letzten Wiegetag im Monat auch an das Monatsfoto.</p>
 
       <h3 class="gruppe-titel">Daten</h3>
       <p class="leise mehr-hinweis">Alle Einträge liegen nur auf diesem Handy. Speichere regelmäßig eine Sicherung, zum Beispiel in deinem Cloud-Ordner oder per Mail an dich selbst.</p>
@@ -230,6 +235,11 @@
           <span class="weiter" data-symbol="weiter"></span>
           <input type="file" accept="application/json,.json" id="import-datei" class="nur-vorlesen">
         </label>
+      </div>
+      <div class="speicher-belegt mehr-hinweis" id="speicher-belegt" hidden>
+        <span class="speicher-balken" aria-hidden="true"><span id="speicher-balken-wert"></span></span>
+        <p class="hinweis-text-klein" id="speicher-belegt-text"></p>
+        <p class="speicher-warnung" id="speicher-belegt-hinweis" hidden></p>
       </div>
       <p class="hinweis-text-klein mehr-hinweis" id="speicher-status"></p>
       <div class="liste">
@@ -264,7 +274,7 @@
           <span data-symbol="dokument"></span><span class="text">Nutzungsbedingungen</span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.25.0</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.26.0</span>
         </div>
       </div>
     </section>
@@ -323,19 +333,39 @@
       <label>Notiz (optional)
         <input name="notiz" autocomplete="off" placeholder="z. B. Tierarzt">
       </label>
-      <div class="feld"><span id="label-gewicht-foto">Foto (freiwillig)</span>
+      <button type="button" class="knopf-text" data-aktion="gewicht-foto-nachholen" id="gewicht-foto-nachholen" hidden>Monatsfoto nachholen (freiwillig)</button>
+      <p class="tipp" id="gewicht-foto-wiegetag-tipp" hidden>Tipp: Lege unter „Mehr“ einen Wiegetag fest. Am letzten Wiegetag im Monat fragt die App dann nach dem Foto.</p>
+      <div class="feld" id="gewicht-foto-bereich"><span id="label-gewicht-foto">Monatsfoto (freiwillig)</span>
         <div class="gewicht-foto">
           <img id="gewicht-foto-vorschau" alt="Vorschau des Fotos" hidden>
           <button type="button" class="knopf-zweit" data-aktion="gewicht-foto-waehlen" aria-describedby="label-gewicht-foto"><span data-symbol="kamera"></span><span id="gewicht-foto-knopf">Foto hinzufügen</span></button>
           <button type="button" class="knopf-text" data-aktion="gewicht-foto-entfernen" id="gewicht-foto-entfernen" hidden>Entfernen</button>
           <input type="file" accept="image/*" id="gewicht-foto-datei" class="nur-vorlesen" tabindex="-1" aria-hidden="true">
         </div>
-        <p class="tipp">Ein Foto pro Woche reicht, am besten immer aus der gleichen Richtung. Es bleibt auf diesem Handy.</p>
+        <p class="tipp" id="gewicht-foto-belegt" role="status" hidden></p>
+        <p class="tipp">Ein Foto im Monat reicht, damit man den Unterschied sieht: gleicher Ort, gleiches Licht, immer aus der gleichen Richtung. Es bleibt auf diesem Handy.</p>
       </div>
       <p class="fehler" id="gewicht-fehler" hidden></p>
       <div class="knoepfe">
         <button value="abbrechen" formnovalidate class="knopf-zweit">Abbrechen</button>
         <button value="speichern" class="knopf-haupt">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Foto einer Wägung groß ansehen -->
+  <dialog id="dialog-foto">
+    <form method="dialog">
+      <h2 id="foto-titel" tabindex="-1" autofocus>Foto</h2>
+      <img id="foto-gross" class="foto-gross" alt="">
+      <div class="foto-aktionen">
+        <button type="button" class="knopf-zweit" data-aktion="waegung-foto-tauschen"><span data-symbol="kamera"></span>Anderes Foto</button>
+        <button type="button" class="knopf-text" data-aktion="waegung-foto-entfernen">Foto entfernen</button>
+        <input type="file" accept="image/*" id="foto-tauschen-datei" class="nur-vorlesen" tabindex="-1" aria-hidden="true">
+      </div>
+      <p class="fehler" id="foto-fehler" hidden></p>
+      <div class="knoepfe">
+        <button value="schliessen" class="knopf-haupt">Schließen</button>
       </div>
     </form>
   </dialog>

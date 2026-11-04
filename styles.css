@@ -330,6 +330,7 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .eintrag-tier .text b { font-family: var(--serif); font-weight: 500; font-size: 1.125rem; }
 /* Eintrag mit Auswahlmenü rechts (Wiegetag, Darstellung, Zeitraum) */
 .eintrag-auswahl { flex-wrap: wrap; row-gap: 0; }
+.eintrag-haken input[type="checkbox"] { width: 24px; height: 24px; margin: 0 4px 0 auto; flex: none; accent-color: var(--akzent); }
 /* Titel bricht nur zwischen Wörtern; reicht der Platz nicht, rutscht das Menü in die nächste Zeile (große Schrift). */
 .eintrag-auswahl .text { flex: 1 1 7.5rem; overflow-wrap: normal; }
 .eintrag-auswahl > .auswahl, .eintrag-auswahl > div > .auswahl { flex: 0 1 auto; min-width: 0; }
@@ -342,11 +343,23 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .freigabe-tafel .eckdaten { margin: 0; }
 .karte > h4.label { margin: 0; }
 .mehr-hinweis { margin: 6px 2px 0; }
+.speicher-belegt { display: grid; gap: 6px; }
+.speicher-belegt[hidden], .speicher-warnung[hidden] { display: none; }
+.speicher-balken { display: block; height: 6px; border-radius: 3px; background: var(--raster, var(--rand)); overflow: hidden; }
+.speicher-balken > span { display: block; height: 100%; background: var(--akzent); }
+.speicher-belegt.knapp .speicher-balken > span, .speicher-belegt.voll .speicher-balken > span { background: var(--warnung); }
+.speicher-warnung { margin: 0; padding: 8px 10px; border-left: 3px solid var(--warnung); background: var(--warnung-hell); font-size: 0.875rem; }
 
 /* ---------- Fotos an Wägungen (ab 0.25.0) ---------- */
+#gewicht-foto-bereich[hidden], #gewicht-foto-wiegetag-tipp[hidden] { display: none; }
 .gewicht-foto { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; position: relative; }
 .gewicht-foto img { width: 72px; height: 72px; border-radius: var(--rund-klein); object-fit: cover; border: 1px solid var(--rand); }
 .gewicht-foto .knopf-zweit { display: inline-flex; align-items: center; gap: 8px; }
+.waegung-foto-knopf { flex: none; width: 48px; height: 48px; padding: 4px; margin: -4px 0; border: 0; background: none; border-radius: var(--rund-klein); cursor: pointer; }
+.waegung-foto-knopf .waegung-foto { display: block; }
+.foto-aktionen { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; position: relative; }
+.foto-aktionen .knopf-zweit { display: inline-flex; align-items: center; gap: 8px; }
+.foto-gross { width: 100%; max-width: 360px; aspect-ratio: 1; justify-self: center; object-fit: cover; border-radius: var(--rund); border: 1px solid var(--rand); }
 .waegung-foto { width: 40px; height: 40px; border-radius: var(--rund-klein); object-fit: cover; flex: none; border: 1px solid var(--rand); }
 .vorher-nachher { gap: 10px; }
 .vn-paar { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -767,6 +780,10 @@ dialog .gramm input { text-align: center; font-family: var(--serif); font-size: 
 .bericht h2 { margin: 0 0 6px; font-size: 1.0625rem; }
 .bericht h3 { margin: 10px 0 0; font-size: 0.9375rem; }
 .bericht p { margin: 0 0 6px; }
+.bericht-vn-paar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: min(12.5cm, calc(100vw - 64px)); } /* Bericht ist wegen breiter Tabellen oft breiter als der Schirm */
+.bericht-vn-seite { margin: 0; display: grid; gap: 4px; break-inside: avoid; }
+.bericht-vn-bild { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; }
+.bericht-vn figcaption { font-size: 0.8125rem; }
 .bericht-foto { float: right; width: 2cm; height: 2cm; border-radius: 50%; object-fit: cover; margin: 0 0 6px 12px; }
 .bericht-klein { font-size: 0.75rem; color: var(--text-leise); }
 .bericht-demo { font-weight: 700; color: var(--gefahr); }
