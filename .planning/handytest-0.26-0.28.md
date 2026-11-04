@@ -10,37 +10,48 @@ Keine Test-Freigabe speichern.
 
 ## A. Normale App (mit Kito)
 
-- [ ] Die App startet wie immer mit Kito und seinen Einträgen, ohne Einrichtung.
-- [ ] **Gewicht** → „Auf dem Arm gewogen?“ aufklappen: Der fette Satz „nie so genau wie eine richtige Tierwaage“ steht oben.
-- [ ] Dort stehen Zahlen zu Kito (1 % des Gewichts in Gramm).
-- [ ] Zwei Zahlen eintragen (z. B. 74,6 und 65,3): Oben erscheint 9,30, die Notiz lautet „auf dem Arm gewogen“. Danach **Abbrechen**, nicht speichern.
-- [ ] Mit der Tastatur: „Weiter“ bzw. Enter im ersten Feld springt ins zweite Feld und schließt das Fenster nicht.
-- [ ] **Mehr**: ganz nach unten scrollen, „Wiegetag“ und „Darstellung“ antippen. Das Menü klappt nach **oben** auf und liegt nicht hinter der unteren Leiste.
-- [ ] **Gewicht** → Monatsfoto: Am Foto-Tag ist das Foto-Feld offen, sonst steht dort der Link „Monatsfoto nachholen“.
-- [ ] Wägungsliste: Auf ein Vorschaubild tippen → „Anderes Foto“ und „Foto entfernen“ funktionieren.
-- [ ] **Mehr** → „Daten“: Die Speicheranzeige zeigt eine Prozentzahl.
-- [ ] **Mehr** → Übersicht für den Tierarzt mit „Fotos mitnehmen“: Erstes und letztes Foto erscheinen im Bericht.
+- [x] Die App startet wie immer mit Kito und seinen Einträgen, ohne Einrichtung.
+- [x] **Gewicht** → „Auf dem Arm gewogen?“ aufklappen: Der fette Satz „nie so genau wie eine richtige Tierwaage“ steht oben.
+- [x] Dort stehen Zahlen zu Kito (1 % des Gewichts in Gramm).
+- [x] Zwei Zahlen eintragen (z. B. 74,6 und 65,3): Oben erscheint 9,30, die Notiz lautet „auf dem Arm gewogen“. Danach **Abbrechen**, nicht speichern.
+- [x] Mit der Tastatur: „Weiter“ bzw. Enter im ersten Feld springt ins zweite Feld und schließt das Fenster nicht.
+- [x] **Mehr**: ganz nach unten scrollen, „Wiegetag“ und „Darstellung“ antippen. Das Menü klappt nach **oben** auf und liegt nicht hinter der unteren Leiste.
+- [x] **Gewicht** → Monatsfoto: Am Foto-Tag ist das Foto-Feld offen, sonst steht dort der Link „Monatsfoto nachholen“.
+- [x] Wägungsliste: Auf ein Vorschaubild tippen → „Anderes Foto“ und „Foto entfernen“ funktionieren.
+- [x] **Mehr** → „Daten“: Die Speicheranzeige zeigt eine Prozentzahl.
+- [x] **Mehr** → Übersicht für den Tierarzt mit „Fotos mitnehmen“: Erstes und letztes Foto erscheinen im Bericht.
+
+Ergebnis 04.11.2026 auf dem Android-Handy (0.29.2): alle 10 Punkte bestanden. Punkte 8 und 10 in der Demo (`?demo`) geprüft, weil die echten Daten noch keine Wägung mit Foto haben. Zusätzlich die Druckvorschau („Drucken / als PDF speichern“) geprüft: beide Fotos sind zu sehen.
 
 ## B. Frische Installation (Inkognito-Tab in Chrome)
 
-- [ ] https://stefanpude.github.io/Kilossos/ im Inkognito-Tab öffnen: Die Einrichtung startet mit 3 Schritten, ohne Kito.
-- [ ] Ohne Namen kommt man nicht weiter (Hinweis erscheint).
-- [ ] Nach „Los geht's“: **Heute** → Mahlzeit eintragen. Das Feld zeigt „Noch keine Sorte gespeichert“, darunter ein Tipp.
-- [ ] Im Feld „Aus der Futterliste wählen“ antippen, eine Sorte übernehmen: Der Tipp verschwindet.
-- [ ] Inkognito-Tab schließen, damit verschwinden alle Testdaten.
+- [x] https://stefanpude.github.io/Kilossos/ im Inkognito-Tab öffnen: Die Einrichtung startet mit 3 Schritten, ohne Kito.
+- [x] Ohne Namen kommt man nicht weiter (Hinweis erscheint).
+- [x] Nach „Los geht's“: **Heute** → Mahlzeit eintragen. Das Feld zeigt „Noch keine Sorte gespeichert“, darunter ein Tipp.
+- [x] Im Feld „Aus der Futterliste wählen“ antippen, eine Sorte übernehmen: Der Tipp verschwindet.
+- [x] Inkognito-Tab schließen, damit verschwinden alle Testdaten.
+
+Ergebnis 04.11.2026: alle 5 Punkte bestanden. Zusätzlich geprüft: Ein neuer Inkognito-Tab startet wieder mit der Einrichtung, die echten Daten bleiben unberührt.
 
 ## C. Neu in 0.28.3 bis 0.28.5 (normaler Tab)
 
-- [ ] **Heute**: Eine Mahlzeit antippen öffnet „Mahlzeit ändern“ wie vorher; nach „Speichern“ sieht alles aus wie vorher.
-- [ ] **Futter**: Eine eigene Sorte antippen öffnet „Sorte ändern“ wie vorher.
+- [x] **Heute**: Eine Mahlzeit antippen öffnet „Mahlzeit ändern“ wie vorher; nach „Speichern“ sieht alles aus wie vorher.
+- [x] **Futter**: Eine eigene Sorte antippen öffnet „Sorte ändern“ wie vorher.
 - [ ] Freiwillig, 2 Minuten: TalkBack einschalten (Einstellungen → Bedienungshilfen → TalkBack). Auf eine Mahlzeit tippen: TalkBack liest Uhrzeit, Sorte, Menge und „ändern“. Doppeltippen öffnet das Blatt, TalkBack nennt dessen Titel. TalkBack danach wieder ausschalten.
+
+Ergebnis 04.11.2026: C1 und C2 bestanden (C1 mit einer Testmahlzeit, danach gelöscht). C3 (TalkBack) übersprungen: später in Ruhe nachholen und vorher den TalkBack-Kurzbefehl über die Lautstärketasten einrichten, damit man TalkBack sicher wieder ausschalten kann.
 
 ## D. Neu in 0.29.0 bis 0.29.2 (normaler Tab)
 
-- [ ] **Futter** → „Aus der Futterliste wählen“ → ins Suchfeld „sterilised“ tippen: 7 Sorten erscheinen, darunter Perfect Fit, Pro Plan und Select Gold. Nichts übernehmen.
-- [ ] **Heute** → Mahlzeit eintragen: Unter „Menge in Gramm“ steht der Hinweis „Wiege das Futter, bevor du Wasser oder Brühe dazugibst …“. Danach **Abbrechen**.
+- [x] **Futter** → „Aus der Futterliste wählen“ → ins Suchfeld „sterilised“ tippen: 7 Sorten erscheinen (Royal Canin, Hill's, zweimal Pro Plan, zweimal Select Gold, Bozita). Bei „steril“ sind es 10, dazu Purina ONE Sterilcat, Whiskas Sterile und Perfect Fit Sterile. Nichts übernehmen. (Korrigiert am 04.11.: Vorher stand hier fälschlich Perfect Fit bei „sterilised“; die Suche prüft nur den Namen.)
+- [x] **Heute** → Mahlzeit eintragen: Unter „Menge in Gramm“ steht der Hinweis „Wiege das Futter, bevor du Wasser oder Brühe dazugibst …“. Danach **Abbrechen**.
 - [ ] Symbol auf dem Startbildschirm: Chrome tauscht das Symbol der installierten App nicht sofort aus, sondern prüft das höchstens etwa einmal am Tag beim Öffnen. Kann sein, dass Chrome dabei fragt, ob das geänderte Symbol übernommen werden soll: bestätigen. Danach sollten beide Ohren und der Napf ganz zu sehen sein. Ist es nach zwei Tagen noch das alte, ist das kein Fehler der App.
+
+Ergebnis 04.11.2026: D1 und D2 bestanden. D3 (Symbol) in den nächsten Tagen beobachten.
 
 ## Was mir auffällt
 
 (Hier notieren, was komisch aussieht oder sich falsch anfühlt, am besten mit Screenshot.)
+
+- **Aktualisieren springt immer auf „Heute“** (04.11.2026): Wer zum Beispiel unter „Mehr“ die Seite aktualisiert, landet wieder auf „Heute“, egal in welchem Bereich. Ursache: Die App merkt sich den offenen Bereich nicht (`zeigeAnsicht` in `app.js`; beim Laden ist nur „Heute“ sichtbar). Das trifft auch, wenn Android die App im Hintergrund beendet und beim Zurückkehren neu lädt. Plan: Bereich in `sessionStorage` merken und beim Aktualisieren wiederherstellen; ein frischer Start der App beginnt weiter auf „Heute“.
+- **Pfeil neben dem Namen auf „Heute“ tut nichts** (04.11.2026): Neben „Kito“ steht ein Pfeil nach unten, Antippen bewirkt nichts. Der Pfeil soll nur bei mehr als einem Tier erscheinen (dann öffnet er das Menü zum Wechseln). `app.js` setzt bei einem Tier `hidden` und sperrt den Knopf, aber `styles.css` (`.tier-wechsel .pfeil { display: inline-block }`) hebt `hidden` auf. Plan: Regel `.tier-wechsel .pfeil[hidden] { display: none; }`, im Browser mit einem und mit zwei Tieren prüfen.
