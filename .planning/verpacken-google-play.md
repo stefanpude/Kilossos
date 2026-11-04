@@ -48,10 +48,7 @@ Ohne Prüfdatei zeigt die App oben eine Adresszeile wie im Browser.
 
 ## Offene Punkte (für Stefan)
 
-- **Symbol beim runden Zuschnitt:** `icons/icon-512.png` ist ein Foto bis an den Rand und wird im Manifest auch als „maskable“ benutzt.
-  Android schneidet solche Symbole rund oder abgerundet zu, sicher sichtbar ist nur ein Kreis mit 80 % Durchmesser.
-  Bei Kitos Foto fallen dann Ohrspitze und Napfrand weg, das Gesicht bleibt. Entscheiden: so lassen oder eigene „maskable“-Fassung mit etwas Rand (Hintergrund beige).
-  Prüfen geht vorher auf https://maskable.app (Bild hochladen, Formen durchschalten).
+- ~~**Symbol beim runden Zuschnitt**~~ entschieden 04.11.2026: eigene „maskable“-Fassung mit Rand (`icons/icon-512-maskable.png`, Foto auf 80 % verkleinert, Rand beige wie der Fotohintergrund). Im ungünstigsten Zuschnitt bleiben Kopf, beide Ohren und Napf ganz. Das normale Symbol `icons/icon-512.png` bleibt unverändert (Willkommensseite, Browser).
 - **Paketname** festlegen, sobald die Domain feststeht.
 - Wo der Signaturschlüssel dauerhaft liegt.
 

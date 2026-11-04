@@ -1,6 +1,6 @@
 // Speichert die App-Dateien auf dem Gerät, damit Kilossos auch ohne Internet startet.
 // Bei jeder Änderung an den Dateien CACHE_NAME hochzählen.
-const CACHE_NAME = "kilossos-v51";
+const CACHE_NAME = "kilossos-v52";
 const DATEIEN = [
   "./",
   "index.html",
@@ -33,6 +33,7 @@ const DATEIEN = [
   "manifest.webmanifest",
   "icons/icon-192.png",
   "icons/icon-512.png",
+  "icons/icon-512-maskable.png",
 ];
 
 self.addEventListener("install", (event) => {
