@@ -1,4 +1,6 @@
-# Store-Texte Google Play (Entwurf 1)
+# Store-Texte Google Play (Entwurf 2)
+
+_Entwurf 2 vom 04.11.2026: an Version 0.28 angepasst (Kalorien-Lineal statt Ring, Strichcode-Scanner, Monatsfoto mit Vorher/Nachher, „Auf dem Arm gewogen?“, Einrichtung beim ersten Start). Titel, Kurzbeschreibung und Ton bleiben._
 
 _Angelegt 03.11.2026. Grundlage: Antworten in `.planning/willkommensseite.md` (Sicherheit vorn, Ton der Willkommensseite, Zielgruppe Halter, nicht werblich, nicht medizinisch, nicht lang). Noch nicht veröffentlicht; vor dem Store nach Kitos ersten Wochen und dem Tierarzttermin noch einmal ansehen._
 
@@ -46,11 +48,13 @@ _Nicht prüfbar ohne Bezahl-Werkzeuge: echtes Suchvolumen der Begriffe._
 >
 > **Was Kilossos macht**
 > • Futter in Gramm erfassen, Kalorien je Mahlzeit und Tag automatisch
-> • Futterliste mit über 40 gängigen Sorten, jede mit Quelle; eigene Sorten anlegen
+> • Futterliste mit 42 gängigen Sorten, jede mit Quelle; Strichcode der Packung scannen oder eigene Sorten anlegen
 > • Leckerlis zählen mit, Hinweis ab 10 % der Tageskalorien
 > • Wöchentliches Wiegen mit Verlauf und Abnahme pro Woche in Prozent
+> • Keine Tierwaage? Erst dich allein wiegen, dann mit Katze auf dem Arm, Kilossos rechnet die Differenz aus (ungenauer als eine Tierwaage)
 > • Warnung, wenn deine Katze mehr als 2 % ihres Gewichts pro Woche verliert
-> • Übersicht für den Tierarzt zum Ausdrucken oder als PDF
+> • Ein Foto pro Monat am Wiegetag, freiwillig, für den Vorher-Nachher-Vergleich
+> • Übersicht für den Tierarzt zum Ausdrucken oder als PDF, auf Wunsch mit Fotos
 > • Mehrere Tiere, jedes mit eigenem Profil
 >
 > **Der Tierarzt entscheidet, Kilossos rechnet mit**
@@ -63,7 +67,7 @@ _Nicht prüfbar ohne Bezahl-Werkzeuge: echtes Suchvolumen der Begriffe._
 > **Wichtig**
 > Kilossos ersetzt keinen Tierarzt und ist kein Medizinprodukt. Ist deine Katze krank (zum Beispiel Diabetes, Nieren-, Schilddrüsen- oder Lebererkrankung), besprich jede Änderung am Futter vorher mit deinem Tierarzt. Frisst eine Katze einen Tag oder länger gar nicht, gehört sie sofort zum Tierarzt.
 
-_Länge: ca. 2016 von 4.000 Zeichen (ohne Platzhalter). Suchwörter darin: Katze (mehrfach), abnehmen, Futter, Kalorien, Gewicht, Tierarzt, Fettleber, Leckerlis, übergewichtig._
+_Länge: ca. 2.255 von 4.000 Zeichen (Entwurf 2, ohne Platzhalter). Suchwörter darin: Katze (mehrfach), abnehmen, Futter, Kalorien, Gewicht, Tierarzt, Fettleber, Leckerlis, übergewichtig._
 
 **Bewusst weggelassen (Claim-Check):**
 - „Kito hat X kg abgenommen“: noch keine Daten. Freischaltung: echte Werte nach mind. 8 Wochen.
@@ -76,11 +80,11 @@ Jeder Screenshot: echtes App-Bild (Demo-Daten `/?demo`) mit einer kurzen Zeile d
 
 | Nr. | Ansicht | Zeile darüber |
 |---|---|---|
-| 1 | „Heute“ mit Kalorienring | Jedes Gramm Futter, jede Kalorie im Blick |
+| 1 | „Heute“ mit Kalorien-Lineal und Mahlzeiten | Jedes Gramm Futter, jede Kalorie im Blick |
 | 2 | Warnhinweis (zu schnelle Abnahme oder zu wenig Futter) | Warnt, bevor es gefährlich wird |
 | 3 | Gewichtsverlauf mit %/Woche | Langsam abnehmen: 0,5 bis 2 % pro Woche |
 | 4 | Freigabe vom Tierarzt | Dein Tierarzt legt das Ziel fest |
-| 5 | Futterliste mit Quelle | Über 40 Futtersorten mit Quelle |
+| 5 | Futterliste mit Quelle oder Scanner | 42 Futtersorten mit Quelle, Strichcode scannen |
 | 6 | Tierarzt-Übersicht (PDF) | Übersicht für den Tierarzttermin |
 
 Die ersten 3 sieht man ohne Wischen, deshalb Sicherheit in 1 bis 3.
@@ -90,5 +94,7 @@ Die ersten 3 sieht man ohne Wischen, deshalb Sicherheit in 1 bis 3.
 **Video:** vorerst keins (Aufwand, wenig Nutzen am Anfang).
 
 ## Noch zu klären
-- Kategorie: „Gesundheit & Fitness“ oder „Lifestyle“? Noch offen, Claude ist unsicher. Die Health-Erklärung in der Play Console ist wohl so oder so nötig (siehe `store-luecken.md`). Vor dem Store prüfen, was Google für Tier-Apps vorsieht.
+- Kategorie: Stand Recherche 04.11. (`store-formulare.md`) vermutlich „Lifestyle“, Health-Erklärung „Nutrition and Weight Management“. Beim Anlegen in der Play Console prüfen.
+- Die Zahl der Sorten (42) vor dem Store an die dann aktuelle Futterliste anpassen.
+- Länge der Beschreibung nach Entwurf 2: siehe Zählung unten, Grenze 4.000 Zeichen.
 - Entwicklername im Store (max. 64 Zeichen), hängt am Impressum-Service.
