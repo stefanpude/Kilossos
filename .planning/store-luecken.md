@@ -71,6 +71,7 @@ Punkte mit ⚖️ vor dem Store von jemandem mit Fachwissen bestätigen lassen.
   sondern alle Rechte bleiben bei dir. Eine Open-Source-Lizenz (z. B. MIT) könnte für die Ausnahme wichtig sein. ⚖️
   Nebenwirkung: Jeder dürfte den Code dann kopieren und weiterverwenden, auch kommerziell.
 - Medizinprodukte-Recht (MDR) gilt nur für Produkte für Menschen, für Tier-Apps nicht. Der Satz „kein Medizinprodukt“ ist also richtig.
+  **Ergänzt 04.11.2026:** Für Tiere gilt in Deutschland § 3 Abs. 3 TAMG („veterinärmedizintechnische Produkte“), der aber nur Gegenstände und Stoffe am oder im Tierkörper erfasst, keine Software. Details: `.planning/store-formulare.md`.
 
 ### 6. Verpacken als Android-App – Aufwand mittel, technischer Haken
 - Üblicher Weg: Trusted Web Activity (Werkzeug Bubblewrap oder PWABuilder). Ohne Prüfdatei zeigt die App oben eine Adresszeile.
