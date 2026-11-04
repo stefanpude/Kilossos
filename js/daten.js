@@ -220,7 +220,14 @@ export function laden(speicher = localStorage) {
   if (!istGueltig(daten)) {
     throw new Error("Die gespeicherten Daten haben ein unbekanntes Format.");
   }
-  if (startwerteAktualisieren(daten)) speichern(daten, speicher);
+  if (startwerteAktualisieren(daten)) {
+    try {
+      speichern(daten, speicher);
+    } catch {
+      // Speicher voll oder gesperrt: Die Umstellung gilt trotzdem im Arbeitsspeicher und wird beim nächsten
+      // Speichern mitgeschrieben. Sonst stünde wegen vollem Speicher die Fehlerkarte „beschädigt“ da.
+    }
+  }
   return daten;
 }
 

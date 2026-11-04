@@ -55,7 +55,7 @@ import { wischenAnmelden } from "./js/wischen.js";
 import { datumText, freigabeTafel } from "./js/mehr.js";
 import { fotoImZeitraum, fotoAngebot, istFotoTag, vorherNachher } from "./js/fotos.js";
 import { belegteZeichen, speicherAnzeige } from "./js/speicher.js";
-import { sicherungPruefen } from "./js/sicherung.js";
+import { sicherungPruefen, einleseFrage } from "./js/sicherung.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
 if ("serviceWorker" in navigator) {
@@ -138,9 +138,92 @@ try {
   einrichtungLaeuft = !demo && istErsterStart();
   daten = laden();
 } catch (fehler) {
-  document.querySelector("main").innerHTML =
-    `<div class="karte"><h2>Daten konnten nicht geladen werden</h2><p>${sicher(fehler.message)}</p></div>`;
+  zeigeLadeFehler(fehler);
   throw fehler;
+}
+
+// Gespeicherte Daten unlesbar (z. B. beschädigt oder aus einer neueren Fassung): Ausweg statt Sackgasse.
+// Läuft, bevor der Rest der App eingerichtet ist, deshalb mit eigenen Listenern. Reihenfolge der Knöpfe:
+// erst retten (Rohdaten herunterladen), dann Sicherung einlesen oder neu anfangen.
+function zeigeLadeFehler(fehler) {
+  const schluessel = demo ? "kilossos-demo" : "kilossos-daten";
+  let roh = null;
+  let gesperrt = false;
+  try {
+    roh = localStorage.getItem(schluessel);
+  } catch {
+    gesperrt = true; // z. B. privater Modus oder Speicher in den Browser-Einstellungen blockiert
+  }
+  document.querySelector(".leiste").style.display = "none"; // ihre Knöpfe funktionieren hier nicht
+  document.querySelector("main").innerHTML = `<section class="karte lade-fehler" aria-labelledby="lade-fehler-titel">
+    <h2 id="lade-fehler-titel" tabindex="-1">Daten konnten nicht geladen werden</h2>
+    ${
+      gesperrt
+        ? `<p>Dieser Browser erlaubt Kilossos gerade keinen Zugriff auf den Speicher (z. B. im privaten Modus oder durch eine Einstellung). Deine Daten sind dadurch nicht gelöscht. Öffne Kilossos normal, nicht privat, oder prüfe die Einstellungen des Browsers.</p>`
+        : demo
+          ? `<p>Die Demo-Daten konnten nicht geladen werden. Deine echten Einträge sind davon nicht betroffen.</p>`
+          : `<p>Die gespeicherten Einträge auf diesem Gerät sind beschädigt oder stammen aus einer neueren Fassung von Kilossos.</p>
+             <p>Lade die gespeicherten Daten zuerst herunter, damit nichts verloren geht. Danach kannst du eine Sicherung einlesen oder neu anfangen.</p>`
+    }
+    <p class="tipp">Technischer Hinweis: ${sicher(fehler.message)}</p>
+    <div class="lade-fehler-knoepfe">
+      <button type="button" class="knopf-haupt" data-notfall="herunterladen"${roh && !demo ? "" : " hidden"}>Gespeicherte Daten herunterladen</button>
+      <button type="button" class="knopf-zweit" data-notfall="einlesen"${gesperrt || demo ? " hidden" : ""}>Sicherung einlesen</button>
+      <button type="button" class="knopf-gefahr" data-notfall="loeschen"${gesperrt ? " hidden" : ""}>${demo ? "Demo neu starten" : "Alle Daten löschen und neu anfangen"}</button>
+    </div>
+    <input type="file" accept="application/json,.json" class="nur-vorlesen" id="notfall-datei" tabindex="-1" aria-hidden="true">
+  </section>`;
+  document.getElementById("lade-fehler-titel").focus();
+  const karte = document.querySelector(".lade-fehler");
+  karte.addEventListener("click", (ereignis) => {
+    const aktion = ereignis.target.closest("[data-notfall]")?.dataset.notfall;
+    if (aktion === "herunterladen") {
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(new Blob([roh], { type: "application/json" }));
+      link.download = `kilossos-gespeichert-${tagSchluessel(new Date())}.json`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } else if (aktion === "einlesen") {
+      document.getElementById("notfall-datei").click();
+    } else if (aktion === "loeschen") {
+      try {
+        // Demo: nur ihr eigener Speicherplatz, die echten Daten bleiben unberührt.
+        if (demo) {
+          localStorage.removeItem(schluessel);
+          return location.reload();
+        }
+        const frage = roh
+          ? "Wirklich ALLE Daten löschen und neu anfangen? Hast du die gespeicherten Daten vorher heruntergeladen?"
+          : "Wirklich ALLE Daten löschen und neu anfangen?";
+        if (!confirm(frage)) return;
+        if (!confirm("Letzte Rückfrage: Das lässt sich nicht rückgängig machen.")) return;
+        for (const s of Object.keys(localStorage)) if (s.startsWith("kilossos-")) localStorage.removeItem(s);
+      } catch {
+        return alert("Der Speicher dieses Browsers ist gesperrt. Es wurde nichts gelöscht.");
+      }
+      location.reload();
+    }
+  });
+  document.getElementById("notfall-datei").addEventListener("change", async (ereignis) => {
+    const datei = ereignis.target.files[0];
+    ereignis.target.value = "";
+    if (!datei) return;
+    let neu;
+    try {
+      neu = JSON.parse(await datei.text());
+    } catch {
+      return alert("Diese Datei ist keine Kilossos-Sicherung.");
+    }
+    const pruefung = sicherungPruefen(neu, tagSchluessel(new Date()));
+    if (!pruefung) return alert("Diese Datei ist keine gültige Kilossos-Sicherung.");
+    if (!confirm(einleseFrage(neu, pruefung, " Die unlesbaren Daten auf diesem Gerät werden dadurch ersetzt."))) return;
+    try {
+      speichernInSpeicher(neu);
+    } catch {
+      return alert("Die Sicherung passt nicht in den Speicher dieses Browsers. Es wurde nichts geändert.");
+    }
+    location.reload();
+  });
 }
 // Alle Ansichten zeigen das aktive Tier; gewechselt wird oben auf „Heute“.
 let tier = aktivesTier(daten, leseAktivesTier(demo));
@@ -1695,13 +1778,8 @@ $("import-datei").addEventListener("change", async (ereignis) => {
     alert("Diese Datei ist keine gültige Kilossos-Sicherung.");
     return;
   }
-  const { kaputt, fotos: verworfen, angaben: profilFehler } = pruefung;
-  const anzahl = `${neu.mahlzeiten.length} Mahlzeiten und ${neu.gewichte.length} Gewichte`;
-  const fotoText = verworfen > 0 ? " Ein Foto in der Datei war ungültig und wird nicht übernommen." : "";
-  const profilText = profilFehler > 0 ? " Einige Angaben im Profil, in den Freigaben oder bei den Strichcodes waren ungültig und werden nicht übernommen." : "";
-  const kaputtText = kaputt > 0 ? ` ${kaputt === 1 ? "Ein Eintrag war" : `${kaputt} Einträge waren`} beschädigt und ${kaputt === 1 ? "wird" : "werden"} entfernt oder repariert.` : "";
   const ersetzen = einrichtungLaeuft ? "" : " Alle Einträge auf diesem Handy werden dadurch ersetzt.";
-  if (!confirm(`Sicherung mit ${anzahl} einlesen?${ersetzen}${kaputtText}${fotoText}${profilText}`)) return;
+  if (!confirm(einleseFrage(neu, pruefung, ersetzen))) return;
   try {
     // Auch während der Einrichtung erlaubt: Die Sicherung ersetzt den Platzhalter vollständig.
     speichernInSpeicher(neu);

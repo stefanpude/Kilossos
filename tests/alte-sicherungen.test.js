@@ -152,3 +152,27 @@ test("Keine Kilossos-Sicherung: sicherungPruefen gibt null zurück", () => {
   ohneTiere.tiere = [null];
   assert.equal(sicherungPruefen(ohneTiere, HEUTE), null);
 });
+
+test("einleseFrage nennt Anzahl und alle Korrekturen", async () => {
+  const { einleseFrage } = await import("../js/sicherung.js");
+  const neu = lies("kilossos-0.28.json");
+  assert.equal(
+    einleseFrage(neu, { kaputt: 0, fotos: 0, angaben: 0 }, ""),
+    "Sicherung mit 16 Mahlzeiten und 4 Gewichte einlesen?",
+  );
+  const text = einleseFrage(neu, { kaputt: 2, fotos: 1, angaben: 1 }, " X.");
+  assert.match(text, /einlesen\? X\. 2 Einträge waren beschädigt und werden entfernt/);
+  assert.match(text, /Ein Foto in der Datei war ungültig/);
+  assert.match(text, /Einige Angaben im Profil/);
+  assert.match(einleseFrage(neu, { kaputt: 1, fotos: 0, angaben: 0 }, ""), /Ein Eintrag war beschädigt und wird/);
+});
+
+test("Speicher voll beim Umstellen alter Startwerte: laden() zeigt die Daten trotzdem", () => {
+  const s = speicher();
+  s.setItem("kilossos-daten", JSON.stringify(lies("kilossos-0.05.json")));
+  s.setItem = () => {
+    throw new DOMException("voll", "QuotaExceededError");
+  };
+  const daten = laden(s);
+  assert.equal(daten.futter.find((f) => f.listeId === "sheba-fresh-fine-huhn-gefluegel-truthahn").kcalPro100g, 77);
+});

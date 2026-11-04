@@ -16,3 +16,18 @@ export function sicherungPruefen(neu, heute) {
   const angaben = profilBereinigen(neu, heute) + freigabenBereinigen(neu) + eanBereinigen(neu);
   return { kaputt, fotos, angaben };
 }
+
+// Rückfrage vor dem Einlesen: wie viel drin ist und was dabei korrigiert wird.
+export function einleseFrage(neu, { kaputt, fotos, angaben }, ersetzen) {
+  const anzahl = `${neu.mahlzeiten.length} Mahlzeiten und ${neu.gewichte.length} Gewichte`;
+  const kaputtText =
+    kaputt > 0
+      ? ` ${kaputt === 1 ? "Ein Eintrag war" : `${kaputt} Einträge waren`} beschädigt und ${kaputt === 1 ? "wird" : "werden"} entfernt oder repariert.`
+      : "";
+  const fotoText = fotos > 0 ? " Ein Foto in der Datei war ungültig und wird nicht übernommen." : "";
+  const angabenText =
+    angaben > 0
+      ? " Einige Angaben im Profil, in den Freigaben oder bei den Strichcodes waren ungültig und werden nicht übernommen."
+      : "";
+  return `Sicherung mit ${anzahl} einlesen?${ersetzen}${kaputtText}${fotoText}${angabenText}`;
+}
