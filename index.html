@@ -315,7 +315,7 @@
           <span data-symbol="dokument"></span><span class="text">Nutzungsbedingungen</span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.27.0</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.28.0</span>
         </div>
       </div>
     </section>
@@ -333,7 +333,8 @@
   <dialog id="dialog-mahlzeit">
     <form method="dialog" id="form-mahlzeit">
       <h2 id="mahlzeit-titel">Mahlzeit eintragen</h2>
-      <div class="feld"><span id="label-futter">Futtersorte</span><div id="mahlzeit-futter"></div></div>
+      <div class="feld"><span id="label-futter">Futtersorte</span><div id="mahlzeit-futter"></div>
+        <p class="tipp" id="mahlzeit-futter-tipp" hidden>Tippe auf das Feld: Dort wählst du eine Sorte aus der Futterliste oder scannst den Strichcode der Packung.</p></div>
       <label>Uhrzeit
         <input name="uhrzeit" type="time" required>
       </label>
@@ -368,6 +369,27 @@
       </div>
       <p class="waage-hilfe" id="waage-hilfe">Gewicht eintippen, Knöpfe für feine Schritte</p>
       <div class="rueckmeldung" id="gewicht-rueckmeldung" aria-live="polite" hidden></div>
+      <!-- Auf dem Arm gewogen: die beiden Halter-Gewichte haben bewusst kein name, kommen nie in FormData und werden nie gespeichert. -->
+      <details class="arm" id="arm-bereich">
+        <summary>Auf dem Arm gewogen?<span class="pfeil" data-symbol="runter" aria-hidden="true"></span></summary>
+        <div class="arm-inhalt">
+          <p class="arm-warnung"><b>Auf dem Arm gewogen ist nie so genau wie eine richtige Tierwaage.</b></p>
+          <p class="tipp">Stell dich erst mit Katze auf die Personenwaage, dann allein. Kilossos rechnet die Differenz aus und trägt sie oben ein. Deine eigenen Gewichte werden nicht gespeichert.</p>
+          <div class="arm-felder">
+            <label>Du mit Katze (kg)
+              <input id="arm-mit" inputmode="decimal" autocomplete="off" placeholder="z. B. 74,6" aria-describedby="arm-fehler">
+            </label>
+            <label>Du allein (kg)
+              <input id="arm-allein" inputmode="decimal" autocomplete="off" placeholder="z. B. 65,3" aria-describedby="arm-fehler">
+            </label>
+          </div>
+          <p class="arm-ergebnis" id="arm-ergebnis" role="status"></p>
+          <p class="fehler" id="arm-fehler" hidden></p>
+          <p class="tipp">Personenwaagen zeigen meist nur 100-g-Schritte und schwanken, wenn sich die Katze bewegt. Weil zweimal abgelesen wird, kann die Differenz leicht 100 g oder mehr danebenliegen.
+            <span id="arm-zahlen"></span> Für den Wiegetag ist eine Tier- oder Babywaage (10-g-Schritte) deutlich genauer. Immer dieselbe Waage nehmen.
+            Bei einer Warnung zum Tempo erst mit einer genauen Waage oder beim Tierarzt nachwiegen.</p>
+        </div>
+      </details>
       <label>Datum
         <input name="datum" type="date" required>
       </label>

@@ -730,6 +730,22 @@ dialog .waage-anzeige input.waage-zahl:focus-visible { outline: none; border-bot
 .gramm button:active { transform: scale(0.92); }
 dialog .gramm input { text-align: center; font-family: var(--serif); font-size: 1.75rem; font-weight: 500; font-variant-numeric: tabular-nums; }
 
+/* ---------- Auf dem Arm gewogen (Gewicht-Dialog) ---------- */
+.arm { border: 1px solid var(--rand-stark); border-radius: var(--rund-klein); }
+.arm > summary {
+  min-height: 48px; display: flex; align-items: center; gap: 8px; padding: 0 12px;
+  cursor: pointer; list-style: none; font-weight: 700; color: var(--text);
+}
+.arm > summary::-webkit-details-marker { display: none; }
+.arm > summary:focus-visible { outline: 3px solid var(--fokus); outline-offset: 1px; border-radius: var(--rund-klein); }
+.arm > summary .pfeil { margin-left: auto; color: var(--text-leise); transition: transform 0.25s; }
+.arm > summary .pfeil .ico { width: 1.125rem; height: 1.125rem; }
+.arm[open] > summary .pfeil { transform: rotate(180deg); }
+.arm-inhalt { display: grid; gap: 10px; padding: 0 12px 12px; }
+.arm-warnung { margin: 0; padding: 10px 12px; background: var(--warnung-hell); border-left: 4px solid var(--warnung); border-radius: var(--rund-klein); color: var(--text); }
+.arm-felder { display: grid; grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr)); gap: 10px; }
+.arm-ergebnis { margin: 0; color: var(--text); font-weight: 700; }
+
 /* ---------- Auswahlmenü (js/auswahl.js) ---------- */
 .auswahl { position: relative; font-weight: 400; }
 .auswahl-knopf, .auswahl-fest {
@@ -752,6 +768,8 @@ dialog .gramm input { text-align: center; font-family: var(--serif); font-size: 
   transition: transform 0.18s ease-out, opacity 0.15s, visibility 0.18s;
 }
 .auswahl.offen > .auswahl-menue { transform: none; opacity: 1; visibility: visible; }
+/* Unten zu wenig Platz (js/auswahl.js): Menü klappt nach oben auf */
+.auswahl.nach-oben > .auswahl-menue { top: auto; bottom: calc(100% + 6px); transform-origin: bottom center; }
 .auswahl-menue li, .auswahl-menue button {
   display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: var(--rund-klein);
   font-size: 0.9375rem; cursor: pointer; width: 100%; border: 0; background: none; text-align: left; color: var(--text);

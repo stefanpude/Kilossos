@@ -42,8 +42,55 @@ function schliessen(auswahl, fokus = false) {
   if (fokus) knopf.focus();
 }
 
+// Freier Bereich für das Menü (oben/unten in Bildschirm-Koordinaten): sichtbarer Teil des Bildschirms
+// (bei offener Tastatur kleiner). In einem Blatt (<dialog>) zusätzlich dessen Rand, denn das Blatt
+// schneidet ab, was darüber hinausragt. Sonst ohne die untere Leiste, die über dem Menü liegt.
+// Die Willkommensseite deckt die Leiste ab, dort zählt sie nicht.
+function freierBereich(auswahl) {
+  const sicht = window.visualViewport;
+  let oben = sicht ? sicht.offsetTop : 0;
+  let unten = sicht ? sicht.offsetTop + sicht.height : window.innerHeight;
+  const blatt = auswahl.closest("dialog");
+  if (blatt) {
+    const rand = blatt.getBoundingClientRect();
+    oben = Math.max(oben, rand.top);
+    unten = Math.min(unten, rand.bottom);
+  } else if (!auswahl.closest(".willkommen")) {
+    // offsetParent taugt hier nicht: Bei position: fixed ist er immer null.
+    const leiste = document.querySelector(".leiste");
+    if (leiste && leiste.getClientRects().length > 0) unten = Math.min(unten, leiste.getBoundingClientRect().top);
+  }
+  return { oben, unten };
+}
+
+// Klappt das Menü nach oben auf, wenn es unten nicht passt und oben mehr Platz ist.
+function richtungWaehlen(auswahl) {
+  const menue = auswahl.querySelector(".auswahl-menue");
+  auswahl.classList.remove("nach-oben");
+  menue.style.maxHeight = "";
+  const knopf = auswahl.querySelector(".auswahl-knopf").getBoundingClientRect();
+  const bereich = freierBereich(auswahl);
+  const abstand = 6 + 8; // Lücke zum Knopf + etwas Luft zum Rand
+  const unten = bereich.unten - knopf.bottom - abstand;
+  const oben = knopf.top - bereich.oben - abstand;
+  const hoehe = menue.scrollHeight + 2; // + Rahmen
+  if (hoehe <= unten || unten >= oben) {
+    menue.style.maxHeight = `min(50dvh, ${Math.max(unten, 120)}px)`;
+    return;
+  }
+  auswahl.classList.add("nach-oben");
+  menue.style.maxHeight = `min(50dvh, ${Math.max(oben, 120)}px)`;
+}
+
+// Geht die Tastatur zu oder wird das Handy gedreht, ändert sich der Platz: offenes Menü neu ausrichten.
+// typeof-Prüfung: Die Tests laden diese Datei in Node, dort gibt es kein window.
+if (typeof window !== "undefined") window.visualViewport?.addEventListener("resize", () => {
+  document.querySelectorAll(".auswahl.offen").forEach(richtungWaehlen);
+});
+
 function oeffnen(auswahl) {
   document.querySelectorAll(".auswahl.offen").forEach((a) => a !== auswahl && schliessen(a));
+  richtungWaehlen(auswahl);
   auswahl.classList.add("offen");
   auswahl.querySelector(".auswahl-knopf").setAttribute("aria-expanded", "true");
   const ziel = auswahl.querySelector('[aria-selected="true"]') ?? auswahl.querySelector('[role="option"]');

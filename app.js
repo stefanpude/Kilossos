@@ -32,6 +32,8 @@ import {
   aktuelleFreigabe,
   gewichteBis,
   warnungen,
+  armGewicht,
+  prozentInGramm,
 } from "./js/rechnen.js";
 import { zeichneVerlauf } from "./js/verlauf.js";
 import { berichtDaten, berichtHtml } from "./js/bericht.js";
@@ -908,11 +910,16 @@ function futterMenue(gewaehlt) {
       zusatz: `${TYP_NAMEN[f.typ]} · ${zahl(f.kcalPro100g, f.kcalPro100g % 1 ? 1 : 0)} kcal/100 g`,
     })),
     wert: gewaehlt,
+    platzhalter: daten.futter.length ? "Bitte wählen" : "Noch keine Sorte gespeichert",
     extra: [
       { text: "Aus der Futterliste wählen", aktion: "liste-oeffnen" },
       { text: "Strichcode scannen", aktion: "scanner-oeffnen" },
     ],
   });
+  const ohneSorte = daten.futter.length === 0;
+  $("mahlzeit-futter-tipp").hidden = !ohneSorte;
+  // Vorlesefunktion liest den Hinweis mit, solange es keine Sorte gibt.
+  if (ohneSorte) $("mahlzeit-futter").querySelector(".auswahl-knopf")?.setAttribute("aria-describedby", "mahlzeit-futter-tipp");
 }
 
 // Ohne Mahlzeit: neu eintragen. Mit Mahlzeit: Sorte, Uhrzeit und Menge nachträglich ändern (der Tag bleibt).
@@ -1044,9 +1051,83 @@ function oeffneGewicht() {
   fotoNachgeholt = false;
   fotoLauf += 1;
   zeigeGewichtFoto();
+  armZuruecksetzen(letzte);
   zeigeGewichtRueckmeldung();
   $("dialog-gewicht").showModal();
 }
+
+// ---------- Auf dem Arm gewogen (Plan .planning/arm-wiegen.md) ----------
+// Die beiden Halter-Gewichte stehen nur in den Feldern (ohne name, nicht in FormData) und werden nie gespeichert.
+let armKg = ""; // Wert, den der Bereich zuletzt ins kg-Feld geschrieben hat
+const ARM_NOTIZ = "auf dem Arm gewogen";
+let armNotizGesetzt = false; // Notiz stammt vom Bereich (nicht vom Nutzer)
+
+function armZuruecksetzen(letzte) {
+  $("arm-bereich").open = false;
+  $("arm-mit").value = "";
+  $("arm-allein").value = "";
+  $("arm-ergebnis").textContent = "";
+  zeigeFehler("arm-fehler", "");
+  armKg = "";
+  armNotizGesetzt = false;
+  // Zahlen je Tier aus dem letzten Gewicht: Wie viel ist 1 % und was nennen die Leitlinien pro Woche?
+  $("arm-zahlen").textContent = letzte
+    ? `Bei ${tier.name} sind 1 % des Gewichts ${prozentInGramm(letzte.kg, 1)} g. ` +
+      `Die Leitlinien nennen als Abnahme ${zahl(GRENZEN.abnahmeMin, 1)}–${GRENZEN.abnahmeMax} % pro Woche, ` +
+      `das sind ${prozentInGramm(letzte.kg, GRENZEN.abnahmeMin)}–${prozentInGramm(letzte.kg, GRENZEN.abnahmeMax)} g.`
+    : "Schon 100 g sind bei einer Katze oft mehr als 1 % ihres Gewichts.";
+}
+
+// fehlerZeigen: erst beim Verlassen eines Feldes, damit beim Tippen von „74,6“ nicht schon bei „7“ ein Fehler erscheint.
+function armRechnen(fehlerZeigen) {
+  const form = $("form-gewicht");
+  const textMit = $("arm-mit").value.trim();
+  const textAllein = $("arm-allein").value.trim();
+  const mit = leseZahl(textMit);
+  const allein = leseZahl(textAllein);
+  let fehler = "";
+  let ergebnis = null;
+  if (textMit && textAllein) {
+    if (mit === null || allein === null) fehler = "Bitte Zahlen eingeben, zum Beispiel 74,6.";
+    else {
+      const r = armGewicht(mit, allein);
+      if (r.fehler) fehler = r.fehler;
+      else ergebnis = r.kg;
+    }
+  }
+  if (ergebnis !== null) {
+    armKg = zahl(ergebnis, 2);
+    form.kg.value = armKg;
+    $("arm-ergebnis").textContent = `Differenz: ${armKg} kg, oben eingetragen.`;
+    zeigeFehler("arm-fehler", "");
+    // Damit der Tierarzt im Bericht sieht, woher der Wert kommt (sichtbar und änderbar).
+    if (!form.notiz.value.trim()) {
+      form.notiz.value = ARM_NOTIZ;
+      armNotizGesetzt = true;
+    }
+  } else {
+    // Ein Wert, den der Bereich selbst eingetragen hat, passt nicht mehr: wieder leeren. Eigene Eingaben bleiben.
+    if (armKg && form.kg.value === armKg) form.kg.value = "";
+    armKg = "";
+    // Ebenso die vorgeschlagene Notiz, sonst stünde beim Tierarzt eine falsche Herkunft des Werts.
+    if (armNotizGesetzt && form.notiz.value === ARM_NOTIZ) form.notiz.value = "";
+    armNotizGesetzt = false;
+    $("arm-ergebnis").textContent = "";
+    if (fehlerZeigen || !fehler) zeigeFehler("arm-fehler", fehler);
+  }
+  zeigeGewichtRueckmeldung();
+}
+
+$("arm-bereich").addEventListener("input", () => armRechnen(false));
+$("arm-bereich").addEventListener("change", () => armRechnen(true));
+// Enter in den Arm-Feldern soll nicht speichern oder schließen: weiter zum zweiten Feld bzw. Eingabe abschließen.
+$("arm-bereich").addEventListener("keydown", (ereignis) => {
+  if (ereignis.key !== "Enter" || ereignis.target.tagName !== "INPUT" || ereignis.isComposing) return;
+  ereignis.preventDefault();
+  ereignis.stopPropagation(); // sonst speichert der Enter-Listener des Formulars (siehe oben „Enter in einem Eingabefeld“)
+  if (ereignis.target.id === "arm-mit") $("arm-allein").focus();
+  else ereignis.target.blur();
+});
 
 function zeigeGewichtRueckmeldung() {
   const form = $("form-gewicht");

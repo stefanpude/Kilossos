@@ -59,6 +59,23 @@ export function mahlzeitenAm(mahlzeiten, tag) {
     .sort((a, b) => a.zeitpunkt.localeCompare(b.zeitpunkt));
 }
 
+// Gewicht auf dem Arm: Halter mit Katze minus Halter allein (Plan .planning/arm-wiegen.md).
+// Ergebnis { kg } mit 2 Nachkommastellen oder { fehler }. Die Grenzen 0,5–20 kg sind dieselben wie im kg-Feld.
+// Die beiden Halter-Gewichte werden nie gespeichert.
+export function armGewicht(mitKatze, allein) {
+  if (mitKatze == null || allein == null) return { fehler: "Bitte beide Gewichte eintragen." };
+  if ([mitKatze, allein].some((w) => w < 1 || w > 250)) return { fehler: "Bitte Gewichte zwischen 1 und 250 kg eingeben." };
+  if (mitKatze <= allein) return { fehler: "Das Gewicht mit Katze muss größer sein als das Gewicht allein." };
+  const kg = Math.round((mitKatze - allein) * 100) / 100;
+  if (kg < 0.5 || kg > 20) return { fehler: "Die Differenz muss zwischen 0,5 und 20 kg liegen. Bitte beide Zahlen prüfen." };
+  return { kg };
+}
+
+// Anteil des Körpergewichts in ganzen Gramm, z. B. 1 % von 9,32 kg = 93 g.
+export function prozentInGramm(kg, prozent) {
+  return Math.round(kg * prozent * 10);
+}
+
 // Gewichte, neueste zuerst.
 export function gewichteSortiert(gewichte) {
   return [...gewichte].sort((a, b) => b.datum.localeCompare(a.datum));
