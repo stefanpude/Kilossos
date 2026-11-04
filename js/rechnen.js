@@ -76,6 +76,12 @@ export function prozentInGramm(kg, prozent) {
   return Math.round(kg * prozent * 10);
 }
 
+// Wie viel wären „gramm“ bei der Katze beim Menschen? Gleicher Anteil am Körpergewicht, in kg auf 0,1 gerundet.
+// Beispiel Kito (9,32 kg): 100 g ≈ 0,8 kg bei einem 75-kg-Menschen. Nur zum Veranschaulichen, kein Grenzwert.
+export function menschVergleich(katzeKg, gramm = 100, menschKg = 75) {
+  return Math.round((menschKg * gramm * 10) / (katzeKg * 1000)) / 10;
+}
+
 // Gewichte, neueste zuerst.
 export function gewichteSortiert(gewichte) {
   return [...gewichte].sort((a, b) => b.datum.localeCompare(a.datum));

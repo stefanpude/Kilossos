@@ -1,7 +1,7 @@
 // Wiegen mit der Katze auf dem Arm (Plan .planning/arm-wiegen.md), Beispielzahlen von Kito.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { armGewicht, prozentInGramm } from "../js/rechnen.js";
+import { armGewicht, prozentInGramm, menschVergleich } from "../js/rechnen.js";
 
 test("armGewicht: Differenz mit 2 Nachkommastellen (Kito 74,6 − 65,3 = 9,30)", () => {
   assert.deepEqual(armGewicht(74.6, 65.3), { kg: 9.3 });
@@ -31,4 +31,11 @@ test("prozentInGramm: Kito 9,32 kg → 1 % = 93 g, 0,5 % = 47 g, 2 % = 186 g", (
   assert.equal(prozentInGramm(9.32, 1), 93);
   assert.equal(prozentInGramm(9.32, 0.5), 47);
   assert.equal(prozentInGramm(9.32, 2), 186);
+});
+
+test("menschVergleich: 100 g bei der Katze entsprechen beim 75-kg-Menschen … kg (auf 0,1 gerundet)", () => {
+  assert.equal(menschVergleich(9.32), 0.8); // Kito
+  assert.equal(menschVergleich(6), 1.3); // 1,25 → 1,3 (Erklärseite nennt 1,25 genau)
+  assert.equal(menschVergleich(7.5), 1);
+  assert.equal(menschVergleich(4), 1.9);
 });

@@ -34,6 +34,7 @@ import {
   warnungen,
   armGewicht,
   prozentInGramm,
+  menschVergleich,
 } from "./js/rechnen.js";
 import { zeichneVerlauf } from "./js/verlauf.js";
 import { berichtDaten, berichtHtml } from "./js/bericht.js";
@@ -1073,6 +1074,7 @@ function armZuruecksetzen(letzte) {
   // Zahlen je Tier aus dem letzten Gewicht: Wie viel ist 1 % und was nennen die Leitlinien pro Woche?
   $("arm-zahlen").textContent = letzte
     ? `Bei ${tier.name} sind 1 % des Gewichts ${prozentInGramm(letzte.kg, 1)} g. ` +
+      `Schon 100 g sind bei ${tier.name} so viel wie etwa ${zahl(menschVergleich(letzte.kg), 1)} kg bei einem Menschen mit 75 kg. ` +
       `Die Leitlinien nennen als Abnahme ${zahl(GRENZEN.abnahmeMin, 1)}–${GRENZEN.abnahmeMax} % pro Woche, ` +
       `das sind ${prozentInGramm(letzte.kg, GRENZEN.abnahmeMin)}–${prozentInGramm(letzte.kg, GRENZEN.abnahmeMax)} g.`
     : "Schon 100 g sind bei einer Katze oft mehr als 1 % ihres Gewichts.";
