@@ -315,7 +315,7 @@
           <span data-symbol="dokument"></span><span class="text">Nutzungsbedingungen</span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.29.1</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.29.2</span>
         </div>
       </div>
     </section>
@@ -341,9 +341,10 @@
       <div class="feld"><span id="gramm-label">Menge in Gramm</span>
         <div class="gramm">
           <button type="button" data-aktion="gramm-minus" aria-label="5 Gramm weniger"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/></svg></button>
-          <input name="gramm" inputmode="decimal" autocomplete="off" placeholder="0" aria-labelledby="gramm-label" required>
+          <input name="gramm" inputmode="decimal" autocomplete="off" placeholder="0" aria-labelledby="gramm-label" aria-describedby="gramm-tipp" required>
           <button type="button" data-aktion="gramm-plus" aria-label="5 Gramm mehr"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg></button>
         </div>
+        <p class="tipp" id="gramm-tipp">Wiege das Futter, bevor du Wasser oder Brühe dazugibst. Sonst zählt das Wasser als Futter mit.</p>
       </div>
       <p class="vorschau" id="mahlzeit-vorschau"></p>
       <p class="fehler" id="mahlzeit-fehler" hidden></p>
