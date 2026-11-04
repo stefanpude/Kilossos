@@ -2,14 +2,14 @@
 <html lang="de" data-theme="hell">
 <head>
   <meta charset="utf-8">
-  <meta name="theme-color" content="#fbf6f1" id="theme-farbe">
+  <meta name="theme-color" content="#f3f5f2" id="theme-farbe">
   <!-- Hell/Dunkel wie in index.html, damit die Seite zur App passt. -->
   <script>
     try {
       var w = localStorage.getItem("kilossos-anzeige");
       var d = w === "dunkel" || (w === "handy" && matchMedia("(prefers-color-scheme: dark)").matches);
       document.documentElement.dataset.theme = d ? "dunkel" : "hell";
-      if (d) document.getElementById("theme-farbe").content = "#1c1714";
+      if (d) document.getElementById("theme-farbe").content = "#131b1a";
     } catch (e) { document.documentElement.dataset.theme = "hell"; }
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">

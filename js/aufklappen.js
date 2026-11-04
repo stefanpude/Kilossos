@@ -2,6 +2,7 @@
 // aufklappKarte() liefert nur HTML-Text (testbar ohne Browser); aufklappenAnmelden() hört einmal auf alle Klicks.
 // Der Auf/Zu-Zustand wird je id gemerkt, damit offene Bereiche nach dem Neuzeichnen offen bleiben
 // (z. B. nach dem Speichern einer Mahlzeit). Gespeichert wird er nicht.
+import { SYMBOL } from "./symbole.js";
 
 const zustand = new Map();
 const sicher = (text) =>
@@ -29,7 +30,7 @@ export function aufklappKarte({ id, kopf, inhalt, offen = false, klasse = "", fe
   const auf = zustand.has(id) ? zustand.get(id) : offen;
   const i = sicher(id);
   return `<div class="aufklapp${auf ? " offen" : ""}${klasse ? " " + klasse : ""}" data-aufklapp="${i}">
-    <button type="button" class="aufklapp-kopf" aria-expanded="${auf}" aria-controls="ak-${i}">${kopf}<span class="pfeil" aria-hidden="true">⌄</span></button>
+    <button type="button" class="aufklapp-kopf" aria-expanded="${auf}" aria-controls="ak-${i}">${kopf}<span class="pfeil" aria-hidden="true">${SYMBOL.runter}</span></button>
     <div class="aufklapp-inhalt" id="ak-${i}"><div>${inhalt}</div></div>
   </div>`;
 }

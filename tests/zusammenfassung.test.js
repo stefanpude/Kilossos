@@ -11,6 +11,8 @@ import {
   monatsGruppen,
   ringWerte,
   leckerliKachel,
+  tempoRueckmeldung,
+  achtWochen,
 } from "../js/zusammenfassung.js";
 
 const G = (datum, kg) => ({ id: datum, tierId: "k", datum, kg, notiz: "" });
@@ -130,4 +132,65 @@ test("leckerliKachel rechnet wie warnungen()", () => {
   assert.equal(mitFreigabe.stufe, "normal");
   assert.equal(leckerliKachel({ tag: "2026-10-22", heute: "2026-10-22", kcal: 150, leckerli: 30, freigabe, warnungAktiv: true }).stufe, "achtung");
   assert.equal(leckerliKachel({ tag: "2026-10-21", heute: "2026-10-22", kcal: 0, leckerli: 0, freigabe: null, warnungAktiv: false }).anteil, null);
+});
+
+// ---------- Rückmeldung beim Gewicht eintragen (ab 0.23.0) ----------
+
+const zwei = [G("2026-10-01", 9.32), G("2026-10-08", 9.25)];
+
+test("tempoRueckmeldung: ohne frühere Messung oder ohne gültiges Gewicht keine Rückmeldung", () => {
+  assert.equal(tempoRueckmeldung({ gewichte: [], freigaben: [], kg: 9.3, datum: "2026-10-15" }), null);
+  assert.equal(tempoRueckmeldung({ gewichte: zwei, freigaben: [], kg: null, datum: "2026-10-15" }), null);
+  // Nachtrag vor der ersten Messung: nichts davor
+  assert.equal(tempoRueckmeldung({ gewichte: zwei, freigaben: [], kg: 9.4, datum: "2026-09-20" }), null);
+});
+
+test("tempoRueckmeldung: vergleicht mit der letzten Messung vor dem Datum", () => {
+  const r = tempoRueckmeldung({ gewichte: zwei, freigaben: [freigabe], kg: 9.18, datum: "2026-10-15" });
+  assert.equal(r.seit, "2026-10-08");
+  nahe(r.diffKg, -0.07);
+  nahe(r.prozent, (0.07 / 9.25) * 100);
+  assert.equal(r.bewertung, "gut");
+  assert.match(r.titel, /^−0,07 kg seit dem 08\.10\./);
+  assert.match(r.text, /0,8 % pro Woche, im sicheren Bereich/);
+  // Nachtrag zwischen zwei Messungen: Vergleich mit der Messung davor
+  assert.equal(tempoRueckmeldung({ gewichte: zwei, freigaben: [], kg: 9.3, datum: "2026-10-05" }).seit, "2026-10-01");
+});
+
+test("tempoRueckmeldung: sicher/langsamer nur nach einer Freigabe (wie wochenRaten)", () => {
+  assert.equal(tempoRueckmeldung({ gewichte: zwei, freigaben: [], kg: 9.18, datum: "2026-10-15" }).bewertung, "neutral");
+  const ohne = tempoRueckmeldung({ gewichte: zwei, freigaben: [], kg: 9.18, datum: "2026-10-15" });
+  assert.match(ohne.text, /erst mit einer Freigabe vom Tierarzt/);
+  assert.doesNotMatch(ohne.text, /sicher/);
+  // Freigabe erst nach der letzten Messung: diese Woche zählt noch nicht als bewertet
+  const spaet = { ...freigabe, datum: "2026-10-10" };
+  assert.equal(tempoRueckmeldung({ gewichte: zwei, freigaben: [spaet], kg: 9.18, datum: "2026-10-15" }).bewertung, "neutral");
+  assert.equal(tempoRueckmeldung({ gewichte: zwei, freigaben: [freigabe], kg: 9.23, datum: "2026-10-15" }).bewertung, "langsam");
+});
+
+test("tempoRueckmeldung: über 2 % pro Woche immer markieren, auch ohne Freigabe", () => {
+  const r = tempoRueckmeldung({ gewichte: zwei, freigaben: [], kg: 9.0, datum: "2026-10-15" });
+  assert.equal(r.bewertung, "zu-schnell");
+  assert.match(r.text, /schneller als 2 %/);
+  assert.match(r.text, /Mittel über zwei Wochen/);
+  assert.match(r.text, /Nicht selbst die Menge ändern/);
+});
+
+test("tempoRueckmeldung: Zunahme", () => {
+  const mit = tempoRueckmeldung({ gewichte: zwei, freigaben: [freigabe], kg: 9.3, datum: "2026-10-15" });
+  assert.equal(mit.bewertung, "zunahme");
+  assert.match(mit.titel, /^\+0,05 kg/);
+  assert.match(mit.text, /Zunahme/);
+  assert.equal(tempoRueckmeldung({ gewichte: zwei, freigaben: [], kg: 9.3, datum: "2026-10-15" }).bewertung, "neutral");
+});
+
+test("tempoRueckmeldung: gleiches Gewicht", () => {
+  const r = tempoRueckmeldung({ gewichte: zwei, freigaben: [freigabe], kg: 9.25, datum: "2026-10-15" });
+  assert.match(r.titel, /^±0,00 kg/);
+  assert.equal(r.bewertung, "langsam");
+});
+
+test("achtWochen: Wägungen der letzten 56 Tage, älteste zuerst", () => {
+  const liste = [G("2026-08-01", 9.6), G("2026-09-05", 9.4), ...gewichte];
+  assert.deepEqual(achtWochen(liste, "2026-10-29").map((g) => g.datum), ["2026-09-05", "2026-10-01", "2026-10-08", "2026-10-15", "2026-10-29"]);
 });

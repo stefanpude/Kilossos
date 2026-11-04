@@ -32,7 +32,7 @@ import {
   gewichteBis,
   warnungen,
 } from "./js/rechnen.js";
-import { zeichneVerlauf, glatt } from "./js/verlauf.js";
+import { zeichneVerlauf } from "./js/verlauf.js";
 import { berichtDaten, berichtHtml } from "./js/bericht.js";
 import {
   FUTTERLISTE,
@@ -44,7 +44,8 @@ import {
   eanBereinigen,
 } from "./js/futterliste.js";
 import { kameraScanMoeglich, starteScanner } from "./js/scanner.js";
-import { ringWerte, leckerliKachel, monatsGruppen } from "./js/zusammenfassung.js";
+import { ringWerte, leckerliKachel, monatsGruppen, tempoRueckmeldung, achtWochen } from "./js/zusammenfassung.js";
+import { SYMBOL } from "./js/symbole.js";
 import { leseAnzeige, merkeAnzeige, aufgeloest } from "./js/anzeige.js";
 import { aufklappKarte, merkeZustand, zustandVon, zustandVergessen, aufklappenAnmelden } from "./js/aufklappen.js";
 import { auswahlFeld, auswahlAnmelden } from "./js/auswahl.js";
@@ -69,7 +70,7 @@ const sicher = (text) =>
 const ohneBewegung = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const TYP_NAMEN = { nass: "Nassfutter", trocken: "Trockenfutter", leckerli: "Leckerli" };
-const TYP_SYMBOL = { nass: "🥫", trocken: "🥣", leckerli: "🍬" };
+const TYP_SYMBOL = { nass: SYMBOL.nass, trocken: SYMBOL.trocken, leckerli: SYMBOL.leckerli };
 const QUELLE_NAMEN = { packung: "Packung", hersteller: "Hersteller", ungefaehr: "ungefähr", geschaetzt: "geschätzt" };
 
 // Kurztitel für Hinweise (Art "hinweis"): zugeklappt steht nur diese Zeile, der volle Text klappt auf.
@@ -88,7 +89,7 @@ const handyDunkel = matchMedia("(prefers-color-scheme: dark)");
 function wendeAnzeigeAn(wahl) {
   const thema = aufgeloest(wahl, handyDunkel.matches);
   document.documentElement.dataset.theme = thema;
-  $("theme-farbe").content = thema === "dunkel" ? "#1c1714" : "#fbf6f1";
+  $("theme-farbe").content = thema === "dunkel" ? "#131b1a" : "#f3f5f2";
 }
 handyDunkel.addEventListener("change", () => {
   if (leseAnzeige() === "handy") wendeAnzeigeAn("handy");
@@ -178,54 +179,57 @@ function tagTitel(datum) {
 }
 
 // Rundes Profilbild: "gross" füllt den Knopf auf „Heute“, "klein" steht im Kopf von „Verlauf“.
+// Ohne eigenes Foto: ruhige Initiale auf Salbei (seit 0.23.0, vorher Zeichentrick-Katze).
 function profilHtml(einTier, groesse) {
-  const bild = fotoGueltig(einTier.foto) ? `<img src="${sicher(einTier.foto)}" alt="">` : "🐱";
+  const initiale = sicher((einTier.name?.trim()[0] ?? "?").toLocaleUpperCase("de-DE"));
+  const bild = fotoGueltig(einTier.foto)
+    ? `<img src="${sicher(einTier.foto)}" alt="">`
+    : `<span class="initiale" aria-hidden="true">${initiale}</span>`;
   if (groesse === "klein") return `<span class="avatar">${bild}</span>`;
-  return `${bild}<span class="kamera" aria-hidden="true">📷</span>`;
+  return `${bild}<span class="kamera" aria-hidden="true">${SYMBOL.kamera}</span>`;
 }
 
 // ---------- Heute ----------
 
-const UMFANG = 2 * Math.PI * 54;
-let ringZahl = 0;
+let kcalZahl = 0;
 
-// Füllt den Ring auf "anteil" (0–1; null = ohne Freigabe, nur die Bahn) und zählt die Zahl hoch.
+// Füllt das Lineal auf "anteil" (0–1; null = ohne Freigabe: kein Lineal) und zählt die Zahl hoch.
 // vonNull: beim Wechsel auf „Heute“ und beim Tageswechsel von 0 an, sonst vom alten Wert aus.
-function zeichneRing(anteil, kcal, ueber, vonNull) {
-  const fuell = $("ring-fuell");
-  fuell.setAttribute("stroke-dasharray", UMFANG);
+function zeichneLineal(anteil, kcal, ueber, vonNull) {
+  const fuell = $("lineal-fuell");
+  $("lineal").hidden = anteil === null;
   fuell.classList.toggle("ueber", ueber);
-  fuell.style.visibility = anteil === null ? "hidden" : "visible";
   if (vonNull) {
     fuell.style.transition = "none";
-    fuell.setAttribute("stroke-dashoffset", UMFANG);
+    fuell.style.width = "0";
     fuell.getBoundingClientRect();
     fuell.style.transition = "";
-    ringZahl = 0;
+    kcalZahl = 0;
   }
-  fuell.setAttribute("stroke-dashoffset", UMFANG * (1 - (anteil ?? 0)));
+  fuell.style.width = `${((anteil ?? 0) * 100).toFixed(1)}%`;
   const start = performance.now();
-  const von = ringZahl;
-  const dauer = ohneBewegung() ? 1 : 1000;
-  const zahlFeld = $("ring-zahl");
+  const von = kcalZahl;
+  const dauer = ohneBewegung() ? 1 : 900;
+  const zahlFeld = $("kcal-zahl");
   (function schritt(jetzt) {
     const p = Math.min(1, (jetzt - start) / dauer);
     const e = 1 - (1 - p) ** 3;
     zahlFeld.textContent = zahl(Math.round(von + (kcal - von) * e));
     if (p < 1) requestAnimationFrame(schritt);
   })(start);
-  ringZahl = kcal;
+  kcalZahl = kcal;
 }
 
-// Kleine Kurve der letzten Wägungen für die Gewichtskachel.
-function miniKurve(gewichte) {
-  const liste = [...gewichte].reverse().slice(-6);
+// Mini-Kurve der Wägungen aus den letzten 8 Wochen (älteste zuerst), letzter Punkt in Tanne.
+function miniKurve(liste) {
   if (liste.length < 2) return "";
   const kgs = liste.map((g) => g.kg);
   const min = Math.min(...kgs);
   const max = Math.max(...kgs);
-  const punkte = liste.map((g, i) => [4 + (i / (liste.length - 1)) * 112, 30 - ((g.kg - min) / (max - min || 1)) * 26]);
-  return `<svg class="mini" viewBox="0 0 120 34" aria-hidden="true"><path d="${glatt(punkte)}"/></svg>`;
+  const punkte = liste.map((g, i) => [4 + (i / (liste.length - 1)) * 88, 6 + ((max - g.kg) / (max - min || 1)) * 32]);
+  const [lx, ly] = punkte.at(-1);
+  const linie = punkte.map((p) => p.map((v) => v.toFixed(1)).join(",")).join(" ");
+  return `<svg class="mini" viewBox="0 0 96 44" aria-hidden="true"><polyline points="${linie}"/><circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="3.5"/></svg>`;
 }
 
 function zeichneHeute(vonNull = false) {
@@ -249,12 +253,14 @@ function zeichneHeute(vonNull = false) {
   if (mehrere) $("tier-wechsel").setAttribute("aria-label", `${tier.name}, Tier wechseln`);
   else $("tier-wechsel").removeAttribute("aria-label");
   const art = { kater: "Kater", katze: "Katze" }[tier.geschlecht] ?? "";
-  $("kopf-gewicht").textContent = [art, sortiert[0] ? `${zahl(sortiert[0].kg, 2)} kg` : ""].filter(Boolean).join(" · ");
+  $("kopf-gewicht").textContent = sortiert[0]
+    ? `${zahl(sortiert[0].kg, 2)} kg` + (freigabe ? `, Ziel ${zahl(freigabe.zielgewichtKg, 2)} kg` : art ? ` · ${art}` : "")
+    : art;
 
   // Wiegetag: nur am heutigen Tag und nur, solange heute noch kein Gewicht eingetragen ist.
   const wiegen = tag === heute && istWiegetag(tier, heute) && !gewichte.some((g) => g.datum === heute);
   $("wiegetag-hinweis").hidden = !wiegen;
-  if (wiegen) $("wiegetag-hinweis-text").textContent = `⚖️ Heute ist Wiegetag für ${tier.name}. Am besten zur gewohnten Uhrzeit mit der gleichen Waage.`;
+  if (wiegen) $("wiegetag-hinweis-text").textContent = `Heute ist Wiegetag für ${tier.name}. Am besten zur gewohnten Uhrzeit mit der gleichen Waage.`;
   $("kopf-datum").textContent = new Date().toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "short" });
   $("tag-titel").textContent = tagTitel(gewaehlterTag);
   document.querySelector('[data-aktion="tag-vor"]').disabled = tag >= heute;
@@ -284,45 +290,30 @@ function zeichneHeute(vonNull = false) {
     )
     .join("");
 
-  // Ring: ohne Freigabe kein Ziel und kein Füllstand.
+  // Lineal: ohne Freigabe kein Ziel und kein Füllstand.
   const ring = ringWerte(summe.kcal, freigabe);
   const ca = summe.unsicher ? "ca. " : "";
-  zeichneRing(ring.anteil, Math.round(summe.kcal), ring.ueber, vonNull);
-  const zeile = (titel, wert) => `<div><span>${titel}</span><b>${wert}</b></div>`;
+  $("kcal-titel").textContent = tag === heute ? "Heute gefüttert" : "Gefüttert";
+  zeichneLineal(ring.anteil, Math.round(summe.kcal), ring.ueber, vonNull);
   if (freigabe) {
-    $("ring-unter").textContent = `${ca}von ${zahl(freigabe.kcalProTag)} kcal`;
-    $("ring-rechts").innerHTML =
-      zeile("Gefüttert", `${ca}${zahl(summe.kcal)} kcal`) +
-      zeile("Freigabe", `${zahl(freigabe.kcalProTag)} kcal`) +
-      (ring.darueber > 0 ? zeile("darüber", `${zahl(ring.darueber)} kcal`) : zeile("Noch offen", `${zahl(ring.offen)} kcal`));
+    $("kcal-von").textContent = `${ca}von ${zahl(freigabe.kcalProTag)} kcal`;
+    $("lineal-mitte").textContent = zahl(Math.round(freigabe.kcalProTag / 2));
+    $("lineal-ende").textContent = zahl(freigabe.kcalProTag);
+    let satz;
+    if (ring.darueber > 0) satz = `<b>${zahl(ring.darueber)} kcal</b> über der Tagesmenge vom Tierarzt.`;
+    else if (tag === heute) satz = `Noch <b>${zahl(ring.offen)} kcal</b> bis zur Tagesmenge vom Tierarzt.`;
+    else satz = `<b>${zahl(ring.offen)} kcal</b> unter der Tagesmenge vom Tierarzt.`;
+    $("kcal-text").innerHTML =
+      `<p class="kcal-rest">${satz}</p><p class="kcal-zeilen"><span>Menge <b>${zahl(summe.gramm)} g</b></span></p>`;
   } else {
-    $("ring-unter").textContent = `${ca}kcal · ${zahl(summe.gramm)} g Futter`;
-    $("ring-rechts").innerHTML =
-      zeile("Gefüttert", `${ca}${zahl(summe.kcal)} kcal`) +
-      zeile("Menge", `${zahl(summe.gramm)} g`) +
-      `<p>Ziel kommt mit der Freigabe vom Tierarzt.</p>` +
+    $("kcal-von").textContent = `${ca}kcal · ${zahl(summe.gramm)} g Futter`;
+    $("kcal-text").innerHTML =
+      `<p class="kcal-rest">Ziel kommt mit der Freigabe vom Tierarzt.</p>` +
       `<button type="button" class="knopf-text" data-aktion="warum-kein-ziel">Warum kein Ziel?</button>`;
   }
   $("summe-hinweis").hidden = !summe.unsicher;
 
-  // Kacheln: Gewicht und Leckerli
-  const trend = abnahmeProWoche(gewichte, GRENZEN.tageZuSchnell);
-  const gewichtKachel = sortiert[0]
-    ? `<div class="kachel"><span class="label">Gewicht</span>
-        <div class="wert">${zahl(sortiert[0].kg, 2)} <small>kg</small></div>
-        ${trend ? `<span class="leise">${trend.prozent >= 0 ? "−" : "+"}${zahl(Math.abs(trend.prozent), 1)} % pro Woche</span>` : ""}
-        ${miniKurve(sortiert)}</div>`
-    : `<div class="kachel"><span class="label">Gewicht</span><div class="wert">–</div><span class="leise">noch nicht gewogen</span></div>`;
-  const lk = leckerliKachel({ tag, heute, kcal: summe.kcal, leckerli, freigabe, warnungAktiv: liste.some((w) => w.id === "leckerli") });
-  const anteilText = lk.anteil === null ? (lk.amTagesende ? "wird am Tagesende bewertet" : "") : `${zahl(lk.anteil * 100)} % der Tages-kcal · Grenze 10 %`;
-  const breite = lk.anteil === null ? 0 : Math.min(100, (lk.anteil / GRENZEN.leckerliMax) * 100);
-  const leckerliKachelHtml = `<div class="kachel"><span class="label">Leckerli</span>
-      <div class="wert">${zahl(lk.kcal)} <small>kcal</small></div>
-      <span class="leise">${anteilText}</span>
-      ${lk.anteil === null ? "" : `<span class="balken sofort${lk.stufe === "achtung" ? " gefahr" : ""}"><i style="--w: ${breite.toFixed(1)}%"></i></span>`}</div>`;
-  $("heute-kacheln").innerHTML = gewichtKachel + leckerliKachelHtml;
-
-  // Mahlzeiten des Tages: zugeklappt nur die Zusammenfassung.
+  // Mahlzeiten als Protokoll: Uhrzeit, Futter, Gramm und kcal. Antippen ändert, Kreuz löscht.
   if (mahlzeiten.length === 0) {
     $("heute-mahlzeiten").innerHTML = '<p class="leer">Noch keine Mahlzeit an diesem Tag.</p>';
   } else {
@@ -331,20 +322,47 @@ function zeichneHeute(vonNull = false) {
       .map((m) => {
         const f = futter.get(m.futterId);
         const kcal = f ? `${zahl(kcalFuer(m.gramm, f.kcalPro100g))} kcal` : "kcal unbekannt";
-        return `<div class="zeile tippbar" data-aktion="mahlzeit-bearbeiten" data-id="${m.id}"><span class="icon" aria-hidden="true">${TYP_SYMBOL[f?.typ] ?? "🍽️"}</span>
-          <span class="name">${sicher(f ? f.name : "Gelöschte Sorte")}<small>${uhr(m)} · ${zahl(m.gramm)} g</small></span>
-          <span class="kcal">${kcal}</span>
-          <button type="button" class="knopf-loeschen" data-aktion="mahlzeit-loeschen" data-id="${m.id}" aria-label="Mahlzeit löschen">✕</button></div>`;
+        return `<li class="tippbar" data-aktion="mahlzeit-bearbeiten" data-id="${m.id}">
+          <span class="zeit">${uhr(m)}</span>
+          <span class="was">${sicher(f ? f.name : "Gelöschte Sorte")}<small>${f ? TYP_NAMEN[f.typ] : "Sorte fehlt"}</small></span>
+          <span class="wert">${zahl(m.gramm)} g<small>${kcal}</small></span>
+          <button type="button" class="knopf-loeschen" data-aktion="mahlzeit-loeschen" data-id="${m.id}" aria-label="Mahlzeit um ${uhr(m)} löschen">${SYMBOL.loeschen}</button></li>`;
       })
       .join("");
-    const anzahl = mahlzeiten.length === 1 ? "1 Eintrag" : `${mahlzeiten.length} Einträge`;
-    $("heute-mahlzeiten").innerHTML = aufklappKarte({
-      id: "mahlzeiten-heute",
-      klasse: "karte",
-      kopf: `<span class="zusammen"><span class="label">Mahlzeiten</span><br>${anzahl} · ${ca}${zahl(summe.kcal)} kcal · zuletzt ${uhr(mahlzeiten.at(-1))}</span>`,
-      inhalt: zeilen,
-    });
+    $("heute-mahlzeiten").innerHTML = `<ul class="protokoll">${zeilen}</ul>`;
   }
+
+  // Gewicht: Mini-Kurve der letzten 8 Wochen, Änderung zur Messung davor und Tempo (Regeln wie im Verlauf).
+  const letzte = sortiert[0];
+  let gewichtText;
+  if (!letzte) {
+    gewichtText = `<p>Noch nicht gewogen.<br><span class="leise">Am besten 1× pro Woche, immer zur gleichen Zeit.</span></p>`;
+  } else {
+    const r = tempoRueckmeldung({
+      gewichte: sortiert.slice(1),
+      freigaben: daten.freigaben.filter((f) => f.tierId === tier.id && f.datum <= tag),
+      kg: letzte.kg,
+      datum: letzte.datum,
+    });
+    const bewertung = { gut: ", sicher", langsam: ", langsamer als 0,5 %", "zu-schnell": ", schneller als 2 %", zunahme: "" };
+    const tempo = r
+      ? `${r.prozent < 0 ? "Zunahme " : ""}${zahl(Math.abs(r.prozent), 1)} % pro Woche${bewertung[r.bewertung] ?? ""}`
+      : `gewogen am ${datumText(letzte.datum)}`;
+    const kopf = r ? `Letzte Messung <b>${sicher(r.titel.split(" seit")[0])}</b>` : `<b>${zahl(letzte.kg, 2)} kg</b>`;
+    gewichtText = `<p>${kopf}<br><span class="leise">${tempo}</span></p>`;
+  }
+  $("heute-gewicht").innerHTML = `<section class="karte" aria-label="Gewicht in den letzten 8 Wochen">
+      <div class="mini-zeile">${miniKurve(achtWochen(gewichte, tag))}${gewichtText}</div></section>`;
+
+  // Leckerli: gleiche Basis wie die Leckerli-Warnung in warnungen().
+  const lk = leckerliKachel({ tag, heute, kcal: summe.kcal, leckerli, freigabe, warnungAktiv: liste.some((w) => w.id === "leckerli") });
+  const anteilText =
+    lk.anteil === null ? (lk.amTagesende ? "wird am Tagesende bewertet" : "") : `${zahl(lk.anteil * 100)} % der Tages-kcal · Grenze 10 %`;
+  const breite = lk.anteil === null ? 0 : Math.min(100, (lk.anteil / GRENZEN.leckerliMax) * 100);
+  $("heute-leckerli").innerHTML = `<section class="karte leckerli-zeile" aria-label="Leckerli">
+      <div class="oben"><span class="label">Leckerli</span><span class="wert">${zahl(lk.kcal)} <small class="leise">kcal</small></span></div>
+      ${anteilText ? `<span class="leise">${anteilText}</span>` : ""}
+      ${lk.anteil === null ? "" : `<span class="balken sofort${lk.stufe === "achtung" ? " gefahr" : ""}"><i style="--w: ${breite.toFixed(1)}%"></i></span>`}</section>`;
 }
 
 // ---------- Gewicht ----------
@@ -386,7 +404,7 @@ function zeichneGewicht() {
               : `<span class="marke">${g100 < 0 ? "−" : g100 > 0 ? "+" : "±"}${zahl(Math.abs(g100))} g</span>`; // neutral, siehe verlauf.js
           return `<div class="zeile"><span class="name"><b>${zahl(g.kg, 2)} kg</b><small>${datumText(g.datum)}${g.notiz ? " · " + sicher(g.notiz) : ""}</small></span>
             ${marke}
-            <button type="button" class="knopf-loeschen" data-aktion="gewicht-loeschen" data-id="${g.id}" aria-label="Gewicht löschen">✕</button></div>`;
+            <button type="button" class="knopf-loeschen" data-aktion="gewicht-loeschen" data-id="${g.id}" aria-label="Gewicht löschen">${SYMBOL.loeschen}</button></div>`;
         })
         .join("");
       const anzahl = monat.eintraege.length === 1 ? "1 Wägung" : `${monat.eintraege.length} Wägungen`;
@@ -451,7 +469,7 @@ function zeichneFreigabe() {
   $("praxis-anrufen").hidden = !link;
   if (link) {
     $("praxis-anrufen").href = link;
-    $("praxis-anrufen").textContent = `📞 ${tier.tierarzt.praxis ?? "Praxis"} anrufen`;
+    $("praxis-anrufen").innerHTML = `${SYMBOL.telefon}${sicher(tier.tierarzt.praxis ?? "Praxis")} anrufen`;
   }
 }
 
@@ -479,7 +497,7 @@ function zeichneTiere() {
         <span class="profil-text"><b>${sicher(t.name)}</b>
           <small>${sicher(zusammen || "Profil")}</small>
           ${fehlt ? "<small>Profil ergänzen: Alter, Körperbau, Tierarzt</small>" : ""}${aktiv}</span>
-        <span class="weiter" aria-hidden="true">›</span></button>`;
+        <span class="weiter" aria-hidden="true">${SYMBOL.weiter}</span></button>`;
     })
     .join("");
 }
@@ -616,6 +634,12 @@ $("form-profil").addEventListener("submit", (ereignis) => {
   zeigeToast(`${name} entfernt`);
 });
 
+function verlaufKopf() {
+  const erste = gewichteSortiert(daten.gewichte.filter((g) => g.tierId === tier.id)).at(-1);
+  const seit = erste ? ` · seit dem ${new Date(erste.datum + "T12:00").toLocaleDateString("de-DE")}` : "";
+  return `<div class="verlauf-kopf">${profilHtml(tier, "klein")}<div><h2>Verlauf</h2><p>${sicher(tier.name)}${seit}</p></div></div>`;
+}
+
 function zeichneVerlaufAnsicht() {
   $("verlauf-inhalt").innerHTML = zeichneVerlauf({
     gewichte: daten.gewichte.filter((g) => g.tierId === tier.id),
@@ -624,7 +648,7 @@ function zeichneVerlaufAnsicht() {
     futterNachId: futterNachId(daten),
     zeitraum,
     heute: tagSchluessel(new Date()),
-    kopf: `<div class="verlauf-kopf">${profilHtml(tier, "klein")}<h2>Verlauf</h2></div>`,
+    kopf: verlaufKopf(),
   });
 }
 
@@ -807,7 +831,7 @@ function futterMenue(gewaehlt) {
     })),
     wert: gewaehlt,
     extra: [
-      { text: "＋ Aus der Futterliste wählen", aktion: "liste-oeffnen" },
+      { text: "Aus der Futterliste wählen", aktion: "liste-oeffnen" },
       { text: "Strichcode scannen", aktion: "scanner-oeffnen" },
     ],
   });
@@ -838,7 +862,7 @@ function zeigeMahlzeitVorschau() {
     gramm && futter ? `= ${zahl(kcalFuer(gramm, futter.kcalPro100g))} kcal` : "";
 }
 
-// − / ＋ in 5-g-Schritten; eintippen bleibt möglich.
+// − / + in 5-g-Schritten; eintippen bleibt möglich.
 function grammSchritt(schritt) {
   const feld = $("form-mahlzeit").gramm;
   const jetzt = leseZahl(feld.value) ?? 0;
@@ -870,6 +894,13 @@ beimSpeichern("form-mahlzeit", "mahlzeit-fehler", (werte) => {
   sichern();
 });
 
+// Gewicht eintragen: große Zahl, ±10 g, sofortige Rückmeldung zum Tempo.
+// Das Feld bleibt leer (das letzte Gewicht steht nur als Platzhalter da), damit nie ungewogen gespeichert wird.
+// ±10 g startet bei leerem Feld vom letzten Gewicht.
+function eigeneGewichte() {
+  return daten.gewichte.filter((g) => g.tierId === tier.id);
+}
+
 function oeffneGewicht() {
   const form = $("form-gewicht");
   form.reset();
@@ -877,8 +908,43 @@ function oeffneGewicht() {
   zeigeFehler("gewicht-fehler", "");
   form.datum.value = tagSchluessel(new Date());
   form.datum.max = tagSchluessel(new Date());
+  const letzte = gewichteSortiert(eigeneGewichte())[0];
+  form.kg.placeholder = letzte ? zahl(letzte.kg, 2) : "0,00";
+  zeigeGewichtRueckmeldung();
   $("dialog-gewicht").showModal();
 }
+
+function zeigeGewichtRueckmeldung() {
+  const form = $("form-gewicht");
+  const feld = $("gewicht-rueckmeldung");
+  const kg = leseZahl(form.kg.value);
+  const r =
+    kg && kg >= 0.5 && kg <= 20 && form.datum.value
+      ? tempoRueckmeldung({
+          gewichte: eigeneGewichte(),
+          freigaben: daten.freigaben.filter((f) => f.tierId === tier.id),
+          kg,
+          datum: form.datum.value,
+        })
+      : null;
+  feld.hidden = !r;
+  if (!r) return;
+  const zeichen = { gut: SYMBOL.haken, "zu-schnell": "!", langsam: "!", zunahme: "!" }[r.bewertung] ?? "i";
+  feld.className = `rueckmeldung ${r.bewertung}`;
+  feld.innerHTML = `<span class="zeichen" aria-hidden="true">${zeichen}</span><span><b>${sicher(r.titel)}</b><span class="leise">${sicher(r.text)}</span></span>`;
+}
+
+function kgSchritt(schritt) {
+  const form = $("form-gewicht");
+  const letzte = gewichteSortiert(eigeneGewichte())[0];
+  const jetzt = leseZahl(form.kg.value) ?? letzte?.kg ?? null;
+  if (jetzt === null) return form.kg.focus();
+  const neu = Math.min(20, Math.max(0.5, Math.round((jetzt + schritt) * 100) / 100));
+  form.kg.value = zahl(neu, 2);
+  zeigeGewichtRueckmeldung();
+}
+
+$("form-gewicht").addEventListener("input", zeigeGewichtRueckmeldung);
 
 beimSpeichern("form-gewicht", "gewicht-fehler", (werte) => {
   const kg = leseZahl(werte.get("kg"));
@@ -1483,6 +1549,10 @@ document.addEventListener("click", (ereignis) => {
       return grammSchritt(-5);
     case "gramm-plus":
       return grammSchritt(5);
+    case "kg-minus":
+      return kgSchritt(-0.01);
+    case "kg-plus":
+      return kgSchritt(0.01);
     case "mahlzeit-loeschen":
       if (confirm("Diese Mahlzeit löschen?")) {
         daten.mahlzeiten = daten.mahlzeiten.filter((m) => m.id !== id);

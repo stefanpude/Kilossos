@@ -2,6 +2,7 @@
 // Der Wert steht in einem versteckten <input>, damit FormData und die Formular-Logik unverändert bleiben.
 // Gibt es nur eine Möglichkeit (und keine Zusatz-Aktion), wird der Wert fest angezeigt, ohne Menü.
 // Alle Knöpfe haben type="button" – sonst würde ein Klick das <form method="dialog"> abschicken.
+import { SYMBOL } from "./symbole.js";
 
 const sicher = (text) =>
   String(text).replace(/[&<>"']/g, (z) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[z]);
@@ -28,7 +29,7 @@ export function auswahlFeld({ name, optionen, wert, platzhalter = "Bitte wählen
     .join("");
   return `<div class="auswahl" data-auswahl="${sicher(name)}">
     ${feld}
-    <button type="button" class="auswahl-knopf" id="${knopfId}"${label} aria-haspopup="listbox" aria-expanded="false"><span class="auswahl-text">${gewaehlt ? anzeige(gewaehlt) : `<span class="platzhalter">${sicher(platzhalter)}</span>`}</span><span class="pfeil" aria-hidden="true">⌄</span></button>
+    <button type="button" class="auswahl-knopf" id="${knopfId}"${label} aria-haspopup="listbox" aria-expanded="false"><span class="auswahl-text">${gewaehlt ? anzeige(gewaehlt) : `<span class="platzhalter">${sicher(platzhalter)}</span>`}</span><span class="pfeil" aria-hidden="true">${SYMBOL.runter}</span></button>
     <ul class="auswahl-menue" role="listbox">${eintraege}</ul>
   </div>`;
 }

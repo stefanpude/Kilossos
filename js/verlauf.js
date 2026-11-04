@@ -1,5 +1,5 @@
-// Ansicht "Verlauf": Zeitraum-Umschalter, weiche Gewichtskurve, Kennzahlen und drei aufklappbare Karten
-// (Abnahme pro Woche, Futter pro Tag, Befunde vom Tierarzt) – alles als HTML-Text, ohne Zusatzpakete.
+// Ansicht "Verlauf": Eckdaten, Zeitraum-Umschalter, Gewichtskurve auf Millimeterpapier, Tempo pro Woche und
+// zwei aufklappbare Karten (Futter pro Tag, Befunde vom Tierarzt) – alles als HTML-Text, ohne Zusatzpakete.
 // gewichtDiagramm und kcalDiagramm sind die älteren Diagramme; sie bleiben unverändert für den PDF-Bericht.
 // Farben kommen aus styles.css (--reihe-1, --reihe-2, --akzent, --gut, --rand, --text-leise).
 
@@ -7,6 +7,7 @@ import { GRENZEN, gewichteSortiert, tagesSumme, leckerliKcal, tagSchluessel, akt
 import { zeitraumStart, wochenRaten, abnahmeZusammenfassung, futterTage, futterZusammenfassung, wochenGruppen } from "./zusammenfassung.js";
 import { aufklappKarte } from "./aufklappen.js";
 import { befundText } from "./daten.js";
+import { SYMBOL } from "./symbole.js";
 
 const B = 340; // Breite der Zeichenfläche (viewBox); das SVG skaliert auf die Bildschirmbreite
 const H = 190;
@@ -191,9 +192,9 @@ export function kcalDiagramm(mahlzeiten, futterNachId, freigaben) {
   );
 }
 
-// ---------- Neue Verlauf-Ansicht (ab 0.7.0) ----------
+// ---------- Verlauf-Ansicht „Wiegeprotokoll“ (ab 0.23.0, vorher weiche Kurve seit 0.7.0) ----------
 
-const TYP_SYMBOL = { nass: "🥫", trocken: "🥣", leckerli: "🍬" };
+const TYP_SYMBOL = { nass: SYMBOL.nass, trocken: SYMBOL.trocken, leckerli: SYMBOL.leckerli };
 const ZEITRAEUME = [
   ["1m", "1 Monat"],
   ["3m", "3 Monate"],
@@ -205,7 +206,7 @@ export function verlaufGewichte(gewichte, von) {
   return [...gewichteSortiert(gewichte)].reverse().filter((g) => !von || g.datum >= von);
 }
 
-// Weiche Linie durch alle Punkte (Catmull-Rom als kubische Bézierkurven).
+// Weiche Linie durch alle Punkte (Catmull-Rom als kubische Bézierkurven). Wird nicht mehr gezeichnet, bleibt für Erweiterungen.
 export function glatt(p) {
   let d = `M${p[0][0]},${p[0][1]}`;
   for (let i = 0; i < p.length - 1; i++) {
@@ -218,15 +219,18 @@ export function glatt(p) {
   return d;
 }
 
+// Gewichtskurve auf Millimeterpapier: gerade Linie von Wägung zu Wägung (wie von Hand eingetragen),
+// Ziel vom Tierarzt gestrichelt, Freigaben als senkrechte Marken, sicherer Bereich als blasse Fläche.
 // Gezeichnet werden die Wägungen ab "von"; der sichere Bereich rechnet aber vom Gewicht am Tag der ersten
 // Freigabe, das auch vor dem Zeitraum liegen kann – deshalb bekommt die Funktion immer alle Wägungen.
+// Der Name bleibt aus der Zeit der weichen Kurve, damit Aufrufer und Tests gleich bleiben.
 export function weicheKurve(gewichte, freigaben, von = null) {
   const alle = verlaufGewichte(gewichte, null);
   const liste = verlaufGewichte(gewichte, von);
   if (liste.length < 2) return "";
   const KB = 340;
-  const KH = 200;
-  const R = { links: 36, rechts: 12, oben: 14, unten: 24 };
+  const KH = 220;
+  const R = { links: 34, rechts: 40, oben: 14, unten: 24 };
   const kgs = liste.map((g) => g.kg);
   const yMin = Math.floor((Math.min(...kgs) - 0.15) * 10) / 10;
   const yMax = Math.ceil((Math.max(...kgs) + 0.15) * 10) / 10;
@@ -236,11 +240,8 @@ export function weicheKurve(gewichte, freigaben, von = null) {
   const y = skala(yMin, yMax, KH - R.unten, R.oben);
   const unten = KH - R.unten;
 
-  const gitter = schritte(yMin, yMax, 3)
-    .map(
-      (w) => `<line class="gitter" x1="${R.links}" x2="${KB - R.rechts}" y1="${y(w)}" y2="${y(w)}"/>
-      <text class="achse" x="${R.links - 6}" y="${y(w) + 3.5}" text-anchor="end">${zahl(w, 1)}</text>`
-    )
+  const achse = schritte(yMin, yMax, 4)
+    .map((w) => `<text class="achse" x="${R.links - 6}" y="${y(w) + 4}" text-anchor="end">${zahl(w, 1)}</text>`)
     .join("");
   const monate = [];
   const d = new Date(vonMs);
@@ -251,7 +252,8 @@ export function weicheKurve(gewichte, freigaben, von = null) {
   }
 
   // Sicherer Bereich wie im PDF-Diagramm: ab der ersten Freigabe 0,5–2 % pro Woche vom Gewicht an diesem Tag.
-  const erste = freigaben.length ? [...freigaben].sort((a, b) => a.datum.localeCompare(b.datum))[0] : null;
+  const sortiert = [...freigaben].sort((a, b) => a.datum.localeCompare(b.datum));
+  const erste = sortiert[0] ?? null;
   let band = "";
   if (erste && ms(erste.datum) < bisMs) {
     const startG = alle.filter((g) => g.datum <= erste.datum).at(-1) ?? alle[0];
@@ -264,53 +266,112 @@ export function weicheKurve(gewichte, freigaben, von = null) {
     const unterkante = zeiten.map((t) => `${x(t)},${y(kg(t, GRENZEN.abnahmeMax))}`).reverse();
     band = `<polygon class="band" points="${oben.concat(unterkante).join(" ")}"/>`;
   }
+
+  // Freigaben im Zeitraum als senkrechte Marken; Beschriftung versetzt, wenn zwei dicht beieinander liegen.
+  let letzteMarke = -Infinity;
+  let reihe = 0;
+  const marken = sortiert
+    .filter((f) => ms(f.datum) >= vonMs && ms(f.datum) <= bisMs)
+    .map((f) => {
+      const fx = Math.round(x(ms(f.datum)) * 10) / 10;
+      reihe = fx - letzteMarke < 64 ? 1 - reihe : 0;
+      letzteMarke = fx;
+      const rechtsBuendig = fx > KB - R.rechts - 50;
+      return `<line class="freigabe-marke" x1="${fx}" x2="${fx}" y1="${R.oben}" y2="${unten}"/>
+        <text class="freigabe-text" x="${rechtsBuendig ? fx - 4 : fx + 4}" y="${R.oben + 10 + reihe * 13}"${rechtsBuendig ? ' text-anchor="end"' : ""}>${zahl(f.kcalProTag)} kcal</text>`;
+    })
+    .join("");
+
   // Ziellinie nur mit Freigabe und nur, wenn das Ziel im sichtbaren Bereich liegt.
   const ziel = aktuelleFreigabe(freigaben)?.zielgewichtKg;
   const zielLinie =
     ziel && ziel >= yMin && ziel <= yMax
       ? `<line class="ziel" x1="${R.links}" x2="${KB - R.rechts}" y1="${y(ziel)}" y2="${y(ziel)}"/>
-         <text class="ziel-text" x="${R.links + 4}" y="${y(ziel) - 4}">Ziel ${zahl(ziel, 1)} kg</text>`
+         <text class="ziel-text" x="${R.links + 6}" y="${y(ziel) - 6}">Ziel ${zahl(ziel, 2)} kg</text>`
       : "";
 
   const punkte = liste.map((g) => [Math.round(x(ms(g.datum)) * 10) / 10, Math.round(y(g.kg) * 10) / 10]);
-  const pfad = glatt(punkte);
-  const flaeche = `${pfad} L${punkte.at(-1)[0]},${unten} L${punkte[0][0]},${unten} Z`;
+  const pfad = "M" + punkte.map((p) => p.join(",")).join(" L");
   const tips = liste.map((g, i) => [...punkte[i], `${kurzDatum(g.datum)}: ${zahl(g.kg, 2)} kg`]);
-  const letzter = punkte.at(-1);
-  return `<svg viewBox="0 0 ${KB} ${KH}" class="kurve" role="img" aria-label="Gewichtsverlauf in kg" data-punkte="${sicher(JSON.stringify(tips))}">
-    <defs><linearGradient id="kurve-verlauf" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" style="stop-color: var(--akzent); stop-opacity: 0.28"/>
-      <stop offset="1" style="stop-color: var(--akzent); stop-opacity: 0"/>
-    </linearGradient></defs>
-    ${gitter}${monate.join("")}${band}${zielLinie}
-    <path class="flaeche" d="${flaeche}" fill="url(#kurve-verlauf)"/>
+  const [lx, ly] = punkte.at(-1);
+  const endText = ly < R.oben + 16 ? ly + 18 : ly - 9;
+  return `<svg viewBox="0 0 ${KB} ${KH}" class="kurve" role="img" aria-label="Gewichtsverlauf von ${zahl(liste[0].kg, 2)} auf ${zahl(liste.at(-1).kg, 2)} kg" data-punkte="${sicher(JSON.stringify(tips))}">
+    ${band}${achse}${monate.join("")}
+    <line class="grundlinie" x1="${R.links}" x2="${KB - R.rechts}" y1="${unten}" y2="${unten}"/>
+    ${marken}${zielLinie}
     <path class="linie" d="${pfad}"/>
-    <circle class="punkt" cx="${letzter[0]}" cy="${letzter[1]}" r="5"/>
+    <circle class="punkt" cx="${lx}" cy="${ly}" r="4.5"/>
+    <text class="end-text" x="${Math.min(lx + 6, KB - 2)}" y="${endText}" text-anchor="${lx > KB - R.rechts - 4 ? "end" : "start"}">${zahl(liste.at(-1).kg, 2)}</text>
     <line class="hilfslinie" x1="0" x2="0" y1="${R.oben}" y2="${unten}" visibility="hidden"/>
     <circle class="punkt aktiv" cx="0" cy="0" r="6" visibility="hidden"/>
   </svg>`;
 }
 
-function kennzahlen(gewichte) {
-  const liste = [...gewichteSortiert(gewichte)].reverse();
+// Legende passend zu dem, was die Kurve gerade zeigt.
+function legende(freigaben, von, bis) {
+  const teile = ['<span><i></i>Gewicht</span>'];
+  if (freigaben.length) {
+    teile.push('<span><i class="ziel"></i>Ziel vom Tierarzt</span>');
+    if (freigaben.some((f) => (!von || f.datum >= von) && f.datum <= bis)) teile.push('<span><i class="freigabe"></i>Freigabe</span>');
+    teile.push('<span><i class="band"></i>sicher: 0,5 bis 2 % pro Woche</span>');
+  }
+  return `<p class="legende-zeile">${teile.join("")}</p>`;
+}
+
+// Eckdaten wie auf einer Gewichtskarte: Start, Jetzt und – mit Freigabe – wie weit es noch bis zum Ziel ist.
+function eckdaten(liste, freigaben) {
   const erste = liste[0];
   const letzte = liste.at(-1);
+  const ziel = aktuelleFreigabe(freigaben)?.zielgewichtKg;
   const wochen = (ms(letzte.datum) - ms(erste.datum)) / (7 * TAG_MS);
-  const prozent = ((erste.kg - letzte.kg) / erste.kg) * 100;
-  const proWoche = wochen > 0 ? (1 - (letzte.kg / erste.kg) ** (1 / wochen)) * 100 : 0;
-  const kachel = (titel, wert, zusatz) =>
-    `<div class="kachel"><span class="label">${titel}</span><strong>${wert}</strong><span class="leise">${zusatz}</span></div>`;
-  return `<div class="kacheln">
-    ${kachel("Start", `${zahl(erste.kg, 2)} kg`, kurzDatum(erste.datum))}
-    ${kachel("Jetzt", `${zahl(letzte.kg, 2)} kg`, kurzDatum(letzte.datum))}
-    ${kachel("Abgenommen", `${zahl((erste.kg - letzte.kg) * 1000)} g`, `${zahl(prozent, 1)} % in ${zahl(wochen)} Wochen`)}
-    ${kachel("Ø pro Woche", `${zahl(proWoche, 2)} %`, `sicher: ${zahl(GRENZEN.abnahmeMin, 1)}–${zahl(GRENZEN.abnahmeMax)} %`)}
-  </div>`;
+  const diff = erste.kg - letzte.kg;
+  const prozent = (diff / erste.kg) * 100;
+  const feld = (titel, wert, zusatz) => `<div><span class="label">${titel}</span><strong>${wert}</strong><small>${zusatz}</small></div>`;
+  const drittes = ziel
+    ? letzte.kg <= ziel
+      ? feld("Bis zum Ziel", "erreicht", `Ziel ${zahl(ziel, 2)} kg`)
+      : feld("Bis zum Ziel", `${zahl(letzte.kg - ziel, 2)} kg`, `Ziel ${zahl(ziel, 2)} kg`)
+    : feld(diff >= 0 ? "Abgenommen" : "Zugenommen", `${zahl(Math.abs(diff), 2)} kg`, `${zahl(Math.abs(prozent), 1)} %`);
+  return `<div class="eckdaten">
+    ${feld("Start", `${zahl(erste.kg, 2)} kg`, kurzDatum(erste.datum))}
+    ${feld("Jetzt", `${zahl(letzte.kg, 2)} kg`, kurzDatum(letzte.datum))}
+    ${drittes}
+  </div>
+  <p class="tipp">${diff >= 0 ? "Abgenommen" : "Zugenommen"}: ${zahl(Math.abs(diff), 2)} kg (${zahl(Math.abs(prozent), 1)} %) in ${zahl(wochen)} ${Math.round(wochen) === 1 ? "Woche" : "Wochen"}.</p>`;
 }
 
 const vorzeichen = (wert, stellen) => (wert > 0 ? "+" : wert < 0 ? "−" : "±") + zahl(Math.abs(wert), stellen);
 
-function abnahmeKarte(gewichte, freigaben, von) {
+// Tempo pro Woche: Säulen der letzten 12 Wochenraten im Band 0,5 bis 2 %. Farben wie die Bewertung in wochenRaten.
+function tempoDiagramm(raten) {
+  const liste = raten.slice(0, 12).reverse();
+  const TB = 300;
+  const TH = 90;
+  const breite = 268;
+  const oben = 6;
+  const unten = TH - 6;
+  const y = skala(-0.5, 2.6, unten, oben);
+  const klemm = (v) => Math.min(2.6, Math.max(-0.5, v));
+  const slot = breite / liste.length;
+  const saeulen = liste
+    .map((r, i) => {
+      const v = klemm(r.prozent);
+      const y0 = y(0);
+      const y1 = y(v);
+      const w = Math.min(14, slot * 0.5);
+      return `<rect class="saeule ${r.bewertung}" x="${(i * slot + (slot - w) / 2).toFixed(1)}" y="${Math.min(y0, y1).toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(1.5, Math.abs(y1 - y0)).toFixed(1)}" rx="1.5"/>`;
+    })
+    .join("");
+  return `<svg class="tempo" viewBox="0 0 ${TB} ${TH}" aria-hidden="true">
+    <rect class="band" x="0" y="${y(GRENZEN.abnahmeMax)}" width="${breite}" height="${y(GRENZEN.abnahmeMin) - y(GRENZEN.abnahmeMax)}"/>
+    <text class="achse" x="${TB}" y="${y(GRENZEN.abnahmeMax) + 4}" text-anchor="end">2 %</text>
+    <text class="achse" x="${TB}" y="${y(GRENZEN.abnahmeMin) + 4}" text-anchor="end">0,5 %</text>
+    <line class="grundlinie" x1="0" x2="${breite}" y1="${y(0)}" y2="${y(0)}"/>
+    ${saeulen}
+  </svg>`;
+}
+
+function tempoKarte(gewichte, freigaben, von) {
   const raten = wochenRaten(gewichte, freigaben).filter((r) => !von || r.datum >= von);
   if (raten.length === 0) return "";
   const z = abnahmeZusammenfassung(raten);
@@ -327,13 +388,21 @@ function abnahmeKarte(gewichte, freigaben, von) {
       </div>`;
     })
     .join("");
-  return aufklappKarte({
-    id: "abnahme",
-    klasse: "karte",
-    kopf: `<span class="zusammen"><span class="label">Abnahme pro Woche</span><br>Ø ${zahl(z.durchschnitt, 2)} % pro Woche${bereich}
-      <small>je Wägung, auf 7 Tage umgerechnet · sicher: ${zahl(GRENZEN.abnahmeMin, 1)}–${zahl(GRENZEN.abnahmeMax)} %</small></span>`,
-    inhalt: zeilen,
-  });
+  const erklaerung = freigaben.length
+    ? "Band: 0,5 bis 2 % pro Woche gelten als sicher. Je Wägung, auf 7 Tage umgerechnet."
+    : "Band: 0,5 bis 2 % pro Woche gelten als sicher. Bewertet wird erst ab der Freigabe vom Tierarzt; über 2 % ist immer markiert.";
+  return `<section class="karte" aria-labelledby="tempo-titel">
+    <h2 id="tempo-titel">Tempo pro Woche</h2>
+    <p>Ø ${zahl(z.durchschnitt, 2)} % pro Woche${bereich}</p>
+    ${tempoDiagramm(raten)}
+    <p class="tipp">${erklaerung}</p>
+    ${aufklappKarte({
+      id: "abnahme",
+      klasse: "tag-klapp",
+      kopf: `<span class="zusammen">Alle Wochen<small>${raten.length} ${raten.length === 1 ? "Wert" : "Werte"}, neueste zuerst</small></span>`,
+      inhalt: zeilen,
+    })}
+  </section>`;
 }
 
 function futterKarte(mahlzeiten, futterNachId, freigaben, von, heute) {
@@ -362,7 +431,7 @@ function futterKarte(mahlzeiten, futterNachId, freigaben, von, heute) {
               .map((m) => {
                 const f = futterNachId.get(m.futterId);
                 const uhr = new Date(m.zeitpunkt).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
-                return `<div class="zeile"><span class="icon" aria-hidden="true">${TYP_SYMBOL[f?.typ] ?? "🍽️"}</span>
+                return `<div class="zeile"><span class="icon" aria-hidden="true">${TYP_SYMBOL[f?.typ] ?? SYMBOL.unbekannt}</span>
                   <span class="name">${sicher(f ? f.name : "Gelöschte Sorte")}<small>${uhr} · ${zahl(m.gramm)} g</small></span>
                   <span class="kcal">${f ? zahl(kcalFuer(m.gramm, f.kcalPro100g)) : "?"}</span></div>`;
               })
@@ -380,8 +449,8 @@ function futterKarte(mahlzeiten, futterNachId, freigaben, von, heute) {
   return aufklappKarte({
     id: "futter-pro-tag",
     klasse: "karte",
-    kopf: `<span class="zusammen"><span class="label">Futter pro Tag</span><br>${kopf}
-      <small>${mitFreigabe ? "Balken voll = Freigabe; gelb = mehr als 10 % darüber" : "Balken voll = höchster Tag im Zeitraum"}</small></span>`,
+    kopf: `<span class="zusammen"><span class="karte-titel">Futter pro Tag</span><br>${kopf}
+      <small>${mitFreigabe ? "Balken voll = Freigabe; Bernstein = mehr als 10 % darüber" : "Balken voll = höchster Tag im Zeitraum"}</small></span>`,
     inhalt,
   });
 }
@@ -393,7 +462,7 @@ function befundKarte(freigaben) {
   const langDatum = (iso) => new Date(ms(iso)).toLocaleDateString("de-DE");
   const zeilen = sortiert
     .map(
-      (f) => `<div class="zeile"><span class="icon" aria-hidden="true">🩺</span>
+      (f) => `<div class="zeile"><span class="icon" aria-hidden="true">${SYMBOL.tierarzt}</span>
         <span class="name">${befundText(f) || "ohne BCS"}<small>${langDatum(f.datum)} · ${sicher(f.tierarzt)}<br>
           Ziel ${zahl(f.zielgewichtKg, 1)} kg · ${zahl(f.kcalProTag)} kcal pro Tag</small></span></div>`
     )
@@ -402,7 +471,7 @@ function befundKarte(freigaben) {
   return aufklappKarte({
     id: "befunde",
     klasse: "karte",
-    kopf: `<span class="zusammen"><span class="label">Befunde vom Tierarzt</span><br>${neueste}
+    kopf: `<span class="zusammen"><span class="karte-titel">Befunde vom Tierarzt</span><br>${neueste}
       <small>${sortiert.length} ${sortiert.length === 1 ? "Freigabe" : "Freigaben"} · neueste zuerst</small></span>`,
     inhalt: zeilen,
   });
@@ -413,9 +482,7 @@ export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, futterNachId, 
     return `${kopf}<p class="leer">Sobald mindestens zwei Gewichte eingetragen sind, erscheint hier der Verlauf.</p>`;
   }
   const von = zeitraumStart(zeitraum, heute);
-  const pos = ZEITRAEUME.findIndex(([wert]) => wert === zeitraum);
-  const umschalter = `<div class="umschalter" role="group" aria-label="Zeitraum" style="--pos: ${Math.max(0, pos)}">
-    <span class="gleiter" aria-hidden="true"></span>
+  const umschalter = `<div class="umschalter" role="group" aria-label="Zeitraum">
     ${ZEITRAEUME.map(([wert, text]) => `<button type="button" data-aktion="zeitraum" data-wert="${wert}" aria-pressed="${wert === zeitraum}">${text}</button>`).join("")}
   </div>`;
 
@@ -425,28 +492,28 @@ export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, futterNachId, 
   let aenderung = "";
   if (imZeitraum.length >= 2) {
     const diff = imZeitraum.at(-1).kg - imZeitraum[0].kg;
-    // Neutral: ob eine Abnahme gut ist, bewertet nur „Abnahme pro Woche“ (mit Freigabe, rot über 2 %).
+    // Neutral: ob eine Abnahme gut ist, bewertet nur „Tempo pro Woche“ (mit Freigabe, über 2 % immer markiert).
     aenderung = `<span class="marke">${vorzeichen(diff, 2)} kg</span>`;
   }
   const kurve =
     imZeitraum.length >= 2
-      ? `<div class="kurve-feld">${weicheKurve(gewichte, freigaben, von)}<div class="infoblase" id="infoblase" hidden></div></div>`
+      ? `<div class="papier"><div class="kurve-feld">${weicheKurve(gewichte, freigaben, von)}<div class="infoblase" id="infoblase" hidden></div></div></div>
+         ${legende(freigaben, von, aktuell.datum)}`
       : `<p class="leer">Im gewählten Zeitraum gibt es weniger als zwei Wägungen.</p>`;
-  const gewichtKarte = `<div class="karte">
+  const gewichtKarte = `<section class="karte" aria-label="Gewicht">
     <div class="diagramm-kopf">
       <div><span class="label">Gewicht</span><div class="wert">${zahl(aktuell.kg, 2)} <small>kg</small></div></div>
       ${aenderung}
     </div>
     ${kurve}
-    ${freigaben.length ? '<p class="leise">Grüne Fläche: sichere Abnahme von 0,5 bis 2 % pro Woche ab der ersten Freigabe.</p>' : ""}
-  </div>`;
+  </section>`;
 
   return (
     kopf +
+    (imZeitraum.length >= 2 ? eckdaten(imZeitraum, freigaben) : "") +
     umschalter +
     gewichtKarte +
-    (imZeitraum.length >= 2 ? kennzahlen(imZeitraum) : "") +
-    abnahmeKarte(gewichte, freigaben, von) +
+    tempoKarte(gewichte, freigaben, von) +
     (mahlzeiten.length ? futterKarte(mahlzeiten, futterNachId, freigaben, von, heute) : "") +
     befundKarte(freigaben) +
     `<p class="tipp">Tippe auf die Kurve, um Datum und Gewicht zu sehen. Alle Gewichte als Liste stehen unter „Gewicht“.</p>`

@@ -154,3 +154,55 @@ export function leckerliKachel({ tag, heute, kcal, leckerli, freigabe, warnungAk
   if (tag >= heute) return { kcal: leckerli, anteil: null, amTagesende: true, stufe };
   return { kcal: leckerli, anteil: kcal > 0 ? leckerli / kcal : null, amTagesende: false, stufe };
 }
+
+// ---------- Rückmeldung beim Gewicht eintragen (ab 0.23.0) ----------
+
+const prozentText = (wert) => Math.abs(wert).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const kgText = (wert) =>
+  (Math.round(wert * 100) === 0 ? "±" : wert > 0 ? "+" : "−") +
+  Math.abs(wert).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const kurzTag = (iso) => `${iso.slice(8, 10)}.${iso.slice(5, 7)}.`;
+
+// Vergleicht ein neues Gewicht mit der letzten Messung vor seinem Datum. Gleiche Regeln wie wochenRaten:
+// über 2 % pro Woche immer markiert, „sicher“ und „langsamer“ nur, wenn die letzte Messung nach der ersten
+// Freigabe liegt. Bewertet nur zur Information – gewarnt wird weiterhin erst über das Mittel von zwei Wochen.
+// bewertung: "gut" | "langsam" | "zunahme" | "zu-schnell" | "neutral". prozent: positiv = Abnahme.
+export function tempoRueckmeldung({ gewichte, freigaben, kg, datum }) {
+  if (!kg || !datum) return null;
+  const vorher = gewichteSortiert(gewichte).find((g) => g.datum < datum);
+  if (!vorher) return null;
+  const wochen = tageZwischen(vorher.datum, datum) / 7;
+  const diffKg = kg - vorher.kg;
+  const prozent = ((vorher.kg - kg) / vorher.kg / wochen) * 100;
+  const ersteFreigabe = [...freigaben].sort((a, b) => a.datum.localeCompare(b.datum))[0];
+  const nachFreigabe = Boolean(ersteFreigabe) && vorher.datum >= ersteFreigabe.datum;
+  const p = prozentText(prozent);
+  let bewertung = "neutral";
+  let text;
+  if (prozent > GRENZEN.abnahmeMax) {
+    bewertung = "zu-schnell";
+    text =
+      `${p} % pro Woche, schneller als 2 %. Eine einzelne Wägung schwankt; Kilossos warnt, wenn das Mittel über zwei Wochen ` +
+      "zu schnell ist. Nicht selbst die Menge ändern, bei Sorge mit dem Tierarzt sprechen.";
+  } else if (!nachFreigabe) {
+    text = `${prozent < 0 ? `Zunahme von ${p} %` : `${p} %`} pro Woche. Bewertet wird das Tempo erst mit einer Freigabe vom Tierarzt.`;
+  } else if (prozent >= GRENZEN.abnahmeMin) {
+    bewertung = "gut";
+    text = `${p} % pro Woche, im sicheren Bereich (0,5 bis 2 %).`;
+  } else if (prozent < 0) {
+    bewertung = "zunahme";
+    text = `Zunahme von ${p} % pro Woche. Eine einzelne Wägung schwankt; behalte den Verlauf im Blick.`;
+  } else {
+    bewertung = "langsam";
+    text =
+      `${p} % pro Woche, langsamer als 0,5 %. Eine einzelne Wägung schwankt; bleibt es vier Wochen so, ` +
+      "rät Kilossos, den Plan mit dem Tierarzt zu besprechen.";
+  }
+  return { seit: vorher.datum, diffKg, prozent, bewertung, titel: `${kgText(diffKg)} kg seit dem ${kurzTag(vorher.datum)}`, text };
+}
+
+// Wägungen der letzten 8 Wochen (56 Tage bis "heute"), älteste zuerst – für die Mini-Kurve auf „Heute“.
+export function achtWochen(gewichte, heute) {
+  const von = plusTage(heute, -56);
+  return [...gewichteSortiert(gewichte)].reverse().filter((g) => g.datum >= von && g.datum <= heute);
+}

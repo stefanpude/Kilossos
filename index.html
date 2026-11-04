@@ -2,14 +2,14 @@
 <html lang="de" data-theme="hell">
 <head>
   <meta charset="utf-8">
-  <meta name="theme-color" content="#fbf6f1" id="theme-farbe">
+  <meta name="theme-color" content="#f3f5f2" id="theme-farbe">
   <!-- Hell/Dunkel vor dem ersten Zeichnen setzen, damit nichts aufblitzt (gleiche Regel wie js/anzeige.js). -->
   <script>
     try {
       var w = localStorage.getItem("kilossos-anzeige");
       var d = w === "dunkel" || (w === "handy" && matchMedia("(prefers-color-scheme: dark)").matches);
       document.documentElement.dataset.theme = d ? "dunkel" : "hell";
-      if (d) document.getElementById("theme-farbe").content = "#1c1714";
+      if (d) document.getElementById("theme-farbe").content = "#131b1a";
     } catch (e) { document.documentElement.dataset.theme = "hell"; }
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -18,6 +18,8 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="preload" href="fonts/literata.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/atkinson-hyperlegible-next.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -68,16 +70,16 @@
         </div>
         <div class="tier-text tier-feld" id="tier-feld">
           <button type="button" class="tier-wechsel" id="tier-wechsel" data-aktion="tier-wahl" aria-haspopup="menu" aria-expanded="false">
-            <b><span id="tiername">Kito</span><span class="pfeil" id="tier-pfeil" aria-hidden="true" hidden> ⌄</span></b><small id="kopf-gewicht"></small>
+            <b><span id="tiername">Kito</span><span class="pfeil" id="tier-pfeil" aria-hidden="true" hidden> <svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 9.5l6 6 6-6"/></svg></span></b><small id="kopf-gewicht"></small>
           </button>
         </div>
         <div class="datum" id="kopf-datum"></div>
       </div>
 
       <div class="tagwahl">
-        <button class="knopf-rund" data-aktion="tag-zurueck" aria-label="Vorheriger Tag">‹</button>
+        <button class="knopf-rund" data-aktion="tag-zurueck" aria-label="Vorheriger Tag"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.5 6l-6 6 6 6"/></svg></button>
         <h2 id="tag-titel">Heute</h2>
-        <button class="knopf-rund" data-aktion="tag-vor" aria-label="Nächster Tag">›</button>
+        <button class="knopf-rund" data-aktion="tag-vor" aria-label="Nächster Tag"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9.5 6l6 6-6 6"/></svg></button>
       </div>
 
       <div class="warnung sicherung-hinweis" id="sicherung-hinweis" hidden>
@@ -92,24 +94,27 @@
 
       <ul class="warnungen" id="warnungen-liste"></ul>
 
-      <div class="karte">
-        <span class="label">Kalorien</span>
-        <div class="ring-zeile">
-          <div class="ring">
-            <svg width="130" height="130" viewBox="0 0 130 130" aria-hidden="true">
-              <circle class="bahn" cx="65" cy="65" r="54" fill="none" stroke-width="12"/>
-              <circle class="fuell" id="ring-fuell" cx="65" cy="65" r="54" fill="none" stroke-width="12"/>
-            </svg>
-            <div class="ring-mitte"><b id="ring-zahl">0</b><small id="ring-unter"></small></div>
-          </div>
-          <div class="zahlen" id="ring-rechts"></div>
+      <!-- Kalorien-Lineal (ab 0.23.0 statt Ring): ohne Freigabe kein Ziel und kein Füllstand. -->
+      <section class="karte" aria-labelledby="kcal-titel">
+        <h2 id="kcal-titel">Gefüttert</h2>
+        <div class="kcal-kopf"><span class="kcal-zahl" id="kcal-zahl">0</span><span class="von" id="kcal-von"></span></div>
+        <div class="lineal" id="lineal" aria-hidden="true" hidden>
+          <div class="bahn"><div class="fuell" id="lineal-fuell"></div></div>
+          <div class="striche"></div>
+          <div class="marken"><span>0</span><span id="lineal-mitte"></span><span id="lineal-ende"></span></div>
         </div>
+        <div id="kcal-text"></div>
         <p class="ca-hinweis" id="summe-hinweis" hidden>ca. – enthält Futter ohne genau abgelesenen kcal-Wert</p>
-        <button class="knopf-haupt" data-aktion="mahlzeit-neu">＋ Mahlzeit eintragen</button>
-      </div>
+      </section>
 
-      <div class="kacheln" id="heute-kacheln"></div>
-      <div id="heute-mahlzeiten"></div>
+      <section class="karte" aria-labelledby="mahlzeiten-titel">
+        <h2 id="mahlzeiten-titel">Mahlzeiten</h2>
+        <div id="heute-mahlzeiten"></div>
+        <button class="knopf-haupt" data-aktion="mahlzeit-neu">Mahlzeit eintragen</button>
+      </section>
+
+      <div id="heute-gewicht"></div>
+      <div id="heute-leckerli"></div>
 
       <!-- Notfall-Hinweis: immer sichtbar, bewusst ruhig gestaltet (Ideen-Tafel, 0.14.0). -->
       <p class="notfall-hinweis"><strong>Frisst deine Katze einen Tag oder länger gar nicht?</strong>
@@ -119,14 +124,14 @@
     <!-- Gewicht -->
     <section class="ansicht" data-ansicht="gewicht" hidden>
       <div class="karte summe">
-        <span class="label">Gewicht</span>
-        <div><span class="gross" id="gewicht-aktuell">–</span> kg</div>
+        <h2>Gewicht</h2>
+        <div class="gewicht-kopf"><span class="gross" id="gewicht-aktuell">–</span><span class="einheit">kg</span></div>
         <div class="leise" id="gewicht-aenderung">Noch kein Gewicht eingetragen.</div>
         <div class="leise" id="gewicht-trend" hidden></div>
       </div>
       <p class="tipp">Am besten 1× pro Woche wiegen: gleicher Wochentag, gleiche Uhrzeit, gleiche Waage.</p>
       <div class="karte" id="gewicht-monate"></div>
-      <button class="knopf-haupt" data-aktion="gewicht-neu">＋ Gewicht eintragen</button>
+      <button class="knopf-haupt" data-aktion="gewicht-neu">Gewicht eintragen</button>
     </section>
 
     <!-- Verlauf -->
@@ -137,7 +142,7 @@
     <!-- Übersicht für den Tierarzt (über "Mehr" erreichbar) -->
     <section class="ansicht" data-ansicht="bericht" hidden>
       <div class="bericht-werkzeuge">
-        <button class="knopf-zweit" data-ziel="mehr">‹ Zurück</button>
+        <button class="knopf-zweit" data-ziel="mehr"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.5 6l-6 6 6 6"/></svg>Zurück</button>
         <button class="knopf-haupt" data-aktion="bericht-drucken">Drucken / als PDF speichern</button>
         <p class="tipp">Im Druckfenster als Drucker „Als PDF speichern“ wählen.</p>
       </div>
@@ -148,7 +153,7 @@
     <section class="ansicht" data-ansicht="futter" hidden>
       <button class="knopf-haupt" data-aktion="liste-oeffnen">Aus der Futterliste wählen</button>
       <button class="knopf-zweit" data-aktion="scanner-oeffnen">Strichcode scannen</button>
-      <button class="knopf-zweit" data-aktion="futter-neu">＋ Eigene Sorte anlegen</button>
+      <button class="knopf-zweit" data-aktion="futter-neu">Eigene Sorte anlegen</button>
       <p class="tipp">Tippe auf eine Sorte, um sie zu ändern – zum Beispiel, um den genauen kcal-Wert von der Packung einzutragen.</p>
       <div class="karte" id="futter-gruppen"></div>
     </section>
@@ -157,7 +162,7 @@
     <section class="ansicht" data-ansicht="mehr" hidden>
       <h3 class="gruppe-titel">Tiere</h3>
       <div class="tiere-liste" id="tiere-liste"></div>
-      <button type="button" class="knopf-zweit" data-aktion="tier-neu">＋ Tier hinzufügen</button>
+      <button type="button" class="knopf-zweit" data-aktion="tier-neu">Tier hinzufügen</button>
 
       <h3 class="gruppe-titel" id="titel-tierarzt">Tierarzt</h3>
       <div class="karte">
@@ -237,16 +242,16 @@
         <p class="rechtslinks"><a href="datenschutz.html">Datenschutz</a> <a href="impressum.html">Impressum</a>
           <a href="nutzungsbedingungen.html">Nutzungsbedingungen</a></p>
       </div>
-      <p class="fuss" id="version">Version 0.22.1</p>
+      <p class="fuss" id="version">Version 0.23.0</p>
     </section>
   </main>
 
   <nav class="leiste" aria-label="Bereiche">
-    <button data-ziel="heute" aria-current="page"><span class="symbol" aria-hidden="true">🏠</span>Heute</button>
-    <button data-ziel="gewicht"><span class="symbol" aria-hidden="true">⚖️</span>Gewicht</button>
-    <button data-ziel="verlauf"><span class="symbol" aria-hidden="true">📈</span>Verlauf</button>
-    <button data-ziel="futter"><span class="symbol" aria-hidden="true">🥣</span>Futter</button>
-    <button data-ziel="mehr"><span class="symbol" aria-hidden="true">☰</span>Mehr</button>
+    <button data-ziel="heute" aria-current="page"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-5h-6v5H5a1 1 0 0 1-1-1z"/></svg>Heute</button>
+    <button data-ziel="gewicht"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8.5 11a3.5 3.5 0 0 1 7 0M12 11l1.6-2"/></svg>Gewicht</button>
+    <button data-ziel="verlauf"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 19h16M5 15l4-4 3 3 6-7"/></svg>Verlauf</button>
+    <button data-ziel="futter"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12h16a8 8 0 0 1-16 0zM9 8c0-1.5 1-2.5 1-4M13 8c0-1.5 1-2.5 1-4"/></svg>Futter</button>
+    <button data-ziel="mehr"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 7h14M5 12h14M5 17h14"/></svg>Mehr</button>
   </nav>
 
   <!-- Formular: Mahlzeit -->
@@ -259,9 +264,9 @@
       </label>
       <div class="feld"><span id="gramm-label">Menge in Gramm</span>
         <div class="gramm">
-          <button type="button" data-aktion="gramm-minus" aria-label="5 Gramm weniger">−</button>
+          <button type="button" data-aktion="gramm-minus" aria-label="5 Gramm weniger"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/></svg></button>
           <input name="gramm" inputmode="decimal" autocomplete="off" placeholder="0" aria-labelledby="gramm-label" required>
-          <button type="button" data-aktion="gramm-plus" aria-label="5 Gramm mehr">＋</button>
+          <button type="button" data-aktion="gramm-plus" aria-label="5 Gramm mehr"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg></button>
         </div>
       </div>
       <p class="vorschau" id="mahlzeit-vorschau"></p>
@@ -277,9 +282,17 @@
   <dialog id="dialog-gewicht">
     <form method="dialog" id="form-gewicht">
       <h2 id="gewicht-titel">Gewicht eintragen</h2>
-      <label>Gewicht in kg
-        <input name="kg" inputmode="decimal" autocomplete="off" placeholder="z. B. 9,32" required>
-      </label>
+      <div class="waage">
+        <button type="button" class="stufe" data-aktion="kg-minus" aria-label="10 Gramm weniger">−10 g</button>
+        <div class="waage-anzeige">
+          <input name="kg" class="waage-zahl" inputmode="decimal" autocomplete="off" placeholder="9,32" required
+            aria-label="Gewicht in kg" aria-describedby="waage-hilfe">
+          <span class="einheit" aria-hidden="true">kg</span>
+        </div>
+        <button type="button" class="stufe" data-aktion="kg-plus" aria-label="10 Gramm mehr">+10 g</button>
+      </div>
+      <p class="waage-hilfe" id="waage-hilfe">Gewicht eintippen, Knöpfe für feine Schritte</p>
+      <div class="rueckmeldung" id="gewicht-rueckmeldung" aria-live="polite" hidden></div>
       <label>Datum
         <input name="datum" type="date" required>
       </label>
