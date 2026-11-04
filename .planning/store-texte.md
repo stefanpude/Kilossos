@@ -48,7 +48,7 @@ _Nicht prüfbar ohne Bezahl-Werkzeuge: echtes Suchvolumen der Begriffe._
 >
 > **Was Kilossos macht**
 > • Futter in Gramm erfassen, Kalorien je Mahlzeit und Tag automatisch
-> • Futterliste mit 42 gängigen Sorten, jede mit Quelle; Strichcode der Packung scannen oder eigene Sorten anlegen
+> • Futterliste mit 49 gängigen Sorten, jede mit Quelle; Strichcode der Packung scannen oder eigene Sorten anlegen
 > • Leckerlis zählen mit, Hinweis ab 10 % der Tageskalorien
 > • Wöchentliches Wiegen mit Verlauf und Abnahme pro Woche in Prozent
 > • Keine Tierwaage? Erst dich allein wiegen, dann mit Katze auf dem Arm, Kilossos rechnet die Differenz aus (ungenauer als eine Tierwaage)
@@ -84,7 +84,7 @@ Jeder Screenshot: echtes App-Bild (Demo-Daten `/?demo`) mit einer kurzen Zeile d
 | 2 | Warnhinweis (zu schnelle Abnahme oder zu wenig Futter) | Warnt, bevor es gefährlich wird |
 | 3 | Gewichtsverlauf mit %/Woche | Langsam abnehmen: 0,5 bis 2 % pro Woche |
 | 4 | Freigabe vom Tierarzt | Dein Tierarzt legt das Ziel fest |
-| 5 | Futterliste mit Quelle oder Scanner | 42 Futtersorten mit Quelle, Strichcode scannen |
+| 5 | Futterliste mit Quelle oder Scanner | 49 Futtersorten mit Quelle, Strichcode scannen |
 | 6 | Tierarzt-Übersicht (PDF) | Übersicht für den Tierarzttermin |
 
 Die ersten 3 sieht man ohne Wischen, deshalb Sicherheit in 1 bis 3.

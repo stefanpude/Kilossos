@@ -201,3 +201,32 @@ Packungsgröße im Hinweis. Die Analysewerte auf der Fundstelle wurden mit der L
 
 **Kleinere Abweichungen ohne Folgen:** Royal Canin Satiety in Soße bei Fressnapf 2,2 % Fett und 1,3 % Faser (Liste 2,3 und 1,1);
 Whiskas 1+ bei Fressnapf 7,3 % Protein, 0,25 % Faser, 84,5 % Feuchte, 61 kcal je 85 g (Liste 7,5 / 0,35 / 84,8 / 60,4).
+
+# Kilossos-Futterliste, dritte Runde (Stand 04.11.2026, Version 0.29.0)
+
+7 neue Sorten, zusammen 49. Schwerpunkt Light- und Sterilised-Futter. Gleiche Prüfung und EAN-Regeln wie in Runde 2:
+jede Nummer von einer zweiten Quelle demselben Produkt zugeordnet (Suche nach der Nummer selbst), keine Hausnummern mit 2….
+
+| Sorte | Art | kcal/100 g | Status | NRC-Nachrechnung | EAN | Quelle | EAN bestätigt durch |
+|---|---|---|---|---|---|---|---|
+| Smilla Adult Light Geflügel (trocken) | trocken | 353,2 | Hersteller | 353 | 4062911031982 (1 kg), 4062911031999 (4 kg), 4062911035362 (10 kg) | zooplus.de („ME (FEDIAF, 2021) 3.532 kcal/kg“) | propet.sk, allegro.pl |
+| Real Nature Original Light Huhn & Lamm (Dose) | nass | 79 | geschätzt | 79 | – (nur Hausnummer) | fressnapf.de | – |
+| Perfect Fit Sterile 1+ mit Huhn (trocken) | trocken | 374 | Hersteller | 367 | 4008429160264 (750 g) | fressnapf.de (Brennwert in der Deklaration) | zoolini.ie, petsplace.nl |
+| Purina Pro Plan LiveClear Sterilised Adult Truthahn (trocken) | trocken | 377 | geschätzt | 377 | 7613287232564 (1,4 kg) | fressnapf.de | koelle-zoo.at, arukereso.hu |
+| Purina Pro Plan Sterilised Nutrisavour Huhn (Beutel) | nass | 94 | geschätzt | 94 | – (nur Hausnummer) | fressnapf.de | – |
+| Select Gold Sterilised Adult Geflügel & Reis (trocken) | trocken | 358 | geschätzt | 358 | 4047777236863 (300 g) | fressnapf.de | maxizoo.dk, biezen.nl |
+| Select Gold Adult Sterilised Geflügel (Beutel) | nass | 98 | geschätzt | 98 | – (nur Hausnummer) | fressnapf.de | – |
+
+**Nicht aufgenommen:**
+- Smilla Frischebeutel Adult Light: Die Händlerseite nennt keine Analytischen Bestandteile.
+- Feringa Adult Sterilised Geflügel: Die Seite zeigt zwei Rezepturen nebeneinander (alt 369, „NEU“ 379 kcal/100 g, andere Fett- und Aschewerte). Erst aufnehmen, wenn nur noch die neue im Handel ist.
+- Kitekat trocken, Whiskas Sterile nass, Felix Sterilised: wie in Runde 2 keine verlässliche Quelle gefunden.
+
+**Was auffällt:**
+- „Sterilised“ heißt nicht „wenig kcal“: Die beiden Sterilised-Beutel (Pro Plan 94, Select Gold 98 kcal/100 g) liegen
+  deutlich über üblichem Beutelfutter (≈ 70–85) und über Kitos Sheba (77). Das steht im Hinweis der Sorten.
+- Smilla Light ist die einzige neue Sorte mit veröffentlichtem kcal-Wert außer Perfect Fit; er stimmt genau mit der Nachrechnung überein.
+
+- Pro Plan LiveClear: Weder Fressnapf noch zooplus.com nennen kcal. Nur ein einzelner Shop (vivapets) schreibt 350 kcal/100 g; das reicht nicht als Herstellerwert, deshalb bleibt die Nachrechnung (377, „geschätzt“). Bei einem Packungsfoto gilt die Packung.
+
+**Jetzt 33 von 49 Sorten mit EAN.**
