@@ -1,4 +1,6 @@
-# kJ-Schutz und kcal-Rechner im Fenster „Eigene Sorte“ (geplant für 0.31.0)
+# kJ-Schutz und kcal-Rechner im Fenster „Eigene Sorte“ (geplant für 0.32.0)
+
+_Version verschoben am 04.11.2026: 0.31.0 wurde „Gewicht ändern“ (`.planning/gewicht-aendern.md`), dieser Bau wird 0.32.0 mit Cache v58._
 
 _Angelegt 04.11.2026 nach einem kurzen Brainstorming mit Stefan. Von Stefan freigegeben am 04.11.2026 („Ja, freigeben“).
 Als Nächstes: Skill `migration` für das neue Feld, dann Umsetzungsplan mit `superpowers:writing-plans`.
@@ -194,8 +196,8 @@ Auf „Heute“ und im Verlauf steht wie bisher „ca.“ vor den kcal, weil die
 
 ### D. Version
 
-0.31.0: `CACHE_NAME` in `sw.js` auf `kilossos-v57`, `#version` in `index.html`, Versionstest in `tests/wissen.test.js`
-(„Version 0.31.0: Cache v57 …“). Am einfachsten ohne neue Datei (Funktionen in `js/rechnen.js`); kommt doch eine neue
+0.32.0: `CACHE_NAME` in `sw.js` auf `kilossos-v58`, `#version` in `index.html`, Versionstest in `tests/wissen.test.js`
+(„Version 0.32.0: Cache v58 …“). Am einfachsten ohne neue Datei (Funktionen in `js/rechnen.js`); kommt doch eine neue
 JS-Datei dazu, gehört sie in `DATEIEN` in `sw.js`.
 
 ## Texte (endgültig, Zahlen und Einheit mit geschütztem Leerzeichen)
