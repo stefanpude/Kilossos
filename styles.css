@@ -340,8 +340,6 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .freigabe-tafel { display: grid; gap: 6px; }
 .freigabe-tafel .eckdaten { margin: 0; }
 .karte > h4.label { margin: 0; }
-/* Große Handy-Schrift: Werte dürfen umbrechen statt in die Nachbarspalte zu laufen. */
-.freigabe-tafel .eckdaten strong { white-space: normal; }
 .mehr-hinweis { margin: 6px 2px 0; }
 .zwei-spalten { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
@@ -512,7 +510,8 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .eckdaten > div { padding: 10px 0; min-width: 0; }
 .eckdaten > div + div { border-left: 1px solid var(--rand); padding-left: 12px; }
 .eckdaten .label { display: block; }
-.eckdaten strong { font-family: var(--serif); font-weight: 500; font-size: 1.375rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* Bei großer Handy-Schrift höchstens 6 % der Breite, damit „erreicht“ in die Spalte passt; normal bleibt 1.375rem. */
+.eckdaten strong { font-family: var(--serif); font-weight: 500; font-size: min(1.375rem, 6vw); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .eckdaten small { display: block; font-size: 0.8125rem; color: var(--text-leise); }
 .umschalter { display: flex; gap: 6px; }
 .umschalter button {
