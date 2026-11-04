@@ -27,6 +27,13 @@ Keine Test-Freigabe speichern.
 - [ ] Im Feld „Aus der Futterliste wählen“ antippen, eine Sorte übernehmen: Der Tipp verschwindet.
 - [ ] Inkognito-Tab schließen, damit verschwinden alle Testdaten.
 
+## C. Neu in 0.28.3 bis 0.28.5 (normaler Tab)
+
+- [ ] **Mehr** → „Über Kilossos“ zeigt Version 0.28.5.
+- [ ] **Heute**: Eine Mahlzeit antippen öffnet „Mahlzeit ändern“ wie vorher; nach „Speichern“ sieht alles aus wie vorher.
+- [ ] **Futter**: Eine eigene Sorte antippen öffnet „Sorte ändern“ wie vorher.
+- [ ] Freiwillig, 2 Minuten: TalkBack einschalten (Einstellungen → Bedienungshilfen → TalkBack). Auf eine Mahlzeit tippen: TalkBack liest Uhrzeit, Sorte, Menge und „ändern“. Doppeltippen öffnet das Blatt, TalkBack nennt dessen Titel. TalkBack danach wieder ausschalten.
+
 ## Was mir auffällt
 
 (Hier notieren, was komisch aussieht oder sich falsch anfühlt, am besten mit Screenshot.)
