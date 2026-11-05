@@ -13,7 +13,9 @@ import {
   leckerliKachel,
   tempoRueckmeldung,
   achtWochen,
+  gefuettertWerte,
 } from "../js/zusammenfassung.js";
+import { GRENZEN } from "../js/rechnen.js";
 
 const G = (datum, kg) => ({ id: datum, tierId: "k", datum, kg, notiz: "" });
 const gewichte = [G("2026-10-01", 9.32), G("2026-10-08", 9.25), G("2026-10-15", 9.0), G("2026-10-29", 8.95)];
@@ -208,4 +210,128 @@ test("achtWochen: Wägungen der letzten 56 Tage, älteste zuerst", () => {
 test("wochenRaten: genau 2,0 % pro Woche ist nicht „zu schnell“", () => {
   const raten = wochenRaten([G("2026-10-01", 10), G("2026-10-15", 9.6)], []);
   assert.notEqual(raten[0].bewertung, "zu-schnell");
+});
+
+// ---------- 0.38.0: „Gefüttert“ mit Mahlzeiten im Balken (Plan .planning/grafiken-auswahl.md, Stelle 1) ----------
+
+const SORTEN = new Map([
+  ["n", { id: "n", name: "Nass", typ: "nass", kcalPro100g: 100, kcalQuelle: "hersteller", notiz: "" }],
+  ["t", { id: "t", name: "Trocken", typ: "trocken", kcalPro100g: 400, kcalQuelle: "hersteller", notiz: "" }],
+  ["l", { id: "l", name: "Leckerli", typ: "leckerli", kcalPro100g: 300, kcalQuelle: "hersteller", notiz: "" }],
+]);
+const MZ = (futterId, gramm, uhr) => ({ id: futterId + uhr, tierId: "k", futterId, gramm, zeitpunkt: `2026-11-05T${uhr}:00` });
+// Nass in Gramm = kcal, dazu immer 25 g Trocken = 100 kcal.
+const tagMit = (kcal) => [MZ("n", kcal - 100, "08:00"), MZ("t", 25, "12:00")];
+const werte = (kcal, extra = {}) =>
+  gefuettertWerte({ mahlzeiten: tagMit(kcal), futterNachId: SORTEN, freigabe, tag: "2026-11-05", heute: "2026-11-05", ...extra });
+
+test("0.38.0: gefuettertWerte unter der Tagesmenge: „Noch 9 kcal“, keine Überdeckung, Marke am Ende", () => {
+  const w = werte(211);
+  assert.equal(w.kcal, 211);
+  assert.equal(w.gramm, 136);
+  assert.equal(w.unsicher, false);
+  assert.deepEqual(w.ziel.kachel, { wort: "Noch", kcal: 9, warnung: false });
+  assert.equal(w.ziel.ueberdeckung, "keine");
+  assert.equal(w.ziel.marke, 1);
+  assert.equal(w.ziel.soll, 220);
+});
+
+test("0.38.0: gefuettertWerte über der Tagesmenge: „Darüber“, Marke rückt nach links", () => {
+  const w = werte(230);
+  assert.deepEqual(w.ziel.kachel, { wort: "Darüber", kcal: 10, warnung: false });
+  assert.equal(w.ziel.ueberdeckung, "grau");
+  nahe(w.ziel.marke, 220 / 230);
+});
+
+test("0.38.0: gefuettertWerte: Bernstein erst über der Tagesmenge plus Spielraum aus GRENZEN", () => {
+  const grenze = Math.round((1 + GRENZEN.spielraum) * 220);
+  assert.equal(werte(grenze).ziel.ueberdeckung, "grau");
+  assert.equal(werte(grenze).ziel.kachel.warnung, false);
+  const drueber = werte(grenze + 1);
+  assert.equal(drueber.ziel.ueberdeckung, "bernstein");
+  assert.deepEqual(drueber.ziel.kachel, { wort: "Darüber", kcal: grenze + 1 - 220, warnung: true });
+});
+
+test("0.38.0: gefuettertWerte genau getroffen: „Noch 0 kcal“ (nie -0), vergangener Tag „Darunter 0 kcal“", () => {
+  const w = werte(220);
+  assert.deepEqual(w.ziel.kachel, { wort: "Noch", kcal: 0, warnung: false });
+  assert.ok(Object.is(w.ziel.kachel.kcal, 0));
+  assert.equal(w.ziel.ueberdeckung, "keine");
+  const gestern = werte(220, { heute: "2026-11-06" });
+  assert.deepEqual(gestern.ziel.kachel, { wort: "Darunter", kcal: 0, warnung: false });
+  assert.ok(Object.is(gestern.ziel.kachel.kcal, 0));
+  // Knapp darüber rundet auf 0: weder „-0“ noch „Darüber“.
+  const knapp = gefuettertWerte({ mahlzeiten: [MZ("n", 220.4, "08:00")], futterNachId: SORTEN, freigabe, tag: "2026-11-05", heute: "2026-11-05" });
+  assert.ok(Object.is(knapp.ziel.kachel.kcal, 0));
+  assert.equal(knapp.ziel.kachel.wort, "Noch");
+});
+
+test("0.38.0: gefuettertWerte vergangener Tag unter der Tagesmenge: „Darunter 70 kcal“", () => {
+  assert.deepEqual(werte(150, { heute: "2026-11-06" }).ziel.kachel, { wort: "Darunter", kcal: 70, warnung: false });
+  // Ein künftiger Tag (falsche Geräteuhr) zählt wie heute.
+  assert.equal(werte(150, { heute: "2026-11-04" }).ziel.kachel.wort, "Noch");
+});
+
+test("0.38.0: gefuettertWerte ohne Freigabe: kein Ziel, Arten trotzdem gefüllt", () => {
+  const w = werte(211, { freigabe: null });
+  assert.equal(w.ziel, null);
+  assert.deepEqual(w.arten, [
+    { typ: "nass", kcal: 111 },
+    { typ: "trocken", kcal: 100 },
+  ]);
+  assert.equal(w.kcal, 211);
+});
+
+test("0.38.0: gefuettertWerte Mahlzeit mit gelöschter Sorte: kein Stück, Gramm zählen, „ca.“", () => {
+  const w = gefuettertWerte({
+    mahlzeiten: [MZ("n", 100, "08:00"), MZ("weg", 40, "09:00")],
+    futterNachId: SORTEN,
+    freigabe,
+    tag: "2026-11-05",
+    heute: "2026-11-05",
+  });
+  assert.equal(w.stuecke.length, 1);
+  assert.deepEqual(w.stuecke[0], { typ: "nass", kcal: 100 });
+  assert.equal(w.gramm, 140);
+  assert.equal(w.kcal, 100);
+  assert.equal(w.unsicher, true);
+  assert.deepEqual(w.ziel.kachel, { wort: "Noch", kcal: 120, warnung: false });
+});
+
+test("0.38.0: gefuettertWerte Stücke in Mahlzeiten-Reihenfolge, Arten nass, trocken, leckerli", () => {
+  const w = gefuettertWerte({
+    mahlzeiten: [MZ("n", 89, "08:00"), MZ("t", 30, "12:00"), MZ("l", 1.5, "18:00")],
+    futterNachId: SORTEN,
+    freigabe,
+    tag: "2026-11-05",
+    heute: "2026-11-05",
+  });
+  assert.deepEqual(w.stuecke.map((s) => s.typ), ["nass", "trocken", "leckerli"]);
+  assert.deepEqual(w.arten, [
+    { typ: "nass", kcal: 89 },
+    { typ: "trocken", kcal: 120 },
+    { typ: "leckerli", kcal: 5 },
+  ]);
+  // Reihenfolge der Arten fest, auch wenn das Leckerli zuerst kam.
+  const frueh = gefuettertWerte({
+    mahlzeiten: [MZ("l", 1.5, "07:00"), MZ("n", 89, "08:00")],
+    futterNachId: SORTEN,
+    freigabe,
+    tag: "2026-11-05",
+    heute: "2026-11-05",
+  });
+  assert.deepEqual(frueh.stuecke.map((s) => s.typ), ["leckerli", "nass"]);
+  assert.deepEqual(frueh.arten.map((a) => a.typ), ["nass", "leckerli"]);
+  const nurNass = gefuettertWerte({ mahlzeiten: [MZ("n", 89, "08:00")], futterNachId: SORTEN, freigabe, tag: "2026-11-05", heute: "2026-11-05" });
+  assert.equal(nurNass.arten.length, 1);
+});
+
+test("0.38.0: gefuettertWerte ohne Mahlzeit mit Freigabe: „Noch 220 kcal“, keine Stücke, keine Arten", () => {
+  const w = gefuettertWerte({ mahlzeiten: [], futterNachId: SORTEN, freigabe, tag: "2026-11-05", heute: "2026-11-05" });
+  assert.equal(w.kcal, 0);
+  assert.equal(w.gramm, 0);
+  assert.deepEqual(w.stuecke, []);
+  assert.deepEqual(w.arten, []);
+  assert.deepEqual(w.ziel.kachel, { wort: "Noch", kcal: 220, warnung: false });
+  assert.equal(w.ziel.marke, 1);
 });

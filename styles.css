@@ -531,31 +531,41 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .balken.zu-schnell > i, .balken.gefahr > i { background: var(--gefahr); }
 .balken.neutral > i { background: var(--text-leise); }
 
-/* ---------- Heute: Kalorien-Lineal ---------- */
+/* ---------- Heute: Gefüttert (ab 0.38.0, Mischung kompakt) ---------- */
 .kcal-kopf { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; }
-.kcal-zahl { font-size: 2.5rem; font-weight: 500; line-height: 1; }
+.kcal-zahl { font-size: 3rem; font-weight: 500; line-height: 1; }
 .kcal-kopf .von { color: var(--text-leise); }
-.lineal { position: relative; height: 36px; margin: 8px 0 0; }
-.lineal[hidden] { display: none; }
-.lineal .bahn {
-  position: absolute; left: 0; right: 0; top: 0; height: 14px; background: var(--hintergrund);
-  border: 1px solid var(--rand-stark); border-radius: 3px; overflow: hidden;
+/* Balken: ein Stück je Mahlzeit, der Rest bis zur Tagesmenge blass, Marke bei der Tagesmenge */
+.gef-feld { position: relative; margin-top: 6px; padding: 4px 0; }
+.gef-bahn { position: relative; display: flex; gap: 2px; height: 14px; }
+.gef-st { display: block; min-width: 3px; border-radius: 3px; }
+.gef-st:first-child { border-top-left-radius: 7px; border-bottom-left-radius: 7px; }
+.gef-st:last-of-type { border-top-right-radius: 7px; border-bottom-right-radius: 7px; }
+.gef-chip.nass, .gef-st.nass { background: var(--akzent); }
+.gef-chip.trocken, .gef-st.trocken { background: color-mix(in srgb, var(--akzent) 50%, var(--flaeche)); }
+.gef-chip.leckerli, .gef-st.leckerli { background: repeating-linear-gradient(135deg, var(--akzent) 0 2px, var(--flaeche) 2px 4px); }
+.gef-st.rest { background: var(--flaeche-2); }
+/* Über der Tagesmenge: rechts der Marke überdeckt, bis zum Spielraum grau schraffiert, darüber Bernstein */
+.gef-drueber {
+  position: absolute; top: 0; bottom: 0; right: 0; border-radius: 0 7px 7px 0;
+  background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--text) 35%, transparent) 0 2px, transparent 2px 5px);
 }
-.lineal .fuell { height: 100%; width: 0; background: var(--gut); transition: width 0.9s var(--feder), background 0.3s; }
-.lineal .fuell.ueber { background: var(--warnung); }
-.lineal .striche {
-  position: absolute; left: 0; right: 0; top: 14px; height: 7px;
-  background: repeating-linear-gradient(90deg, var(--rand-stark) 0 1px, transparent 1px 10%);
-  border-right: 1px solid var(--rand-stark);
+.gef-drueber.stark { background: var(--warnung); opacity: 0.85; }
+.gef-marke { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--text); border-radius: 1px; }
+/* Legende je vorkommender Art */
+.gef-legende { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: 0.875rem; color: var(--text-leise); }
+.gef-chip { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+/* Zwei Kacheln, je eine Zeile: Wort links, Zahl rechts */
+.gef-kacheln { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+.gef-kachel {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 6px; min-width: 0; padding: 6px 10px;
+  background: var(--hintergrund); border: 1px solid var(--rand); border-radius: var(--rund-klein);
 }
-.lineal .marken {
-  position: absolute; left: 0; right: 0; top: 21px; display: flex; justify-content: space-between;
-  font-size: 0.75rem; color: var(--text-leise); font-variant-numeric: tabular-nums;
-}
+.gef-kachel strong { font-family: var(--serif); font-weight: 500; font-size: 1.25rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.gef-kachel.warn { background: var(--warnung-hell); border-color: var(--warnung); }
+.gef-kachel.warn strong { color: var(--warnung); }
 .kcal-rest { margin: 0; font-size: 0.9375rem; }
 .kcal-rest b { font-family: var(--serif); font-weight: 600; }
-.kcal-zeilen { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.875rem; color: var(--text-leise); }
-.kcal-zeilen b { color: var(--text); font-family: var(--serif); font-weight: 500; font-variant-numeric: tabular-nums; }
 .ca-hinweis { margin: 0; color: var(--text-leise); font-size: 0.8125rem; }
 .ca-hinweis[hidden] { display: none; }
 

@@ -55,7 +55,8 @@ import {
   findeNachEan,
 } from "./js/futterliste.js";
 import { kameraScanMoeglich, starteScanner } from "./js/scanner.js";
-import { ringWerte, leckerliKachel, monatsGruppen, tempoRueckmeldung, achtWochen } from "./js/zusammenfassung.js";
+import { leckerliKachel, monatsGruppen, tempoRueckmeldung, achtWochen, gefuettertWerte } from "./js/zusammenfassung.js";
+import { gefuettertHtml } from "./js/heute-grafiken.js";
 import { SYMBOL } from "./js/symbole.js";
 import { leseAnzeige, merkeAnzeige, aufgeloest } from "./js/anzeige.js";
 import { aufklappKarte, merkeZustand, zustandVon, zustandVergessen, aufklappenAnmelden } from "./js/aufklappen.js";
@@ -384,20 +385,10 @@ function profilHtml(einTier, groesse) {
 
 let kcalZahl = 0;
 
-// Füllt das Lineal auf "anteil" (0–1; null = ohne Freigabe: kein Lineal) und zählt die Zahl hoch.
+// Zählt die große kcal-Zahl auf „Gefüttert“ hoch (bei „weniger Bewegung“ sofort).
 // vonNull: beim Wechsel auf „Heute“ und beim Tageswechsel von 0 an, sonst vom alten Wert aus.
-function zeichneLineal(anteil, kcal, ueber, vonNull) {
-  const fuell = $("lineal-fuell");
-  $("lineal").hidden = anteil === null;
-  fuell.classList.toggle("ueber", ueber);
-  if (vonNull) {
-    fuell.style.transition = "none";
-    fuell.style.width = "0";
-    fuell.getBoundingClientRect();
-    fuell.style.transition = "";
-    kcalZahl = 0;
-  }
-  fuell.style.width = `${((anteil ?? 0) * 100).toFixed(1)}%`;
+function zaehleKcal(kcal, vonNull) {
+  if (vonNull) kcalZahl = 0;
   const start = performance.now();
   const von = kcalZahl;
   const dauer = ohneBewegung() ? 1 : 900;
@@ -503,28 +494,16 @@ function zeichneHeute(vonNull = false) {
     )
     .join("");
 
-  // Lineal: ohne Freigabe kein Ziel und kein Füllstand.
-  const ring = ringWerte(summe.kcal, freigabe);
-  const ca = summe.unsicher ? "ca. " : "";
+  // Gefüttert (ab 0.38.0): Mahlzeiten als Stücke im Balken; ohne Freigabe kein Ziel und kein Balken.
+  const gefuettert = gefuettertWerte({ mahlzeiten, futterNachId: futter, freigabe, tag, heute });
+  const ca = gefuettert.unsicher ? "ca. " : "";
   $("kcal-titel").textContent = tag === heute ? "Heute gefüttert" : "Gefüttert";
-  zeichneLineal(ring.anteil, Math.round(summe.kcal), ring.ueber, vonNull);
-  if (freigabe) {
-    $("kcal-von").textContent = `${ca}von ${zahl(freigabe.kcalProTag)} kcal`;
-    $("lineal-mitte").textContent = zahl(Math.round(freigabe.kcalProTag / 2));
-    $("lineal-ende").textContent = zahl(freigabe.kcalProTag);
-    let satz;
-    if (ring.darueber > 0) satz = `<b>${zahl(ring.darueber)} kcal</b> über der Tagesmenge vom Tierarzt.`;
-    else if (tag === heute) satz = `Noch <b>${zahl(ring.offen)} kcal</b> bis zur Tagesmenge vom Tierarzt.`;
-    else satz = `<b>${zahl(ring.offen)} kcal</b> unter der Tagesmenge vom Tierarzt.`;
-    $("kcal-text").innerHTML =
-      `<p class="kcal-rest">${satz}</p><p class="kcal-zeilen"><span>Menge <b>${zahl(summe.gramm)} g</b></span></p>`;
-  } else {
-    $("kcal-von").textContent = `${ca}kcal · ${zahl(summe.gramm)} g Futter`;
-    $("kcal-text").innerHTML =
-      `<p class="kcal-rest">Ziel kommt mit der Freigabe vom Tierarzt.</p>` +
-      `<button type="button" class="knopf-text" data-aktion="warum-kein-ziel">Warum kein Ziel?</button>`;
-  }
-  $("summe-hinweis").hidden = !summe.unsicher;
+  zaehleKcal(Math.round(gefuettert.kcal), vonNull);
+  $("kcal-von").textContent = gefuettert.ziel
+    ? `${ca}von ${zahl(gefuettert.ziel.soll)} kcal vom Tierarzt`
+    : `${ca}kcal · ${zahl(gefuettert.gramm)} g Futter`;
+  $("kcal-text").innerHTML = gefuettertHtml(gefuettert);
+  $("summe-hinweis").hidden = !gefuettert.unsicher;
 
   // Mahlzeiten als Protokoll: Uhrzeit, Futter, Gramm und kcal. Antippen ändert, Kreuz löscht.
   if (mahlzeiten.length === 0) {

@@ -2,7 +2,7 @@
 // Reine Funktionen ohne Bildschirm und Speicher – dadurch automatisch testbar (tests/zusammenfassung.test.js).
 // Die Grenzen selbst kommen unverändert aus rechnen.js; hier wird nichts neu bewertet, nur zusammengefasst.
 
-import { GRENZEN, gewichteSortiert, tagesSumme, tagSchluessel, aktuelleFreigabe, leckerliKcal } from "./rechnen.js";
+import { GRENZEN, gewichteSortiert, tagesSumme, tagSchluessel, aktuelleFreigabe, leckerliKcal, kcalFuer } from "./rechnen.js";
 
 const TAG_MS = 86400000;
 const datumVon = (iso) => {
@@ -145,6 +145,44 @@ export function ringWerte(kcal, freigabe) {
     darueber: Math.max(0, kcal - soll),
     ueber: kcal > (1 + GRENZEN.spielraum) * soll,
   };
+}
+
+// Feste Reihenfolge der Futterarten in der Legende von „Gefüttert“.
+const ARTEN = ["nass", "trocken", "leckerli"];
+
+// Werte für die Karte „Gefüttert“ (ab 0.38.0): Stücke im Balken, Legende je Art, Marke, Überdeckung und erste Kachel.
+// mahlzeiten: die des Tages, nach Uhrzeit sortiert (wie mahlzeitenAm). Mahlzeiten ohne Sorte (gelöscht) ergeben kein
+// Stück; ihre Gramm zählen über tagesSumme trotzdem mit, und „unsicher“ bleibt wahr. Ohne Freigabe kein Ziel (null).
+// Sorten ohne bekannte Art (fremde Sicherungen) zählen als Nassfutter, damit ihr Stück nicht aus der Legende fällt.
+export function gefuettertWerte({ mahlzeiten, futterNachId, freigabe, tag, heute }) {
+  const summe = tagesSumme(mahlzeiten, futterNachId);
+  const stuecke = [];
+  for (const m of mahlzeiten) {
+    const futter = futterNachId.get(m.futterId);
+    if (!futter) continue;
+    stuecke.push({ typ: ARTEN.includes(futter.typ) ? futter.typ : "nass", kcal: kcalFuer(m.gramm, futter.kcalPro100g) });
+  }
+  const arten = ARTEN.filter((typ) => stuecke.some((s) => s.typ === typ)).map((typ) => ({
+    typ,
+    kcal: Math.round(stuecke.filter((s) => s.typ === typ).reduce((a, s) => a + s.kcal, 0)),
+  }));
+  let ziel = null;
+  if (freigabe) {
+    const soll = freigabe.kcalProTag;
+    const d = Math.round(summe.kcal - soll);
+    let ueberdeckung = "keine";
+    let kachel;
+    if (d > 0) {
+      const warnung = ringWerte(summe.kcal, freigabe).ueber;
+      ueberdeckung = warnung ? "bernstein" : "grau";
+      kachel = { wort: "Darüber", kcal: d, warnung };
+    } else {
+      // Math.abs macht aus Math.round(-0,4) = -0 eine echte 0 (sonst „-0 kcal“).
+      kachel = { wort: tag >= heute ? "Noch" : "Darunter", kcal: Math.abs(d), warnung: false };
+    }
+    ziel = { soll, marke: soll / Math.max(soll, summe.kcal), ueberdeckung, kachel };
+  }
+  return { kcal: summe.kcal, gramm: summe.gramm, unsicher: summe.unsicher, stuecke, arten, ziel };
 }
 
 // Gleiche Basis wie die Leckerli-Warnung in warnungen(); die Farbe kommt nur von der Warnung selbst.

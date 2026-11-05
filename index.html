@@ -147,17 +147,13 @@
 
       <ul class="warnungen" id="warnungen-liste"></ul>
 
-      <!-- Kalorien-Lineal (ab 0.23.0 statt Ring): ohne Freigabe kein Ziel und kein Füllstand. -->
+      <!-- Gefüttert (ab 0.38.0): Balken mit einem Stück je Mahlzeit, Legende und Kacheln aus js/heute-grafiken.js.
+           Ohne Freigabe kein Ziel und kein Balken. -->
       <section class="karte" aria-labelledby="kcal-titel">
         <h2 id="kcal-titel">Gefüttert</h2>
         <div class="kcal-kopf"><span class="kcal-zahl" id="kcal-zahl">0</span><span class="von" id="kcal-von"></span></div>
-        <div class="lineal" id="lineal" aria-hidden="true" hidden>
-          <div class="bahn"><div class="fuell" id="lineal-fuell"></div></div>
-          <div class="striche"></div>
-          <div class="marken"><span>0</span><span id="lineal-mitte"></span><span id="lineal-ende"></span></div>
-        </div>
         <div id="kcal-text"></div>
-        <p class="ca-hinweis" id="summe-hinweis" hidden>ca. – enthält Futter ohne genau abgelesenen kcal-Wert</p>
+        <p class="ca-hinweis" id="summe-hinweis" hidden>ca. = enthält Futter ohne genauen kcal-Wert</p>
       </section>
 
       <section class="karte" aria-labelledby="mahlzeiten-titel">
@@ -345,7 +341,7 @@
           <span data-symbol="dokument"></span><span class="text">Nutzungsbedingungen</span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.37.0</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.38.0</span>
         </div>
       </div>
     </section>
