@@ -80,6 +80,15 @@ test("aktuelleFreigabe nimmt die neueste", () => {
   assert.equal(aktuelleFreigabe([neu, alt], "2026-11-01"), null);
 });
 
+// Seit 0.34.0: Zwei Freigaben am selben Tag (nur aus alten Daten möglich) – die spätere Eintragung ist die Korrektur.
+test("aktuelleFreigabe: bei gleichem Datum gilt die zuletzt eingetragene", () => {
+  const erste = { id: "a", datum: "2026-11-13", kcalProTag: 230 };
+  const zweite = { id: "b", datum: "2026-11-13", kcalProTag: 210 };
+  assert.equal(aktuelleFreigabe([erste, zweite]), zweite);
+  assert.equal(aktuelleFreigabe([erste, zweite], "2026-11-13"), zweite);
+  assert.equal(aktuelleFreigabe([{ id: "c", datum: "2026-11-20" }, erste, zweite]).id, "c");
+});
+
 // ---------- Warnungen ----------
 
 const freigabe = { datum: "2026-11-03", zielgewichtKg: 7.2, kcalProTag: 245 };

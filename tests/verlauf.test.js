@@ -109,6 +109,25 @@ test("zeichneVerlauf: Karte „Befunde vom Tierarzt“ nur mit Freigaben, mit BC
   assert.ok(mit.indexOf("15.10.") < mit.indexOf("8.10."));
 });
 
+// Seit 0.34.0 gilt bei zwei Freigaben am selben Tag (alte Daten) die zuletzt eingetragene; die Karte muss dieselbe
+// als „neueste“ zeigen wie Tafel und Rechnung (Review-Fund).
+test("zeichneVerlauf: Befunde-Karte zeigt bei gleichem Datum die zuletzt eingetragene als neueste", () => {
+  const html = zeichneVerlauf({
+    gewichte,
+    mahlzeiten: [],
+    freigaben: [{ ...freigabe, id: "a", datum: "2026-10-13", bcs: 8 }, { ...freigabe, id: "b", datum: "2026-10-13", bcs: 7 }],
+    futterNachId: new Map(),
+    zeitraum: "alles",
+    heute: "2026-10-20",
+    kopf: "",
+  });
+  const kopf = html.match(/Befunde vom Tierarzt<\/span><br>\s*([^<]*)/)[1].trim();
+  assert.equal(kopf, "BCS 7 von 9");
+  const liste = html.slice(html.indexOf('id="ak-befunde"'));
+  assert.ok(liste.includes("BCS 8 von 9"));
+  assert.ok(liste.indexOf("BCS 7 von 9") < liste.indexOf("BCS 8 von 9"));
+});
+
 test("zeichneVerlauf: Vorher/Nachher-Karte steht ganz am Ende, hinter den Befunden (0.29.4)", () => {
   const html = zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [freigabe], futterNachId: new Map(), zeitraum: "3m", heute: "2026-10-20", kopf: "", fotos: "<section id=\"fotos-test\"></section>" });
   const tempo = html.indexOf("Tempo pro Woche");

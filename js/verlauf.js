@@ -527,9 +527,13 @@ function futterKarte(mahlzeiten, futterNachId, freigaben, von, heute) {
 }
 
 // Alle Freigaben, neueste zuerst – unabhängig vom Zeitraum, damit der Verlauf von BCS und MCS sichtbar bleibt.
+// Bei gleichem Datum (alte Daten) die zuletzt eingetragene zuerst, wie in aktuelleFreigabe (seit 0.34.0).
 function befundKarte(freigaben) {
   if (freigaben.length === 0) return "";
-  const sortiert = [...freigaben].sort((a, b) => b.datum.localeCompare(a.datum));
+  const sortiert = freigaben
+    .map((f, stelle) => ({ f, stelle }))
+    .sort((a, b) => b.f.datum.localeCompare(a.f.datum) || b.stelle - a.stelle)
+    .map(({ f }) => f);
   const langDatum = (iso) => new Date(ms(iso)).toLocaleDateString("de-DE");
   const zeilen = sortiert
     .map(

@@ -398,6 +398,15 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 /* Freigabe-Tafel: nutzt .eckdaten aus dem Verlauf */
 .freigabe-tafel { display: grid; gap: 6px; }
 .freigabe-tafel .eckdaten { margin: 0; }
+/* Seit 0.34.0 ist die Tafel ein Knopf „ändern“: gleiches Bild wie vorher (Eckdaten, darunter die Zeile mit 6 px Abstand),
+   nur antippbar. Fokus-Rahmen nach innen, damit die Karte ihn nicht abschneidet. */
+.freigabe-knopf {
+  display: grid; gap: 6px; width: 100%; min-height: 48px; margin: 0; padding: 0;
+  background: none; border: 0; border-radius: var(--rund-klein); color: var(--text); text-align: left;
+  position: relative; /* Halt für den versteckten Vorlese-Zusatz */
+}
+.freigabe-knopf:focus-visible { outline-offset: -3px; }
+.freigabe-knopf > .leise { display: block; }
 .karte > h4.label { margin: 0; }
 .mehr-hinweis { margin: 6px 2px 0; }
 .speicher-belegt { display: grid; gap: 6px; }
@@ -610,8 +619,8 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .eckdaten {
   display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--rand); border-bottom: 1px solid var(--rand);
 }
-.eckdaten > div { padding: 10px 0; min-width: 0; }
-.eckdaten > div + div { border-left: 1px solid var(--rand); padding-left: 12px; }
+.eckdaten > * { padding: 10px 0; min-width: 0; }
+.eckdaten > * + * { border-left: 1px solid var(--rand); padding-left: 12px; }
 .eckdaten .label { display: block; }
 /* Bei großer Handy-Schrift höchstens 6 % der Breite, damit „erreicht“ in die Spalte passt; normal bleibt 1.375rem. */
 .eckdaten strong { font-family: var(--serif); font-weight: 500; font-size: min(1.375rem, 6vw); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }

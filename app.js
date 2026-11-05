@@ -16,6 +16,8 @@ import {
   ersteDaten,
   waegungAendern,
   analyseGueltig,
+  befundText,
+  bcsGueltig,
 } from "./js/daten.js";
 import {
   leseZahl,
@@ -62,6 +64,17 @@ import { alterText, telefonLink, telefonGueltig, istWiegetag, WOCHENTAGE, HALTUN
 import { aktivesTier, leseAktivesTier, merkeAktivesTier, neuesTier, eintraegeVon, tierEntfernen } from "./js/tiere.js";
 import { wischenAnmelden } from "./js/wischen.js";
 import { datumText, freigabeTafel } from "./js/mehr.js";
+import {
+  freigabeAendern,
+  fruehereFreigaben,
+  freigabeKurz,
+  loeschFrage,
+  ersetzenFrage,
+  speicherPlan,
+  HINWEIS_AENDERN,
+  TEXT_GLEICHER_TAG_NICHT_GESPEICHERT,
+  TEXT_DATUM_PRUEFEN,
+} from "./js/freigaben.js";
 import { fotoImZeitraum, fotoAngebot, istFotoTag, vorherNachher } from "./js/fotos.js";
 import { belegteZeichen, speicherAnzeige } from "./js/speicher.js";
 import { sicherungPruefen, einleseFrage } from "./js/sicherung.js";
@@ -645,16 +658,40 @@ function freigabeVonTier(stichtag) {
   return aktuelleFreigabe(daten.freigaben.filter((f) => f.tierId === tier.id), stichtag);
 }
 
+function eigeneFreigaben() {
+  return daten.freigaben.filter((f) => f.tierId === tier.id);
+}
+
+// Tafel mit der geltenden Freigabe; antippen = ändern (seit 0.34.0). Ein Knopf darf nur span enthalten,
+// deshalb Eckdaten und Zeile als span (Aussehen wie vorher, siehe styles.css „Freigabe-Tafel“).
+// Darunter „Frühere Freigaben (n)“: jede Zeile ein Knopf „ändern“, auch ältere sollen korrigierbar sein.
 function zeichneFreigabe() {
   const freigabe = freigabeVonTier();
   $("titel-tierarzt").textContent = daten.tiere.length > 1 ? `Tierarzt · ${tier.name}` : "Tierarzt";
   const tafel = freigabeTafel(freigabe);
   $("freigabe-tafel").innerHTML = tafel
-    ? `<div class="eckdaten">${tafel.felder
-        .map((f) => `<div><span class="label">${sicher(f.titel)}</span><strong>${sicher(f.wert)}</strong></div>`)
-        .join("")}</div>
-      <p class="leise">${[tafel.zeile, tafel.befund, tafel.notiz].filter(Boolean).map(sicher).join(" · ")}</p>`
+    ? `<button type="button" class="freigabe-knopf tippbar" data-aktion="freigabe-bearbeiten" data-id="${sicher(freigabe.id)}">
+        <span class="eckdaten">${tafel.felder
+          .map((f) => `<span><span class="label">${sicher(f.titel)}</span><strong>${sicher(f.wert)}</strong></span>`)
+          .join("")}</span>
+        <span class="leise">${[tafel.zeile, tafel.befund, tafel.notiz].filter(Boolean).map(sicher).join(" · ")}</span>
+        <span class="nur-vorlesen">, ändern</span></button>`
     : '<p class="leise">Noch keine Freigabe eingetragen.</p>';
+  const frueher = fruehereFreigaben(eigeneFreigaben());
+  $("freigaben-frueher").innerHTML = frueher.length
+    ? aufklappKarte({
+        id: "freigaben-frueher",
+        klasse: "tag-klapp",
+        kopf: `<span class="zusammen">Frühere Freigaben (${frueher.length})</span>`,
+        inhalt: frueher
+          .map((f) => {
+            const unten = [f.tierarzt, freigabeKurz(f), befundText(f)].filter(Boolean).map(sicher).join(" · ");
+            return `<div class="zeile"><button type="button" class="waegung-knopf freigabe-zeile tippbar" data-aktion="freigabe-bearbeiten" data-id="${sicher(f.id)}">
+              <span class="name"><b>${datumText(f.datum)}</b><small>${unten}</small></span><span class="nur-vorlesen">, ändern</span></button></div>`;
+          })
+          .join(""),
+      })
+    : "";
   const link = telefonLink(tier.tierarzt?.telefon);
   $("praxis-anrufen").hidden = !link;
   if (link) {
@@ -1573,30 +1610,46 @@ $("dialog-foto").addEventListener("close", () => {
 const BCS_GRUPPE = (bcs) => (bcs <= 3 ? "zu dünn" : bcs <= 5 ? "ideal" : bcs === 6 ? "etwas zu schwer" : "übergewichtig");
 const BCS_OPTIONEN = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((bcs) => ({ wert: String(bcs), text: String(bcs), zusatz: BCS_GRUPPE(bcs) }));
 
-function oeffneFreigabe() {
+// Ohne Freigabe: neu eintragen. Mit Freigabe: einen Fehler beim Eintragen korrigieren oder sie löschen (seit 0.34.0,
+// Entwurf .planning/freigabe-aendern.md). Ein neuer Plan des Tierarztes kommt weiter als neue Freigabe dazu.
+let bearbeiteteFreigabe = null;
+
+function oeffneFreigabe(freigabe = null) {
+  bearbeiteteFreigabe = freigabe;
   const form = $("form-freigabe");
   form.reset();
-  $("freigabe-titel").textContent = `Freigabe für ${tier.name}`;
+  $("freigabe-titel").textContent = freigabe ? `Freigabe für ${tier.name} ändern` : `Freigabe für ${tier.name}`;
+  $("freigabe-hinweis-aendern").textContent = HINWEIS_AENDERN;
+  $("freigabe-hinweis-aendern").hidden = !freigabe;
+  $("freigabe-loeschen").hidden = !freigabe;
   zeigeFehler("freigabe-fehler", "");
-  form.datum.value = tagSchluessel(new Date());
-  form.datum.max = tagSchluessel(new Date());
-  form.tierarzt.value = tier.tierarzt?.praxis ?? "";
+  const heute = tagSchluessel(new Date());
+  form.datum.max = heute;
+  form.datum.value = freigabe?.datum ?? heute;
+  // Beim Ändern die Praxis aus der Freigabe, nicht aus dem Tierprofil (die Praxis kann inzwischen gewechselt haben).
+  form.tierarzt.value = freigabe ? freigabe.tierarzt ?? "" : tier.tierarzt?.praxis ?? "";
+  if (freigabe) {
+    form.ziel.value = String(freigabe.zielgewichtKg).replace(".", ",");
+    form.kcal.value = String(freigabe.kcalProTag).replace(".", ",");
+    form.notiz.value = freigabe.notiz ?? "";
+  }
   $("freigabe-bcs").innerHTML = auswahlFeld({
     name: "bcs",
     beschriftung: "label-bcs",
     optionen: [{ wert: "", text: "Keine Angabe" }, ...BCS_OPTIONEN],
-    wert: "",
+    wert: freigabe && bcsGueltig(freigabe.bcs) ? String(freigabe.bcs) : "",
   });
   $("freigabe-mcs").innerHTML = auswahlFeld({
     name: "mcs",
     beschriftung: "label-mcs",
     optionen: [{ wert: "", text: "Keine Angabe" }, ...Object.entries(MCS).map(([wert, text]) => ({ wert, text }))],
-    wert: "",
+    wert: freigabe && Object.hasOwn(MCS, freigabe.mcs ?? "") ? freigabe.mcs : "",
   });
   $("dialog-freigabe").showModal();
 }
 
-// Eine neue Freigabe ersetzt die alte nicht, sondern kommt dazu – so bleibt der Verlauf für den Tierarzt erhalten.
+// Reihenfolge wie im Entwurf: Werte, Datum (gleicher Tag), 60-%-Rückfrage, „welche Freigabe gilt“, Ersetzen am
+// selben Tag. Geändert wird erst nach allen Rückfragen, ein Abbruch lässt also nichts halb geändert zurück.
 beimSpeichern("form-freigabe", "freigabe-fehler", (werte) => {
   const ziel = leseZahl(werte.get("ziel"));
   const kcal = leseZahl(werte.get("kcal"));
@@ -1604,8 +1657,23 @@ beimSpeichern("form-freigabe", "freigabe-fehler", (werte) => {
   if (!ziel || ziel < 1 || ziel > 15) return "Bitte ein Zielgewicht zwischen 1 und 15 kg eingeben.";
   if (!kcal || kcal < 50 || kcal > 600) return "Bitte eine Tagesmenge zwischen 50 und 600 kcal eingeben.";
   if (!tierarzt) return "Bitte Tierarzt oder Praxis eintragen.";
+  const datum = werte.get("datum");
+  const alt = bearbeiteteFreigabe;
+  // Was passiert, entscheidet speicherPlan (js/freigaben.js, mit Tests); hier nur noch fragen und ausführen.
+  const plan = speicherPlan({
+    freigaben: daten.freigaben,
+    tierId: tier.id,
+    alt,
+    datum,
+    zielgewichtKg: ziel,
+    kcalProTag: kcal,
+    heute: tagSchluessel(new Date()),
+  });
+  if (plan.fehler) return plan.fehler;
   const grenze = Math.round(harteUntergrenze(ziel));
+  const wertGeaendert = !alt || ziel !== alt.zielgewichtKg || kcal !== alt.kcalProTag;
   if (
+    wertGeaendert &&
     kcal < grenze &&
     !confirm(
       `${zahl(kcal)} kcal liegen unter ${grenze} kcal (60 % des Ruhebedarfs beim Zielgewicht). ` +
@@ -1613,19 +1681,47 @@ beimSpeichern("form-freigabe", "freigabe-fehler", (werte) => {
     )
   )
     return "Bitte die Tagesmenge mit dem Tierarzt klären.";
-  daten.freigaben.push({
-    id: neueId(),
-    tierId: tier.id,
-    datum: werte.get("datum"),
+  const neu = {
+    datum,
     zielgewichtKg: ziel,
     kcalProTag: kcal,
     tierarzt,
-    notiz: werte.get("notiz").trim(),
+    notiz: werte.get("notiz"),
     // BCS und MCS sind freiwillig: ohne Angabe fehlen die Felder ganz, wie in Freigaben vor 0.12.0.
-    ...(werte.get("bcs") ? { bcs: Number(werte.get("bcs")) } : {}),
-    ...(werte.get("mcs") ? { mcs: werte.get("mcs") } : {}),
-  });
+    bcs: werte.get("bcs") ? Number(werte.get("bcs")) : undefined,
+    mcs: werte.get("mcs") || undefined,
+  };
+  if (plan.frage && !confirm(plan.frage)) return TEXT_DATUM_PRUEFEN;
+  if (plan.ersetzen && !confirm(ersetzenFrage(plan.ueberschrieben))) return TEXT_GLEICHER_TAG_NICHT_GESPEICHERT;
+  if (plan.ueberschrieben) {
+    freigabeAendern(plan.ueberschrieben, neu);
+  } else {
+    const freigabe = { id: neueId(), tierId: tier.id };
+    freigabeAendern(freigabe, neu);
+    daten.freigaben.push(freigabe);
+  }
   sichern();
+});
+
+// Löschen nur im Fenster „Freigabe ändern“, mit Rückfrage, die sagt, welche Freigabe danach gilt.
+$("form-freigabe").addEventListener("submit", (ereignis) => {
+  if (ereignis.submitter?.value !== "loeschen" || !bearbeiteteFreigabe) return;
+  const weg = bearbeiteteFreigabe;
+  if (!confirm(loeschFrage(eigeneFreigaben(), weg, tier.name, tagSchluessel(new Date())))) {
+    ereignis.preventDefault();
+    return;
+  }
+  daten.freigaben = daten.freigaben.filter((f) => f !== weg);
+  // Der Knopf der gelöschten Freigabe ist weg: Fokus auf die Tafel, ohne Freigabe auf „Freigabe eintragen“.
+  oeffner = eigeneFreigaben().length ? { aktion: "freigabe-bearbeiten" } : { aktion: "freigabe-neu" };
+  if (sichern()) zeigeToast("✓ Freigabe gelöscht");
+});
+
+// Wie bei Gewicht und Besonderer Tag: Nach dem Schließen gilt das Fenster wieder als „neu eintragen“.
+// Nur, wenn es wirklich zu ist: Der Browser kann „close“ verspätet schicken (gesehen bei verstecktem Fenster), dann
+// wäre das Fenster schon für eine andere Freigabe offen und würde still wie „neu eintragen“ speichern.
+$("dialog-freigabe").addEventListener("close", () => {
+  if (!$("dialog-freigabe").open) bearbeiteteFreigabe = null;
 });
 
 let bearbeitetesFutter = null;
@@ -2596,6 +2692,10 @@ document.addEventListener("click", (ereignis) => {
       return uebernehmeAusListe(id);
     case "freigabe-neu":
       return oeffneFreigabe();
+    case "freigabe-bearbeiten": {
+      const freigabe = eigeneFreigaben().find((f) => f.id === id);
+      return freigabe ? oeffneFreigabe(freigabe) : undefined;
+    }
     case "zeitraum": {
       // Die Markierung startet an der alten Stelle und gleitet zur neuen (die Ansicht wird neu gezeichnet).
       const altePos = ziel.closest(".umschalter").style.getPropertyValue("--pos");

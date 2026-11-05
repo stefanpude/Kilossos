@@ -268,8 +268,11 @@ export function leckerliKcal(mahlzeiten, futterNachId) {
 }
 
 // Die neueste Freigabe – mit "stichtag" ("JJJJ-MM-TT") die, die an diesem Tag galt.
+// Bei gleichem Datum die zuletzt eingetragene (spätere Stelle in der Liste), seit 0.34.0; vorher galt die erste.
 export function aktuelleFreigabe(freigaben, stichtag = "9999-12-31") {
-  return [...freigaben].filter((f) => f.datum <= stichtag).sort((a, b) => b.datum.localeCompare(a.datum))[0] ?? null;
+  let beste = null;
+  for (const f of freigaben) if (f.datum <= stichtag && (!beste || f.datum >= beste.datum)) beste = f;
+  return beste;
 }
 
 // Gewichte, die an einem Tag schon bekannt waren – für den Blick auf vergangene Tage.

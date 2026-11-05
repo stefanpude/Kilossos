@@ -1,7 +1,10 @@
 # Freigabe ändern und löschen (Version 0.34.0)
 
-Stand: 05.11.2026. Status: **Entwurf**, vom Prüfer gelesen (frischer Agent, Fragen eingearbeitet), wartet auf
-Stefans Freigabe.
+Stand: 05.11.2026. Status: **gebaut als 0.34.0** (Stefan: „Passt, bauen“). Umsetzungsplan
+`.planning/freigabe-aendern-umsetzung.md`. Review durch frischen Agenten: 0 kritisch, 1 wichtig (Speicher-Entscheidung
+jetzt als `speicherPlan` in `js/freigaben.js` mit Tests), dazu die Befunde-Karte an die neue Gleich-Tag-Regel angepasst.
+Beim Bau geändert: Schließen-Signal setzt den Ändern-Modus nur bei wirklich geschlossenem Fenster zurück; Text bei zwei
+alten Freigaben am selben Tag (siehe unten); Zeilen unter „Frühere Freigaben“ mit dem Wortlaut der Rückfragen.
 
 ## Warum
 
@@ -48,7 +51,7 @@ Ziel: Fehler in Freigaben lassen sich korrigieren und Freigaben löschen, ohne d
   „ändern“, wie seit 0.31.0 die Wägungen. Ohne Freigabe bleibt der Text „Noch keine Freigabe eingetragen.“ und ist
   kein Knopf.
 - Gibt es ältere Freigaben, steht unter der Tafel eine aufklappbare Zeile „Frühere Freigaben (n)“, zugeklappt. Darin
-  je Freigabe eine Zeile, neueste zuerst: Datum, Praxis, „Ziel x,xx kg · y kcal pro Tag“ und, falls vorhanden, der
+  je Freigabe eine Zeile, neueste zuerst: Datum, Praxis, „Ziel x,xx kg, y kcal“ (wie in den Rückfragen) und, falls vorhanden, der
   Befund (BCS, MCS). Jede Zeile ist ein Knopf „ändern“. Bei nur einer Freigabe gibt es die Zeile nicht.
 - Der Knopf „Freigabe eintragen“ bleibt, wie er ist.
 
@@ -99,8 +102,9 @@ Ziel: Fehler in Freigaben lassen sich korrigieren und Freigaben löschen, ohne d
   Array) statt der ersten. Claude: Die spätere ist fast immer die Korrektur. Wer sie sehen will, findet beide unter
   „Frühere Freigaben“ und kann eine löschen.
 - An so einem Tag mit zwei alten Freigaben gehen Ändern (auch bei unverändertem Datum) und Neu-Eintragen nicht, nur
-  Löschen. Fehlertext: „An diesem Tag gibt es zwei Freigaben. Bitte lösche zuerst die falsche unter „Frühere
-  Freigaben“.“ Claude: Sonst könnte man die frühere der beiden ändern, während still die spätere weiter gilt (erstes
+  Löschen. Fehlertext: „An diesem Tag gibt es zwei Freigaben. Bitte prüf beide und lösche zuerst die falsche.“
+  (Beim Bau geändert: Der erste Wortlaut schickte nur zu „Frühere Freigaben“; ist die falsche die auf der Tafel, hätte
+  man dort die richtige gelöscht.) Claude: Sonst könnte man die frühere der beiden ändern, während still die spätere weiter gilt (erstes
   Anti-Ziel). Der Fall ist selten, Löschen reicht als Ausweg. Ausnahme (Claude, beim Planen): Bekommt eine der beiden
   beim Ändern ein Datum, an dem keine andere Freigabe steht, ist das erlaubt; damit ist der doppelte Tag aufgelöst, und
   die Rückfrage „welche Freigabe gilt“ greift wie sonst auch.

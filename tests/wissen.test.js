@@ -173,10 +173,11 @@ test("Willkommensseite verspricht nichts, was die App nicht halten kann (Stefan,
   assert.doesNotMatch(html, /ohne Fettleber-Risiko|für jede Sorte/);
 });
 
-test("Version 0.33.0: Cache v60 mit js/besondere-tage.js, Versionszeile unter „Mehr“", () => {
+test("Version 0.34.0: Cache v61 mit js/freigaben.js, Versionszeile unter „Mehr“", () => {
   const sw = lies("sw.js");
-  assert.match(sw, /const CACHE_NAME = "kilossos-v60";/);
+  assert.match(sw, /const CACHE_NAME = "kilossos-v61";/);
   assert.match(sw, /"js\/wissen\.js",/);
   assert.match(sw, /"js\/besondere-tage\.js",/);
-  assert.match(lies("index.html"), /id="version">Version 0\.33\.0</);
+  assert.match(sw, /"js\/freigaben\.js",/);
+  assert.match(lies("index.html"), /id="version">Version 0\.34\.0</);
 });

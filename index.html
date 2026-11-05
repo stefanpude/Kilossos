@@ -233,6 +233,7 @@
       <div class="karte">
         <h4 class="label">Freigabe vom Tierarzt</h4>
         <div class="freigabe-tafel" id="freigabe-tafel"></div>
+        <div id="freigaben-frueher"></div>
         <p class="tipp">Zielgewicht und Tagesmenge legt nur der Tierarzt fest. Ohne Freigabe zeichnet Kilossos nur auf und warnt, schlägt aber keine Mengen vor.</p>
         <button class="knopf-haupt" data-aktion="freigabe-neu">Freigabe eintragen</button>
       </div>
@@ -344,7 +345,7 @@
           <span data-symbol="dokument"></span><span class="text">Nutzungsbedingungen</span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.33.0</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.34.0</span>
         </div>
       </div>
     </section>
@@ -565,6 +566,8 @@
     <form method="dialog" id="form-freigabe">
       <h2 id="freigabe-titel">Freigabe vom Tierarzt</h2>
       <p class="tipp">Bitte genau die Werte eintragen, die der Tierarzt festgelegt hat.</p>
+      <!-- Nur beim Ändern sichtbar (seit 0.34.0); Text aus js/freigaben.js (HINWEIS_AENDERN). -->
+      <p class="tipp" id="freigabe-hinweis-aendern" hidden></p>
       <label>Zielgewicht in kg
         <input name="ziel" inputmode="decimal" autocomplete="off" placeholder="z. B. 7,2" required>
       </label>
@@ -585,6 +588,7 @@
       </label>
       <p class="fehler" id="freigabe-fehler" hidden></p>
       <div class="knoepfe">
+        <button value="loeschen" formnovalidate class="knopf-gefahr" id="freigabe-loeschen" hidden>Freigabe löschen</button>
         <button value="abbrechen" formnovalidate class="knopf-zweit">Abbrechen</button>
         <button value="speichern" class="knopf-haupt">Speichern</button>
       </div>
