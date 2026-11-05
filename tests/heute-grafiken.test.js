@@ -313,3 +313,11 @@ test("0.40.1: Linie der Kurve mit pathLength=1, CSS zeichnet mit Strichlänge 1"
   assert.match(regel, /stroke-dashoffset: 1;/);
   assert.doesNotMatch(regel, /600/);
 });
+
+// ---------- 0.42.1: linkes Ende der Tempo-Skala beschriftet (Stefan 05.11.: „klare Abgrenzung“) ----------
+test("0.42.1: Tempo-Skala zeigt am linken Ende Strich und „−0,5“ (Bereich für eine kleine Zunahme)", () => {
+  const h = mess([G("2026-10-29", 6.24), G("2026-11-05", 6.19)], true);
+  assert.match(h, /<line class="mess-sk-strich" x1="12" x2="12" y1="17" y2="21"\/>/);
+  assert.match(h, /<text class="achse" x="12" y="32" text-anchor="middle">−0,5<\/text>/, "echtes Minuszeichen U+2212");
+  assert.doesNotMatch(h, />-0,5</, "kein Bindestrich als Minus");
+});

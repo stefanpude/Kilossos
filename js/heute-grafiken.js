@@ -96,7 +96,9 @@ export function skalaPunkt(prozent) {
 // Flach: Spur y 10, grüner Bereich y 4 (12 hoch), Striche 17–21, Zahlen y 32, Punkt r 6.
 function skalaSvg(prozent, bewertung) {
   const { W, H } = SKALA;
+  // Linkes Ende beschriftet (0.42.1): Der Bereich unter 0 steht für eine kleine Zunahme. Echtes Minus „−“.
   const striche = [
+    [SKALA.von, grenzZahl(SKALA.von).replace("-", "−")],
     [0, "0"],
     [GRENZEN.abnahmeMin, grenzZahl(GRENZEN.abnahmeMin)],
     [GRENZEN.abnahmeMax, grenzZahl(GRENZEN.abnahmeMax)],
