@@ -2,8 +2,9 @@
 
 Stand: 05.11.2026. Wunsch des Halters: die Grafiken auf „Heute“, im „Verlauf“ und im PDF für den Tierarzt schöner und
 leichter lesbar machen. Je Stelle gab es 2–3 klickbare Entwürfe (A/B/C) und danach Mischungen; der Halter hat für alle
-vier Stellen gewählt. Diese Datei beschreibt, was gebaut wird. **Gebaut wird erst nach dem „So bauen“ des Halters,
-empfohlen nach dem Tierarzttermin am 13.11.2026.**
+vier Stellen gewählt. Diese Datei beschreibt, was gebaut wird.
+**Freigegeben am 05.11.2026 („So bauen, nach 13.11.“), samt den Entscheidungen beim Schreiben (unten).
+Gebaut wird nach dem Tierarzttermin am 13.11.2026.**
 
 | Stelle | Gewählt |
 |---|---|
@@ -300,7 +301,7 @@ Im Druck 150 mm breit wie heute, dadurch etwa 94 mm hoch statt 84 mm. Prüfen mi
   als hätte der Tierarzt die Menge langsam geändert); Übergang über zwei oder mehr Wochen (zeigt eine Freigabe, die es
   nie gab); nur Ecken abrunden (Kante bleibt).
 
-## Entscheidungen beim Schreiben (nicht in den Entwürfen, bitte prüfen)
+## Entscheidungen beim Schreiben (nicht in den Entwürfen, vom Halter mit „So bauen“ angenommen)
 
 1. **PDF: Bezugswert je Woche als Durchschnitt der Freigaben an den eingetragenen Tagen** statt „Freigabe vom
    Sonntag“; dazu die Stufe am echten Tag und kein Bezug in der Woche der ersten Freigabe. Ändert, welche Woche
