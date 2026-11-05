@@ -502,9 +502,14 @@ const mitMinus = (wert, stellen) => {
 // Höhe des Tempo-Diagramms (seit 0.40.0) in % pro Woche: von 0 (bei Zunahmen tiefer: Minimum − 0,1, auf 0,5
 // abgerundet) bis 0,5 über der oberen Grenze (2,5) oder Maximum + 0,2, auf 0,5 aufgerundet. 1e-9 gleicht
 // Rundungsfehler aus (2,8 + 0,2 ist im Rechner nicht genau 3). hi liegt immer über lo: nie Teilen durch 0.
+// Begrenzt (Fix-Runde 1, Review 05.11.2026): höchstens 2,5 × obere Grenze (5), mindestens −(obere Grenze + 0,5)
+// (−2,5). Wiegen an aufeinanderfolgenden Tagen ergibt sonst Wochenraten von 15 % und mehr; die Achse wurde
+// unlesbar. Werte darüber hinaus zeichnet tempoDiagramm am Rand mit Pfeil.
 export function tempoAchse(werte) {
-  const hi = Math.max(GRENZEN.abnahmeMax + 0.5, Math.ceil((Math.max(...werte) + 0.2) * 2 - 1e-9) / 2);
-  const lo = Math.min(0, Math.floor((Math.min(...werte) - 0.1) * 2 + 1e-9) / 2);
+  const hiMax = 2.5 * GRENZEN.abnahmeMax;
+  const loMin = -(GRENZEN.abnahmeMax + 0.5);
+  const hi = Math.min(hiMax, Math.max(GRENZEN.abnahmeMax + 0.5, Math.ceil((Math.max(...werte) + 0.2) * 2 - 1e-9) / 2));
+  const lo = Math.max(loMin, Math.min(0, Math.floor((Math.min(...werte) - 0.1) * 2 + 1e-9) / 2));
   return { lo: lo || 0, hi }; // || 0: kein -0
 }
 
@@ -527,15 +532,19 @@ function tempoDiagramm(raten, { vonMs, bisMs }, durchschnitt) {
   const sy = skala(lo, hi, grund, TEMPO.oben);
   const x = (t) => r1(sx(t));
   const y = (v) => r1(sy(v));
+  const yk = (v) => y(Math.min(hi, Math.max(lo, v))); // Ausreißer am Rand der Zeichenfläche
 
   // Hilfslinien alle 0,5 %, Zahlen bei 0,5 und ganzen Werten, die oberste ganze Zahl mit „%“; Nulllinie kräftiger.
+  // Bei großer Spanne (über 4 %) Linien alle 1 % und nur ganze Zahlen; so liegen die Zahlen mindestens 14 Einheiten
+  // auseinander (144 Einheiten Höhe: 0,5 % ≥ 18, 1 % ≥ 19,2).
+  const schritt = hi - lo > 4 ? 1 : 0.5;
   const stufen = [];
-  for (let v = lo; v <= hi + 1e-9; v += 0.5) stufen.push(Math.round(v * 10) / 10 || 0);
+  for (let v = schritt === 1 ? Math.ceil(lo) : lo; v <= hi + 1e-9; v += schritt) stufen.push(Math.round(v * 10) / 10 || 0);
   const obersteGanze = Math.max(...stufen.filter(Number.isInteger));
   const gitter = stufen
     .map((v) => {
       const linie = `<line class="${v === 0 ? "tempo-null" : "gitter"}" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/>`;
-      if (!Number.isInteger(v) && v !== 0.5) return linie;
+      if (!Number.isInteger(v) && (v !== 0.5 || schritt === 1)) return linie;
       const text = mitMinus(v, Number.isInteger(v) ? 0 : 1) + (v === obersteGanze ? `${NB}%` : "");
       return `${linie}<text class="achse" x="${L - 5}" y="${r1(y(v) + 4)}" text-anchor="end">${sicher(text)}</text>`;
     })
@@ -546,29 +555,44 @@ function tempoDiagramm(raten, { vonMs, bisMs }, durchschnitt) {
     <text class="tempo-band-text" x="${L + 5}" y="${r1(yOben + 12)}">sicherer Bereich</text>`;
 
   const linie =
-    liste.length > 1 ? `<polyline class="tempo-verbindung" points="${liste.map((r) => `${x(ms(r.datum))},${y(r.prozent)}`).join(" ")}"/>` : "";
+    liste.length > 1 ? `<polyline class="tempo-verbindung" points="${liste.map((r) => `${x(ms(r.datum))},${yk(r.prozent)}`).join(" ")}"/>` : "";
+  // Punkte außerhalb der Achse stehen am Rand, mit „▲“ (darüber) oder „▼“ (darunter); der Titel nennt den echten Wert.
   const punkte = liste
     .map((r, i) => {
       const titel = `${kurzDatum(r.datum)}: ${zahl(Math.abs(r.prozent), 2)}${NB}% ${r.prozent < 0 ? "zugenommen" : "abgenommen"}`;
-      return `<circle class="tempo-p ${sicher(r.bewertung)}" cx="${x(ms(r.datum))}" cy="${y(r.prozent)}" r="${i === liste.length - 1 ? 5 : 3.5}"><title>${sicher(titel)}</title></circle>`;
+      const cx = x(ms(r.datum));
+      const cy = yk(r.prozent);
+      const pfeil = r.prozent > hi + 1e-9 ? "▲" : r.prozent < lo - 1e-9 ? "▼" : "";
+      return (
+        `<circle class="tempo-p ${sicher(r.bewertung)}" cx="${cx}" cy="${cy}" r="${i === liste.length - 1 ? 5 : 3.5}"><title>${sicher(titel)}</title></circle>` +
+        (pfeil ? `<text class="tempo-pfeil" x="${r1(cx + 6)}" y="${r1(cy + 3.5)}">${pfeil}</text>` : "")
+      );
     })
     .join("");
 
   // Wert der neuesten Wägung links über ihrem Punkt; ganz links (nur ein Punkt) rechts daneben, damit er nicht in die Zahlen läuft.
   const letzte = liste.at(-1);
   const lx = x(ms(letzte.datum));
-  const ly = y(letzte.prozent);
+  const ly = yk(letzte.prozent);
   const links = lx - 2 > L + 34;
-  const endText = `<text class="tempo-end-text" x="${links ? r1(lx - 2) : r1(lx + 8)}" y="${r1(ly - 9)}" text-anchor="${links ? "end" : "start"}">${sicher(mitMinus(letzte.prozent, 1))}${NB}%</text>`;
+  const endY = r1(ly - 9 < TEMPO.oben ? ly + 16 : ly - 9); // am oberen Rand (Ausreißer) unter den Punkt
+  const endText = `<text class="tempo-end-text" x="${links ? r1(lx - 2) : r1(lx + 8)}" y="${endY}" text-anchor="${links ? "end" : "start"}">${sicher(mitMinus(letzte.prozent, 1))}${NB}%</text>`;
 
   // Ø im rechten Rand, wenn der Text dort hineinpasst (geschätzt 6 Einheiten je Zeichen, 4 Einheiten Innenabstand
-  // des Papiers dürfen mitgenutzt werden); sonst innen am rechten Rand.
-  const yd = y(durchschnitt);
+  // des Papiers dürfen mitgenutzt werden); sonst innen am rechten Rand. Innen weicht der Text dem Wert des neuesten
+  // Punkts aus (Grundlinien mindestens 12 Einheiten auseinander), der Strich bleibt beim Durchschnitt.
+  const yd = yk(durchschnitt);
   const dText = `Ø ${mitMinus(durchschnitt, 2)}`;
   const imRand = W - R + 8 + dText.length * 6 <= W + 4;
+  let dy = r1(yd + 4);
+  if (!imRand && links && Math.abs(dy - endY) < 12) {
+    const drueber = r1(endY - 12);
+    const drunter = r1(endY + 12);
+    dy = (dy < endY && drueber >= TEMPO.oben) || drunter > grund ? drueber : drunter;
+  }
   const durch = imRand
-    ? `<line class="tempo-durch" x1="${W - R}" x2="${W - R + 6}" y1="${yd}" y2="${yd}"/><text class="tempo-durch-text" x="${W - R + 8}" y="${r1(yd + 4)}">${sicher(dText)}</text>`
-    : `<line class="tempo-durch" x1="${W - R - 6}" x2="${W - R}" y1="${yd}" y2="${yd}"/><text class="tempo-durch-text" x="${W - R - 8}" y="${r1(yd + 4)}" text-anchor="end">${sicher(dText)}</text>`;
+    ? `<line class="tempo-durch" x1="${W - R}" x2="${W - R + 6}" y1="${yd}" y2="${yd}"/><text class="tempo-durch-text" x="${W - R + 8}" y="${dy}">${sicher(dText)}</text>`
+    : `<line class="tempo-durch" x1="${W - R - 6}" x2="${W - R}" y1="${yd}" y2="${yd}"/><text class="tempo-durch-text" x="${W - R - 8}" y="${dy}" text-anchor="end">${sicher(dText)}</text>`;
 
   return `<div class="papier"><svg class="tempo-diagramm" viewBox="0 0 ${W} ${TH}" aria-hidden="true">
     ${band}${gitter}${durch}${linie}${punkte}${endText}${zeitAchse(vonMs, bisMs, sx, grund, TH)}

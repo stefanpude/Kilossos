@@ -627,6 +627,65 @@ test("Tempo pro Woche: nur ein Wert im Zeitraum – ein Punkt, Achse ab dem Wieg
   assert.doesNotMatch(html, /NaN/);
 });
 
+// Fix-Runde 1 (Review 05.11.2026): Wiegen an aufeinanderfolgenden Tagen ergibt riesige Wochenraten. Ohne Grenze
+// wurden daraus 64 Hilfslinien, Zahlen übereinander und ein Band von wenigen Pixeln.
+const tAusreisser = [
+  G("2026-10-01", 9.4),
+  G("2026-10-08", 9.35),
+  G("2026-10-15", 9.3),
+  G("2026-10-22", 9.25),
+  G("2026-10-23", 9.05), // ein Tag später: 15,14 % pro Woche
+  G("2026-10-24", 9.25), // und zurück: 15,47 % zugenommen
+  G("2026-10-31", 9.2),
+];
+
+test("Tempo pro Woche: Achse bei Ausreißern begrenzt, Punkte am Rand mit Pfeil, Zahlen lesbar", () => {
+  const raten = wochenRaten(tAusreisser, [freigabe]);
+  const achse = tempoAchse(raten.map((r) => r.prozent));
+  assert.equal(achse.hi, 2.5 * GRENZEN.abnahmeMax);
+  assert.ok(achse.lo >= -(GRENZEN.abnahmeMax + 0.5));
+  assert.deepEqual(tempoAchse([30]), { lo: 0, hi: 2.5 * GRENZEN.abnahmeMax });
+  assert.equal(tempoAchse([-30]).lo, -(GRENZEN.abnahmeMax + 0.5));
+  // innerhalb der Grenzen wie bisher
+  assert.equal(tempoAchse([2.8]).hi, 3);
+  assert.equal(tempoAchse([-0.3, 1]).lo, -0.5);
+
+  const html = tVerlauf({ gewichte: tAusreisser, freigaben: [freigabe], heute: "2026-10-31" });
+  const svgText = tempoSvg(html);
+  assert.doesNotMatch(html, /NaN/);
+  assert.ok((svgText.match(/<line class="(gitter|tempo-null)"/g) ?? []).length <= 16);
+  const zahlenY = [...svgText.matchAll(/<text class="achse" x="29" y="([\d.]+)" text-anchor="end">/g)].map((m) => Number(m[1]));
+  assert.ok(zahlenY.length >= 2);
+  for (let i = 1; i < zahlenY.length; i++) assert.ok(Math.abs(zahlenY[i] - zahlenY[i - 1]) >= 14, `Zahlen bei y ${zahlenY.join(", ")}`);
+  assert.doesNotMatch(svgText, />0,5</); // bei großer Spanne nur ganze Zahlen
+  // Ausreißer nach oben: am oberen Rand, Pfeil „▲“, Titel mit dem echten Wert
+  const oben = svgText.match(/<circle class="tempo-p zu-schnell" cx="[\d.]+" cy="([\d.]+)" r="[\d.]+"><title>([^<]+)<\/title><\/circle><text class="tempo-pfeil"[^>]*>▲<\/text>/);
+  assert.ok(oben, "Punkt mit ▲");
+  assert.ok(Number(oben[1]) >= 10 && Number(oben[1]) <= 154, `cy ${oben[1]}`);
+  assert.equal(oben[2], `23. Okt.: 15,14${NB}% abgenommen`);
+  // nach unten: am unteren Rand, „▼“
+  const unten = svgText.match(/cy="([\d.]+)" r="[\d.]+"><title>[^<]*15,47[^<]*zugenommen<\/title><\/circle><text class="tempo-pfeil"[^>]*>▼<\/text>/);
+  assert.ok(unten, "Punkt mit ▼");
+  assert.ok(Number(unten[1]) <= 154);
+  // Band bleibt lesbar breit, „sicherer Bereich“ steht darin
+  const [, by, bh] = svgText.match(/<rect class="tempo-band" x="34" y="([\d.]+)" width="266" height="([\d.]+)"/).map(Number);
+  const ty = Number(svgText.match(/class="tempo-band-text" x="[\d.]+" y="([\d.]+)"/)[1]);
+  assert.ok(bh >= 20 && ty > by && ty < by + bh, `Band ${by}+${bh}, Text bei ${ty}`);
+  // Verbindungslinie bleibt in der Zeichenfläche
+  const ys = svgText.match(/class="tempo-verbindung" points="([^"]+)"/)[1].split(" ").map((p) => Number(p.split(",")[1]));
+  assert.ok(ys.every((yy) => yy >= 10 && yy <= 154), ys.join());
+});
+
+test("Tempo pro Woche: Ø-Text innen weicht dem Wert des neuesten Punkts aus", () => {
+  // −0,2 % und −0,6 %: „Ø −0,40“ passt nicht in den Rand und steht innen, der neueste Punkt liegt knapp darunter.
+  const g = [G("2026-10-01", 9.0), G("2026-10-08", 9.018), G("2026-10-15", 9.0721)];
+  const svgText = tempoSvg(tVerlauf({ gewichte: g, freigaben: [], heute: "2026-10-15" }));
+  const durch = svgText.match(/class="tempo-durch-text" x="([\d.]+)" y="([\d.]+)" text-anchor="end">Ø −0,40</);
+  assert.ok(durch, "Ø innen");
+  const wertY = Number(svgText.match(/class="tempo-end-text" x="[\d.]+" y="([\d.]+)"/)[1]);
+  assert.ok(Math.abs(Number(durch[2]) - wertY) >= 12, `Ø bei y ${durch[2]}, Wert bei y ${wertY}`);
+});
+
 test("Tempo pro Woche: „Alle Wochen“ bleibt, Kopfzeile unverändert", () => {
   const html = tVerlauf();
   assert.match(html, /Alle Wochen<small>15 Werte, neueste zuerst<\/small>/);
