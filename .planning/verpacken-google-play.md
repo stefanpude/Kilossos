@@ -7,6 +7,13 @@ Werkzeug: **Bubblewrap** von Google Chrome Labs. Es macht aus der Web-App eine A
 Die App öffnet Kilossos im Chrome-Motor ohne Adresszeile. Der Code bleibt die Web-App, Updates kommen weiter über die Webseite.
 Quelle: https://github.com/GoogleChromeLabs/bubblewrap/blob/main/packages/cli/README.md (abgerufen 04.11.2026)
 
+> **Überholt am 05.11.2026:** Die Play-Store-App soll abends an das Eintragen erinnern (`.planning/erinnerung-abends.md`,
+> Teil 3). Das geht ohne Server nur mit lokalen Benachrichtigungen, deshalb wird mit **Capacitor** statt Bubblewrap
+> verpackt. Diese Anleitung vor dem Verpacken neu schreiben. Folgen: Updates gehen durch die Prüfung bei Google Play,
+> und die App hat ihren eigenen Speicher (Umzug von der Webseite per Sicherung). Die eigene Domain bleibt geplant
+> (Webseite, Rechtstexte), ist für Capacitor aber keine technische Voraussetzung mehr (keine Prüfdatei nötig).
+> Konto und Testphase unten gelten weiter.
+
 ## Vorher (einmalig)
 
 1. **Domain** gekauft und GitHub Pages darauf umgestellt (eigene Anleitung, wenn es so weit ist).
