@@ -821,6 +821,10 @@ dialog::backdrop { background: rgb(29 43 42 / 0.4); animation: einblenden 0.3s e
 
 dialog form, .willkommen form { display: grid; gap: 14px; }
 dialog h2 { margin: 0; font-size: 1.3125rem; }
+/* Zwischenüberschriften im Freigabe-Fenster (0.42.5): Plan oben, Befund mit Linie darüber abgesetzt. */
+.form-abschnitt { margin: 4px 0 -6px; font-size: 1.0625rem; }
+.form-abschnitt small { font-family: var(--sans); font-size: 0.8125rem; font-weight: 400; color: var(--text-leise); }
+.form-abschnitt.befund { margin-top: 6px; padding-top: 16px; border-top: 1px solid var(--rand); }
 dialog label, .willkommen label, .feld { display: grid; gap: 4px; font-weight: 400; font-size: 0.875rem; color: var(--text-leise); }
 dialog label > input, .willkommen label > input, .feld > div { color: var(--text); font-size: 1rem; }
 dialog input:not([type="radio"]):not([type="hidden"]), .willkommen input:not([type="hidden"]):not([type="file"]) {

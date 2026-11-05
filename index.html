@@ -341,7 +341,7 @@
           <span data-symbol="dokument"></span><span class="text">Nutzungsbedingungen</span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.42.4</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.42.5</span>
         </div>
       </div>
     </section>
@@ -564,6 +564,9 @@
       <p class="tipp">Bitte genau die Werte eintragen, die der Tierarzt festgelegt hat.</p>
       <!-- Nur beim Ändern sichtbar (seit 0.34.0); Text aus js/freigaben.js (HINWEIS_AENDERN). -->
       <p class="tipp" id="freigabe-hinweis-aendern" hidden></p>
+      <!-- Plan und Befund getrennt (0.42.5): Ziel und Tagesmenge legt der Tierarzt fest, BCS/MCS beschreiben den
+           Zustand der Katze am Tag der Freigabe. Gespeichert wird alles wie bisher in einer Freigabe. -->
+      <h3 class="form-abschnitt">Plan vom Tierarzt</h3>
       <label>Zielgewicht in kg
         <input name="ziel" inputmode="decimal" autocomplete="off" placeholder="z. B. 7,2" required>
       </label>
@@ -576,12 +579,13 @@
       <label>Tierarzt / Praxis
         <input name="tierarzt" autocomplete="off" required>
       </label>
-      <div class="feld"><span id="label-bcs">BCS vom Tierarzt (optional)</span><div id="freigabe-bcs"></div></div>
-      <div class="feld"><span id="label-mcs">Muskelzustand (MCS) vom Tierarzt (optional)</span><div id="freigabe-mcs"></div></div>
-      <button type="button" class="knopf-text" data-aktion="bcs-erklaerung">Was ist der BCS?</button>
       <label>Notiz (optional)
         <input name="notiz" autocomplete="off" placeholder="z. B. nächste Kontrolle in 4 Wochen">
       </label>
+      <h3 class="form-abschnitt befund">Befund am Tag der Freigabe <small>(freiwillig)</small></h3>
+      <div class="feld"><span id="label-bcs">BCS vom Tierarzt</span><div id="freigabe-bcs"></div></div>
+      <div class="feld"><span id="label-mcs">Muskelzustand (MCS) vom Tierarzt</span><div id="freigabe-mcs"></div></div>
+      <button type="button" class="knopf-text" data-aktion="bcs-erklaerung">Was ist der BCS?</button>
       <p class="fehler" id="freigabe-fehler" hidden></p>
       <div class="knoepfe">
         <button value="loeschen" formnovalidate class="knopf-gefahr" id="freigabe-loeschen" hidden>Freigabe löschen</button>

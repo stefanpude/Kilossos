@@ -82,3 +82,21 @@ test("app.js: neue Mahlzeit wählt keine Sorte vor, außer es gibt nur eine", ()
   assert.doesNotMatch(app, /futterMenue\(mahlzeit \? mahlzeit\.futterId : daten\.futter\[0\]\?\.id\)/);
   assert.match(app, /futterMenue\(mahlzeit \? mahlzeit\.futterId : daten\.futter\.length === 1 \? daten\.futter\[0\]\.id : null\)/);
 });
+
+// 0.42.5: Im Freigabe-Fenster stehen Plan (Ziel, Tagesmenge) und Befund (BCS, MCS) unter eigenen Überschriften.
+test("0.42.5: Freigabe-Fenster trennt Plan und Befund", () => {
+  const html = lies("index.html");
+  const fenster = html.slice(html.indexOf('<dialog id="dialog-freigabe">'), html.indexOf("</dialog>", html.indexOf('<dialog id="dialog-freigabe">')));
+  const stelle = (muster) => {
+    const i = fenster.search(muster);
+    assert.ok(i >= 0, `fehlt: ${muster}`);
+    return i;
+  };
+  const plan = stelle(/<h3 class="form-abschnitt">Plan vom Tierarzt<\/h3>/);
+  const befund = stelle(/<h3 class="form-abschnitt befund">Befund am Tag der Freigabe <small>\(freiwillig\)<\/small><\/h3>/);
+  const reihe = [plan, stelle(/name="ziel"/), stelle(/name="kcal"/), stelle(/name="datum"/), stelle(/name="tierarzt"/), stelle(/name="notiz"/),
+    befund, stelle(/id="label-bcs">BCS vom Tierarzt</), stelle(/id="label-mcs">Muskelzustand \(MCS\) vom Tierarzt</), stelle(/data-aktion="bcs-erklaerung"/)];
+  assert.deepEqual([...reihe].sort((a, b) => a - b), reihe);
+  assert.doesNotMatch(fenster, /\(optional\)<\/span>/);
+  assert.match(lies("styles.css"), /\.form-abschnitt\s*\{/);
+});
