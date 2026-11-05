@@ -23,6 +23,9 @@ Die Liste für Zuki: [tierarzt-fragen-zuki.md](tierarzt-fragen-zuki.md).
 - [ ] Wie schnell soll er abnehmen? Die App warnt ab mehr als 2 % pro Woche
       (bei 9,32 kg wären das mehr als 186 g pro Woche). Sinnvoll sind 0,5–2 %, also etwa 47–186 g pro Woche.
 - [ ] Ab welcher Abnahme pro Woche soll ich mich melden?
+- [ ] Die App rechnet „zu schnell“ im **Mittel über zwei Wochen**, weil das Wiegen zu Hause schwankt. Eine einzelne
+      Woche mit einem großen Sprung löst also noch keine Warnung aus. Ist das in Ordnung, oder soll die App schon nach
+      **einer Woche** warnen, und ab wie viel (z. B. mehr als 3 %, bei 9,32 kg etwa 280 g)?
 
 ## 3. Futter
 - [ ] Reicht unser **Handelsfutter**, oder braucht Kito ein **Diätfutter**?
@@ -34,8 +37,12 @@ Die Liste für Zuki: [tierarzt-fragen-zuki.md](tierarzt-fragen-zuki.md).
 
 ## 4. Sicherheit
 - [ ] Woran erkenne ich früh eine **Fettleber** (hepatische Lipidose)? Was tue ich, wenn er nicht frisst?
-- [ ] Wie lange darf er höchstens ohne Futter sein, bevor ich anrufen muss?
-      (Die App rät bisher: einen Tag oder länger gar nichts gefressen → sofort zum Tierarzt. Passt diese Grenze?)
+- [ ] Wie lange darf er höchstens ohne Futter sein, bevor ich anrufen muss? Die App zeigt bisher:
+      an einem Tag **weniger als die Hälfte** der freigegebenen Menge → „am selben Tag den Tierarzt anrufen“;
+      **weniger als 90 %** → „nicht dauerhaft unterschreiten“. Passen diese Grenzen?
+      Und wie viele Tage hintereinander unter der Menge sind noch in Ordnung?
+- [ ] Ab wann ist **Erbrechen** ein Grund, sofort anzurufen? In der App trage ich es als „Auffälligkeit beim Fressen“
+      ein. Einen roten Notfall-Hinweis zeigt sie bisher nur bei „Futter verweigert“.
 - [ ] Wie wichtig ist Kitos **Wasseraufnahme** beim Abnehmen? Katzen nehmen einen großen Teil ihres Wassers
       über Nassfutter auf; weniger Futter heißt auch weniger Wasser. Sollen wir etwas beachten
       (z. B. Wasser ins Nassfutter, Trinkbrunnen), und sollen die Nierenwerte vorher bestimmt werden?
@@ -57,6 +64,8 @@ Die Liste für Zuki: [tierarzt-fragen-zuki.md](tierarzt-fragen-zuki.md).
 ## 6. Zur App (optional)
 - [ ] Würden Sie sich die Grenzwerte der App ansehen? (Quellen: AAHA- und WSAVA-Leitlinien,
       siehe `docs/sicherheitsgrenzen.md`)
+- [ ] In der PDF-Übersicht steht je Monat eine Bilanz in % pro Woche. Soll ein Monat mit mehr als 2 % pro Woche
+      dort **markiert** sein? (Zu schnelle Phasen stehen bisher unter „Auffälligkeiten im Zeitraum“.)
 
 ## Antworten
 | Frage | Antwort |
@@ -65,6 +74,9 @@ Die Liste für Zuki: [tierarzt-fragen-zuki.md](tierarzt-fragen-zuki.md).
 | MCS | |
 | Zielgewicht | |
 | kcal pro Tag | |
+| „Zu schnell“: nach 1 oder 2 Wochen warnen, ab wie viel | |
+| Zu wenig gefressen: ab wann anrufen | |
+| Erbrechen: ab wann anrufen | |
 | Diätfutter? | |
 | Nächster Termin | |
 | Abstand der Kontrollen | |
