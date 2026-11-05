@@ -203,3 +203,9 @@ test("achtWochen: Wägungen der letzten 56 Tage, älteste zuerst", () => {
   const liste = [G("2026-08-01", 9.6), G("2026-09-05", 9.4), ...gewichte];
   assert.deepEqual(achtWochen(liste, "2026-10-29").map((g) => g.datum), ["2026-09-05", "2026-10-01", "2026-10-08", "2026-10-15", "2026-10-29"]);
 });
+
+// 0.36.2: genau 2,0 % (10 → 9,6 kg in 14 Tagen, Gleitkomma 2,000…02) gilt wie bei den Warnungen noch als erlaubt.
+test("wochenRaten: genau 2,0 % pro Woche ist nicht „zu schnell“", () => {
+  const raten = wochenRaten([G("2026-10-01", 10), G("2026-10-15", 9.6)], []);
+  assert.notEqual(raten[0].bewertung, "zu-schnell");
+});

@@ -52,17 +52,18 @@ export function berichtDaten({ tier, gewichte, mahlzeiten, freigaben, besondereT
     });
   });
   let abnahme = null;
-  if (gewichteImZeitraum.length >= 2) {
-    const erste = gewichteImZeitraum[0];
-    const letzte = gewichteImZeitraum.at(-1);
-    const wochen = tageZwischen(erste.datum, letzte.datum) / 7;
+  const ersteW = gewichteImZeitraum[0];
+  const letzteW = gewichteImZeitraum.at(-1);
+  // Erst ab zwei verschiedenen Tagen (sonst „−∞ %“). Linear wie die Spalte „Monat“ und die Warnregeln (seit 0.36.2).
+  if (gewichteImZeitraum.length >= 2 && tageZwischen(ersteW.datum, letzteW.datum) > 0) {
+    const wochen = tageZwischen(ersteW.datum, letzteW.datum) / 7;
     abnahme = {
-      startKg: erste.kg,
-      endKg: letzte.kg,
-      diffG: Math.round((erste.kg - letzte.kg) * 1000),
-      prozent: ((erste.kg - letzte.kg) / erste.kg) * 100,
+      startKg: ersteW.kg,
+      endKg: letzteW.kg,
+      diffG: Math.round((ersteW.kg - letzteW.kg) * 1000),
+      prozent: ((ersteW.kg - letzteW.kg) / ersteW.kg) * 100,
       wochen,
-      proWoche: (1 - (letzte.kg / erste.kg) ** (1 / wochen)) * 100,
+      proWoche: ((ersteW.kg - letzteW.kg) / ersteW.kg / wochen) * 100,
     };
   }
 
@@ -321,8 +322,11 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
   const a = b.abnahme;
   teile.push(`<section class="bericht-teil"><h2>Gewicht</h2>`);
   if (a) {
+    // Zunahme ausgeschrieben statt mit Minus vor der Rate (seit 0.36.2), wie in der Spalte „Monat“.
+    const zunahme = a.diffG < 0;
+    const gText = a.diffG === 0 ? "±0 g" : `${zunahme ? "+" : "−"}${zahl(Math.abs(a.diffG))} g`;
     teile.push(`<p>${zahl(a.startKg, 2)} kg → <strong>${zahl(a.endKg, 2)} kg</strong> in ${zahl(a.wochen, 1)} Wochen:
-      ${a.diffG >= 0 ? "−" : "+"}${zahl(Math.abs(a.diffG))} g (${zahl(a.prozent, 1)} %), im Mittel <strong>${zahl(a.proWoche, 2)} % KM/Woche</strong>
+      ${gText} (${zahl(Math.abs(a.prozent), 1)} %${zunahme ? " Zunahme" : ""}), im Mittel <strong>${zunahme ? "Zunahme " : ""}${zahl(Math.abs(a.proWoche), 2)} % KM/Woche</strong>
       (Zielbereich ${zahl(GRENZEN.abnahmeMin, 1)}–${zahl(GRENZEN.abnahmeMax)} %).</p>`);
     const imZeitraum = gewichte.filter((g) => g.datum >= b.von && g.datum <= b.bis);
     // Streifen der besonderen Tage mit derselben Achse: von der ersten Wägung im Zeitraum bis zum Berichtsende.
@@ -332,7 +336,7 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
     const besondere = b.besondereTage ?? [];
     const leiste = pdfZeitleiste(besondere, { vonTag: erste, bisTag: b.bis });
     teile.push(
-      `<div class="bericht-grafik">${gewichtDiagramm(imZeitraum, freigaben.filter((f) => f.datum <= b.bis), b.bis)}${leiste}</div>`
+      `<div class="bericht-grafik">${gewichtDiagramm(imZeitraum, freigaben.filter((f) => f.datum <= b.bis), b.bis, gewichte.filter((g) => g.datum <= b.bis))}${leiste}</div>`
     );
     if (besondere.length) {
       teile.push(

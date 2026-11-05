@@ -10,6 +10,7 @@ import {
   aktuelleFreigabe,
   gewichteBis,
   warnungen,
+  gesternWenigGefressen,
 } from "../js/rechnen.js";
 
 // Beispielwerte aus docs/sicherheitsgrenzen.md, Abschnitt B4 (Kito, 9,32 kg).
@@ -174,4 +175,33 @@ test("warnungen: Freigabe älter als 3 Monate und Ziel erreicht", () => {
 
 test("jede Warnung nennt eine Quelle", () => {
   for (const w of warnungen({ ...basis, kcal: 100, leckerli: 30 })) assert.ok(w.quelle.length > 0);
+});
+
+// ---------- 0.36.2: Funde aus dem Sicherheits-Review 05.11.2026 ----------
+test("warnungen: ohne Freigabe und ohne Gewicht fragt ein vergangener Tag ohne Mahlzeit trotzdem nach", () => {
+  const ohne = { ...basis, freigabe: null, gewichte: [] };
+  assert.deepEqual(arten(warnungen({ ...ohne, kcal: 0 })), ["sofort:wenig-gefressen"]);
+  assert.deepEqual(warnungen({ ...ohne, kcal: 0, fruehereMahlzeiten: false }), []); // vor dem ersten Eintrag
+  assert.deepEqual(warnungen({ ...ohne, kcal: 120 }), []); // ohne Grenze kein Urteil über „wenig“
+});
+
+test("gesternWenigGefressen: auf „Heute“ steht, wenn gestern kaum etwas eingetragen ist", () => {
+  const gestern = { ...basis, tag: "2026-11-10", heute: "2026-11-11" };
+  const w = gesternWenigGefressen({ ...gestern, kcal: 38.5 });
+  assert.equal(w.art, "sofort");
+  assert.equal(w.id, "wenig-gefressen-gestern");
+  assert.match(w.text, /^Gestern sind nur 39 kcal eingetragen\. Hat Kito normal gefressen\? .*am selben Tag den Tierarzt anrufen/);
+  assert.match(gesternWenigGefressen({ ...gestern, kcal: 0 }).text, /^Für gestern ist keine Mahlzeit eingetragen\. Hat Kito/);
+  assert.equal(gesternWenigGefressen({ ...gestern, kcal: 200 }), null); // nur unter der Freigabe: steht beim Zurückblättern
+  assert.equal(gesternWenigGefressen({ ...gestern, kcal: 0, fruehereMahlzeiten: false }), null); // erster Tag der Nutzung
+});
+
+test("warnungen: genau 2,0 % pro Woche ist noch erlaubt, knapp darüber steht mit 2 Nachkommastellen", () => {
+  const nurSchnell = (gw) => warnungen({ ...basis, gewichte: gw }).filter((w) => w.id === "zu-schnell");
+  assert.deepEqual(nurSchnell([{ kg: 10, datum: "2026-10-27" }, { kg: 9.6, datum: "2026-11-10" }]), []); // 2,000…02 durch Gleitkomma
+  const knapp = nurSchnell([{ kg: 9.32, datum: "2026-10-27" }, { kg: 8.94, datum: "2026-11-10" }]); // 2,039 %
+  assert.equal(knapp.length, 1);
+  assert.match(knapp[0].text, /zu schnell ab: 2,04 % pro Woche \(erlaubt bis 2 %\)/);
+  const deutlich = nurSchnell([{ kg: 9.32, datum: "2026-10-27" }, { kg: 8.8, datum: "2026-11-10" }]); // 2,79 %
+  assert.match(deutlich[0].text, /zu schnell ab: 2,8 % pro Woche/);
 });

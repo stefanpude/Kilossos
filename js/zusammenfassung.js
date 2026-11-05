@@ -41,7 +41,7 @@ export function wochenRaten(gewichte, freigaben) {
     const prozent = ((alt.kg - neu.kg) / alt.kg / wochen) * 100;
     const nachFreigabe = Boolean(ersteFreigabe) && alt.datum >= ersteFreigabe.datum;
     let bewertung = "neutral";
-    if (prozent > GRENZEN.abnahmeMax) bewertung = "zu-schnell";
+    if (prozent > GRENZEN.abnahmeMax + 1e-9) bewertung = "zu-schnell"; // 1e-9: genau 2 % ist erlaubt (wie warnungen)
     else if (nachFreigabe) bewertung = prozent >= GRENZEN.abnahmeMin ? "gut" : "langsam";
     raten.push({ datum: neu.datum, vonDatum: alt.datum, prozent, bewertung, nachFreigabe });
   }
@@ -181,7 +181,7 @@ export function tempoRueckmeldung({ gewichte, freigaben, kg, datum, ohneId }) {
   const p = prozentText(prozent);
   let bewertung = "neutral";
   let text;
-  if (prozent > GRENZEN.abnahmeMax) {
+  if (prozent > GRENZEN.abnahmeMax + 1e-9) {
     bewertung = "zu-schnell";
     text =
       `${p} % pro Woche, schneller als 2 %. Eine einzelne Wägung schwankt; Kilossos warnt, wenn das Mittel über zwei Wochen ` +

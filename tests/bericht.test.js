@@ -418,3 +418,29 @@ test("styles.css: Monatsraster passt am PC ohne Wischen in die Übersicht", () =
   assert.ok(m, "Mindestbreite des Rasters in rem");
   assert.ok(Number(m[1]) * 16 <= platz, `${m[1]}rem = ${Number(m[1]) * 16} px, Platz ${platz} px`);
 });
+
+// ---------- 0.36.2: Kopfzeile „Gewicht“ (Sicherheits-Review 05.11.2026) ----------
+// Funde: Zunahme stand als „−0,28 % KM/Woche“ da (liest sich als Abnahme); der Kopf rechnete mit Zinseszins, die Spalte
+// „Monat“ und die Warnregeln linear (10 → 8,4 kg in 8 Wochen: Kopf 2,16 %, Spalte 2,00 %); zwei Wägungen am selben
+// Tag ergaben „−∞ %“ bzw. „NaN %“.
+const kopfText = (html) => html.match(/<h2>Gewicht<\/h2>\s*<p>([^]*?)<\/p>/)?.[1].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim() ?? "";
+
+test("berichtHtml: Zunahme steht im Kopf als „Zunahme“, nie mit Minus", () => {
+  const text = kopfText(mitWaegungen([G2("2026-09-18", 9.0), G2("2026-11-13", 9.2)]));
+  assert.match(text, /\+200 g \(2,2 % Zunahme\), im Mittel Zunahme 0,28 % KM\/Woche/);
+  assert.doesNotMatch(text, /−0|-0,/);
+});
+
+test("berichtHtml: Kopf rechnet die Rate linear wie Spalte „Monat“ und Warnregeln", () => {
+  const text = kopfText(mitWaegungen([G2("2026-09-18", 10.0), G2("2026-11-13", 8.4)]));
+  assert.match(text, /−1\.600 g \(16,0 %\), im Mittel 2,00 % KM\/Woche/);
+});
+
+test("berichtHtml: gleiches Gewicht steht als „±0 g“", () => {
+  assert.match(kopfText(mitWaegungen([G2("2026-10-16", 9.0), G2("2026-11-13", 9.0)])), /±0 g \(0,0 %\), im Mittel 0,00 % KM\/Woche/);
+});
+
+test("berichtHtml: zwei Wägungen am selben Tag – kein „∞“ und kein „NaN“", () => {
+  const html = mitWaegungen([G2("2026-11-13", 9.3), G2("2026-11-13", 9.1, "auf dem Arm gewogen")]);
+  assert.doesNotMatch(html, /∞|NaN|Infinity/);
+});

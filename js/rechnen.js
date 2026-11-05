@@ -280,6 +280,31 @@ export function gewichteBis(gewichte, stichtag) {
   return gewichte.filter((g) => g.datum <= stichtag);
 }
 
+function wenigGefressenText(kcal, name, gestern) {
+  const k = Math.round(kcal);
+  const anfang =
+    kcal === 0
+      ? gestern ? "Für gestern ist keine Mahlzeit eingetragen." : "Für diesen Tag ist keine Mahlzeit eingetragen."
+      : gestern ? `Gestern sind nur ${k} kcal eingetragen.` : `An diesem Tag sind nur ${k} kcal eingetragen.`;
+  return (
+    anfang +
+    ` Hat ${name} normal gefressen? Wenn eine Katze 24 Stunden lang nichts oder kaum etwas frisst: ` +
+    "am selben Tag den Tierarzt anrufen – Gefahr einer Fettleber."
+  );
+}
+
+// Für „Heute“: Hat die Katze gestern kaum etwas gefressen? Sonst stünde das nur beim Zurückblättern
+// (Sicherheits-Review 05.11.2026). eingaben wie bei warnungen(), aber für den Tag gestern. Ergebnis: Warnung oder null.
+export function gesternWenigGefressen(eingaben) {
+  if (!warnungen(eingaben).some((w) => w.id === "wenig-gefressen")) return null;
+  return {
+    art: "sofort",
+    id: "wenig-gefressen-gestern",
+    text: wenigGefressenText(eingaben.kcal, eingaben.name, true),
+    quelle: QUELLEN.fettleber,
+  };
+}
+
 // Alle Warnungen für einen Tag, die dringendsten zuerst. art: "sofort" | "achtung" | "hinweis".
 // tag/heute: "JJJJ-MM-TT"; kcal und leckerli: Summe des Tages; fruehereMahlzeiten: gab es vor "tag" schon Einträge?
 // normalesFutterKcal: kcal des Tages aus Futter, das kein Diätfutter ist (normalesFutterKcal in futterliste.js).
@@ -293,18 +318,12 @@ export function warnungen({ name, tag, heute, kcal, leckerli, freigabe, gewichte
   // Grenze, unter der ein abgeschlossener Tag als "zu wenig" gilt.
   const soll = freigabe ? freigabe.kcalProTag : neuestes ? untergrenzeOhneFreigabe(neuestes.kg) : null;
   const leererTag = kcal === 0 && !fruehereMahlzeiten;
-  if (soll && tagVorbei && !leererTag) {
-    if (kcal < GRENZEN.wenigGefressen * soll) {
-      liste.push({
-        art: "sofort",
-        id: "wenig-gefressen",
-        text:
-          (kcal === 0 ? "Für diesen Tag ist keine Mahlzeit eingetragen." : `An diesem Tag sind nur ${k} kcal eingetragen.`) +
-          ` Hat ${name} normal gefressen? Wenn eine Katze 24 Stunden lang nichts oder kaum etwas frisst: ` +
-          "am selben Tag den Tierarzt anrufen – Gefahr einer Fettleber.",
-        quelle: QUELLEN.fettleber,
-      });
-    } else if (freigabe && kcal < (1 - GRENZEN.spielraum) * soll) {
+  // Ohne Grenze (keine Freigabe, kein Gewicht) fragt wenigstens ein Tag ganz ohne Mahlzeit nach (seit 0.36.2).
+  const wenig = tagVorbei && !leererTag && (soll ? kcal < GRENZEN.wenigGefressen * soll : kcal === 0);
+  if (wenig) {
+    liste.push({ art: "sofort", id: "wenig-gefressen", text: wenigGefressenText(kcal, name, false), quelle: QUELLEN.fettleber });
+  } else if (soll && tagVorbei && !leererTag) {
+    if (freigabe && kcal < (1 - GRENZEN.spielraum) * soll) {
       liste.push({
         art: "achtung",
         id: "unter-freigabe",
@@ -358,12 +377,16 @@ export function warnungen({ name, tag, heute, kcal, leckerli, freigabe, gewichte
   }
 
   const schnell = abnahmeProWoche(gewichte, GRENZEN.tageZuSchnell);
-  if (schnell && schnell.prozent > GRENZEN.abnahmeMax) {
+  // 1e-9: genau 2 % (z. B. 10 → 9,6 kg in 14 Tagen) ergibt durch Gleitkomma 2,000…02 und ist noch erlaubt.
+  // Knapp darüber 2 Nachkommastellen, aufgerundet – sonst stünde „2,0 % (erlaubt bis 2 %)“ da (seit 0.36.2).
+  if (schnell && schnell.prozent > GRENZEN.abnahmeMax + 1e-9) {
+    const p = schnell.prozent;
+    const anzeige = (p < 2.1 ? (Math.ceil(p * 100) / 100).toFixed(2) : p.toFixed(1)).replace(".", ",");
     liste.push({
       art: "achtung",
       id: "zu-schnell",
       text:
-        `${name} nimmt zu schnell ab: ${schnell.prozent.toFixed(1).replace(".", ",")} % pro Woche (erlaubt bis 2 %). ` +
+        `${name} nimmt zu schnell ab: ${anzeige} % pro Woche (erlaubt bis 2 %). ` +
         "Bitte in den nächsten Tagen mit dem Tierarzt sprechen – nicht selbst die Menge ändern.",
       quelle: QUELLEN.abnahme,
     });

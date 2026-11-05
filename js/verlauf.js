@@ -94,7 +94,8 @@ const treffer = (x, breite, tip, extra = "") =>
   `<g class="treffer" data-tip="${sicher(tip)}">${extra}<rect x="${x - breite / 2}" y="${RAND.oben}" width="${breite}" height="${innenH}" fill="transparent"/></g>`;
 
 // bis: letzter Tag des Berichtszeitraums; die Achse endet dort (seit 0.33.0), die Linie an der letzten Wägung.
-export function gewichtDiagramm(gewichte, freigaben, bis = null) {
+// alle: alle Wägungen des Tiers (nicht nur die im Zeitraum) – daraus das Startgewicht des sicheren Bereichs (seit 0.36.2).
+export function gewichtDiagramm(gewichte, freigaben, bis = null, alle = gewichte) {
   const liste = [...gewichteSortiert(gewichte)].reverse();
   const erste = freigaben.length ? [...freigaben].sort((a, b) => a.datum.localeCompare(b.datum))[0] : null;
   const ziel = aktuelleFreigabe(freigaben)?.zielgewichtKg;
@@ -107,14 +108,19 @@ export function gewichtDiagramm(gewichte, freigaben, bis = null) {
   const y = skala(yMin, yMax, H - RAND.unten, RAND.oben);
 
   // Sicherer Bereich ab der ersten Freigabe: 0,5–2 % pro Woche vom Gewicht an diesem Tag.
+  // Startgewicht aus allen Wägungen; liegt die Freigabe vor dem Zeitraum, beginnt das Band am Achsenanfang,
+  // gerechnet ab dem Freigabe-Datum (wie weicheKurve in der App). Vorher sank es am Achsenanfang schon um Wochen
+  // ab, und eine Katze mit 1 % pro Woche sah „zu langsam“ aus (Sicherheits-Review 05.11.2026).
   let band = "";
-  if (erste) {
-    const startG = liste.filter((g) => g.datum <= erste.datum).at(-1) ?? liste[0];
-    const s = ms(erste.datum);
+  const alleSortiert = [...gewichteSortiert(alle)].reverse();
+  if (erste && ms(erste.datum) < bisMs && alleSortiert.length) {
+    const startG = alleSortiert.filter((g) => g.datum <= erste.datum).at(-1) ?? alleSortiert[0];
+    const anker = ms(startG.datum > erste.datum ? startG.datum : erste.datum);
+    const s = Math.max(anker, vonMs);
     const punkte = [];
     for (let t = s; t <= bisMs + 1; t += 7 * TAG_MS) punkte.push(t);
     if (punkte.at(-1) < bisMs) punkte.push(bisMs);
-    const kg = (t, rate) => Math.max(yMin, startG.kg * (1 - rate / 100) ** ((t - s) / (7 * TAG_MS)));
+    const kg = (t, rate) => Math.min(yMax, Math.max(yMin, startG.kg * (1 - rate / 100) ** ((t - anker) / (7 * TAG_MS))));
     const oben = punkte.map((t) => `${x(t)},${y(kg(t, GRENZEN.abnahmeMin))}`);
     const unten = punkte.map((t) => `${x(t)},${y(kg(t, GRENZEN.abnahmeMax))}`).reverse();
     band = `<polygon class="band" points="${oben.concat(unten).join(" ")}"/>

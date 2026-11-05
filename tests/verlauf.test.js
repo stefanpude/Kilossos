@@ -428,3 +428,67 @@ test("gewichtDiagramm (PDF): bis 8 Monate jeder Monat, darüber nur jeder zweite
   assert.deepEqual(achsenText(zwischen("2026-03-12", "2026-11-05")), ["Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov"]);
   assert.deepEqual(achsenText(zwischen("2025-11-01", "2026-11-13")), ["Dez", "Feb", "Apr", "Jun", "Aug", "Okt"]);
 });
+
+// ---------- 0.36.2: sicherer Bereich im PDF auch bei „letzte 4/12 Wochen“ (Sicherheits-Review 05.11.2026) ----------
+// Fund zweier Prüfer: Lag die erste Freigabe vor dem Berichtszeitraum, begann das Band am Freigabe-Datum mit dem Gewicht
+// der ersten Wägung im Zeitraum – am Achsenanfang war es dann schon um Wochen abgesunken. Eine Katze mit genau 1 % pro
+// Woche lag „über dem Band“ und sah für den Tierarzt nach „zu langsam“ aus.
+const plusWochen = (iso, n) => {
+  const [j, m, t] = iso.split("-").map(Number);
+  const d = new Date(j, m - 1, t + 7 * n, 12);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+// Band als Ober- und Unterkante (y im SVG wächst nach unten) an der Stelle x, linear zwischen den Eckpunkten.
+function bandBei(svgText, x) {
+  const p = svgText.match(/class="band" points="([^"]+)"/)[1].split(" ").map((s) => s.split(",").map(Number));
+  const halb = p.length / 2;
+  const oben = p.slice(0, halb);
+  const unten = p.slice(halb).reverse();
+  const bei = (kante) => {
+    for (let i = 1; i < kante.length; i++) {
+      const [x0, y0] = kante[i - 1];
+      const [x1, y1] = kante[i];
+      if (x >= x0 - 0.01 && x <= x1 + 0.01) return x1 === x0 ? y0 : y0 + ((y1 - y0) * (x - x0)) / (x1 - x0);
+    }
+    return null;
+  };
+  return { oben: bei(oben), unten: bei(unten) };
+}
+const marker = (svgText) => [...svgText.matchAll(/<circle class="marker" cx="([\d.]+)" cy="([\d.]+)"/g)].map((m) => [Number(m[1]), Number(m[2])]);
+
+test("gewichtDiagramm (PDF): Freigabe vor dem Zeitraum – Katze mit 1 % pro Woche liegt im sicheren Bereich", () => {
+  const start = "2026-11-13";
+  const alle = Array.from({ length: 16 }, (_, i) => G(plusWochen(start, i), Math.round(9.32 * 0.99 ** i * 100) / 100));
+  const fg = { ...freigabe, datum: start };
+  const bis = alle.at(-1).datum; // 26.02.2027
+  const imZeitraum = alle.slice(-5); // „letzte 4 Wochen“
+  const svgText = gewichtDiagramm(imZeitraum, [fg], bis, alle);
+  const punkte = marker(svgText);
+  assert.equal(punkte.length, 5);
+  for (const [x, yPunkt] of punkte) {
+    const { oben, unten } = bandBei(svgText, x);
+    assert.ok(oben !== null && unten !== null, `Band reicht bis x=${x}`);
+    assert.ok(yPunkt >= oben - 0.5 && yPunkt <= unten + 0.5, `Punkt bei x=${x} (y=${yPunkt}) im Band ${oben}–${unten}`);
+  }
+  // Das Band beginnt am Achsenanfang, nicht links davon.
+  const ersterX = Number(svgText.match(/class="band" points="([\d.-]+),/)[1]);
+  assert.equal(ersterX, PDF_RAND.links);
+});
+
+// Das Band rechnet ab der Freigabe insgesamt; zu schnelle Phasen meldet der Abschnitt „Auffälligkeiten“.
+test("gewichtDiagramm (PDF): durchgehend zu schnell (2,5 % pro Woche) liegt auch bei „letzte 4 Wochen“ unter dem Band", () => {
+  const start = "2026-11-13";
+  const alle = Array.from({ length: 16 }, (_, i) => G(plusWochen(start, i), Math.round(9.32 * 0.975 ** i * 100) / 100));
+  const svgText = gewichtDiagramm(alle.slice(-5), [{ ...freigabe, datum: start }], alle.at(-1).datum, alle);
+  const [x, yPunkt] = marker(svgText).at(-1);
+  const { unten } = bandBei(svgText, x);
+  assert.ok(yPunkt > unten + 0.5, `letzter Punkt (y=${yPunkt}) unter dem Band (Unterkante ${unten})`);
+});
+
+// 0.36.2: Freigabe genau am Berichtsende (PDF am Tag des Termins nach dem Eintragen) – kein Band ohne Breite,
+// dessen Text „sicherer Bereich“ sonst im rechten Rand über der Ziel-Beschriftung stand (Gegenprüfung 05.11.2026).
+test("gewichtDiagramm (PDF): Freigabe am Berichtsende zeichnet kein leeres Band", () => {
+  const svgText = gewichtDiagramm(gewichte, [{ ...freigabe, datum: "2026-10-15" }], "2026-10-15");
+  assert.doesNotMatch(svgText, /class="band"/);
+  assert.doesNotMatch(svgText, /sicherer Bereich/);
+});

@@ -33,6 +33,7 @@ import {
   aktuelleFreigabe,
   gewichteBis,
   warnungen,
+  gesternWenigGefressen,
   armGewicht,
   prozentInGramm,
   menschVergleich,
@@ -252,6 +253,29 @@ let tier = aktivesTier(daten, leseAktivesTier(demo));
 let gewaehlterTag = new Date();
 let zeitraum = "3m";
 
+// Bleibt der Tab über Nacht offen (Opera), stünde „Heute“ sonst noch auf dem Vortag, und neue Mahlzeiten landeten dort.
+// Beim Zurückkehren in den Tab nach einem Tageswechsel: auf den neuen Tag springen und neu zeichnen (seit 0.36.2).
+let tagBeimZeichnen = tagSchluessel(new Date());
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") return;
+  const jetzt = tagSchluessel(new Date());
+  if (jetzt === tagBeimZeichnen) return;
+  // Ist ein Fenster offen (z. B. Mahlzeit um 23:50 angefangen), nicht springen: Die Eingabe gehört zum alten Tag.
+  // Beim nächsten Zurückkehren ohne offenes Fenster wird nachgeholt.
+  if (document.querySelector("dialog[open]")) return;
+  if (tagSchluessel(gewaehlterTag) === tagBeimZeichnen) gewaehlterTag = new Date();
+  tagBeimZeichnen = jetzt;
+  zeichneAlles();
+});
+// Hat ein zweiter Tab mit Kilossos gespeichert: neu laden. Sonst überschriebe dieser Tab dessen Einträge beim nächsten
+// Speichern, und „Alle Daten löschen“ im anderen Tab wäre wirkungslos (Sicherheits-Review 05.11.2026).
+// Nicht in der Demo: Sie schreibt bei jedem Laden neu, zwei Demo-Tabs würden sich sonst endlos gegenseitig neu laden.
+if (!demo) {
+  window.addEventListener("storage", (e) => {
+    if (e.key === null || e.key === "kilossos-daten") location.reload();
+  });
+}
+
 // Speicher voll (z. B. durch viele Fotos): Änderung verwerfen, gespeicherten Stand neu laden und deutlich melden,
 // statt sie nur im Arbeitsspeicher zu halten und beim nächsten Öffnen still zu verlieren.
 let speicherFehler = false;
@@ -335,7 +359,8 @@ function zeigeAnsicht(name, richtung = 0) {
 
 function tagTitel(datum) {
   const heute = tagSchluessel(new Date());
-  const gestern = tagSchluessel(new Date(Date.now() - 86400000));
+  const jetzt = new Date();
+  const gestern = tagSchluessel(new Date(jetzt.getFullYear(), jetzt.getMonth(), jetzt.getDate() - 1)); // nicht −24 h: Zeitumstellung
   const schluessel = tagSchluessel(datum);
   if (schluessel === heute) return "Heute";
   if (schluessel === gestern) return "Gestern";
@@ -444,6 +469,25 @@ function zeichneHeute(vonNull = false) {
     fruehereMahlzeiten: daten.mahlzeiten.some((m) => m.tierId === tier.id && tagSchluessel(new Date(m.zeitpunkt)) < tag),
     normalesFutterKcal: normalesFutterKcal(mahlzeiten, futter),
   });
+  // Auf „Heute“ zusätzlich gestern: Hat die Katze kaum etwas gefressen, steht das oben – nicht erst beim
+  // Zurückblättern (Sicherheits-Review 05.11.2026).
+  if (tag === heute) {
+    const jetzt = new Date();
+    const gestern = tagSchluessel(new Date(jetzt.getFullYear(), jetzt.getMonth(), jetzt.getDate() - 1));
+    const eigene = daten.mahlzeiten.filter((m) => m.tierId === tier.id);
+    const mahlzeitenGestern = mahlzeitenAm(eigene, gestern);
+    const warnungGestern = gesternWenigGefressen({
+      name: tier.name,
+      tag: gestern,
+      heute,
+      kcal: tagesSumme(mahlzeitenGestern, futter).kcal,
+      leckerli: leckerliKcal(mahlzeitenGestern, futter),
+      freigabe: freigabeVonTier(gestern),
+      gewichte: gewichteBis(daten.gewichte.filter((g) => g.tierId === tier.id), gestern),
+      fruehereMahlzeiten: eigene.some((m) => tagSchluessel(new Date(m.zeitpunkt)) < gestern),
+    });
+    if (warnungGestern) liste.unshift(warnungGestern);
+  }
   $("warnungen-liste").innerHTML = liste
     .map((w) =>
       w.art === "hinweis"
@@ -490,11 +534,11 @@ function zeichneHeute(vonNull = false) {
         const f = futter.get(m.futterId);
         const kcal = f ? `${zahl(kcalFuer(m.gramm, f.kcalPro100g))} kcal` : "kcal unbekannt";
         // Die Zeile selbst ist ein Knopf (Tastatur, Vorlesefunktion); Löschen bleibt ein eigener Knopf daneben.
-        return `<li><button type="button" class="protokoll-knopf tippbar" data-aktion="mahlzeit-bearbeiten" data-id="${m.id}">
+        return `<li><button type="button" class="protokoll-knopf tippbar" data-aktion="mahlzeit-bearbeiten" data-id="${sicher(m.id)}">
           <span class="zeit">${uhr(m)}</span>
           <span class="was">${sicher(f ? f.name : "Gelöschte Sorte")}<small>${f ? TYP_NAMEN[f.typ] : "Sorte fehlt"}</small></span>
           <span class="wert">${zahl(m.gramm)} g<small>${kcal}</small></span><span class="nur-vorlesen">, ändern</span></button>
-          <button type="button" class="knopf-loeschen" data-aktion="mahlzeit-loeschen" data-id="${m.id}" aria-label="Mahlzeit um ${uhr(m)}, ${sicher(f ? f.name : "Gelöschte Sorte")}, löschen">${SYMBOL.loeschen}</button></li>`;
+          <button type="button" class="knopf-loeschen" data-aktion="mahlzeit-loeschen" data-id="${sicher(m.id)}" aria-label="Mahlzeit um ${uhr(m)}, ${sicher(f ? f.name : "Gelöschte Sorte")}, löschen">${SYMBOL.loeschen}</button></li>`;
       })
       .join("");
     $("heute-mahlzeiten").innerHTML = `<ul class="protokoll">${zeilen}</ul>`;
@@ -603,13 +647,13 @@ function zeichneGewicht() {
               ? ""
               : `<span class="marke">${g100 < 0 ? "−" : g100 > 0 ? "+" : "±"}${zahl(Math.abs(g100))} g</span>`; // neutral, siehe verlauf.js
           const bild = fotoGueltig(g.foto)
-            ? `<button type="button" class="waegung-foto-knopf" data-aktion="waegung-foto-ansehen" data-id="${g.id}" aria-label="Foto vom ${datumText(g.datum)} ansehen"><img class="waegung-foto" src="${sicher(g.foto)}" alt=""></button>`
+            ? `<button type="button" class="waegung-foto-knopf" data-aktion="waegung-foto-ansehen" data-id="${sicher(g.id)}" aria-label="Foto vom ${datumText(g.datum)} ansehen"><img class="waegung-foto" src="${sicher(g.foto)}" alt=""></button>`
             : "";
           // Gewicht, Datum, Notiz und Marke sind ein Knopf „ändern“ (seit 0.31.0); Foto und Kreuz bleiben eigene Knöpfe daneben.
           return `<div class="zeile">${bild}<button type="button" class="waegung-knopf tippbar" data-aktion="gewicht-bearbeiten" data-id="${sicher(g.id)}">
             <span class="name"><b>${zahl(g.kg, 2)} kg</b><small>${datumText(g.datum)}${g.notiz ? " · " + sicher(g.notiz) : ""}</small></span>
             ${marke}<span class="nur-vorlesen">, ändern</span></button>
-            <button type="button" class="knopf-loeschen" data-aktion="gewicht-loeschen" data-id="${g.id}" aria-label="Gewicht vom ${datumText(g.datum)} löschen">${SYMBOL.loeschen}</button></div>`;
+            <button type="button" class="knopf-loeschen" data-aktion="gewicht-loeschen" data-id="${sicher(g.id)}" aria-label="Gewicht vom ${datumText(g.datum)} löschen">${SYMBOL.loeschen}</button></div>`;
         })
         .join("");
       const anzahl = monat.eintraege.length === 1 ? "1 Wägung" : `${monat.eintraege.length} Wägungen`;
@@ -627,10 +671,10 @@ function zeichneGewicht() {
 // ---------- Futter ----------
 
 function sortenZeile(f) {
-  return `<button type="button" class="zeile zeile-knopf tippbar" data-aktion="futter-bearbeiten" data-id="${f.id}">
+  return `<button type="button" class="zeile zeile-knopf tippbar" data-aktion="futter-bearbeiten" data-id="${sicher(f.id)}">
     <span class="icon" aria-hidden="true">${TYP_SYMBOL[f.typ]}</span>
     <span class="name">${sicher(f.name)}<small>${TYP_NAMEN[f.typ]} · ${zahl(f.kcalPro100g, f.kcalPro100g % 1 ? 1 : 0)} kcal/100 g</small></span>
-    <span class="marke marke-${f.kcalQuelle}">${QUELLE_NAMEN[f.kcalQuelle]}</span><span class="nur-vorlesen">, ändern</span>
+    <span class="marke marke-${sicher(f.kcalQuelle)}">${QUELLE_NAMEN[f.kcalQuelle]}</span><span class="nur-vorlesen">, ändern</span>
   </button>`;
 }
 
@@ -724,7 +768,7 @@ function zeichneTiere() {
       const zusammen = profilZusammenfassung(t);
       const fehlt = !t.geburtsdatum && !t.tierarzt && !t.koerperbau;
       const aktiv = mehrere && t === tier ? '<small class="aktiv-marke">wird gerade angezeigt</small>' : "";
-      return `<button type="button" class="eintrag eintrag-tier" data-aktion="profil-oeffnen" data-id="${t.id}" aria-label="Profil von ${sicher(t.name)} bearbeiten">
+      return `<button type="button" class="eintrag eintrag-tier" data-aktion="profil-oeffnen" data-id="${sicher(t.id)}" aria-label="Profil von ${sicher(t.name)} bearbeiten">
         ${profilHtml(t, "klein")}
         <span class="text"><b>${sicher(t.name)}</b>
           <small>${sicher(zusammen || "Profil")}</small>
@@ -748,7 +792,7 @@ function tierWahlAntippen() {
   profilMenueZu();
   const eintraege = daten.tiere
     .map(
-      (t) => `<li role="none"><button type="button" role="menuitem" data-aktion="tier-waehlen" data-id="${t.id}">
+      (t) => `<li role="none"><button type="button" role="menuitem" data-aktion="tier-waehlen" data-id="${sicher(t.id)}">
         ${profilHtml(t, "klein")}<span>${sicher(t.name)}</span>${t === tier ? '<span class="haken" aria-hidden="true">✓</span>' : ""}</button></li>`
     )
     .join("");
@@ -1211,7 +1255,8 @@ $("form-mahlzeit").addEventListener("input", zeigeMahlzeitVorschau);
 beimSpeichern("form-mahlzeit", "mahlzeit-fehler", (werte) => {
   if (!werte.get("futter")) return "Bitte eine Futtersorte wählen.";
   const gramm = leseZahl(werte.get("gramm"));
-  if (!gramm || gramm > 1000) return "Bitte eine Menge zwischen 1 und 1000 g eingeben.";
+  // Ab 0,1 g: ein einzelnes Leckerli wiegt etwa 0,5 g; „0,085“ (in kg gedacht) wird abgelehnt (seit 0.36.2).
+  if (!gramm || gramm < 0.1 || gramm > 1000) return "Bitte eine Menge zwischen 0,1 und 1000 g eingeben.";
   const [stunde, minute] = werte.get("uhrzeit").split(":").map(Number);
   const zeitpunkt = new Date(bearbeiteteMahlzeit ? bearbeiteteMahlzeit.zeitpunkt : gewaehlterTag);
   zeitpunkt.setHours(stunde, minute, 0, 0);
