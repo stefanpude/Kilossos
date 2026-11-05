@@ -444,3 +444,25 @@ test("berichtHtml: zwei Wägungen am selben Tag – kein „∞“ und kein „N
   const html = mitWaegungen([G2("2026-11-13", 9.3), G2("2026-11-13", 9.1, "auf dem Arm gewogen")]);
   assert.doesNotMatch(html, /∞|NaN|Infinity/);
 });
+
+// ---------- 0.36.7: Seitenumbruch im Druck (Handy-Test 05.11.2026) ----------
+// Fund im PDF vom Handy (Opera), am PC mit Chrome genauso: Rutschte das kcal-Diagramm auf die nächste Seite, lag es
+// dort über der Tabelle „Tierärztliche Freigaben“, auf der Seite davor blieb eine leere Fläche. Ursache: zwei
+// ineinander steckende Raster (.ansicht und .bericht mit display: grid); Chrome verrechnet beim Seitenumbruch die Höhe.
+// Im Druck deshalb Blöcke statt Raster, und Überschrift und Legende bleiben beim Diagramm.
+const druckCss = () => {
+  const css = readFileSync(new URL("../styles.css", import.meta.url), "utf8");
+  const start = css.indexOf("@media print {");
+  const ende = css.indexOf("\n}\n", start);
+  return css.slice(start, ende);
+};
+
+test("styles.css: im Druck keine ineinander steckenden Raster in der Übersicht", () => {
+  const druck = druckCss();
+  assert.match(druck, /\.ansicht, \.bericht \{ display: block; \}/);
+  assert.match(druck, /\.bericht > \* \+ \* \{ margin-top: 16px; \}/, "Abstand wie gap: 16px am Bildschirm");
+});
+
+test("styles.css: im Druck bleiben Überschrift und Legende beim Diagramm", () => {
+  assert.match(druckCss(), /\.bericht h3, \.bericht \.legende \{ break-after: avoid; \}/);
+});
