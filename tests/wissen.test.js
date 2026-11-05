@@ -173,14 +173,14 @@ test("Willkommensseite verspricht nichts, was die App nicht halten kann (Stefan,
   assert.doesNotMatch(html, /ohne Fettleber-Risiko|für jede Sorte/);
 });
 
-test("Version 0.42.2: Cache v83 mit js/heute-grafiken.js, Versionszeile unter „Mehr“", () => {
+test("Version 0.42.3: Cache v84 mit js/heute-grafiken.js, Versionszeile unter „Mehr“", () => {
   const sw = lies("sw.js");
-  assert.match(sw, /const CACHE_NAME = "kilossos-v83";/);
+  assert.match(sw, /const CACHE_NAME = "kilossos-v84";/);
   assert.match(sw, /"js\/wissen\.js",/);
   assert.match(sw, /"js\/besondere-tage\.js",/);
   assert.match(sw, /"js\/freigaben\.js",/);
   assert.match(sw, /"js\/heute-grafiken\.js",/);
-  assert.match(lies("index.html"), /id="version">Version 0\.42\.2</);
+  assert.match(lies("index.html"), /id="version">Version 0\.42\.3</);
 });
 
 test("0.41.0: Foto im Profil-Fenster (auch beim Anlegen), gilt erst beim Speichern", () => {

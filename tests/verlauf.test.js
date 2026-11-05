@@ -724,3 +724,12 @@ test("0.42.2: Pfeil eines Ausreißers am rechten Rand steht links vom Punkt, nic
   assert.equal(pfeil[2], ' text-anchor="end"');
   assert.ok(Number(pfeil[1]) <= 340 - 40, `Pfeil bei x ${pfeil[1]}`);
 });
+
+// 0.42.3: „Alle Wochen“ schreibt das Tempo wie Kopf und Skala: Abnahme ohne Vorzeichen, Zunahme mit „−“.
+test("0.42.3: „Alle Wochen“ mit gleichem Vorzeichen wie der Kopf", () => {
+  const g = [G("2026-10-01", 10), G("2026-10-08", 9.97), G("2026-10-15", 10), G("2026-10-22", 10)];
+  const html = tVerlauf({ gewichte: g, freigaben: [], heute: "2026-10-22" });
+  const marken = [...html.matchAll(/<span class="marke[^"]*">([^<]*%)<\/span>/g)].map((m) => m[1]);
+  assert.deepEqual(marken, ["0,00 %", "−0,30 %", "0,30 %"]);
+  assert.doesNotMatch(html, /class="marke[^"]*">\+/);
+});
