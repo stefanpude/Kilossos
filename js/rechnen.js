@@ -95,9 +95,9 @@ const PFLICHT_FELDER = RECHNER_FELDER.slice(0, 4);
 
 // Prüft die fünf getippten Prozentwerte (Text, Komma oder Punkt, „%“ am Ende erlaubt) und rechnet, wenn alles passt.
 // Ergebnis: { art: "nichts" | "keineZahl" | "leer" | "feuchteFehlt" | "zuViel" | "feuchte100" | "ergebnis", … }
-// Bei "zuViel": summe (auf 0,1 aufgerundet, damit nie „100 %, mehr als 100 %“ dasteht), angenommen (8 % Feuchte dabei).
+// Bei "zuViel": summe (auf 0,1 aufgerundet, damit nie „100 %, mehr als 100 %“ dasteht; ohne Feuchte-Annahme).
 // Bei "ergebnis": kcal (ganz, wie in der Futterliste), analyse zum Speichern (feuchte null = nicht angegeben),
-// angenommen (Feuchte 8 % angenommen), viel (über der Grenze der Art, Übernehmen bleibt möglich),
+// angenommen (Feuchte fehlte) mit feuchteAnnahme (8 oder weniger, siehe unten), viel (über der Grenze der Art, Übernehmen bleibt möglich),
 // uebernehmbar (nur 20 bis 700 kcal passen ins Feld).
 export function rechnerPruefen(eingaben, typ) {
   // „7,“ beim Tippen gilt schon als 7, sonst blinkt bei jedem Komma kurz ein Fehler auf.
@@ -116,10 +116,17 @@ export function rechnerPruefen(eingaben, typ) {
   if (leer.length) return { art: "leer", leer };
   const angenommen = zahl.feuchte === null;
   if (angenommen && typ === "nass") return { art: "feuchteFehlt" };
-  const werte = { ...zahl, feuchte: angenommen ? FEUCHTE_TROCKEN_ANNAHME : zahl.feuchte };
   // Auf 0,01 gerundet: 10,3 + 5,9 + 2,1 + 0,3 + 81,4 ergibt sonst 100,00000000000001.
-  const hundertstel = Math.round(RECHNER_FELDER.reduce((s, f) => s + werte[f.name], 0) * 100);
-  if (hundertstel > 10000) return { art: "zuViel", summe: Math.ceil(hundertstel / 10) / 10, angenommen };
+  const hundertstel = (felder) => Math.round(felder.reduce((s, f) => s + (zahl[f.name] ?? 0), 0) * 100);
+  const ohneFeuchte = hundertstel(PFLICHT_FELDER);
+  // Fehlt die Feuchte, gelten 8 %. Läge die Summe damit über 100 % (gefriergetrocknete Snacks), wird der Rest bis
+  // 100 % angenommen (seit 0.42.0): Mehr Feuchte kann es nicht geben, ohne dass die Kohlenhydrate unter 0 fallen.
+  const feuchteAnnahme = angenommen
+    ? Math.max(0, Math.min(FEUCHTE_TROCKEN_ANNAHME * 100, 10000 - ohneFeuchte)) / 100
+    : null;
+  const werte = { ...zahl, feuchte: angenommen ? feuchteAnnahme : zahl.feuchte };
+  const summe = angenommen ? ohneFeuchte : hundertstel(RECHNER_FELDER);
+  if (summe > 10000) return { art: "zuViel", summe: Math.ceil(summe / 10) / 10 };
   if (werte.feuchte >= 100) return { art: "feuchte100" };
   const kcal = Math.round(kcalAusBestandteilen(werte));
   return {
@@ -127,6 +134,7 @@ export function rechnerPruefen(eingaben, typ) {
     kcal,
     analyse: zahl,
     angenommen,
+    ...(angenommen ? { feuchteAnnahme } : {}),
     viel: kcal > (typ === "nass" ? KCAL_GRENZEN.nass : KCAL_GRENZEN.trocken),
     uebernehmbar: passend(kcal),
   };

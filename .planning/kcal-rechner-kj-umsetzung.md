@@ -172,9 +172,15 @@ doppelte Ansage; `sicher()` am Attributwert.
 - Die Rückmeldung „✓ … umgerechnet“ bleibt stehen, bis sich Wert oder Art ändern (statt nur kurz).
 - Wert oder Art geändert: Eine Bestätigung „stimmt so“ verfällt, auch beim Zurückändern.
 
-**Offene Fragen an Stefan (nicht gebaut):**
+**Offene Fragen an Stefan (entschieden 05.11.2026):**
 
 - Sorten, die vor 0.32.0 mit einem kJ-Wert gespeichert wurden, fallen erst beim Speichern auf. Soll der Kasten schon
-  beim Öffnen einer solchen Sorte erscheinen?
+  beim Öffnen einer solchen Sorte erscheinen? → **Nein, nicht bauen.** Solche Sorten gibt es kaum; eine Prüfung beim
+  Einlesen von Sicherungen kommt später.
 - Gefriergetrocknete Snacks ohne Feuchteangabe (z. B. 75/15/5/1): Mit 8 % angenommener Feuchte kommt „über 100 %“.
-  Soll die Annahme dann auf „100 minus Summe“ sinken?
+  Soll die Annahme dann auf „100 minus Summe“ sinken? → **Ja, gebaut in 0.42.0.** Ergeben die vier Pflichtwerte mehr
+  als 92 %, nimmt der Rechner den Rest bis 100 % als Feuchte an (75/15/5/1 → 4 %, etwa 440 kcal) und sagt das im
+  Ergebnis. Mehr Feuchte ist nicht möglich, ohne dass die Kohlenhydrate unter 0 fallen; gegenüber den 8 % ergibt das
+  mehr kcal (Leckerli zählen eher mehr). Liegen schon die vier Werte über 100 %, kommt der rote Kasten mit ihrer Summe,
+  ohne Hinweis auf eine angenommene Feuchte. Gespeichert wird die Feuchte weiter als „nicht angegeben“, das Ergebnis
+  bleibt „geschätzt“.

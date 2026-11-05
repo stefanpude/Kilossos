@@ -2003,7 +2003,7 @@ function zeichneRechnerAusgabe() {
       "Bitte trag sie ein, ohne sie stimmt die Rechnung nicht.",
     ),
     zuViel: roterHinweis(
-      `Zusammen sind das ${mitKomma(r.summe)}&nbsp;%${r.angenommen ? ` (mit ${FEUCHTE_TROCKEN_ANNAHME}&nbsp;% angenommener Feuchte)` : ""}, mehr als 100&nbsp;% geht nicht.`,
+      `Zusammen sind das ${mitKomma(r.summe)}&nbsp;%, mehr als 100&nbsp;% geht nicht.`,
       "Steht bei einem Wert das Komma an der falschen Stelle? Vergleiche die Zahlen bitte mit der Packung.",
     ),
     feuchte100: roterHinweis("Die Feuchte kann nicht 100&nbsp;% sein.", "Vergleiche die Zahlen bitte mit der Packung."),
@@ -2017,10 +2017,17 @@ function zeichneRechnerAusgabe() {
 
 let letzteAusgabe = null;
 
+// Feuchte fehlt: üblich sind 8 %; käme die Summe damit über 100 %, nimmt der Rechner den Rest bis 100 % (0.42.0).
+function feuchteAnnahmeText(prozent) {
+  const anfang = "Die Feuchte steht nicht auf der Packung. Das ist erlaubt, wenn sie unter 14&nbsp;% liegt.";
+  if (prozent >= FEUCHTE_TROCKEN_ANNAHME) return `${anfang} Kilossos nimmt deshalb ${FEUCHTE_TROCKEN_ANNAHME}&nbsp;% an.`;
+  return `${anfang} Mit den üblichen ${FEUCHTE_TROCKEN_ANNAHME}&nbsp;% käme die Summe über 100&nbsp;%. Kilossos nimmt deshalb den Rest bis 100&nbsp;% an: ${mitKomma(prozent)}&nbsp;%.`;
+}
+
 function ergebnisHtml(r, typ) {
   return `<div class="ergebnis">
     <p class="ergebnis-zahl">etwa ${r.kcal}&nbsp;<small>kcal pro 100&nbsp;g</small></p>
-    ${r.angenommen ? `<p class="annahme">Die Feuchte steht nicht auf der Packung. Das ist erlaubt, wenn sie unter 14&nbsp;% liegt. Kilossos nimmt deshalb ${FEUCHTE_TROCKEN_ANNAHME}&nbsp;% an.</p>` : ""}
+    ${r.angenommen ? `<p class="annahme">${feuchteAnnahmeText(r.feuchteAnnahme)}</p>` : ""}
     ${r.viel && ART_DATIV[typ] ? `<p class="annahme">Das ist viel für ${ART_DATIV[typ]}. Stimmen Feuchte und Fett?</p>` : ""}
     <p>Geschätzt: Die Rechnung kann bis etwa 10&nbsp;% vom echten Wert abweichen. Nennt der Hersteller einen Wert, zum Beispiel auf seiner Website, nimm lieber den.</p>
     ${r.uebernehmbar

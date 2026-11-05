@@ -1,6 +1,7 @@
 // kJ-Schutz und kcal-Rechner im Fenster „Eigene Sorte“ (0.32.0, Plan .planning/kcal-rechner-kj.md).
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { kcalPruefen, kcalKasten, rechnerPruefen, KCAL_GRENZEN } from "../js/rechnen.js";
 import { FUTTERLISTE } from "../js/futterliste.js";
 
@@ -154,7 +155,7 @@ test("Rechner: ohne Feuchte bei Nassfutter → Fehler", () => {
 });
 
 test("Rechner: 79 statt 7,9 → zusammen 169,1 %", () => {
-  assert.deepEqual(rechnerPruefen({ ...SHEBA, protein: "79" }, "nass"), { art: "zuViel", summe: 169.1, angenommen: false });
+  assert.deepEqual(rechnerPruefen({ ...SHEBA, protein: "79" }, "nass"), { art: "zuViel", summe: 169.1 });
 });
 
 test("Rechner: Summe genau 100 trotz Kommazahlen ist erlaubt", () => {
@@ -266,14 +267,11 @@ test("Sorten ohne analyse bleiben unberührt", () => {
 
 test("Rechner: Summe knapp über 100 wird aufgerundet genannt, nie „100 %, mehr als 100 %“", () => {
   const werte = { protein: "10,31", fett: "5,9", asche: "2,1", faser: "0,3", feuchte: "81,4" };
-  assert.deepEqual(rechnerPruefen(werte, "nass"), { art: "zuViel", summe: 100.1, angenommen: false });
-  assert.deepEqual(rechnerPruefen({ ...SHEBA, protein: "79" }, "nass"), { art: "zuViel", summe: 169.1, angenommen: false });
+  assert.deepEqual(rechnerPruefen(werte, "nass"), { art: "zuViel", summe: 100.1 });
+  assert.deepEqual(rechnerPruefen({ ...SHEBA, protein: "79" }, "nass"), { art: "zuViel", summe: 169.1 });
 });
 
-test("Rechner: über 100 mit angenommener Feuchte sagt, dass 8 % angenommen sind", () => {
-  const snack = { protein: "75", fett: "15", asche: "5", faser: "1", feuchte: "" };
-  assert.deepEqual(rechnerPruefen(snack, "leckerli"), { art: "zuViel", summe: 104, angenommen: true });
-});
+// Seit 0.42.0: Über 100 % nur mit den angenommenen 8 % → Feuchte = Rest bis 100 (Block „0.42.0“ unten).
 
 test("Rechner: riesige Zahl ist keine Zahl (kein „Infinity %“)", () => {
   assert.deepEqual(rechnerPruefen({ ...SHEBA, protein: "9".repeat(400) }, "nass"), { art: "keineZahl", felder: ["protein"] });
@@ -288,7 +286,64 @@ test("Rechner: Ergebnis außerhalb 20 bis 700 lässt sich nicht übernehmen", ()
   const fett = { protein: "30", fett: "70", asche: "0", faser: "0", feuchte: "0" };
   assert.equal(rechnerPruefen(fett, "trocken").uebernehmbar, false);
   const faser = { protein: "0", fett: "0", asche: "0", faser: "100", feuchte: "" };
-  assert.equal(rechnerPruefen(faser, "trocken").art, "zuViel"); // 100 + 8 angenommen
+  assert.equal(rechnerPruefen(faser, "trocken").uebernehmbar, false); // Feuchte 0 angenommen (Rest bis 100)
   const faser0 = { protein: "0", fett: "0", asche: "0", faser: "100", feuchte: "0" };
   assert.equal(rechnerPruefen(faser0, "trocken").uebernehmbar, false);
+});
+
+// ---------- 0.42.0: Snack-Feuchte „100 minus Summe“ ----------
+// Gefriergetrocknete Snacks nennen oft keine Feuchte, und die vier Pflichtwerte ergeben schon über 92 %. Mit den
+// üblichen 8 % käme die Summe über 100 %. Dann nimmt Kilossos den Rest bis 100 % als Feuchte an (Kohlenhydrate 0).
+
+test("0.42.0: Snack 75/15/5/1 ohne Feuchte → Feuchte 4 % angenommen, etwa 440 kcal", () => {
+  const snack = { protein: "75", fett: "15", asche: "5", faser: "1", feuchte: "" };
+  const r = rechnerPruefen(snack, "leckerli");
+  assert.equal(r.art, "ergebnis");
+  assert.equal(r.angenommen, true);
+  assert.equal(r.feuchteAnnahme, 4);
+  // Von Hand: Brutto 5,7·75 + 9,4·15 + 4,1·1 = 572,6; verdaulich 87,9 − 0,88·(1/96·100) = 86,98 %;
+  // 572,6 · 0,8698 − 0,77·75 = 440,3.
+  assert.equal(r.kcal, 440);
+  assert.equal(r.analyse.feuchte, null, "gespeichert wird weiter „nicht angegeben“");
+  assert.equal(r.uebernehmbar, true);
+  assert.equal(r.viel, false);
+});
+
+test("0.42.0: Grenze – genau 92 % bleibt bei 8 %, 92,01 % nimmt 7,99 %", () => {
+  const genau = { protein: "60", fett: "20", asche: "10", faser: "2", feuchte: "" };
+  assert.equal(rechnerPruefen(genau, "leckerli").feuchteAnnahme, 8);
+  const knapp = { ...genau, protein: "60,01" };
+  assert.equal(rechnerPruefen(knapp, "leckerli").feuchteAnnahme, 7.99);
+});
+
+test("0.42.0: vier Werte zusammen genau 100 → Feuchte 0 angenommen", () => {
+  const voll = { protein: "80", fett: "14", asche: "5", faser: "1", feuchte: "" };
+  const r = rechnerPruefen(voll, "trocken");
+  assert.equal(r.art, "ergebnis");
+  assert.equal(r.feuchteAnnahme, 0);
+});
+
+test("0.42.0: vier Werte schon über 100 → Fehler mit ihrer Summe, ohne angenommene Feuchte", () => {
+  const zuviel = { protein: "80", fett: "15", asche: "5", faser: "1", feuchte: "" };
+  assert.deepEqual(rechnerPruefen(zuviel, "leckerli"), { art: "zuViel", summe: 101 });
+});
+
+test("0.42.0: Trockenfutter wie Purina behält 8 %", () => {
+  assert.equal(rechnerPruefen(PURINA, "trocken").feuchteAnnahme, 8);
+});
+
+test("0.42.0: mit eingetragener Feuchte gibt es keine Annahme", () => {
+  assert.equal("feuchteAnnahme" in rechnerPruefen(SHEBA, "nass"), false);
+});
+
+test("0.42.0: Nassfutter ohne Feuchte bleibt ein Fehler, auch bei hoher Summe", () => {
+  const snack = { protein: "75", fett: "15", asche: "5", faser: "1", feuchte: "" };
+  assert.deepEqual(rechnerPruefen(snack, "nass"), { art: "feuchteFehlt" });
+});
+
+test("0.42.0: Die App nennt die angenommene Feuchte aus dem Ergebnis", () => {
+  const app = readFileSync(new URL("../app.js", import.meta.url), "utf8");
+  assert.match(app, /r\.feuchteAnnahme/);
+  assert.match(app, /käme die Summe über 100&nbsp;%/);
+  assert.doesNotMatch(app, /angenommener Feuchte\)/, "„zuViel“ hat keine angenommene Feuchte mehr");
 });
