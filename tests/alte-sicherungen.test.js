@@ -5,7 +5,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { laden, speichern, futterNachId } from "../js/daten.js";
-import { sicherungPruefen } from "../js/sicherung.js";
+import { sicherungPruefen, einleseFrage } from "../js/sicherung.js";
 import { berichtDaten, berichtHtml } from "../js/bericht.js";
 import { zeichneVerlauf } from "../js/verlauf.js";
 import { wochenRaten, futterTage, monatsGruppen, achtWochen } from "../js/zusammenfassung.js";
@@ -36,10 +36,29 @@ function einlesen(datei) {
   return { pruefung, s, daten: laden(s) };
 }
 
-test("Es gibt Beispiel-Sicherungen von 0.2 bis 0.28", () => {
-  assert.ok(DATEIEN.length >= 14);
+test("Es gibt Beispiel-Sicherungen von 0.2 bis 0.33", () => {
+  assert.ok(DATEIEN.length >= 15);
   assert.ok(DATEIEN.includes("kilossos-0.02.json"));
   assert.ok(DATEIEN.includes("kilossos-0.28.json"));
+  assert.ok(DATEIEN.includes("kilossos-0.33.json"));
+});
+
+test("0.33: besondere Tage aller Formen überstehen das Einlesen, die Rückfrage nennt sie", () => {
+  const original = lies("kilossos-0.33.json");
+  const { daten } = einlesen("kilossos-0.33.json");
+  assert.equal(daten.besondereTage.length, 5);
+  assert.ok(daten.besondereTage.some((b) => b.bis === null), "laufende Phase");
+  assert.ok(daten.besondereTage.some((b) => b.art === "zukunft-art"), "unbekannte Art bleibt");
+  assert.deepEqual(daten.futter.find((f) => f.analyse).analyse, original.futter.find((f) => f.analyse).analyse);
+  const neu = lies("kilossos-0.33.json");
+  const frage = einleseFrage(neu, sicherungPruefen(neu, HEUTE), "");
+  assert.match(frage, /, \d+ Gewichten und 5 besonderen Tagen einlesen\?/);
+  const alt = lies("kilossos-0.28.json");
+  assert.doesNotMatch(einleseFrage(alt, sicherungPruefen(alt, HEUTE), ""), /besonder/);
+  const einer = lies("kilossos-0.33.json");
+  einer.besondereTage = einer.besondereTage.slice(0, 1);
+  assert.match(einleseFrage(einer, sicherungPruefen(einer, HEUTE), ""), /und 1 besonderen Tag einlesen\?/);
+  assert.match(einleseFrage(alt, sicherungPruefen(alt, HEUTE), ""), /Mahlzeiten und \d+ Gewichten einlesen\?/);
 });
 
 for (const datei of DATEIEN) {
@@ -56,6 +75,7 @@ for (const datei of DATEIEN) {
     }
     // Einträge bleiben Feld für Feld gleich (nur Futterwerte dürfen durch die Startwert-Umstellung wechseln).
     for (const feld of ["tiere", "mahlzeiten", "gewichte", "freigaben"]) assert.deepEqual(daten[feld], original[feld], feld);
+    assert.deepEqual(daten.besondereTage, original.besondereTage ?? [], "besondereTage");
     // Jede Mahlzeit zeigt auf eine vorhandene Sorte.
     const sorten = futterNachId(daten);
     for (const m of daten.mahlzeiten) assert.ok(sorten.has(m.futterId), `Sorte zu ${m.id}`);
@@ -74,15 +94,15 @@ for (const datei of DATEIEN) {
     const sorten = futterNachId(daten);
     for (const tier of daten.tiere) {
       const vonTier = (liste) => liste.filter((e) => e.tierId === tier.id);
-      const [mahlzeiten, gewichte, freigaben] = [daten.mahlzeiten, daten.gewichte, daten.freigaben].map(vonTier);
+      const [mahlzeiten, gewichte, freigaben, besondereTage] = [daten.mahlzeiten, daten.gewichte, daten.freigaben, daten.besondereTage].map(vonTier);
       wochenRaten(gewichte, freigaben);
       monatsGruppen(gewichte);
       achtWochen(gewichte, HEUTE);
       futterTage(mahlzeiten, sorten, freigaben);
-      const html = zeichneVerlauf({ gewichte, mahlzeiten, freigaben, futterNachId: sorten, zeitraum: "alles", heute: HEUTE, kopf: true });
+      const html = zeichneVerlauf({ gewichte, mahlzeiten, freigaben, besondereTage, futterNachId: sorten, zeitraum: "alles", heute: HEUTE, kopf: true });
       assert.equal(typeof html, "string");
-      const b = berichtDaten({ tier, gewichte, mahlzeiten, freigaben, futter: daten.futter, von: "2026-10-01", bis: HEUTE, heute: HEUTE });
-      const bericht = berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNachId: sorten, erstellt: HEUTE, demo: false, fotos: true });
+      const b = berichtDaten({ tier, gewichte, mahlzeiten, freigaben, besondereTage, futter: daten.futter, von: "2026-10-01", bis: HEUTE, heute: HEUTE });
+      const bericht = berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, besondereTage, futterNachId: sorten, erstellt: HEUTE, demo: false, fotos: true });
       assert.match(bericht, new RegExp(tier.name));
     }
   });
@@ -124,6 +144,16 @@ test("Sheba-Kopie aus der alten Futterliste (0.6 bis 0.18, 71 laut zooplus) wird
   assert.equal(sheba.kcalQuelle, "geschaetzt");
 });
 
+test("Demo-Simulation hat besondere Tage: abgeschlossene Phase „Krank“, mehrmals genascht, eine laufende Phase", () => {
+  const demo = JSON.parse(fs.readFileSync(new URL("../demo/kito-simulation.json", import.meta.url), "utf8"));
+  const arten = demo.besondereTage.map((b) => b.art);
+  assert.ok(demo.besondereTage.some((b) => b.art === "krank" && b.bis !== null && b.bis > b.von));
+  assert.ok(arten.filter((a) => a === "genascht").length >= 3);
+  assert.equal(demo.besondereTage.filter((b) => b.bis === null).length, 1);
+  assert.ok(!arten.includes("futter-verweigert"));
+  assert.ok(demo.besondereTage.every((b) => b.notiz.startsWith("Simulation:")));
+});
+
 test("Eine Sicherung aus der Demo hat dasselbe Format und wird ohne Korrekturen angenommen", () => {
   const demo = JSON.parse(fs.readFileSync(new URL("../demo/kito-simulation.json", import.meta.url), "utf8"));
   assert.deepEqual(sicherungPruefen(demo, HEUTE), { kaputt: 0, fotos: 0, angaben: 0 });
@@ -158,7 +188,7 @@ test("einleseFrage nennt Anzahl und alle Korrekturen", async () => {
   const neu = lies("kilossos-0.28.json");
   assert.equal(
     einleseFrage(neu, { kaputt: 0, fotos: 0, angaben: 0 }, ""),
-    "Sicherung mit 16 Mahlzeiten und 4 Gewichte einlesen?",
+    "Sicherung mit 16 Mahlzeiten und 4 Gewichten einlesen?", // seit 0.33.0 im Dativ
   );
   const text = einleseFrage(neu, { kaputt: 2, fotos: 1, angaben: 1 }, " X.");
   assert.match(text, /einlesen\? X\. 2 Einträge waren beschädigt und werden entfernt/);

@@ -40,7 +40,8 @@ import {
   RECHNER_FELDER,
   FEUCHTE_TROCKEN_ANNAHME,
 } from "./js/rechnen.js";
-import { zeichneVerlauf } from "./js/verlauf.js";
+import { zeichneVerlauf, naechsterZeitleistenEintrag } from "./js/verlauf.js";
+import { BESONDERE_ARTEN, artVon, eintraegeAm, zeitraumText, eintragAusFormular, beenden, notfallJetzt } from "./js/besondere-tage.js";
 import { berichtDaten, berichtHtml } from "./js/bericht.js";
 import {
   FUTTERLISTE,
@@ -508,6 +509,8 @@ function zeichneHeute(vonNull = false) {
   $("heute-gewicht").innerHTML = `<section class="karte" aria-label="Gewicht in den letzten 8 Wochen">
       <div class="mini-zeile">${miniKurve(achtWochen(gewichte, tag))}${gewichtText}</div></section>`;
 
+  zeichneBesondereTage(tag, heute);
+
   // Leckerli: gleiche Basis wie die Leckerli-Warnung in warnungen().
   const lk = leckerliKachel({ tag, heute, kcal: summe.kcal, leckerli, freigabe, warnungAktiv: liste.some((w) => w.id === "leckerli") });
   const anteilText =
@@ -517,6 +520,36 @@ function zeichneHeute(vonNull = false) {
       <div class="oben"><span class="label">Leckerli</span><span class="wert">${zahl(lk.kcal)} <small class="leise">kcal</small></span></div>
       ${anteilText ? `<span class="leise">${anteilText}</span>` : ""}
       ${lk.anteil === null ? "" : `<span class="balken sofort${lk.stufe === "achtung" ? " gefahr" : ""}"><i style="--w: ${breite.toFixed(1)}%"></i></span>`}</section>`;
+}
+
+// ---------- Besonderer Tag (0.33.0, .planning/besonderer-tag.md) ----------
+// Karte unter „Mahlzeiten“: Einträge, die den gezeigten Tag betreffen (auch laufende Phasen). Antippen ändert, Kreuz
+// löscht, eine laufende Phase lässt sich mit einem Tipp beenden. Dazu der rote Notfall-Kasten bei „Futter verweigert“.
+function zeichneBesondereTage(tag, heute) {
+  // Hängt am echten Datum, nicht am gezeigten Tag: Es geht um die Katze jetzt.
+  $("notfall-kasten").hidden = !notfallJetzt(daten.besondereTage, tier.id, heute);
+  const liste = eintraegeAm(daten.besondereTage, tier.id, tag);
+  if (liste.length === 0) {
+    $("heute-besonders").innerHTML =
+      '<p class="tipp">Draußen gewesen, genascht, krank? Hier festhalten, damit du und der Tierarzt später seht, warum sich das Gewicht so bewegt.</p>';
+    return;
+  }
+  const zeilen = liste
+    .map((e) => {
+      const art = artVon(e.art);
+      const id = sicher(e.id);
+      const wann = zeitraumText(e);
+      const notiz = e.notiz ? `<small class="notiz">${sicher(e.notiz)}</small>` : "";
+      const ende =
+        e.bis === null
+          ? `<button type="button" class="knopf-zweit knopf-beenden" data-aktion="besonders-beenden" data-id="${id}" aria-label="${sicher(art.text)} seit ${sicher(wann.replace(/^seit /, ""))}: ${sicher(art.ende ?? "Beendet")}">${sicher(art.ende ?? "Beendet")}</button>`
+          : "";
+      return `<li><button type="button" class="protokoll-knopf tippbar" data-aktion="besonders-bearbeiten" data-id="${id}">
+          <span class="was"><b>${sicher(art.text)}</b><small>${sicher(wann)}</small>${notiz}</span><span class="nur-vorlesen">, ändern</span></button>
+          <button type="button" class="knopf-loeschen" data-aktion="besonders-loeschen" data-id="${id}" aria-label="${sicher(art.text)}, ${sicher(wann)}, löschen">${SYMBOL.loeschen}</button>${ende}</li>`;
+    })
+    .join("");
+  $("heute-besonders").innerHTML = `<ul class="protokoll besonders-liste">${zeilen}</ul>`;
 }
 
 // ---------- Gewicht ----------
@@ -764,7 +797,7 @@ beimSpeichern("form-profil", "profil-fehler", (werte) => {
   wechsleTier(ziel.id);
 });
 
-// Entfernen mit Rückfrage: löscht das Tier mit allen Mahlzeiten, Gewichten und Freigaben. Das letzte Tier bleibt.
+// Entfernen mit Rückfrage: löscht das Tier mit allen Mahlzeiten, Gewichten, Freigaben und besonderen Tagen. Das letzte Tier bleibt.
 $("form-profil").addEventListener("submit", (ereignis) => {
   if (ereignis.submitter?.value !== "entfernen" || !bearbeitetesTier) return;
   const anzahl = eintraegeVon(daten, bearbeitetesTier.id);
@@ -772,11 +805,14 @@ $("form-profil").addEventListener("submit", (ereignis) => {
     [anzahl.mahlzeiten, "Mahlzeit", "Mahlzeiten"],
     [anzahl.gewichte, "Gewicht", "Gewichte"],
     [anzahl.freigaben, "Freigabe", "Freigaben"],
+    [anzahl.besondereTage, "besonderer Tag", "besondere Tage"],
   ]
     .filter(([n]) => n > 0)
     .map(([n, eins, mehr]) => `${n} ${n === 1 ? eins : mehr}`);
+  // Genau ein Eintrag insgesamt: „wird“ statt „werden“ („Dabei wird auch 1 besonderer Tag … gelöscht“).
+  const verb = teile.length === 1 && teile[0].startsWith("1 ") ? "wird" : "werden";
   const eintraege = teile.length
-    ? ` Dabei werden auch ${teile.length > 1 ? `${teile.slice(0, -1).join(", ")} und ${teile.at(-1)}` : teile[0]} von ${bearbeitetesTier.name} gelöscht. Das lässt sich nicht rückgängig machen.`
+    ? ` Dabei ${verb} auch ${teile.length > 1 ? `${teile.slice(0, -1).join(", ")} und ${teile.at(-1)}` : teile[0]} von ${bearbeitetesTier.name} gelöscht. Das lässt sich nicht rückgängig machen.`
     : "";
   const frage = `${bearbeitetesTier.name} wirklich entfernen?${eintraege} Die Futtersorten bleiben.`;
   if (!confirm(frage)) {
@@ -824,6 +860,7 @@ function zeichneVerlaufAnsicht() {
     gewichte: daten.gewichte.filter((g) => g.tierId === tier.id),
     mahlzeiten: daten.mahlzeiten.filter((m) => m.tierId === tier.id),
     freigaben: daten.freigaben.filter((f) => f.tierId === tier.id),
+    besondereTage: daten.besondereTage.filter((b) => b.tierId === tier.id),
     futterNachId: futterNachId(daten),
     zeitraum,
     heute: tagSchluessel(new Date()),
@@ -863,6 +900,7 @@ function zeichneBericht() {
     gewichte: daten.gewichte.filter((g) => g.tierId === tier.id),
     mahlzeiten: daten.mahlzeiten.filter((m) => m.tierId === tier.id),
     freigaben: daten.freigaben.filter((f) => f.tierId === tier.id),
+    besondereTage: daten.besondereTage.filter((b) => b.tierId === tier.id),
   };
   const auswahl = document.querySelector('[name="bericht-zeitraum"]').value;
   let von;
@@ -871,6 +909,7 @@ function zeichneBericht() {
       ...eigene.gewichte.map((g) => g.datum),
       ...eigene.mahlzeiten.map((m) => tagSchluessel(new Date(m.zeitpunkt))),
       ...eigene.freigaben.map((f) => f.datum),
+      ...eigene.besondereTage.map((b) => b.von),
     ].sort();
     von = anfaenge[0] ?? heute;
   } else {
@@ -891,9 +930,12 @@ function zeichneBericht() {
 
 // Infoblase der Gewichtskurve: Antippen oder Ziehen zeigt den nächsten Punkt mit Datum und kg.
 function zeigeInfoblase(ereignis) {
+  const leiste = ereignis.target.closest?.("svg.zeitleiste");
+  if (leiste) return zeigeZeitleistenBlase(ereignis, leiste);
   const kurve = ereignis.target.closest?.("svg.kurve");
   const blase = $("infoblase");
   if (!kurve || !blase) return;
+  blase.classList.remove("lang");
   const punkte = JSON.parse(kurve.dataset.punkte);
   const flaeche = kurve.getBoundingClientRect();
   const breite = kurve.viewBox.baseVal.width;
@@ -913,6 +955,25 @@ function zeigeInfoblase(ereignis) {
   const links = (naechster[0] * flaeche.width) / breite;
   blase.style.left = `${Math.min(Math.max(links, blase.offsetWidth / 2), flaeche.width - blase.offsetWidth / 2)}px`;
   blase.style.top = `${(naechster[1] * flaeche.height) / hoehe}px`;
+}
+// Zeitleiste der besonderen Tage (0.33.0): Antippen zeigt Art, Zeitraum und Notiz des nächsten Eintrags in derselben Blase.
+function zeigeZeitleistenBlase(ereignis, leiste) {
+  const blase = $("infoblase");
+  if (!blase) return;
+  document.querySelectorAll(".kurve .hilfslinie, .kurve .punkt.aktiv").forEach((el) => el.setAttribute("visibility", "hidden"));
+  const flaeche = leiste.getBoundingClientRect();
+  const feld = leiste.parentElement.getBoundingClientRect(); // .kurve-feld: Bezug für die Lage der Blase
+  const breite = leiste.viewBox.baseVal.width;
+  const hoehe = leiste.viewBox.baseVal.height;
+  const x = ((ereignis.clientX - flaeche.left) * breite) / flaeche.width;
+  const y = ((ereignis.clientY - flaeche.top) * hoehe) / flaeche.height;
+  const [x1, x2, ey, text] = naechsterZeitleistenEintrag(JSON.parse(leiste.dataset.eintraege), x, y);
+  blase.classList.add("lang");
+  blase.textContent = text;
+  blase.hidden = false;
+  const links = (Math.min(Math.max(x, x1), x2) * flaeche.width) / breite + (flaeche.left - feld.left);
+  blase.style.left = `${Math.min(Math.max(links, blase.offsetWidth / 2), feld.width - blase.offsetWidth / 2)}px`;
+  blase.style.top = `${flaeche.top - feld.top + (ey * flaeche.height) / hoehe}px`;
 }
 function versteckeInfoblase() {
   const blase = $("infoblase");
@@ -1378,6 +1439,77 @@ beimSpeichern("form-gewicht", "gewicht-fehler", (werte) => {
   }
   zeichneAlles();
   if (gewichtFoto && !eintrag.foto) return { toast: "✓ Gespeichert, ohne das neue Foto" };
+});
+
+// ---------- Fenster „Besonderer Tag“ (0.33.0) ----------
+// Ohne Eintrag: neu, Datum ist der gezeigte Tag. Mit Eintrag: ändern (wie „Gewicht ändern“ seit 0.31.0).
+let bearbeiteterTag = null;
+
+function zeigeBesondersFelder() {
+  const form = $("form-besonders");
+  const art = BESONDERE_ARTEN.find((a) => a.wert === form.art.value);
+  $("besonders-art-tipp").textContent = art?.hinweis ?? "";
+  $("besonders-art-tipp").hidden = !art?.hinweis;
+  $("besonders-notiz-zusatz").textContent = art?.notizPflicht ? "(bitte ausfüllen)" : "(freiwillig)";
+  $("besonders-bis-feld").hidden = !form.mehrere.checked;
+  // Gesperrt, solange das Häkchen aus ist: Der Browser prüft ein verstecktes Feld sonst trotzdem (min = Datum) und
+  // verweigert das Speichern ohne sichtbare Meldung (Review 05.11.). Gesperrte Felder fehlen in FormData.
+  form.bis.disabled = !form.mehrere.checked;
+  form.bis.min = form.von.value;
+}
+
+function oeffneBesonders(eintrag = null) {
+  bearbeiteterTag = eintrag;
+  const form = $("form-besonders");
+  form.reset();
+  zeigeFehler("besonders-fehler", "");
+  $("besonders-dialog-titel").textContent = eintrag ? `Besonderen Tag von ${tier.name} ändern` : `Besonderer Tag für ${tier.name}`;
+  $("besonders-art").innerHTML = auswahlFeld({
+    name: "art",
+    beschriftung: "label-besonders-art",
+    optionen: BESONDERE_ARTEN,
+    wert: eintrag?.art ?? "",
+  });
+  const heute = tagSchluessel(new Date());
+  form.von.max = heute;
+  form.bis.max = heute;
+  form.von.value = eintrag ? eintrag.von : tagSchluessel(gewaehlterTag);
+  form.mehrere.checked = !!eintrag && eintrag.bis !== eintrag.von;
+  form.bis.value = eintrag && eintrag.bis !== null && eintrag.bis !== eintrag.von ? eintrag.bis : "";
+  form.notiz.value = eintrag?.notiz ?? "";
+  zeigeBesondersFelder();
+  $("dialog-besonders").showModal();
+}
+
+// Art (Auswahlmenü meldet change), Häkchen und Datum: Hinweise, Feld „bis“ und dessen frühestes Datum anpassen.
+$("form-besonders").addEventListener("change", zeigeBesondersFelder);
+$("form-besonders").von.addEventListener("input", zeigeBesondersFelder);
+// Wie beim Gewicht: Nach dem Schließen gilt das Fenster wieder als „neu eintragen“.
+$("dialog-besonders").addEventListener("close", () => {
+  bearbeiteterTag = null;
+});
+
+beimSpeichern("form-besonders", "besonders-fehler", (werte) => {
+  const heute = tagSchluessel(new Date());
+  const ergebnis = eintragAusFormular(
+    {
+      art: werte.get("art"),
+      von: werte.get("von"),
+      mehrere: werte.get("mehrere") !== null,
+      bis: werte.get("bis") ?? "",
+      notiz: werte.get("notiz"),
+    },
+    heute
+  );
+  if (ergebnis.fehler) return ergebnis.fehler;
+  if (bearbeiteterTag) Object.assign(bearbeiteterTag, ergebnis.eintrag);
+  else daten.besondereTage.push({ id: neueId(), tierId: tier.id, ...ergebnis.eintrag });
+  // Speicher voll: sichern() lädt den gespeicherten Stand neu und meldet es.
+  if (!sichern()) return;
+  // „Futter verweigert“ und jetzt dringend: den roten Kasten oben auf „Heute“ zeigen.
+  if (artVon(ergebnis.eintrag.art).notfall && notfallJetzt(daten.besondereTage, tier.id, heute)) {
+    requestAnimationFrame(() => $("notfall-kasten").scrollIntoView({ block: "center", behavior: ohneBewegung() ? "auto" : "smooth" }));
+  }
 });
 
 // Foto einer Wägung groß ansehen und einzeln entfernen (die Wägung bleibt).
@@ -2085,6 +2217,7 @@ function zeichneSicherung() {
     ...daten.mahlzeiten.map((m) => tagSchluessel(new Date(m.zeitpunkt))),
     ...daten.gewichte.map((g) => g.datum),
     ...daten.freigaben.map((f) => f.datum),
+    ...daten.besondereTage.flatMap((b) => [b.von, b.bis].filter(Boolean)),
   ].sort();
   const hinweis = demo
     ? null
@@ -2415,6 +2548,28 @@ document.addEventListener("click", (ereignis) => {
         sichern();
       }
       return;
+    case "besonders-neu":
+      return oeffneBesonders();
+    case "besonders-bearbeiten": {
+      const eintrag = daten.besondereTage.find((b) => b.id === id);
+      return eintrag ? oeffneBesonders(eintrag) : undefined;
+    }
+    case "besonders-loeschen":
+      if (confirm("Diesen Eintrag löschen?")) {
+        daten.besondereTage = daten.besondereTage.filter((b) => b.id !== id);
+        sichern();
+      }
+      return;
+    case "besonders-beenden": {
+      const eintrag = daten.besondereTage.find((b) => b.id === id);
+      if (!eintrag) return;
+      beenden(eintrag, tagSchluessel(gewaehlterTag));
+      if (!sichern()) return;
+      zeigeToast(`✓ ${artVon(eintrag.art).ende ?? "Beendet"}`);
+      // Der Knopf ist weg: Fokus auf den Eintrag selbst, damit Tastatur und Vorlesefunktion nicht oben anfangen.
+      document.querySelector(`[data-aktion="besonders-bearbeiten"][data-id="${CSS.escape(eintrag.id)}"]`)?.focus({ preventScroll: true });
+      return;
+    }
     case "futter-neu":
       return oeffneFutter(null);
     case "futter-bearbeiten":

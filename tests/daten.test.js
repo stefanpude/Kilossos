@@ -64,7 +64,7 @@ test("ersteDaten legt genau die eingegebene Katze an, alle Listen leer", () => {
   const { id, ...rest } = daten.tiere[0];
   assert.equal(typeof id, "string");
   assert.deepEqual(rest, { name: "Mia", art: "katze", geschlecht: "katze", kastriert: true, wiegetag: 3 });
-  for (const feld of ["futter", "mahlzeiten", "gewichte", "freigaben"]) assert.deepEqual(daten[feld], []);
+  for (const feld of ["futter", "mahlzeiten", "gewichte", "freigaben", "besondereTage"]) assert.deepEqual(daten[feld], []);
 });
 
 test("ersteDaten ohne Wiegetag und Foto lässt die Schlüssel ganz weg, mit Foto übernimmt es das Foto", () => {
@@ -233,6 +233,29 @@ test("verschiebeDaten verschiebt Tage, Uhrzeit bleibt (auch über die Zeitumstel
   const zeit = new Date(neu.mahlzeiten[0].zeitpunkt);
   assert.deepEqual([zeit.getDate(), zeit.getHours(), zeit.getMinutes()], [30, 7, 30]);
   assert.equal(daten.gewichte[0].datum, "2026-03-20"); // Original unverändert
+});
+
+test("verschiebeDaten verschiebt Anfang und Ende besonderer Tage, laufende bleiben offen", () => {
+  const daten = {
+    version: 1,
+    tiere: [],
+    futter: [],
+    mahlzeiten: [],
+    gewichte: [],
+    freigaben: [],
+    besondereTage: [
+      { id: "a", von: "2026-03-20", bis: "2026-03-22" },
+      { id: "b", von: "2026-12-30", bis: null },
+    ],
+  };
+  const neu = verschiebeDaten(daten, 10);
+  assert.deepEqual(
+    neu.besondereTage.map((b) => [b.von, b.bis]),
+    [["2026-03-30", "2026-04-01"], ["2027-01-09", null]],
+  );
+  assert.equal(daten.besondereTage[0].von, "2026-03-20"); // Original unverändert
+  const { besondereTage, ...ohne } = daten;
+  assert.deepEqual(verschiebeDaten(ohne, 3).besondereTage, []);
 });
 
 test("sicherungsHinweis: ohne Einträge nie, noch nie gesichert erst nach 7 Tagen", () => {

@@ -19,7 +19,12 @@ export function sicherungPruefen(neu, heute) {
 
 // Rückfrage vor dem Einlesen: wie viel drin ist und was dabei korrigiert wird.
 export function einleseFrage(neu, { kaputt, fotos, angaben }, ersetzen) {
-  const anzahl = `${neu.mahlzeiten.length} Mahlzeiten und ${neu.gewichte.length} Gewichte`;
+  // besondereTage hat sicherungPruefen schon angelegt (bei alten Sicherungen leer).
+  const besondere = neu.besondereTage?.length ?? 0;
+  const anzahl =
+    besondere > 0
+      ? `${neu.mahlzeiten.length} Mahlzeiten, ${neu.gewichte.length} Gewichten und ${besondere} ${besondere === 1 ? "besonderen Tag" : "besonderen Tagen"}`
+      : `${neu.mahlzeiten.length} Mahlzeiten und ${neu.gewichte.length} Gewichten`;
   const kaputtText =
     kaputt > 0
       ? ` ${kaputt === 1 ? "Ein Eintrag war" : `${kaputt} Einträge waren`} beschädigt und ${kaputt === 1 ? "wird" : "werden"} entfernt oder repariert.`

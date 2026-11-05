@@ -12,7 +12,8 @@ import {
   gewichteBis,
   warnungen,
 } from "./rechnen.js";
-import { gewichtDiagramm, kcalDiagramm } from "./verlauf.js";
+import { gewichtDiagramm, kcalDiagramm, zeitleiste, PDF_RAND } from "./verlauf.js";
+import { artVon, beruehrt } from "./besondere-tage.js";
 import { normalesFutterKcal } from "./futterliste.js";
 import { fotoGueltig, bcsGueltig, MCS } from "./daten.js";
 import { alterText, HALTUNG } from "./profil.js";
@@ -31,8 +32,8 @@ function tageVon(von, bis) {
   return tage;
 }
 
-// tier, gewichte, mahlzeiten, freigaben (alle eines Tieres), futter (alle Sorten), von/bis/heute: "JJJJ-MM-TT".
-export function berichtDaten({ tier, gewichte, mahlzeiten, freigaben, futter, von, bis, heute }) {
+// tier, gewichte, mahlzeiten, freigaben, besondereTage (alle eines Tieres), futter (alle Sorten), von/bis/heute: "JJJJ-MM-TT".
+export function berichtDaten({ tier, gewichte, mahlzeiten, freigaben, besondereTage = [], futter, von, bis, heute }) {
   const futterMap = new Map(futter.map((f) => [f.id, f]));
   const alleGewichte = [...gewichteSortiert(gewichte)].reverse();
 
@@ -131,6 +132,8 @@ export function berichtDaten({ tier, gewichte, mahlzeiten, freigaben, futter, vo
     fuetterung,
     freigaben: [...freigaben].sort((a, b) => a.datum.localeCompare(b.datum)),
     auffaelligkeiten: [...zaehler.values()],
+    // Besondere Tage (seit 0.33.0): alle, die den Zeitraum berühren, mit ihrem ganzen Zeitraum.
+    besondereTage: besondereTage.filter((e) => beruehrt(e, von, bis)).sort((a, b) => a.von.localeCompare(b.von)),
   };
 }
 
@@ -176,6 +179,21 @@ function profilZeile(tier, heute) {
   return teile.length ? `<p>${teile.map(sicher).join(" · ")}</p>` : "";
 }
 
+// „03.11.2026“, „30.10.2026 bis 02.11.2026“, „seit 03.11.2026, läuft noch“.
+function besondererZeitraum(e) {
+  if (e.bis === null) return `seit ${datum(e.von)}, läuft noch`;
+  return e.bis === e.von ? datum(e.von) : `${datum(e.von)} bis ${datum(e.bis)}`;
+}
+
+function besondereTageTeil(liste) {
+  return `<section class="bericht-teil"><h2>Besondere Tage</h2>
+    <p class="bericht-klein">Vom Halter festgehalten, ohne Mengenangaben.</p>
+    <table><thead><tr><th>Zeitraum</th><th>Art</th><th>Notiz</th></tr></thead><tbody>
+      ${liste
+        .map((e) => `<tr><td>${besondererZeitraum(e)}</td><td>${sicher(artVon(e.art).text)}</td><td>${sicher(e.notiz ?? "")}</td></tr>`)
+        .join("")}</tbody></table></section>`;
+}
+
 function fotoTeil(gewichte, von, bis) {
   const liste = gewichte
     .filter((g) => typeof g.datum === "string" && g.datum >= von && g.datum <= bis && fotoGueltig(g.foto))
@@ -213,7 +231,15 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
       ${a.diffG >= 0 ? "−" : "+"}${zahl(Math.abs(a.diffG))} g (${zahl(a.prozent, 1)} %), im Mittel <strong>${zahl(a.proWoche, 2)} % KM/Woche</strong>
       (Zielbereich ${zahl(GRENZEN.abnahmeMin, 1)}–${zahl(GRENZEN.abnahmeMax)} %).</p>`);
     const imZeitraum = gewichte.filter((g) => g.datum >= b.von && g.datum <= b.bis);
-    teile.push(gewichtDiagramm(imZeitraum, freigaben.filter((f) => f.datum <= b.bis)));
+    // Zeitleiste mit derselben Achse: von der ersten Wägung im Zeitraum bis zum Berichtsende (seit 0.33.0).
+    // Beide in einem Rahmen: Im Druck gilt die Breite für beide gleich, und ein Seitenumbruch trennt sie nicht.
+    const erste = imZeitraum.map((g) => g.datum).sort()[0];
+    teile.push(
+      `<div class="bericht-grafik">${gewichtDiagramm(imZeitraum, freigaben.filter((f) => f.datum <= b.bis), b.bis)}${zeitleiste(
+        b.besondereTage ?? [],
+        { vonTag: erste, bisTag: b.bis, ...PDF_RAND }
+      )}</div>`
+    );
   }
   if (b.gewichte.length) {
     teile.push(`<table><thead><tr><th>Datum</th><th>kg</th><th>Änderung</th><th>% KM/Woche</th><th>Notiz</th></tr></thead><tbody>
@@ -230,6 +256,9 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
 
   // Fotos (nur auf Wunsch, ab 0.26.0): erstes und letztes Foto im Zeitraum, zum Vergleich.
   if (fotos) teile.push(fotoTeil(gewichte, b.von, b.bis));
+
+  // Besondere Tage (seit 0.33.0): erklären Knicke in der Kurve, deshalb direkt nach dem Gewicht. Ohne Einträge kein Abschnitt.
+  if (b.besondereTage?.length) teile.push(besondereTageTeil(b.besondereTage));
 
   // Fütterung
   const f = b.fuetterung;

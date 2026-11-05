@@ -1,6 +1,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { verlaufGewichte, weicheKurve, zeichneVerlauf } from "../js/verlauf.js";
+import {
+  verlaufGewichte,
+  weicheKurve,
+  zeichneVerlauf,
+  zeitleiste,
+  naechsterZeitleistenEintrag,
+  gewichtDiagramm,
+  PDF_RAND,
+} from "../js/verlauf.js";
 
 const G = (datum, kg) => ({ id: datum, tierId: "k", datum, kg, notiz: "" });
 const gewichte = [G("2026-10-15", 9.0), G("2026-10-01", 9.32), G("2026-10-08", 9.25)];
@@ -123,8 +131,8 @@ test("zeichneVerlauf: Tipp zur Kurve steht in der Gewichtskarte unter der Legend
 });
 
 test("zeichneVerlauf: Legende nennt Ziel und sicheren Bereich nur, wenn die Kurve sie zeigt (0.32.1)", () => {
-  const verlauf = (freigaben) =>
-    zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben, futterNachId: new Map(), zeitraum: "3m", heute: "2026-10-20", kopf: "" });
+  const verlauf = (freigaben, heute = "2026-10-15") =>
+    zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben, futterNachId: new Map(), zeitraum: "3m", heute, kopf: "" });
   const legende = (text) => {
     const start = text.indexOf('class="legende-zeile"');
     return text.slice(start, text.indexOf("</p>", start));
@@ -144,4 +152,158 @@ test("zeichneVerlauf: Fotos erscheinen auch, wenn es noch keinen Verlauf gibt", 
   const html = zeichneVerlauf({ gewichte: gewichte.slice(0, 1), mahlzeiten: [], freigaben: [], futterNachId: new Map(), zeitraum: "3m", heute: "2026-10-20", kopf: "", fotos: "<section id=\"fotos-test\"></section>" });
   assert.match(html, /Sobald mindestens zwei Gewichte/);
   assert.match(html, /id="fotos-test"/);
+});
+
+
+// ---------- 0.33.0: Zeitachse bis heute ----------
+const letztesX = (kurve) => JSON.parse(kurve.match(/data-punkte="([^"]*)"/)[1].replace(/&quot;/g, '"')).at(-1)[0];
+
+test("weicheKurve: Zeitachse endet heute, die Linie an der letzten Wägung", () => {
+  assert.equal(letztesX(weicheKurve(gewichte, [])), 300); // ohne „bis“ wie bisher
+  assert.equal(letztesX(weicheKurve(gewichte, [], null, "2026-10-15")), 300); // heute gewogen: wie bisher
+  const bisHeute = weicheKurve(gewichte, [], null, "2026-10-29");
+  assert.ok(letztesX(bisHeute) < 300, `letzter Punkt bei x=${letztesX(bisHeute)}`);
+  assert.doesNotMatch(bisHeute, /NaN/);
+  // „bis“ vor der letzten Wägung (falsche Uhr am Gerät): die Achse reicht trotzdem bis zur letzten Wägung.
+  assert.equal(letztesX(weicheKurve(gewichte, [], null, "2026-10-10")), 300);
+});
+
+test("zeichneVerlauf: Freigabe nach der letzten Wägung erscheint als Marke, sicherer Bereich läuft bis heute", () => {
+  const verlauf = (freigaben) =>
+    zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben, futterNachId: new Map(), zeitraum: "3m", heute: "2026-10-20", kopf: "" });
+  const legende = (text) => {
+    const start = text.indexOf('class="legende-zeile"');
+    return text.slice(start, text.indexOf("</p>", start));
+  };
+  const amEnde = { ...freigabe, datum: "2026-10-15" };
+  assert.match(verlauf([amEnde]), /class="band"/);
+  assert.match(legende(verlauf([amEnde])), /sicher: 0,5 bis 2 % pro Woche/);
+  const danach = { ...freigabe, datum: "2026-10-18" };
+  assert.match(verlauf([danach]), /class="freigabe-marke"/);
+  assert.match(legende(verlauf([danach])), /Freigabe/);
+});
+
+test("gewichtDiagramm (PDF): Achse bis zum Berichtsende, Endpunkt an der letzten Wägung", () => {
+  const endX = (svg) => Number(svg.match(/class="endpunkt" cx="([\d.]+)"/)[1]);
+  assert.equal(endX(gewichtDiagramm(gewichte, [])), 340 - PDF_RAND.rechts);
+  const bisEnde = gewichtDiagramm(gewichte, [freigabe], "2026-10-31");
+  assert.ok(endX(bisEnde) < 340 - PDF_RAND.rechts);
+  assert.doesNotMatch(bisEnde, /NaN/);
+  assert.deepEqual(PDF_RAND, { links: 34, rechts: 52 });
+});
+
+// ---------- 0.33.0: Zeitleiste der besonderen Tage ----------
+const BT = (felder) => ({ id: "b" + Math.random(), tierId: "k", art: "krank", von: "2026-10-05", bis: "2026-10-09", notiz: "", ...felder });
+const OKT = { vonTag: "2026-10-01", bisTag: "2026-10-31", links: 34, rechts: 40 };
+const unmaskiert = (text) =>
+  text.replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+const eintraegeVon = (svg) => JSON.parse(unmaskiert(svg.match(/data-eintraege="([^"]*)"/)[1]));
+
+test("zeitleiste: leer, wenn kein Eintrag den Zeitraum berührt", () => {
+  assert.equal(zeitleiste([], OKT), "");
+  assert.equal(zeitleiste([BT({ von: "2026-09-01", bis: "2026-09-03" }), BT({ von: "2026-11-02", bis: "2026-11-02" })], OKT), "");
+});
+
+test("zeitleiste: Phase als Balken, Tag als Punkt, gleiche Achse wie die Kurve", () => {
+  const svg = zeitleiste([BT({}), BT({ art: "genascht", von: "2026-10-20", bis: "2026-10-20" })], OKT);
+  assert.match(svg, /<svg viewBox="0 0 340 18" class="zeitleiste"/);
+  assert.equal((svg.match(/class="zl-balken/g) ?? []).length, 1);
+  assert.equal((svg.match(/class="zl-punkt/g) ?? []).length, 1);
+  assert.match(svg, /aria-label="Besondere Tage im Zeitraum: 2"/);
+  assert.match(svg, /<title>Krank: 5\. bis 9\. Okt\.<\/title>/);
+  assert.doesNotMatch(svg, /NaN/);
+  const [balken, punkt] = eintraegeVon(svg);
+  assert.ok(balken[0] > 34 && balken[1] > balken[0]);
+  assert.equal(punkt[0], punkt[1]);
+});
+
+test("zeitleiste: laufende Phase reicht bis zum rechten Rand, frühere Phase beginnt am linken", () => {
+  const [laufend] = eintraegeVon(zeitleiste([BT({ von: "2026-10-25", bis: null })], OKT));
+  assert.equal(laufend[1], 300);
+  const [frueher] = eintraegeVon(zeitleiste([BT({ von: "2026-09-20", bis: "2026-10-03" })], OKT));
+  assert.equal(frueher[0], 34);
+});
+
+test("zeitleiste: „Futter verweigert“ in der Notfall-Farbe, überlappende Phasen in zwei Reihen", () => {
+  assert.match(zeitleiste([BT({ art: "futter-verweigert" })], OKT), /class="zl-balken notfall"/);
+  const zwei = zeitleiste([BT({}), BT({ art: "weniger-bewegung", von: "2026-10-07", bis: "2026-10-12" })], OKT);
+  assert.match(zwei, /viewBox="0 0 340 32"/);
+  assert.deepEqual(eintraegeVon(zwei).map((e) => e[2]), [9, 23]);
+});
+
+test("zeitleiste: Notiz gekürzt und maskiert, unbekannte Art heißt „Sonstiges“", () => {
+  const svg = zeitleiste([BT({ art: "zukunft-art", notiz: "<script>alert(1)</script>" + "x".repeat(80) })], OKT);
+  assert.doesNotMatch(svg, /<script/);
+  const text = eintraegeVon(svg)[0][3];
+  assert.match(text, /^Sonstiges: 5\. bis 9\. Okt\. · <script>/);
+  assert.ok(text.endsWith("…"));
+  assert.ok(text.length < 100);
+});
+
+test("naechsterZeitleistenEintrag: Treffer im Balken gewinnt, bei zwei Reihen entscheidet die Höhe", () => {
+  const liste = [
+    [100, 160, 9, "oben"],
+    [120, 200, 23, "unten"],
+    [170, 170, 9, "Punkt"],
+  ];
+  assert.equal(naechsterZeitleistenEintrag(liste, 110, 9)[3], "oben");
+  assert.equal(naechsterZeitleistenEintrag(liste, 140, 22)[3], "unten");
+  assert.equal(naechsterZeitleistenEintrag(liste, 140, 10)[3], "oben");
+  assert.equal(naechsterZeitleistenEintrag(liste, 169, 9)[3], "Punkt");
+  assert.equal(naechsterZeitleistenEintrag(liste, 20, 9)[3], "oben");
+});
+
+test("zeichneVerlauf: Zeitleiste unter der Kurve, Legende und Tipp nur mit Einträgen", () => {
+  const verlauf = (besondereTage, g = gewichte) =>
+    zeichneVerlauf({ gewichte: g, mahlzeiten: [], freigaben: [], besondereTage, futterNachId: new Map(), zeitraum: "3m", heute: "2026-10-20", kopf: "" });
+  const mit = verlauf([BT({ von: "2026-10-16", bis: null })]);
+  const feld = mit.slice(mit.indexOf('class="kurve-feld"'), mit.indexOf('class="infoblase"'));
+  assert.ok(feld.indexOf('class="kurve"') < feld.indexOf('class="zeitleiste"'), "Zeitleiste nach der Kurve im Kurvenfeld");
+  assert.match(mit, /<i class="besonders"><\/i>Besonderer Tag/);
+  assert.match(mit, /Tippe auf die Kurve oder auf einen besonderen Tag darunter/);
+  // laufende Phase seit dem 16.: reicht bis heute (rechter Rand)
+  assert.equal(eintraegeVon(mit)[0][1], 300);
+  const ohne = verlauf([]);
+  assert.doesNotMatch(ohne, /class="zeitleiste"/);
+  assert.doesNotMatch(ohne, /Besonderer Tag/);
+  assert.match(ohne, /Tippe auf die Kurve, um Datum und Gewicht zu sehen/);
+  // weniger als zwei Wägungen: keine Kurve, keine Zeitleiste
+  assert.doesNotMatch(verlauf([BT({})], gewichte.slice(0, 1)), /zeitleiste/);
+});
+
+test("zeitleiste: Punkte liegen über den Balken, damit ein Tag in einer Phase sichtbar bleibt", () => {
+  // drei Einträge am selben Tag: in zwei Reihen nicht ohne Überlappung unterzubringen
+  const svg = zeitleiste(
+    [
+      BT({ art: "genascht", von: "2026-10-20", bis: "2026-10-20" }),
+      BT({ art: "futterumstellung", von: "2026-10-20", bis: "2026-10-25" }),
+      BT({ art: "weniger-bewegung", von: "2026-10-20", bis: null }),
+    ],
+    OKT,
+  );
+  assert.ok(svg.lastIndexOf('class="zl-balken') < svg.indexOf('class="zl-punkt'), "erst Balken, dann Punkte");
+});
+
+test("naechsterZeitleistenEintrag: Punkt auf einem Balken gewinnt gegen den Balken", () => {
+  const liste = [
+    [100, 200, 9, "Balken"],
+    [150, 150, 9, "Punkt"],
+  ];
+  assert.equal(naechsterZeitleistenEintrag(liste, 150, 9)[3], "Punkt");
+  assert.equal(naechsterZeitleistenEintrag([liste[1], liste[0]], 151, 9)[3], "Punkt");
+  assert.equal(naechsterZeitleistenEintrag(liste, 120, 9)[3], "Balken");
+});
+
+test("zeichneVerlauf: Zeitleiste ist hoch genug zum Antippen (mindestens 56 Einheiten), Reihen in der Mitte", () => {
+  // Review 05.11.: 18 Einheiten waren bei 375 px nur etwa 16 px hoch; Tippflächen brauchen 48 px.
+  const verlauf = (besondereTage) =>
+    zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [], besondereTage, futterNachId: new Map(), zeitraum: "3m", heute: "2026-10-20", kopf: "" });
+  const eine = verlauf([BT({ von: "2026-10-16", bis: null })]);
+  assert.match(eine, /<svg viewBox="0 0 340 56" class="zeitleiste"/);
+  assert.deepEqual(eintraegeVon(eine).map((e) => e[2]), [28]);
+  const zwei = verlauf([BT({ von: "2026-10-05", bis: "2026-10-09" }), BT({ von: "2026-10-07", bis: "2026-10-12" })]);
+  assert.match(zwei, /<svg viewBox="0 0 340 56" class="zeitleiste"/);
+  assert.deepEqual(eintraegeVon(zwei).map((e) => e[2]), [21, 35]);
+  // im PDF bleibt sie schmal (direkter Aufruf ohne Mindesthöhe)
+  assert.match(zeitleiste([BT({})], OKT), /viewBox="0 0 340 18"/);
 });

@@ -161,3 +161,66 @@ test("berichtHtml: Legende „Freigabe“ nur, wenn das Diagramm eine Freigabe-L
   // Futter und Leckerli stehen immer in der Legende
   assert.match(html([]), /reihe-1"><\/span>Futter<\/li><li><span class="schluessel reihe-2"><\/span>Leckerli/);
 });
+
+// ---------- 0.33.0: Besondere Tage im Bericht ----------
+const BT = (felder) => ({ id: "b" + Math.random(), tierId: "kito", art: "krank", von: "2026-11-02", bis: "2026-11-02", notiz: "", ...felder });
+const besondere = [
+  BT({ id: "laufend", art: "weniger-bewegung", von: "2026-11-03", bis: null }),
+  BT({ id: "davor", von: "2026-10-20", bis: "2026-10-20" }),
+  BT({ id: "phase", von: "2026-10-30", bis: "2026-11-02", notiz: "<b>Durchfall</b>" }),
+  BT({ id: "tag", art: "genascht", von: "2026-11-02", bis: "2026-11-02" }),
+  BT({ id: "neu", art: "zukunft-art", von: "2026-11-04", bis: "2026-11-04", notiz: "aus einer neueren Fassung" }),
+];
+const mitBesonderen = (liste, extra = {}) => {
+  const b = berichtDaten({ ...eingabe, besondereTage: liste, ...extra });
+  return berichtHtml(b, {
+    tier: { name: "Kito" }, gewichte, mahlzeiten, freigaben: [freigabe], besondereTage: liste,
+    futterNachId: new Map(futter.map((f) => [f.id, f])), erstellt: "2026-11-04", demo: false, ...extra,
+  });
+};
+
+test("berichtDaten: besondere Tage, die den Zeitraum berühren, nach Beginn sortiert", () => {
+  const b = berichtDaten({ ...eingabe, besondereTage: besondere });
+  assert.deepEqual(b.besondereTage.map((e) => e.id), ["phase", "tag", "laufend", "neu"]);
+  assert.deepEqual(berichtDaten(eingabe).besondereTage, []);
+});
+
+test("berichtHtml: Abschnitt „Besondere Tage“ nach dem Gewicht, mit ganzem Zeitraum und maskierter Notiz", () => {
+  const html = mitBesonderen(besondere);
+  const abschnitt = html.indexOf("<h2>Besondere Tage</h2>");
+  assert.ok(abschnitt > html.indexOf("<h2>Gewicht</h2>") && abschnitt < html.indexOf("<h2>Fütterung</h2>"));
+  const teil = html.slice(abschnitt, html.indexOf("</section>", abschnitt));
+  assert.match(teil, /Vom Halter festgehalten, ohne Mengenangaben\./);
+  assert.match(teil, /<th>Zeitraum<\/th><th>Art<\/th><th>Notiz<\/th>/);
+  assert.match(teil, /<td>30\.10\.2026 bis 02\.11\.2026<\/td><td>Krank<\/td><td>&lt;b&gt;Durchfall&lt;\/b&gt;<\/td>/);
+  assert.match(teil, /<td>02\.11\.2026<\/td><td>Außer der Reihe genascht<\/td><td><\/td>/);
+  assert.match(teil, /<td>seit 03\.11\.2026, läuft noch<\/td><td>Weniger Bewegung<\/td>/);
+  assert.match(teil, /<td>04\.11\.2026<\/td><td>Sonstiges<\/td><td>aus einer neueren Fassung<\/td>/);
+  assert.doesNotMatch(teil, /20\.10\.2026/);
+  assert.doesNotMatch(html, /<b>Durchfall/);
+});
+
+test("berichtHtml: ohne besondere Tage kein Abschnitt und keine Zeitleiste", () => {
+  const html = mitBesonderen([]);
+  assert.doesNotMatch(html, /Besondere Tage/);
+  assert.doesNotMatch(html, /class="zeitleiste"/);
+  assert.doesNotMatch(mitBesonderen([BT({ von: "2026-10-20", bis: "2026-10-20" })]), /Besondere Tage/);
+});
+
+test("berichtHtml: Zeitleiste direkt unter dem Gewichtsdiagramm, Achse bis zum Berichtsende", () => {
+  const html = mitBesonderen(besondere);
+  assert.match(html, /<\/svg><svg viewBox="0 0 340 \d+" class="zeitleiste"/);
+  assert.doesNotMatch(html, /NaN/);
+  // Bericht bis zum 10.11., letzte Wägung am 04.11.: Endpunkt links vom rechten Rand (288)
+  const spaeter = mitBesonderen(besondere, { bis: "2026-11-10", heute: "2026-11-10" });
+  const endX = Number(spaeter.match(/class="endpunkt" cx="([\d.]+)"/)[1]);
+  assert.ok(endX < 288, `Endpunkt bei ${endX}`);
+});
+
+test("berichtHtml: Diagramm und Zeitleiste stehen in einem gemeinsamen Rahmen (gleiche Breite im Druck)", () => {
+  // Review 05.11.: Im Druck war das Diagramm auf 150 mm begrenzt, die Zeitleiste nicht; die Tage lagen versetzt.
+  const html = mitBesonderen(besondere);
+  assert.match(html, /<div class="bericht-grafik"><svg viewBox="0 0 340 \d+" class="diagramm"[^]*?<\/svg><svg viewBox="0 0 340 \d+" class="zeitleiste"[^]*?<\/svg><\/div>/);
+  // ohne besondere Tage steht das Diagramm allein im Rahmen
+  assert.match(mitBesonderen([]), /<div class="bericht-grafik"><svg viewBox="0 0 340 \d+" class="diagramm"[^]*?<\/svg><\/div>/);
+});

@@ -19,6 +19,11 @@
 //               bcs: optional, Body Condition Score vom Tierarzt, ganze Zahl 1–9 (seit 0.12.0)
 //               mcs: optional, Muscle Condition Score vom Tierarzt, Schlüssel aus MCS (seit 0.12.0)
 //               Ältere Freigaben haben beide Felder nicht – sie bleiben ohne Umwandlung gültig.
+//   besondereTage: { id, tierId, art, von ("JJJJ-MM-TT"), bis ("JJJJ-MM-TT" | null), notiz } (seit 0.33.0)
+//               Ereignis oder Phase, z. B. krank oder genascht; ohne kcal und Gramm, ohne Einfluss auf Rechnungen.
+//               bis gleich von: ein Tag; bis später: abgeschlossene Phase; bis null: Phase läuft noch.
+//               art: Schlüssel aus js/besondere-tage.js; unbekannte Schlüssel (neuere Fassung) bleiben und heißen „Sonstiges“.
+//               Ältere Daten haben die Liste nicht: eintraegeBereinigen legt sie leer an (istGueltig verlangt sie nicht).
 // Die kcal einer Mahlzeit werden immer aus dem aktuellen Futterwert berechnet: Wird ein ungefährer Wert
 // später durch den genauen Packungswert ersetzt, stimmen damit auch alle früheren Tage.
 
@@ -81,7 +86,7 @@ export function ersteDaten({ name, geschlecht, kastriert, foto, wiegetag }) {
   tier.kastriert = kastriert;
   if (foto !== undefined) tier.foto = foto;
   if (wiegetag !== undefined) tier.wiegetag = wiegetag;
-  return { version: VERSION, tiere: [tier], futter: [], mahlzeiten: [], gewichte: [], freigaben: [] };
+  return { version: VERSION, tiere: [tier], futter: [], mahlzeiten: [], gewichte: [], freigaben: [], besondereTage: [] };
 }
 
 // Noch nichts gespeichert: frische Installation (oder nach „Alle Daten löschen“). Dann zeigt die App die Einrichtung.
@@ -115,11 +120,22 @@ const PFLICHT = {
   mahlzeiten: (m) => istText(m.id) && istText(m.tierId) && istZahl(m.gramm) && istZeitpunkt(m.zeitpunkt),
   gewichte: (g) => istText(g.id) && istText(g.tierId) && istZahl(g.kg) && istTag(g.datum),
   freigaben: (f) => istText(f.id) && istText(f.tierId) && istTag(f.datum) && istZahl(f.zielgewichtKg) && istZahl(f.kcalProTag),
+  // bis fehlt ganz (undefined): ungültig, denn ein Tag hat bis gleich von und eine laufende Phase bis null.
+  besondereTage: (b) =>
+    istText(b.id) && istText(b.tierId) && istText(b.art) && istTag(b.von) && (b.bis === null || (istTag(b.bis) && b.bis >= b.von)),
 };
 
 // entfernt: optionale Liste, in die die verworfenen Einträge kommen (laden() hebt sie auf, damit nichts still verloren geht).
 export function eintraegeBereinigen(daten, entfernt = []) {
   let geaendert = 0;
+  // Die Liste besondereTage gibt es erst seit 0.33.0: Fehlt sie, ist sie leer (keine Korrektur). Ist sie kein Array,
+  // wird der Wert wie ein kaputter Eintrag aufgehoben.
+  if (daten.besondereTage == null) daten.besondereTage = [];
+  else if (!Array.isArray(daten.besondereTage)) {
+    entfernt.push({ feld: "besondereTage", eintrag: daten.besondereTage });
+    daten.besondereTage = [];
+    geaendert += 1;
+  }
   for (const [feld, gueltig] of Object.entries(PFLICHT)) {
     const behalten = [];
     for (const e of daten[feld]) {
@@ -367,6 +383,7 @@ export function verschiebeDaten(daten, tage) {
     mahlzeiten: daten.mahlzeiten.map((m) => ({ ...m, zeitpunkt: zeitpunkt(m.zeitpunkt) })),
     gewichte: daten.gewichte.map((g) => ({ ...g, datum: tag(g.datum) })),
     freigaben: daten.freigaben.map((f) => ({ ...f, datum: tag(f.datum) })),
+    besondereTage: (daten.besondereTage ?? []).map((b) => ({ ...b, von: tag(b.von), bis: b.bis === null ? null : tag(b.bis) })),
   };
 }
 

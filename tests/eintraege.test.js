@@ -11,6 +11,7 @@ function gueltigeDaten() {
   d.gewichte = [{ id: "g1", tierId, kg: 9.32, datum: "2026-10-28", notiz: "" }];
   d.mahlzeiten = [{ id: "m1", tierId, futterId: "f1", gramm: 50, zeitpunkt: "2026-11-01T07:00:00.000Z" }];
   d.freigaben = [{ id: "r1", tierId, datum: "2026-11-13", zielgewichtKg: 7.5, kcalProTag: 220, tierarzt: "", notiz: "" }];
+  d.besondereTage = [{ id: "b1", tierId, art: "genascht", von: "2026-11-02", bis: "2026-11-02", notiz: "beim Hund" }];
   return d;
 }
 
@@ -77,4 +78,48 @@ test("eintraegeBereinigen: Mahlzeit ohne Futtersorte (vor 0.7.0 möglich) bleibt
   d.mahlzeiten[0].futterId = null;
   assert.equal(eintraegeBereinigen(d), 0);
   assert.equal(d.mahlzeiten.length, 1);
+});
+
+// ---------- Besondere Tage (0.33.0): neue Liste, alte Daten haben sie nicht ----------
+test("eintraegeBereinigen: fehlende Liste besondereTage wird still leer", () => {
+  const d = gueltigeDaten();
+  delete d.besondereTage;
+  const entfernt = [];
+  assert.equal(eintraegeBereinigen(d, entfernt), 0);
+  assert.deepEqual(d.besondereTage, []);
+  assert.equal(entfernt.length, 0);
+  const mitNull = gueltigeDaten();
+  mitNull.besondereTage = null;
+  assert.equal(eintraegeBereinigen(mitNull), 0);
+  assert.deepEqual(mitNull.besondereTage, []);
+});
+
+test("eintraegeBereinigen: besondereTage kein Array wird leer, der Wert wird aufgehoben", () => {
+  const d = gueltigeDaten();
+  d.besondereTage = "x";
+  const entfernt = [];
+  assert.equal(eintraegeBereinigen(d, entfernt), 1);
+  assert.deepEqual(d.besondereTage, []);
+  assert.deepEqual(entfernt, [{ feld: "besondereTage", eintrag: "x" }]);
+});
+
+test("eintraegeBereinigen: kaputte besondere Tage fliegen raus, unbekannte Art bleibt", () => {
+  const d = gueltigeDaten();
+  const tierId = d.tiere[0].id;
+  const b = (felder) => ({ id: "b" + Math.random(), tierId, art: "krank", von: "2026-11-03", bis: null, notiz: "", ...felder });
+  const laufend = b({ id: "laufend" });
+  const eintaegig = b({ id: "eintaegig", bis: "2026-11-03" });
+  const unbekannt = b({ id: "unbekannt", art: "zukunft-art", bis: "2026-11-04" });
+  const ohneBis = b({});
+  delete ohneBis.bis;
+  d.besondereTage = [laufend, eintaegig, unbekannt, ohneBis, b({ bis: "2026-11-02" }), b({ von: "kaputt" }), b({ art: "" }), null];
+  assert.equal(eintraegeBereinigen(d), 5);
+  assert.deepEqual(d.besondereTage.map((e) => e.id), ["laufend", "eintaegig", "unbekannt"]);
+});
+
+test("eintraegeBereinigen: Notiz eines besonderen Tags als Nicht-Text wird geleert", () => {
+  const d = gueltigeDaten();
+  d.besondereTage[0].notiz = 5;
+  assert.equal(eintraegeBereinigen(d), 1);
+  assert.equal(d.besondereTage[0].notiz, "");
 });

@@ -118,12 +118,33 @@ if (fehler.length) {
   process.exit(1);
 }
 
-const sicherung = { version: VERSION, tiere: [kito], futter, mahlzeiten, gewichte, freigaben };
+// Besondere Tage (seit 0.33.0): ohne Zufall, damit Gewichte und Mahlzeiten gleich bleiben. Kein „Futter verweigert“,
+// sonst stünde in der Demo der rote Notfall-Kasten. Eine laufende Phase zeigt auf „Heute“ den Knopf „Beendet“.
+const letzterTag = WOCHEN * 7;
+const besondereTage = [
+  { art: "genascht", von: 40, bis: 40, notiz: "Simulation: ein paar Stücke vom Hundefutter" },
+  { art: "mehr-bewegung", von: 61, bis: 61, notiz: "Simulation: lange im Garten gewesen" },
+  { art: "genascht", von: 75, bis: 75, notiz: "Simulation: Maus gefangen" },
+  { art: "krank", von: 15 * 7 + 2, bis: 15 * 7 + 4, notiz: "Simulation: Magen verstimmt, Tierarzt angerufen" },
+  { art: "genascht", von: 130, bis: 130, notiz: "Simulation: vom Teller stibitzt" },
+  { art: "futterumstellung", von: 20 * 7, bis: 20 * 7 + 6, notiz: "Simulation: neue Sorte langsam untergemischt" },
+  { art: "genascht", von: letzterTag - 12, bis: letzterTag - 12, notiz: "Simulation: ein paar Stücke vom Hundefutter" },
+  { art: "weniger-bewegung", von: letzterTag - 9, bis: null, notiz: "Simulation: Regenwetter, nur drinnen" },
+].map((b, i) => ({
+  id: `besonders-${i + 1}`,
+  tierId: kito.id,
+  art: b.art,
+  von: tagSchluessel(tagNr(b.von)),
+  bis: b.bis === null ? null : tagSchluessel(tagNr(b.bis)),
+  notiz: b.notiz,
+}));
+
+const sicherung = { version: VERSION, tiere: [kito], futter, mahlzeiten, gewichte, freigaben, besondereTage };
 writeFileSync(new URL("../demo/kito-simulation.json", import.meta.url), JSON.stringify(sicherung));
 const wochenRaten = gewichte.slice(1).map((g, i) => ((gewichte[i].kg - g.kg) / gewichte[i].kg) * 100);
 console.log(
   `OK: ${WOCHEN} Wochen (${tagSchluessel(start)} bis ${heuteSchluessel}), ${gewichte.length} Wägungen, ` +
-    `${mahlzeiten.length} Mahlzeiten, ${freigaben.length} Freigaben – keine Warnung.\n` +
+    `${mahlzeiten.length} Mahlzeiten, ${freigaben.length} Freigaben, ${besondereTage.length} besondere Tage – keine Warnung.\n` +
     `Abnahme pro Woche: ${Math.min(...wochenRaten).toFixed(2)} bis ${Math.max(...wochenRaten).toFixed(2)} % (einzelne Wochen), ` +
     `über 4 Wochen zuletzt ${abnahmeProWoche(gewichte, 28).prozent.toFixed(2)} %.`
 );

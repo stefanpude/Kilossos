@@ -558,6 +558,14 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .protokoll small { display: block; color: var(--text-leise); font-size: 0.8125rem; font-family: var(--sans); }
 .protokoll li .knopf-loeschen { margin: -6px -10px -6px -4px; }
 
+/* Besonderer Tag auf „Heute“ (0.33.0): Art fett, darunter Zeitraum und Notiz; Beenden-Knopf in eigener Zeile. */
+.besonders-liste .protokoll-knopf { grid-template-columns: 1fr; padding: 6px 0; }
+.besonders-liste .was b { font-weight: 700; }
+.besonders-liste .notiz { overflow-wrap: anywhere; }
+.besonders-liste .knopf-beenden { grid-column: 1 / -1; justify-self: start; min-height: 48px; margin-bottom: 4px; }
+.notfall-kasten { font-size: 1.0625rem; font-weight: 400; }
+.notfall-kasten strong { display: block; margin-bottom: 2px; }
+
 /* Gewicht auf „Heute“: Mini-Kurve der letzten 8 Wochen */
 .mini-zeile { display: flex; gap: 14px; align-items: center; }
 .mini-zeile p { margin: 0; font-size: 0.9375rem; }
@@ -643,6 +651,14 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .legende-zeile i.ziel { border-top: 2px dashed var(--akzent); }
 .legende-zeile i.freigabe { width: 0; height: 12px; border-top: 0; border-left: 2px dotted var(--warnung); }
 .legende-zeile i.band { height: 10px; border: 0; background: var(--akzent-hell); }
+.legende-zeile i.besonders { height: 8px; border: 0; border-radius: 4px; background: var(--text-leise); }
+
+/* Zeitleiste der besonderen Tage unter der Gewichtskurve und im PDF (0.33.0): eine ruhige Farbe, Notfall in Rot. */
+.zeitleiste { width: 100%; height: auto; display: block; overflow: visible; touch-action: pan-y; margin-top: 4px; }
+.zeitleiste .zl-balken { stroke: var(--text-leise); stroke-width: 8; stroke-linecap: round; }
+.zeitleiste .zl-punkt { fill: var(--text-leise); stroke: var(--flaeche); stroke-width: 1.5; } /* heller Rand: sichtbar auf einem Balken */
+.zeitleiste .zl-balken.notfall { stroke: var(--gefahr); }
+.zeitleiste .zl-punkt.notfall { fill: var(--gefahr); }
 .tempo { width: 100%; height: auto; display: block; }
 .tempo .band { fill: var(--akzent-hell); }
 .tempo .saeule { fill: var(--text-leise); }
@@ -657,6 +673,8 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
   transform: translate(-50%, -130%); z-index: 2;
 }
 .infoblase[hidden] { display: none; }
+/* Text eines besonderen Tags mit Notiz: darf umbrechen, damit er bei 375 px auf den Bildschirm passt. */
+.infoblase.lang { white-space: normal; width: max-content; max-width: min(260px, 80vw); }
 .woche { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rand); font-size: 0.875rem; }
 .woche:last-child { border: 0; }
 .woche .tag { width: 46px; text-align: center; font-size: 0.8125rem; color: var(--text-leise); line-height: 1.2; flex: none; }
@@ -718,6 +736,12 @@ dialog input:not([type="radio"]):not([type="hidden"]), .willkommen input:not([ty
   background: var(--hintergrund); font-weight: 400; font-size: 1.0625rem; width: 100%; color: var(--text);
 }
 dialog input:focus-visible, .willkommen input:focus-visible { outline: 3px solid var(--fokus); outline-offset: 1px; border-color: var(--akzent); }
+/* Häkchen-Zeile im Fenster „Besonderer Tag“: ganze Zeile antippbar, mindestens 48 px hoch. */
+dialog .haken-zeile { display: flex; align-items: center; gap: 12px; min-height: 48px; color: var(--text); font-size: 1rem; cursor: pointer; }
+dialog .haken-zeile input[type="checkbox"] {
+  width: 24px; height: 24px; min-height: 0; padding: 0; margin: 0; flex: none; accent-color: var(--akzent);
+}
+#besonders-bis-feld[hidden] { display: none; }
 
 /* Gewicht eintragen: große Zahl mit ±10 g */
 .waage { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -939,8 +963,8 @@ dialog .wert-eingabe input:not([type="hidden"]) { padding-right: calc(12px + 1.4
   .ansicht.rein, .ansicht.rein-rechts, .ansicht.rein-links, .willkommen-inhalt { animation: none; }
   main { max-width: none; padding: 0; }
   .bericht { border: none; padding: 0; font-size: 10pt; overflow: visible; }
-  .bericht .diagramm { max-width: 150mm; }
-  .bericht tr, .bericht .diagramm, .bericht-notizen { break-inside: avoid; }
+  .bericht .diagramm, .bericht .bericht-grafik { max-width: 150mm; }
+  .bericht tr, .bericht .diagramm, .bericht .bericht-grafik, .bericht-notizen { break-inside: avoid; }
   .bericht h2 { break-after: avoid; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }

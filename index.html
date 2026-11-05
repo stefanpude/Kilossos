@@ -139,6 +139,12 @@
         <button class="knopf-haupt" data-aktion="gewicht-neu">Gewicht eintragen</button>
       </div>
 
+      <!-- Notfall bei „Futter verweigert“ heute, gestern oder noch laufend (0.33.0): groß und rot, nicht Teil von warnungen(). -->
+      <div class="warnung warnung-sofort notfall-kasten" id="notfall-kasten" role="alert" hidden>
+        <strong>Frisst deine Katze einen Tag oder länger gar nicht?</strong>
+        Dann sofort zum Tierarzt, auch mitten in der Abnahme. Katzen bekommen dabei schnell eine Fettleber.
+      </div>
+
       <ul class="warnungen" id="warnungen-liste"></ul>
 
       <!-- Kalorien-Lineal (ab 0.23.0 statt Ring): ohne Freigabe kein Ziel und kein Füllstand. -->
@@ -158,6 +164,13 @@
         <h2 id="mahlzeiten-titel">Mahlzeiten</h2>
         <div id="heute-mahlzeiten"></div>
         <button class="knopf-haupt" data-aktion="mahlzeit-neu">Mahlzeit eintragen</button>
+      </section>
+
+      <!-- Besonderer Tag (0.33.0): Ausnahmen festhalten, ohne kcal und Gramm. -->
+      <section class="karte" aria-labelledby="besonders-titel">
+        <h2 id="besonders-titel">Besonderer Tag</h2>
+        <div id="heute-besonders"></div>
+        <button class="knopf-zweit" data-aktion="besonders-neu">Besonderen Tag eintragen</button>
       </section>
 
       <div id="heute-gewicht"></div>
@@ -331,7 +344,7 @@
           <span data-symbol="dokument"></span><span class="text">Nutzungsbedingungen</span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.32.1</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.33.0</span>
         </div>
       </div>
     </section>
@@ -427,6 +440,36 @@
         <p class="tipp">Ein Foto im Monat reicht, damit man den Unterschied sieht: gleicher Ort, gleiches Licht, immer aus der gleichen Richtung. Es bleibt auf diesem Handy.</p>
       </div>
       <p class="fehler" id="gewicht-fehler" hidden></p>
+      <div class="knoepfe">
+        <button value="abbrechen" formnovalidate class="knopf-zweit">Abbrechen</button>
+        <button value="speichern" class="knopf-haupt">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Formular: Besonderer Tag (0.33.0) -->
+  <dialog id="dialog-besonders">
+    <form method="dialog" id="form-besonders">
+      <h2 id="besonders-dialog-titel" tabindex="-1" autofocus>Besonderer Tag</h2>
+      <div class="feld"><span id="label-besonders-art">Was war besonders?</span><div id="besonders-art"></div>
+        <p class="tipp" id="besonders-art-tipp" hidden></p></div>
+      <label>Datum
+        <input name="von" type="date" required>
+      </label>
+      <label class="haken-zeile">
+        <input type="checkbox" name="mehrere">
+        <span>Dauert mehrere Tage</span>
+      </label>
+      <div class="feld" id="besonders-bis-feld" hidden>
+        <label>bis
+          <input name="bis" type="date" aria-describedby="besonders-bis-tipp">
+        </label>
+        <p class="tipp" id="besonders-bis-tipp">Leer lassen, solange es noch anhält.</p>
+      </div>
+      <label><span>Notiz <span id="besonders-notiz-zusatz">(freiwillig)</span></span>
+        <input name="notiz" autocomplete="off" maxlength="200" placeholder="z. B. Maus gefangen">
+      </label>
+      <p class="fehler" id="besonders-fehler" hidden></p>
       <div class="knoepfe">
         <button value="abbrechen" formnovalidate class="knopf-zweit">Abbrechen</button>
         <button value="speichern" class="knopf-haupt">Speichern</button>

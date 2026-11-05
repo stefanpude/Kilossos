@@ -8,12 +8,18 @@ import { zeitraumStart, wochenRaten, abnahmeZusammenfassung, futterTage, futterZ
 import { aufklappKarte } from "./aufklappen.js";
 import { befundText } from "./daten.js";
 import { SYMBOL } from "./symbole.js";
+import { artVon, zeitraumText, beruehrt } from "./besondere-tage.js";
 
 const B = 340; // Breite der Zeichenfläche (viewBox); das SVG skaliert auf die Bildschirmbreite
 const H = 190;
 const RAND = { links: 34, rechts: 52, oben: 12, unten: 22 };
 const innenB = B - RAND.links - RAND.rechts;
 const innenH = H - RAND.oben - RAND.unten;
+// Ränder der Zeitachse: Die Zeitleiste der besonderen Tage nutzt dieselben, damit Balken und Kurve übereinanderstehen.
+export const PDF_RAND = { links: RAND.links, rechts: RAND.rechts };
+const KURVE_RAND = { links: 34, rechts: 40 };
+// Ende der Zeitachse (seit 0.33.0): heute bzw. Berichtsende, mindestens aber die letzte Wägung (falsche Geräteuhr).
+const achsenEnde = (bis, letzteWaegung) => Math.max(bis ? ms(bis) : -Infinity, ms(letzteWaegung));
 
 const zahl = (wert, stellen = 0) =>
   wert.toLocaleString("de-DE", { minimumFractionDigits: stellen, maximumFractionDigits: stellen });
@@ -70,12 +76,13 @@ const svg = (inhalt, titel) =>
 const treffer = (x, breite, tip, extra = "") =>
   `<g class="treffer" data-tip="${sicher(tip)}">${extra}<rect x="${x - breite / 2}" y="${RAND.oben}" width="${breite}" height="${innenH}" fill="transparent"/></g>`;
 
-export function gewichtDiagramm(gewichte, freigaben) {
+// bis: letzter Tag des Berichtszeitraums; die Achse endet dort (seit 0.33.0), die Linie an der letzten Wägung.
+export function gewichtDiagramm(gewichte, freigaben, bis = null) {
   const liste = [...gewichteSortiert(gewichte)].reverse();
   const erste = freigaben.length ? [...freigaben].sort((a, b) => a.datum.localeCompare(b.datum))[0] : null;
   const ziel = aktuelleFreigabe(freigaben)?.zielgewichtKg;
   const vonMs = ms(liste[0].datum);
-  const bisMs = ms(liste.at(-1).datum);
+  const bisMs = achsenEnde(bis, liste.at(-1).datum);
   const kgs = liste.map((g) => g.kg).concat(ziel ?? []);
   const yMin = Math.floor((Math.min(...kgs) - 0.2) * 2) / 2;
   const yMax = Math.ceil((Math.max(...kgs) + 0.2) * 2) / 2;
@@ -102,6 +109,7 @@ export function gewichtDiagramm(gewichte, freigaben) {
     : "";
   const linie = liste.map((g) => `${x(ms(g.datum))},${y(g.kg)}`).join(" ");
   const letzte = liste.at(-1);
+  const letzteX = x(ms(letzte.datum));
   const breite = Math.max(8, innenB / liste.length);
   const punkte = liste
     .map((g) =>
@@ -114,8 +122,8 @@ export function gewichtDiagramm(gewichte, freigaben) {
       band +
       zielLinie +
       `<polyline class="linie" points="${linie}"/>
-       <circle class="endpunkt" cx="${x(bisMs)}" cy="${y(letzte.kg)}" r="4"/>
-       <text class="beschriftung stark" x="${B - RAND.rechts + 4}" y="${y(letzte.kg) - 4}">${zahl(letzte.kg, 2)} kg</text>` +
+       <circle class="endpunkt" cx="${letzteX}" cy="${y(letzte.kg)}" r="4"/>
+       <text class="beschriftung stark" x="${letzteX + 6}" y="${y(letzte.kg) - 4}">${zahl(letzte.kg, 2)} kg</text>` +
       punkte,
     "Gewichtsverlauf in kg"
   );
@@ -224,18 +232,20 @@ export function glatt(p) {
 // Gezeichnet werden die Wägungen ab "von"; der sichere Bereich rechnet aber vom Gewicht am Tag der ersten
 // Freigabe, das auch vor dem Zeitraum liegen kann – deshalb bekommt die Funktion immer alle Wägungen.
 // Der Name bleibt aus der Zeit der weichen Kurve, damit Aufrufer und Tests gleich bleiben.
-export function weicheKurve(gewichte, freigaben, von = null) {
+// bis (seit 0.33.0): Ende der Zeitachse, im Verlauf heute. Rechts von der letzten Wägung bleibt bis dahin freie Fläche,
+// sicherer Bereich, Monate und Freigabe-Marken laufen mit. Ohne bis endet die Achse an der letzten Wägung.
+export function weicheKurve(gewichte, freigaben, von = null, bis = null) {
   const alle = verlaufGewichte(gewichte, null);
   const liste = verlaufGewichte(gewichte, von);
   if (liste.length < 2) return "";
   const KB = 340;
   const KH = 220;
-  const R = { links: 34, rechts: 40, oben: 14, unten: 24 };
+  const R = { ...KURVE_RAND, oben: 14, unten: 24 };
   const kgs = liste.map((g) => g.kg);
   const yMin = Math.floor((Math.min(...kgs) - 0.15) * 10) / 10;
   const yMax = Math.ceil((Math.max(...kgs) + 0.15) * 10) / 10;
   const vonMs = ms(liste[0].datum);
-  const bisMs = ms(liste.at(-1).datum);
+  const bisMs = achsenEnde(bis, liste.at(-1).datum);
   const x = skala(vonMs, bisMs, R.links, KB - R.rechts);
   const y = skala(yMin, yMax, KH - R.unten, R.oben);
   const unten = KH - R.unten;
@@ -307,16 +317,76 @@ export function weicheKurve(gewichte, freigaben, von = null) {
   </svg>`;
 }
 
-// Legende passend zu dem, was die Kurve gerade zeigt. Ziel und sicherer Bereich nur, wenn die fertige Kurve sie enthält
-// (Ziel unter dem Ausschnitt, Freigabe erst am Tag der letzten Wägung; Handy-Test 05.11.2026).
-function legende(freigaben, von, bis, kurve) {
+// Legende passend zu dem, was die Kurve gerade zeigt: Ziel, Freigabe und sicherer Bereich nur, wenn die fertige Kurve
+// sie enthält (Ziel unter dem Ausschnitt; Handy-Test 05.11.2026). „Besonderer Tag“ nur mit Zeitleiste (0.33.0).
+function legende(kurve, mitZeitleiste) {
   const teile = ['<span><i></i>Gewicht</span>'];
-  if (freigaben.length) {
-    if (kurve.includes('class="ziel"')) teile.push('<span><i class="ziel"></i>Ziel vom Tierarzt</span>');
-    if (freigaben.some((f) => (!von || f.datum >= von) && f.datum <= bis)) teile.push('<span><i class="freigabe"></i>Freigabe</span>');
-    if (kurve.includes('class="band"')) teile.push('<span><i class="band"></i>sicher: 0,5 bis 2 % pro Woche</span>');
-  }
+  if (kurve.includes('class="ziel"')) teile.push('<span><i class="ziel"></i>Ziel vom Tierarzt</span>');
+  if (kurve.includes('class="freigabe-marke"')) teile.push('<span><i class="freigabe"></i>Freigabe</span>');
+  if (kurve.includes('class="band"')) teile.push('<span><i class="band"></i>sicher: 0,5 bis 2 % pro Woche</span>');
+  if (mitZeitleiste) teile.push('<span><i class="besonders"></i>Besonderer Tag</span>');
   return `<p class="legende-zeile">${teile.join("")}</p>`;
+}
+
+// ---------- Zeitleiste der besonderen Tage (seit 0.33.0) ----------
+// Schmaler Streifen unter der Gewichtskurve bzw. dem PDF-Diagramm, mit derselben Zeitachse (gleiche Breite, gleiche
+// Ränder). Phasen als Balken mit runden Enden, eintägige Ereignisse als Punkte; überlappende in einer zweiten Reihe.
+// eintraege: nur die des Tiers. vonTag/bisTag: Anfang und Ende der Achse ("JJJJ-MM-TT"). Leer ohne Einträge im Zeitraum.
+// minHoehe: Höhe in Einheiten, mindestens; die Reihen stehen dann in der Mitte. Im Verlauf 56, damit der Streifen bei
+// 375 px Breite rund 48 px hoch ist (Tippfläche, Review 05.11.); im PDF schmal.
+const ZL = { halb: 4, abstand: 5, oben: 9, reihe: 14 };
+const kurzNotiz = (text) => (text.length > 60 ? `${text.slice(0, 59).trimEnd()}…` : text);
+
+export function zeitleiste(eintraege, { vonTag, bisTag, links, rechts, minHoehe = 0 }) {
+  const liste = eintraege.filter((e) => beruehrt(e, vonTag, bisTag)).sort((a, b) => a.von.localeCompare(b.von));
+  if (liste.length === 0) return "";
+  const vonMs = ms(vonTag);
+  const bisMs = ms(bisTag);
+  const x = skala(vonMs, bisMs, links, B - rechts);
+  const rund = (wert) => Math.round(wert * 10) / 10;
+  const enden = [-Infinity, -Infinity];
+  const teile = liste.map((e) => {
+    const x1 = rund(x(Math.max(ms(e.von), vonMs)));
+    const x2 = rund(x(Math.min(e.bis === null ? bisMs : ms(e.bis), bisMs)));
+    const frei = enden.findIndex((ende) => x1 - ZL.halb >= ende + ZL.abstand);
+    const reihe = frei >= 0 ? frei : enden[0] <= enden[1] ? 0 : 1;
+    enden[reihe] = Math.max(enden[reihe], x2 + ZL.halb);
+    const text = `${artVon(e.art).text}: ${zeitraumText(e)}${e.notiz ? ` · ${kurzNotiz(e.notiz)}` : ""}`;
+    return { e, x1, x2, reihe, text };
+  });
+  const reihenHoehe = teile.some((t) => t.reihe === 1) ? ZL.oben * 2 + ZL.reihe : ZL.oben * 2;
+  const hoehe = Math.max(reihenHoehe, minHoehe);
+  const versatz = (hoehe - reihenHoehe) / 2;
+  for (const t of teile) t.y = ZL.oben + t.reihe * ZL.reihe + versatz;
+  // Erst die Balken, dann die Punkte: Ein einzelner Tag bleibt auch auf einer Phase in derselben Reihe sichtbar
+  // (drei Einträge am selben Tag passen nicht ohne Überlappung in zwei Reihen).
+  const istTag = (t) => t.e.bis === t.e.von;
+  const formen = [...teile]
+    .sort((a, b) => istTag(a) - istTag(b))
+    .map(({ e, x1, x2, y, text }) => {
+      const notfall = artVon(e.art).notfall ? " notfall" : "";
+      const form =
+        e.bis === e.von
+          ? `<circle class="zl-punkt${notfall}" cx="${x1}" cy="${y}" r="${ZL.halb}"/>`
+          : `<line class="zl-balken${notfall}" x1="${x1}" x2="${x2}" y1="${y}" y2="${y}"/>`;
+      return `<g class="zl-eintrag"><title>${sicher(text)}</title>${form}</g>`;
+    })
+    .join("");
+  const daten = teile.map(({ x1, x2, y, text }) => [x1, x2, y, text]);
+  return `<svg viewBox="0 0 ${B} ${hoehe}" class="zeitleiste" role="img" aria-label="Besondere Tage im Zeitraum: ${liste.length}" data-eintraege="${sicher(JSON.stringify(daten))}">${formen}</svg>`;
+}
+
+// Antippen der Zeitleiste: der Eintrag mit dem kleinsten Abstand (waagerecht plus senkrecht; auf einem Balken oder
+// Punkt samt rundem Ende zählt waagerecht 0). Bei Gleichstand gewinnt der schmalere, also ein Punkt auf einem Balken.
+// liste: [[x1, x2, y, text], …] aus data-eintraege.
+export function naechsterZeitleistenEintrag(liste, x, y) {
+  const abstand = ([x1, x2, ey]) => Math.max(0, x1 - ZL.halb - x, x - x2 - ZL.halb) + Math.abs(y - ey);
+  const breite = ([x1, x2]) => x2 - x1;
+  return liste.reduce((a, b) => {
+    const da = abstand(a);
+    const db = abstand(b);
+    return db < da || (db === da && breite(b) < breite(a)) ? b : a;
+  });
 }
 
 // Eckdaten wie auf einer Gewichtskarte: Start, Jetzt und – mit Freigabe – wie weit es noch bis zum Ziel ist.
@@ -479,7 +549,8 @@ function befundKarte(freigaben) {
 }
 
 // fotos: fertige Vorher/Nachher-Karte aus app.js (ab 0.25.0), steht seit 0.29.4 ganz am Ende (freiwillig, ändert sich selten).
-export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, futterNachId, zeitraum, heute, kopf, fotos = "" }) {
+// besondereTage (seit 0.33.0): nur die des Tiers; erscheinen als Zeitleiste unter der Kurve.
+export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, besondereTage = [], futterNachId, zeitraum, heute, kopf, fotos = "" }) {
   if (gewichte.length < 2) {
     return `${kopf}<p class="leer">Sobald mindestens zwei Gewichte eingetragen sind, erscheint hier der Verlauf.</p>${fotos}`;
   }
@@ -497,12 +568,19 @@ export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, futterNachId, 
     // Neutral: ob eine Abnahme gut ist, bewertet nur „Tempo pro Woche“ (mit Freigabe, über 2 % immer markiert).
     aenderung = `<span class="marke">${vorzeichen(diff, 2)} kg</span>`;
   }
-  const svg = imZeitraum.length >= 2 ? weicheKurve(gewichte, freigaben, von) : "";
+  const svg = imZeitraum.length >= 2 ? weicheKurve(gewichte, freigaben, von, heute) : "";
+  // Gleiches Achsenende wie die Kurve: heute, mindestens die letzte Wägung.
+  const leiste = svg
+    ? zeitleiste(besondereTage, { vonTag: imZeitraum[0].datum, bisTag: heute > aktuell.datum ? heute : aktuell.datum, ...KURVE_RAND, minHoehe: 56 })
+    : "";
+  const tipp = leiste
+    ? "Tippe auf die Kurve oder auf einen besonderen Tag darunter, um Einzelheiten zu sehen."
+    : "Tippe auf die Kurve, um Datum und Gewicht zu sehen.";
   const kurve =
     imZeitraum.length >= 2
-      ? `<div class="papier"><div class="kurve-feld">${svg}<div class="infoblase" id="infoblase" hidden></div></div></div>
-         ${legende(freigaben, von, aktuell.datum, svg)}
-         <p class="tipp">Tippe auf die Kurve, um Datum und Gewicht zu sehen. Alle Gewichte als Liste stehen unter „Gewicht“.</p>`
+      ? `<div class="papier"><div class="kurve-feld">${svg}${leiste}<div class="infoblase" id="infoblase" hidden></div></div></div>
+         ${legende(svg, !!leiste)}
+         <p class="tipp">${tipp} Alle Gewichte als Liste stehen unter „Gewicht“.</p>`
       : `<p class="leer">Im gewählten Zeitraum gibt es weniger als zwei Wägungen.</p>`;
   const gewichtKarte = `<section class="karte" aria-label="Gewicht">
     <div class="diagramm-kopf">

@@ -20,6 +20,7 @@ const beispiel = () => ({
   ],
   gewichte: [{ id: "g1", tierId: "kito" }, { id: "g2", tierId: "zuki" }],
   freigaben: [{ id: "f1", tierId: "kito" }],
+  besondereTage: [{ id: "b1", tierId: "zuki" }, { id: "b2", tierId: "kito" }, { id: "b3", tierId: "zuki" }],
 });
 
 test("aktivesTier nimmt das gemerkte Tier", () => {
@@ -51,7 +52,7 @@ test("neuesTier legt eine Katze mit Namen an", () => {
 });
 
 test("eintraegeVon zählt die Einträge eines Tiers", () => {
-  assert.deepEqual(eintraegeVon(beispiel(), "zuki"), { mahlzeiten: 2, gewichte: 1, freigaben: 0 });
+  assert.deepEqual(eintraegeVon(beispiel(), "zuki"), { mahlzeiten: 2, gewichte: 1, freigaben: 0, besondereTage: 2 });
 });
 
 test("tierEntfernen löscht das Tier mit allen seinen Einträgen, Futter bleibt", () => {
@@ -61,7 +62,15 @@ test("tierEntfernen löscht das Tier mit allen seinen Einträgen, Futter bleibt"
   assert.deepEqual(daten.mahlzeiten.map((m) => m.id), ["m1"]);
   assert.deepEqual(daten.gewichte.map((g) => g.id), ["g1"]);
   assert.deepEqual(daten.freigaben.map((f) => f.id), ["f1"]);
+  assert.deepEqual(daten.besondereTage.map((b) => b.id), ["b2"]);
   assert.equal(daten.futter.length, 1);
+});
+
+test("Daten ohne Liste besondereTage (vor 0.33.0) lassen sich zählen und entfernen", () => {
+  const { besondereTage, ...daten } = beispiel();
+  assert.equal(eintraegeVon(daten, "zuki").besondereTage, 0);
+  assert.equal(tierEntfernen(daten, "zuki"), true);
+  assert.equal("besondereTage" in daten, false);
 });
 
 test("das letzte Tier lässt sich nicht entfernen", () => {

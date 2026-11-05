@@ -21,6 +21,8 @@ Das Datenformat ist seit 0.2 durchgehend Version 1. Neue Felder kamen immer nur 
 | 0.22 | f0c0ab6 | `futter.ean` (eigene Sorten) |
 | 0.25/0.26 | b860cc2 / d6e7750 | `gewichte.foto` |
 | 0.27 | da7675e | Einrichtung: kein Startfutter, `geschlecht` darf fehlen |
+| 0.32 | d145940 | `futter.analyse` (Rechner „Eigene Sorte“); keine eigene Datei, steckt in `kilossos-0.33.json` |
+| 0.33 | – | Liste `besondereTage` (fehlt sie, gilt sie als leer; `istGueltig` verlangt sie nicht) |
 
 ## Umsetzung
 - Prüfkette beim Einlesen aus `app.js` in eine reine Funktion `sicherungPruefen` (`js/sicherung.js`) verschieben,

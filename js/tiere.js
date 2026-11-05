@@ -31,18 +31,21 @@ export function neuesTier(id, name) {
   return { id, name, art: "katze" };
 }
 
+// Listen mit Einträgen je Tier. besondereTage gibt es erst seit 0.33.0 und kann in älteren Daten fehlen.
+const LISTEN = ["mahlzeiten", "gewichte", "freigaben", "besondereTage"];
+
 export function eintraegeVon(daten, tierId) {
-  const zaehle = (liste) => liste.filter((e) => e.tierId === tierId).length;
-  return { mahlzeiten: zaehle(daten.mahlzeiten), gewichte: zaehle(daten.gewichte), freigaben: zaehle(daten.freigaben) };
+  const zaehle = (liste) => (Array.isArray(liste) ? liste.filter((e) => e.tierId === tierId).length : 0);
+  return Object.fromEntries(LISTEN.map((feld) => [feld, zaehle(daten[feld])]));
 }
 
-// Entfernt das Tier samt Mahlzeiten, Gewichten und Freigaben. Futtersorten sind gemeinsam und bleiben.
+// Entfernt das Tier samt Mahlzeiten, Gewichten, Freigaben und besonderen Tagen. Futtersorten sind gemeinsam und bleiben.
 // Das letzte Tier bleibt immer stehen (die App braucht mindestens eins). Gibt zurück, ob etwas entfernt wurde.
 export function tierEntfernen(daten, tierId) {
   if (daten.tiere.length <= 1 || !daten.tiere.some((t) => t.id === tierId)) return false;
   daten.tiere = daten.tiere.filter((t) => t.id !== tierId);
-  for (const feld of ["mahlzeiten", "gewichte", "freigaben"]) {
-    daten[feld] = daten[feld].filter((e) => e.tierId !== tierId);
+  for (const feld of LISTEN) {
+    if (Array.isArray(daten[feld])) daten[feld] = daten[feld].filter((e) => e.tierId !== tierId);
   }
   return true;
 }
