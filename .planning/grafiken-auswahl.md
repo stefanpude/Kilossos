@@ -7,6 +7,9 @@ vier Stellen gewählt. Diese Datei beschreibt, was gebaut wird.
 Gebaut wird nach dem Tierarzttermin am 13.11.2026.**
 **Nachtrag 05.11.2026 (0.36.8):** In sichtbaren Texten heißt es jetzt „gewogen“ statt „Wägung“ (Entscheidung des
 Halters). Die Texte unten beim Bau entsprechend umformulieren, z. B. „Das Tempo erscheint ab dem zweiten Wiegen.“
+**Nachtrag 05.11.2026 abends:** Der Halter hat entschieden, die Stellen 1 bis 3 („Gefüttert“, „Letzte Messung“,
+„Tempo pro Woche“) schon vor dem Tierarzttermin zu bauen, jede als eigene Version. Stichtag Montag, 10.11.2026: Was bis
+dahin nicht sauber läuft, wird wieder herausgenommen. Das PDF (Stelle 4) bleibt bis nach dem 13.11.2026.
 
 | Stelle | Gewählt |
 |---|---|
