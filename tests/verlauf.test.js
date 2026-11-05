@@ -733,3 +733,18 @@ test("0.42.3: „Alle Wochen“ mit gleichem Vorzeichen wie der Kopf", () => {
   assert.deepEqual(marken, ["0,00 %", "−0,30 %", "0,30 %"]);
   assert.doesNotMatch(html, /class="marke[^"]*">\+/);
 });
+
+// 0.42.4: An den Grenzen rundet „Alle Wochen“ wie der Wert am neuesten Punkt (tempoZahl, in Richtung des Urteils),
+// sonst zwei Stellen wie bisher.
+test("0.42.4: „Alle Wochen“ rundet an den Grenzen wie der Tempo-Punkt", () => {
+  const raten = [0.666, 0.5025, 0.4996, 2.004, 1.997, -0.3];
+  const g = [G("2026-09-03", 10)];
+  let kg = 10;
+  raten.forEach((p, i) => {
+    kg *= 1 - p / 100;
+    g.push(G(plusWochen("2026-09-03", i + 1), kg));
+  });
+  const html = tVerlauf({ gewichte: g, freigaben: [], heute: plusWochen("2026-09-03", raten.length) });
+  const marken = [...html.matchAll(/<span class="marke[^"]*">([^<]*%)<\/span>/g)].map((m) => m[1]);
+  assert.deepEqual(marken, ["−0,30 %", "1,99 %", "2,01 %", "0,49 %", "0,51 %", "0,67 %"]);
+});

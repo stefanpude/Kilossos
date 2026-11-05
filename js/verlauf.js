@@ -620,6 +620,12 @@ function tempoKarte(gewichte, freigaben, von, heute) {
   const bisMs = achsenEnde(heute, imZeitraum.at(-1).datum);
   const marke = { gut: "marke-gut", langsam: "marke-warnung", "zu-schnell": "marke-gefahr", neutral: "" };
   // Je Woche das Tempo wie im Kopf und auf der Skala: Abnahme ohne Vorzeichen, Zunahme mit „−“ (0.42.3).
+  // Nahe einer Grenze die Zahl des Tempo-Punkts (tempoZahl, zwei Stellen in Richtung des Urteils, 0.42.4),
+  // sonst zwei Stellen normal gerundet. Nahe einer Grenze liegt immer eine Abnahme, also ohne Vorzeichen.
+  const wochenZahl = (p) => {
+    const t = tempoZahl(p);
+    return /,\d\d$/.test(t) ? t : mitMinus(p, 2);
+  };
   const zeilen = raten
     .map((r) => {
       const d = new Date(ms(r.datum));
@@ -627,7 +633,7 @@ function tempoKarte(gewichte, freigaben, von, heute) {
       return `<div class="woche">
         <span class="tag"><b>${d.getDate()}</b>${d.toLocaleDateString("de-DE", { month: "short" })}</span>
         <span class="balken ${r.bewertung}"><i style="--w: ${breite.toFixed(1)}%"></i></span>
-        <span class="marke ${marke[r.bewertung]}">${mitMinus(r.prozent, 2)} %</span>
+        <span class="marke ${marke[r.bewertung]}">${wochenZahl(r.prozent)} %</span>
       </div>`;
     })
     .join("");
