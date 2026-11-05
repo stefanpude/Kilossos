@@ -1,7 +1,7 @@
-# Handy-Test 0.26.0 bis 0.31.0
+# Handy-Test 0.26.0 bis 0.34.2
 
 Nach dem Hochladen etwa 1 Minute warten. Dann die App einmal ganz schließen und neu öffnen.
-Dann **Mehr** ganz nach unten scrollen: Die letzte Zeile (mit dem i-Zeichen) zeigt die Version, dort muss **Version 0.31.0** stehen.
+Dann **Mehr** ganz nach unten scrollen: Die letzte Zeile (mit dem i-Zeichen) zeigt die Version, dort muss **Version 0.34.2** (oder neuer) stehen.
 „Über Kilossos“ ist nur eine Überschrift, die Versionszeile nur zum Lesen: Antippen bewirkt bei beiden nichts.
 Steht dort noch eine alte Version, die App noch einmal schließen und öffnen.
 
@@ -80,6 +80,45 @@ Der Knopf „Warum nimmt meine Katze nicht ab?“ im Hinweis „Abnahme stockt�
 - [ ] Ganz unten auf „Gewicht eintragen“ tippen: Das Fenster heißt wie immer „Gewicht von Kito“, das Gewichtsfeld ist leer. **Abbrechen**.
 
 Danach oben „Demo beenden“ antippen oder den Tab schließen.
+
+## I. Neu in 0.32.0 und 0.32.1: kJ-Schutz und kcal-Rechner (Demo in Chrome, deine echten Daten bleiben unberührt)
+
+- [ ] https://stefanpude.github.io/Kilossos/?demo öffnen → **Futter** → „Eigene Sorte anlegen“. Als Name „Test“ eintragen, bei „Art“ **Nassfutter** wählen.
+- [ ] Bei „kcal pro 100 g“ **307** eintragen und auf eine freie Stelle tippen: Ein roter Kasten erscheint („307 kcal pro 100 g sind für Nassfutter viel zu viel.“) mit Knöpfen wie „Dort steht kJ“.
+- [ ] Noch **nichts** im roten Kasten antippen, sondern unten **Speichern**: Es wird nicht gespeichert, es erscheint „Bitte zuerst die Frage im roten Kasten beantworten.“
+- [ ] Im roten Kasten „Dort steht kJ“ antippen: Im Feld steht jetzt **73,4**, darunter „✓ 307 kJ umgerechnet: 73,4 kcal pro 100 g.“ Der rote Kasten ist weg.
+- [ ] Weiter unten „Keine kcal auf der Packung?“ aufklappen und eintragen: Protein **7,9**, Fett **4,4**, Asche **1,4**, Faser **0,3**, Feuchte **84**. Es erscheint etwa 77 kcal und ein Knopf „77 kcal übernehmen“.
+- [ ] „77 kcal übernehmen“ antippen: Oben im Feld steht 77, bei „Woher stammt der Wert?“ steht „Aus den Bestandteilen berechnet“.
+- [ ] Oben im Feld 77 in **78** ändern und dann sofort **Speichern** antippen, ohne vorher woanders hinzutippen: Schon der **erste** Tipp speichert („✓ Gespeichert“), die Sorte „Test“ steht in der Liste.
+- [ ] 0.32.1: Im Tab auf **Gewicht** gehen und die Seite aktualisieren (oben im Tab nach unten ziehen): Die Seite lädt neu und zeigt gleich **Gewicht**. „Heute“ darf dabei nicht kurz aufblitzen.
+
+Danach oben „Demo beenden“ antippen oder den Tab schließen. Die Sorte „Test“ verschwindet mit der Demo.
+
+## J. Neu in 0.33.0: Besonderer Tag (Demo in Chrome, deine echten Daten bleiben unberührt)
+
+- [ ] https://stefanpude.github.io/Kilossos/?demo öffnen → **Heute** → in der Karte „Besonderer Tag“ auf „Besonderen Tag eintragen“ tippen. (Dort steht schon ein Eintrag der Demo, „Weniger Bewegung“; den und seinen Knopf „Beendet“ bitte nicht antippen.)
+- [ ] Bei „Was war besonders?“ **Sonstiges** wählen, die Notiz leer lassen und **Speichern** antippen: Es wird nicht gespeichert, es erscheint „Bitte schreib bei „Sonstiges“ kurz dazu, was war.“
+- [ ] Als Notiz „Test“ eintragen und **Speichern**: In der Karte steht jetzt „Sonstiges“ mit dem heutigen Datum und darunter „Test“.
+- [ ] Auf den Eintrag tippen (auf den Text, **nicht** auf das Kreuz): Das Fenster öffnet sich wieder mit „Sonstiges“ und „Test“. **Abbrechen**.
+- [ ] Jetzt das Kreuz rechts neben dem Eintrag antippen: Die Frage „Diesen Eintrag löschen?“ erscheint. Mit **OK** bestätigen: Der Eintrag ist weg.
+
+Danach oben „Demo beenden“ antippen oder den Tab schließen.
+
+## K. Neu in 0.34.0: Freigabe ändern und löschen (Demo in Chrome, deine echten Daten bleiben unberührt)
+
+Bitte in der Demo testen, nicht in deiner echten App. Die Test-Freigabe in der echten App bleibt bis zum Tierarzttermin drin.
+
+- [ ] https://stefanpude.github.io/Kilossos/?demo öffnen → **Mehr** → unter „Tierarzt“ auf die Tafel „Freigabe vom Tierarzt“ tippen (dort stehen Ziel, kcal/Tag und BCS).
+- [ ] Das Fenster heißt „Freigabe für Kito ändern“. Oben steht der Hinweis „Nur für Fehler beim Eintragen …“, die Werte stehen schon drin, unten gibt es den roten Knopf **Freigabe löschen**.
+- [ ] **Freigabe löschen** antippen: Eine Frage erscheint („Freigabe vom … löschen? …“). Dort **Abbrechen** antippen, **nicht** OK: Das Fenster bleibt offen, nichts ist gelöscht.
+- [ ] Unten **Abbrechen** antippen, **nicht** Speichern: Das Fenster schließt, die Tafel sieht aus wie vorher.
+
+Danach oben „Demo beenden“ antippen oder den Tab schließen.
+
+## L. Neu in 0.34.1 und 0.34.2: Zeile im PDF und Logo
+
+- [ ] 0.34.1 (Demo): https://stefanpude.github.io/Kilossos/?demo öffnen → **Mehr** → „Übersicht für den Tierarzt“ → „Übersicht öffnen“. Unter der Gewichtskurve stehen Punkte und Balken, darunter klein und grau „Streifen unter der Kurve: besondere Tage auf derselben Zeitachse …“. Nichts drucken, danach den Tab schließen.
+- [ ] 0.34.2 (Inkognito-Tab in Chrome): https://stefanpude.github.io/Kilossos/ im Inkognito-Tab öffnen. Das Bild von Kito oben ist ein Kasten mit runden Ecken, nicht mehr rund. Ohrspitze und Napf sind ganz zu sehen. Nichts eintragen, den Inkognito-Tab schließen.
 
 ## Was mir auffällt
 
