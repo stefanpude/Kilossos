@@ -986,13 +986,14 @@ dialog .wert-eingabe input:not([type="hidden"]) { padding-right: calc(12px + 1.4
 .bericht-notizen .linie { border-bottom: 1px solid var(--text-leise); height: 28px; }
 /* Wägungen als Monatsraster (ab 0.36.0, js/bericht.js waegungsRaster): eine Zeile je Monat, bis zu 5 Wägungen nebeneinander.
    Feste Spaltenbreiten, damit die Wägungen aller Monate untereinander stehen. Auf dem Handy breiter als der Schirm:
-   scrollt innen wie die anderen breiten Tabellen (min-width), im Druck reicht die Seite (182 mm). */
-.bericht table.wg-raster { table-layout: fixed; min-width: 34rem; }
+   scrollt innen wie die anderen breiten Tabellen (min-width), im Druck reicht die Seite (182 mm).
+   min-width 30rem (0.36.1): passt am PC in den Kasten (494 px Platz), vorher 34rem war rechts abgeschnitten. */
+.bericht table.wg-raster { table-layout: fixed; min-width: 30rem; }
 .wg-raster th, .wg-raster td { border-bottom: 0; padding: 4px 6px 4px 0; }
 .wg-raster thead th { border-bottom: 1px solid var(--rand); }
-.wg-raster thead th:first-child { width: 21mm; }
+.wg-raster thead th:first-child { width: max(21mm, 5rem); } /* wächst mit großer Handy-Schrift mit (0.36.1), im Druck 21 mm */
 .wg-raster thead th:last-child { width: 30mm; }
-.wg-erkl { font-weight: 400; margin-left: 6px; }
+.wg-erkl { font-weight: 400; display: block; } /* am Bildschirm eigene Zeile (sonst Umbruch mitten im Satz), im Druck daneben */
 .wg-raster tr.wg-letzte > *, .wg-raster .wg-monat, .wg-raster .wg-summe { border-bottom: 1px solid var(--rand); }
 .wg-raster .wg-monat { font-size: 0.8125rem; font-weight: 700; color: var(--text); white-space: nowrap; }
 .wg-tag, .wg-diff { display: block; font-size: 0.75rem; color: var(--text-leise); line-height: 1.25; }
@@ -1027,6 +1028,8 @@ dialog .wert-eingabe input:not([type="hidden"]) { padding-right: calc(12px + 1.4
   .bericht .diagramm, .bericht .bericht-grafik { max-width: 150mm; }
   .bericht tr, .bericht .diagramm, .bericht .bericht-grafik, .bericht-notizen { break-inside: avoid; }
   .bericht h2 { break-after: avoid; }
+  .wg-erkl { display: inline; margin-left: 6px; }
+  .wg-raster thead th:first-child { width: 21mm; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 

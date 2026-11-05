@@ -1,4 +1,5 @@
 import { test } from "node:test";
+import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 import { berichtDaten, berichtHtml, waegungsMonate, WAEGUNGEN_PRO_ZEILE } from "../js/bericht.js";
 
@@ -403,4 +404,17 @@ test("berichtHtml: mehr als 5 Wägungen im Monat: Monat und Bilanz über beide Z
   const zeilen = rasterZeilen(html);
   assert.equal(zeilen.length, 2);
   assert.equal(zeilen[1].length, 5); // zweite Zeile ohne Monat und Bilanz (rowspan), 2 Wägungen + 3 leere Felder
+});
+
+// ---------- 0.36.1: Raster passt am PC in den Kasten der Übersicht ----------
+// Fund des Halters 05.11.2026 (Screenshot am PC): rechts war „KM/Woche“ abgeschnitten, weil die Mindestbreite
+// des Rasters (34rem = 544 px) größer war als der Platz im Kasten (main max. 560 px, je 16 px Seitenrand,
+// je 1 px Linie und je 16 px Innenabstand der Übersicht = 494 px). Auf dem Handy scrollt es weiter innen.
+test("styles.css: Monatsraster passt am PC ohne Wischen in die Übersicht", () => {
+  const css = readFileSync(new URL("../styles.css", import.meta.url), "utf8");
+  const main = Number(css.match(/\nmain \{\s*max-width: (\d+)px;/)[1]);
+  const platz = main - 2 * 16 - 2 * 1 - 2 * 16;
+  const m = css.match(/\.bericht table\.wg-raster \{[^}]*min-width: ([\d.]+)rem/);
+  assert.ok(m, "Mindestbreite des Rasters in rem");
+  assert.ok(Number(m[1]) * 16 <= platz, `${m[1]}rem = ${Number(m[1]) * 16} px, Platz ${platz} px`);
 });
