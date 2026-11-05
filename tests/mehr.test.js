@@ -2,6 +2,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { freigabeTafel, datumText } from "../js/mehr.js";
 import { MCS } from "../js/daten.js";
+import { SYMBOL } from "../js/symbole.js";
+import { readFileSync } from "node:fs";
+
+const lies = (datei) => readFileSync(new URL(`../${datei}`, import.meta.url), "utf8");
 
 const mcsSchluessel = Object.keys(MCS)[1];
 
@@ -33,4 +37,40 @@ test("freigabeTafel: ohne BCS, MCS und Notiz keine leeren Angaben", () => {
 
 test("freigabeTafel: ohne Freigabe null", () => {
   assert.equal(freigabeTafel(undefined), null);
+});
+
+// 0.35.1: Stefan wusste nicht, dass man die Tafel antippen kann (Handy-Test 05.11.2026). Deshalb steht es jetzt sichtbar da.
+// „Korrigieren“ statt „Ändern“: Ändern ist nur für Fehler, ein neuer Plan kommt über „Freigabe eintragen“ dazu.
+const zeichneFreigabe = () => {
+  const js = lies("app.js");
+  const start = js.indexOf("function zeichneFreigabe()");
+  return js.slice(start, js.indexOf("// ---------- Profil", start));
+};
+
+test("Stift-Symbol für „korrigieren“", () => {
+  assert.match(SYMBOL.stift, /^<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false">/);
+});
+
+test("Freigabe-Tafel zeigt sichtbar „Korrigieren oder löschen“ mit Stift, die ganze Tafel bleibt der Knopf", () => {
+  const block = zeichneFreigabe();
+  assert.match(block, /class="freigabe-knopf tippbar" data-aktion="freigabe-bearbeiten"/);
+  assert.match(block, /<span class="freigabe-hinweis">\$\{SYMBOL\.stift\}Korrigieren oder löschen<\/span><\/button>/);
+  // Der alte, nur vorgelesene Zusatz „, ändern“ entfällt: Der sichtbare Text wird jetzt mit vorgelesen.
+  assert.doesNotMatch(block, /nur-vorlesen">, ändern/);
+});
+
+test("Frühere Freigaben: jede Zeile mit kleinem Stift, vorgelesen „korrigieren oder löschen“", () => {
+  const block = zeichneFreigabe();
+  assert.match(block, /class="waegung-knopf freigabe-zeile tippbar" data-aktion="freigabe-bearbeiten"/);
+  assert.match(
+    block,
+    /<span class="stift" aria-hidden="true">\$\{SYMBOL\.stift\}<\/span><span class="nur-vorlesen">, korrigieren oder löschen<\/span><\/button>/,
+  );
+});
+
+test("styles.css: Hinweis als umrandetes Feld, Stift in der Zeile leise", () => {
+  const css = lies("styles.css");
+  assert.match(css, /\.freigabe-hinweis \{[^}]*border: 1px solid var\(--akzent\);/);
+  assert.match(css, /\.freigabe-hinweis \{[^}]*color: var\(--akzent-stark\);/);
+  assert.match(css, /\.freigabe-zeile \.stift \{[^}]*color: var\(--text-leise\);/);
 });

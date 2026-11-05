@@ -37,5 +37,7 @@ export const SYMBOL = {
   katzenkopf: ico('<circle cx="12" cy="13.5" r="7"/><path d="M6.4 9.2 5.6 3.8l4.3 3.4M17.6 9.2l.8-5.4-4.3 3.4M11.2 15.3h1.6L12 16.3z"/><circle cx="9.4" cy="12.6" r=".5"/><circle cx="14.6" cy="12.6" r=".5"/><path d="M2.8 14.4l4.4.6M3.2 17.4l4-1M21.2 14.4l-4.4.6M20.8 17.4l-4-1"/>'),
   info: ico('<circle cx="12" cy="12" r="8"/><path d="M12 11v5.5M12 7.8v.1"/>'),
   waage: ico('<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8.5 11a3.5 3.5 0 0 1 7 0M12 11l1.6-2"/>'),
+  // „Korrigieren oder löschen“ an der Freigabe-Tafel (ab 0.35.1)
+  stift: ico('<path d="M4.5 19.5l1-4.2L15.8 5a2.1 2.1 0 0 1 3 3L8.5 18.5z"/><path d="M13.8 7l3 3"/>'),
 };
 SYMBOL.frage = SYMBOL.unbekannt;

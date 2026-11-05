@@ -664,7 +664,9 @@ function eigeneFreigaben() {
 
 // Tafel mit der geltenden Freigabe; antippen = ändern (seit 0.34.0). Ein Knopf darf nur span enthalten,
 // deshalb Eckdaten und Zeile als span (Aussehen wie vorher, siehe styles.css „Freigabe-Tafel“).
-// Darunter „Frühere Freigaben (n)“: jede Zeile ein Knopf „ändern“, auch ältere sollen korrigierbar sein.
+// Seit 0.35.1 steht sichtbar „Korrigieren oder löschen“ darauf (Stefan hatte das Antippen nicht entdeckt);
+// „Korrigieren“, weil Ändern nur für Fehler ist, ein neuer Plan kommt über „Freigabe eintragen“ dazu.
+// Darunter „Frühere Freigaben (n)“: jede Zeile ein Knopf mit kleinem Stift, auch ältere sollen korrigierbar sein.
 function zeichneFreigabe() {
   const freigabe = freigabeVonTier();
   $("titel-tierarzt").textContent = daten.tiere.length > 1 ? `Tierarzt · ${tier.name}` : "Tierarzt";
@@ -675,7 +677,7 @@ function zeichneFreigabe() {
           .map((f) => `<span><span class="label">${sicher(f.titel)}</span><strong>${sicher(f.wert)}</strong></span>`)
           .join("")}</span>
         <span class="leise">${[tafel.zeile, tafel.befund, tafel.notiz].filter(Boolean).map(sicher).join(" · ")}</span>
-        <span class="nur-vorlesen">, ändern</span></button>`
+        <span class="freigabe-hinweis">${SYMBOL.stift}Korrigieren oder löschen</span></button>`
     : '<p class="leise">Noch keine Freigabe eingetragen.</p>';
   const frueher = fruehereFreigaben(eigeneFreigaben());
   $("freigaben-frueher").innerHTML = frueher.length
@@ -687,7 +689,8 @@ function zeichneFreigabe() {
           .map((f) => {
             const unten = [f.tierarzt, freigabeKurz(f), befundText(f)].filter(Boolean).map(sicher).join(" · ");
             return `<div class="zeile"><button type="button" class="waegung-knopf freigabe-zeile tippbar" data-aktion="freigabe-bearbeiten" data-id="${sicher(f.id)}">
-              <span class="name"><b>${datumText(f.datum)}</b><small>${unten}</small></span><span class="nur-vorlesen">, ändern</span></button></div>`;
+              <span class="name"><b>${datumText(f.datum)}</b><small>${unten}</small></span>
+              <span class="stift" aria-hidden="true">${SYMBOL.stift}</span><span class="nur-vorlesen">, korrigieren oder löschen</span></button></div>`;
           })
           .join(""),
       })

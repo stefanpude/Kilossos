@@ -407,6 +407,17 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 }
 .freigabe-knopf:focus-visible { outline-offset: -3px; }
 .freigabe-knopf > .leise { display: block; }
+/* Ab 0.35.1 sichtbar: „Korrigieren oder löschen“ als umrandetes Feld. Kein eigener Knopf, antippen kann man weiter die
+   ganze Tafel; das Feld zeigt nur, dass es geht. Bei „Frühere Freigaben“ ein kleiner Stift rechts in jeder Zeile. */
+.freigabe-hinweis {
+  display: inline-flex; align-items: center; gap: 6px; justify-self: start;
+  margin-top: 2px; padding: 6px 12px 6px 10px;
+  border: 1px solid var(--akzent); border-radius: 999px;
+  color: var(--akzent-stark); font-weight: 700; font-size: 0.875rem; line-height: 1.2;
+}
+.freigabe-hinweis .ico { width: 1rem; height: 1rem; flex: none; }
+.freigabe-zeile .stift { flex: none; display: grid; color: var(--text-leise); }
+.freigabe-zeile .stift .ico { width: 1.125rem; height: 1.125rem; }
 .karte > h4.label { margin: 0; }
 .mehr-hinweis { margin: 6px 2px 0; }
 .speicher-belegt { display: grid; gap: 6px; }
