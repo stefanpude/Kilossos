@@ -247,10 +247,40 @@ export function achtWochen(gewichte, heute) {
   return [...gewichteSortiert(gewichte)].reverse().filter((g) => g.datum >= von && g.datum <= heute);
 }
 
+// Tempo in % pro Woche als Text ohne Vorzeichen (seit 0.40.1), für „Letzte Messung“ und den Wert am neuesten
+// Tempo-Punkt. Normal eine Nachkommastelle. Liegt eine Abnahme näher als 0,1 an einer Grenze aus GRENZEN, zwei
+// Stellen, in Richtung des Urteils gerundet (über der Grenze auf-, sonst zur Grenze hin nach innen gerundet), damit
+// die Zahl nie auf der falschen Seite steht (wie die Warnung in rechnen.js). Genau auf der Grenze bleibt es bei „2,0“.
+// Die Schwellen sind dieselben wie in tempoRueckmeldung und wochenRaten (über 2 % erst ab 1e-9 darüber).
+export function tempoZahl(prozent) {
+  const text = (wert, stellen) => wert.toLocaleString("de-DE", { minimumFractionDigits: stellen, maximumFractionDigits: stellen });
+  const min = GRENZEN.abnahmeMin;
+  const max = GRENZEN.abnahmeMax;
+  const nah = (grenze) => Math.abs(prozent - grenze) < 0.1 - 1e-9;
+  // 1e-6 gleicht Gleitkomma-Reste aus (2,01 · 100 = 200,99999…); die Grenzfälle sichern max/min darunter ab.
+  const auf = (p) => Math.ceil(p * 100 - 1e-6) / 100;
+  const ab = (p) => Math.floor(p * 100 + 1e-6) / 100;
+  if (nah(max)) {
+    if (prozent > max + 1e-9) return text(Math.max(auf(prozent), max + 0.01), 2);
+    const r = ab(prozent);
+    return r >= max ? text(max, 1) : text(r, 2);
+  }
+  if (nah(min)) {
+    if (prozent < min) return text(Math.min(Math.floor(prozent * 100) / 100, min - 0.01), 2);
+    const r = auf(prozent);
+    return r <= min ? text(min, 1) : text(r, 2);
+  }
+  // Math.abs: Zunahme ohne Vorzeichen; −0,04 wird „0,0“, nie „-0,0“.
+  return text(Math.abs(prozent), 1);
+}
+
 // Werte für die Karte „Letzte Messung“ (ab 0.39.0). gewichte und freigaben: nur dieses Tier und nur bis „tag“.
 // Vergleich und Bewertung genau wie tempoRueckmeldung (Wägung davor = letzte mit früherem Datum; zwei am selben
 // Tag ergeben also keinen Vergleich). Die Kurve braucht mindestens zwei Wägungen in den 8 Wochen bis „tag“.
-export function messungWerte({ gewichte, freigaben, tag }) {
+// mittelZuSchnell (seit 0.40.1): Ist an diesem Tag die Warnung „zu schnell“ aktiv (Mittel über GRENZEN.tageZuSchnell
+// Tage, gerechnet in warnungen()), folgt die Karte ihr: rot, mit Hinweis aufs Mittel. Keine zweite Rechnung hier.
+// War die letzte Woche selbst schon zu schnell, bleibt es bei deren Text (mittelZuSchnell dann false).
+export function messungWerte({ gewichte, freigaben, tag, mittelZuSchnell = false }) {
   const sortiert = gewichteSortiert(gewichte);
   const letzte = sortiert[0];
   if (!letzte) return { art: "keine" };
@@ -258,6 +288,7 @@ export function messungWerte({ gewichte, freigaben, tag }) {
   if (!r) return { art: "ohneVergleich", letzte };
   const vorher = sortiert.find((g) => g.datum < letzte.datum);
   const kurve = achtWochen(gewichte, tag);
+  const mittel = Boolean(mittelZuSchnell) && r.bewertung !== "zu-schnell";
   return {
     art: "mitVergleich",
     letzte,
@@ -265,7 +296,8 @@ export function messungWerte({ gewichte, freigaben, tag }) {
     // „|| 0“: Math.round(-0,3) ergibt -0, das würde als „-0 g“ erscheinen.
     diffG: Math.round((letzte.kg - vorher.kg) * 1000) || 0,
     prozent: r.prozent,
-    bewertung: r.bewertung,
+    bewertung: mittel ? "zu-schnell" : r.bewertung,
+    mittelZuSchnell: mittel,
     kurve: kurve.length >= 2 ? kurve : null,
   };
 }

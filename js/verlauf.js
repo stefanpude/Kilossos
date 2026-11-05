@@ -4,7 +4,7 @@
 // Farben kommen aus styles.css (--reihe-1, --reihe-2, --akzent, --gut, --rand, --text-leise).
 
 import { GRENZEN, gewichteSortiert, tagesSumme, leckerliKcal, tagSchluessel, aktuelleFreigabe, kcalFuer } from "./rechnen.js";
-import { zeitraumStart, wochenRaten, abnahmeZusammenfassung, futterTage, futterZusammenfassung, wochenGruppen } from "./zusammenfassung.js";
+import { zeitraumStart, wochenRaten, abnahmeZusammenfassung, futterTage, futterZusammenfassung, wochenGruppen, tempoZahl } from "./zusammenfassung.js";
 import { aufklappKarte } from "./aufklappen.js";
 import { befundText } from "./daten.js";
 import { SYMBOL } from "./symbole.js";
@@ -576,7 +576,10 @@ function tempoDiagramm(raten, { vonMs, bisMs }, durchschnitt) {
   const ly = yk(letzte.prozent);
   const links = lx - 2 > L + 34;
   const endY = r1(ly - 9 < TEMPO.oben ? ly + 16 : ly - 9); // am oberen Rand (Ausreißer) unter den Punkt
-  const endText = `<text class="tempo-end-text" x="${links ? r1(lx - 2) : r1(lx + 8)}" y="${endY}" text-anchor="${links ? "end" : "start"}">${sicher(mitMinus(letzte.prozent, 1))}${NB}%</text>`;
+  // Zahl nahe den Grenzen mit zwei Stellen in Richtung des Urteils (tempoZahl, seit 0.40.1); Zunahme mit echtem Minus.
+  const endZahl = tempoZahl(letzte.prozent);
+  const endWert = letzte.prozent < 0 && /[1-9]/.test(endZahl) ? `−${endZahl}` : endZahl;
+  const endText = `<text class="tempo-end-text" x="${links ? r1(lx - 2) : r1(lx + 8)}" y="${endY}" text-anchor="${links ? "end" : "start"}">${sicher(endWert)}${NB}%</text>`;
 
   // Ø im rechten Rand, wenn der Text dort hineinpasst (geschätzt 6 Einheiten je Zeichen, 4 Einheiten Innenabstand
   // des Papiers dürfen mitgenutzt werden); sonst innen am rechten Rand. Innen weicht der Text dem Wert des neuesten

@@ -693,3 +693,16 @@ test("Tempo pro Woche: „Alle Wochen“ bleibt, Kopfzeile unverändert", () => 
   assert.doesNotMatch(html, /class="tempo"/);
   assert.doesNotMatch(html, /saeule/);
 });
+
+test("0.40.1: Wert am neuesten Tempo-Punkt an den Grenzen nie auf der falschen Seite", () => {
+  const ende = (kgNeu) => {
+    const svgText = tempoSvg(
+      tVerlauf({ gewichte: [G("2026-10-22", 10), G("2026-10-29", 10), G("2026-11-05", kgNeu)], freigaben: [freigabe], heute: "2026-11-05" })
+    );
+    return svgText.match(/class="tempo-end-text"[^>]*>([^<]*)<\/text>/)[1];
+  };
+  assert.equal(ende(9.7964), `2,04${NB}%`); // 2,036 % zu schnell
+  assert.equal(ende(9.9548), `0,45${NB}%`); // 0,452 % langsamer
+  assert.equal(ende(9.9), `1,0${NB}%`);
+  assert.equal(ende(10.1), `−1,0${NB}%`); // Zunahme mit echtem Minus
+});

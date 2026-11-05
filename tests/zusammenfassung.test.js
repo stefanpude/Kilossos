@@ -15,8 +15,9 @@ import {
   achtWochen,
   gefuettertWerte,
   messungWerte,
+  tempoZahl,
 } from "../js/zusammenfassung.js";
-import { GRENZEN } from "../js/rechnen.js";
+import { GRENZEN, warnungen } from "../js/rechnen.js";
 
 const G = (datum, kg) => ({ id: datum, tierId: "k", datum, kg, notiz: "" });
 const gewichte = [G("2026-10-01", 9.32), G("2026-10-08", 9.25), G("2026-10-15", 9.0), G("2026-10-29", 8.95)];
@@ -399,4 +400,63 @@ test("0.39.0: messungWerte vergangener Tag: nur Messungen bis zu diesem Tag zäh
   const w = messung([G("2026-08-20", 6.6), G("2026-09-05", 6.5), G("2026-10-01", 6.4), G("2026-10-29", 6.24)], [], "2026-10-29");
   assert.deepEqual(w.kurve.map((g) => g.datum), ["2026-09-05", "2026-10-01", "2026-10-29"]);
   assert.equal(w.vorher.datum, "2026-10-01");
+});
+
+// ---------- 0.40.1: Funde der Gesamtprüfung ----------
+
+// Beispiel aus der Prüfung: Freigabe 01.10., letzte Woche 1,0 %, im Mittel über 14 Tage aber über 2 %.
+const MITTEL = [G("2026-11-01", 9.32), G("2026-11-08", 8.99), G("2026-11-15", 8.9)];
+const MITTEL_FREIGABE = [{ ...freigabe, datum: "2026-10-01" }];
+
+test("0.40.1: Beispiel der Prüfung: Warnung „zu schnell“ aktiv, letzte Woche allein „gut“", () => {
+  const liste = warnungen({
+    name: "Kito", tag: "2026-11-15", heute: "2026-11-15", kcal: 220, leckerli: 0,
+    freigabe: MITTEL_FREIGABE[0], gewichte: MITTEL, fruehereMahlzeiten: true,
+  });
+  assert.ok(liste.some((w) => w.id === "zu-schnell"));
+  const w = messungWerte({ gewichte: MITTEL, freigaben: MITTEL_FREIGABE, tag: "2026-11-15" });
+  assert.equal(w.bewertung, "gut");
+  assert.equal(w.mittelZuSchnell, false);
+});
+
+test("0.40.1: messungWerte mit mittelZuSchnell: Karte folgt der Warnung", () => {
+  const w = messungWerte({ gewichte: MITTEL, freigaben: MITTEL_FREIGABE, tag: "2026-11-15", mittelZuSchnell: true });
+  assert.equal(w.bewertung, "zu-schnell");
+  assert.equal(w.mittelZuSchnell, true);
+  nahe(w.prozent, 1.0, 0.01);
+  // Letzte Woche selbst schon über 2 %: bleibt die eigene Bewertung, kein Hinweis aufs Mittel.
+  const selbst = messungWerte({
+    gewichte: [G("2026-10-29", 6.24), G("2026-11-05", 6.084)], freigaben: [], tag: "2026-11-05", mittelZuSchnell: true,
+  });
+  assert.equal(selbst.bewertung, "zu-schnell");
+  assert.equal(selbst.mittelZuSchnell, false);
+  // Ohne Vergleich bleibt alles wie bisher.
+  assert.equal(messungWerte({ gewichte: [G("2026-11-05", 6.1)], freigaben: [], tag: "2026-11-05", mittelZuSchnell: true }).art, "ohneVergleich");
+});
+
+test("0.40.1: tempoZahl: nahe an den Grenzen zwei Stellen, in Richtung des Urteils gerundet", () => {
+  assert.equal(tempoZahl(2.036), "2,04");
+  assert.equal(tempoZahl(0.452), "0,45");
+  assert.equal(tempoZahl(1.0), "1,0");
+  assert.equal(tempoZahl(GRENZEN.abnahmeMax), "2,0");
+  assert.equal(tempoZahl(GRENZEN.abnahmeMin), "0,5");
+  // Gleitkomma genau an der Grenze (10 → 9,6 kg in 14 Tagen) bleibt „2,0“ und erlaubt.
+  assert.equal(tempoZahl(((10 - 9.6) / 10 / 2) * 100), "2,0");
+  // Knapp über 2 % nie „2,00“, knapp unter 0,5 % nie „0,50“.
+  assert.equal(tempoZahl(2.0000001), "2,01");
+  assert.equal(tempoZahl(0.4999), "0,49");
+  // Im erlaubten Bereich nahe der Grenze: nach innen gerundet.
+  assert.equal(tempoZahl(1.968), "1,96");
+  assert.equal(tempoZahl(0.541), "0,55");
+  // Weiter weg eine Stelle; Zunahme ohne Vorzeichen und ohne „-0“.
+  assert.equal(tempoZahl(2.5), "2,5");
+  assert.equal(tempoZahl(-0.452), "0,5");
+  assert.equal(tempoZahl(-0.01), "0,0");
+  // Die angezeigte Zahl steht nie auf der falschen Seite der Grenze.
+  for (let p = 0.3; p < 2.3; p += 0.0013) {
+    const z = Number(tempoZahl(p).replace(",", "."));
+    if (p > GRENZEN.abnahmeMax + 1e-9) assert.ok(z > GRENZEN.abnahmeMax, `${p} → ${z}`);
+    else if (p >= GRENZEN.abnahmeMin) assert.ok(z >= GRENZEN.abnahmeMin && z <= GRENZEN.abnahmeMax, `${p} → ${z}`);
+    else assert.ok(z < GRENZEN.abnahmeMin, `${p} → ${z}`);
+  }
 });

@@ -172,7 +172,8 @@ test("0.39.0: messungHtml mit Vergleich und Kurve: Gramm seit, Kurve, Skala, Urt
   assert.ok(h.includes(`−120${NB}g seit 29.10.`), "Vorzeichen −, Datum ohne führende Null");
   assert.match(h, /<svg class="mess-kurve" viewBox="0 0 320 58" aria-hidden="true">/);
   assert.match(h, /<svg class="mess-skala" viewBox="0 0 300 35" aria-hidden="true">/);
-  assert.ok(h.includes(`<p class="mess-urteil neutral"><b>1,9${NB}% pro Woche</b> · noch ohne Bewertung</p>`));
+  // 1,92 % liegt näher als 0,1 an 2 %: seit 0.40.1 zwei Nachkommastellen (tempoZahl).
+  assert.ok(h.includes(`<p class="mess-urteil neutral"><b>1,92${NB}% pro Woche</b> · noch ohne Bewertung</p>`));
   // Erstes und letztes Datum unter der Kurve, Gewicht neben dem letzten Punkt, Hilfslinien mit kg.
   assert.match(h, />10\.9\.</);
   assert.match(h, />5\.11\.</);
@@ -249,4 +250,66 @@ test("0.39.0: messungHtml: kein „Wägung“, alle SVG aria-hidden, Texte maski
     kurve: null,
   });
   assert.doesNotMatch(fremd, /<script>|undefined/);
+});
+
+// ---------- 0.40.1: Funde der Gesamtprüfung ----------
+
+const MITTEL = [G("2026-11-01", 9.32), G("2026-11-08", 8.99), G("2026-11-15", 8.9)];
+const messMittel = (mittelZuSchnell) =>
+  messungHtml(
+    messungWerte({ gewichte: MITTEL, freigaben: [{ ...freigabe, datum: "2026-10-01" }], tag: "2026-11-15", mittelZuSchnell })
+  );
+
+test("0.40.1: „Letzte Messung“ folgt der Warnung „zu schnell“ (Mittel über 2 Wochen)", () => {
+  const h = messMittel(true);
+  const wochen = (GRENZEN.tageZuSchnell / 7).toLocaleString("de-DE");
+  assert.ok(
+    h.includes(`<p class="mess-urteil zu-schnell"><b>1,0${NB}% letzte Woche</b> · im Mittel über ${wochen}${NB}Wochen zu schnell</p>`),
+    h
+  );
+  assert.match(h, /class="mess-sk-punkt zu-schnell"/);
+  assert.match(h, /class="mess-end zu-schnell"/);
+  assert.doesNotMatch(h, /sicher<\/p>/);
+  // Ohne Warnung: unverändert „sicher“.
+  const ohne = messMittel(false);
+  assert.ok(ohne.includes(`<p class="mess-urteil gut"><b>1,0${NB}% pro Woche</b> · sicher</p>`));
+  assert.match(ohne, /class="mess-sk-punkt gut"/);
+  // Letzte Woche selbst über 2 %: bisheriger Text.
+  const selbst = messungHtml(
+    messungWerte({ gewichte: [G("2026-10-29", 6.24), G("2026-11-05", 6.084)], freigaben: [], tag: "2026-11-05", mittelZuSchnell: true })
+  );
+  assert.ok(selbst.includes(`<p class="mess-urteil zu-schnell"><b>2,5${NB}% pro Woche</b> · schneller als 2${NB}%</p>`));
+});
+
+test("0.40.1: app.js gibt die Warnung „zu schnell“ an die Karte weiter, keine zweite Rechnung", () => {
+  const app = readFileSync(new URL("../app.js", import.meta.url), "utf8");
+  assert.match(app, /mittelZuSchnell: liste\.some\(\(w\) => w\.id === "zu-schnell"\)/);
+});
+
+test("0.40.1: „Letzte Messung“ an den Grenzen: Zahl nie auf der falschen Seite", () => {
+  // 10 → 9,7964 kg in 7 Tagen = 2,036 % pro Woche; 10 → 9,9548 kg = 0,452 %.
+  const schnell = mess([G("2026-10-29", 10), G("2026-11-05", 9.7964)], true);
+  assert.ok(schnell.includes(`<b>2,04${NB}% pro Woche</b> · schneller als 2${NB}%`), schnell);
+  const langsam = mess([G("2026-10-29", 10), G("2026-11-05", 9.9548)], true);
+  assert.ok(langsam.includes(`<b>0,45${NB}% pro Woche</b> · langsamer als 0,5${NB}%`), langsam);
+});
+
+test("0.40.1: kein Reststück im Balken, wenn die Kachel „Noch 0 kcal“ zeigt", () => {
+  for (const kcal of [219.6, 219.5]) {
+    const h = html([MZ("n", kcal, "08:00")]);
+    assert.ok(h.includes(`<span class="label">Noch</span><strong>0${NB}kcal</strong>`), String(kcal));
+    assert.doesNotMatch(h, /gef-st rest/, String(kcal));
+  }
+  // Ab 1 kcal Rest bleibt das Reststück.
+  assert.match(html([MZ("n", 219, "08:00")]), /class="gef-st rest" style="flex-grow:1\.0"/);
+});
+
+test("0.40.1: Linie der Kurve mit pathLength=1, CSS zeichnet mit Strichlänge 1", () => {
+  const h = mess([G("2026-09-10", 6.5), G("2026-10-29", 6.24), G("2026-11-05", 6.12)]);
+  assert.match(h, /<polyline class="mess-linie" pathLength="1" points="/);
+  const css = readFileSync(new URL("../styles.css", import.meta.url), "utf8");
+  const regel = css.match(/\.mess-linie \{[^}]*\}/)[0];
+  assert.match(regel, /stroke-dasharray: 1;/);
+  assert.match(regel, /stroke-dashoffset: 1;/);
+  assert.doesNotMatch(regel, /600/);
 });

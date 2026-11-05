@@ -515,10 +515,12 @@ function zeichneHeute(vonNull = false) {
 
   // Letzte Messung (ab 0.39.0): Gewicht, Gramm seit der Messung davor, Kurve der letzten 8 Wochen, Tempo-Skala.
   // Alles bis zum gewählten Tag (gewichte ist schon bis „tag“ gefiltert, Freigaben ebenso).
+  // Ist oben die Warnung „zu schnell“ (Mittel über 2 Wochen) aktiv, folgt die Karte ihr (seit 0.40.1).
   const messung = messungWerte({
     gewichte,
     freigaben: daten.freigaben.filter((f) => f.tierId === tier.id && f.datum <= tag),
     tag,
+    mittelZuSchnell: liste.some((w) => w.id === "zu-schnell"),
   });
   $("heute-gewicht").innerHTML = messungHtml(messung);
 

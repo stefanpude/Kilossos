@@ -613,7 +613,7 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .mess-kurve .gitter { stroke: var(--rand); }
 .mess-linie {
   fill: none; stroke: var(--text); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round;
-  stroke-dasharray: 600; stroke-dashoffset: 600; animation: zeichnen 1.2s 0.2s ease forwards; /* 600 > längste Linie (8 Wochen) */
+  stroke-dasharray: 1; stroke-dashoffset: 1; animation: zeichnen 1.2s 0.2s ease forwards; /* Linie hat pathLength="1" */
 }
 .mess-punkt { fill: var(--text); }
 .mess-endtext { fill: var(--text); font-size: 13px; font-family: var(--serif); font-weight: 500; }

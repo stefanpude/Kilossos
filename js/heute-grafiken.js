@@ -3,6 +3,7 @@
 // Plan: .planning/grafiken-auswahl.md. Grafiken sind aria-hidden, jede wichtige Aussage steht zusätzlich als Text.
 
 import { GRENZEN } from "./rechnen.js";
+import { tempoZahl } from "./zusammenfassung.js";
 
 // Geschütztes Leerzeichen zwischen Zahl und Einheit („9 kcal“ bricht nie um).
 const NB = " ";
@@ -40,7 +41,8 @@ export function gefuettertHtml(werte) {
     .map((s) => `<i class="gef-st ${s.typ}" style="flex-grow:${sicher(s.kcal.toFixed(1))}"></i>`)
     .join("");
   const rest = soll - werte.kcal;
-  const restTeil = rest > 0 ? `<i class="gef-st rest" style="flex-grow:${sicher(rest.toFixed(1))}"></i>` : "";
+  // Reststück nur, wenn auch die Kachel einen Rest zeigt (gleiche Rundung wie gefuettertWerte: 219,6 von 220 = „Noch 0“).
+  const restTeil = Math.round(werte.kcal - soll) < 0 ? `<i class="gef-st rest" style="flex-grow:${sicher(rest.toFixed(1))}"></i>` : "";
   const links = `left:${sicher((marke * 100).toFixed(1))}%`;
   const drueber =
     ueberdeckung === "keine" ? "" : `<span class="gef-drueber${ueberdeckung === "bernstein" ? " stark" : ""}" style="${links}"></span>`;
@@ -151,7 +153,8 @@ function kurveSvg(liste, bewertung) {
     `<line class="gitter" x1="${L}" x2="${W - R}" y1="${y(lo)}" y2="${y(lo)}"/>` +
     `<text class="achse" x="${L - 5}" y="${y(hi) + 4}" text-anchor="end">${sicher(zahl(hi, 1))}</text>` +
     `<text class="achse" x="${L - 5}" y="${y(lo) + 4}" text-anchor="end">${sicher(zahl(lo, 1))}</text>` +
-    `<polyline class="mess-linie" points="${linie}"/>${punkte}` +
+    // pathLength="1": die Zeichen-Animation (CSS) passt so zu jeder Linienlänge.
+    `<polyline class="mess-linie" pathLength="1" points="${linie}"/>${punkte}` +
     `<circle class="mess-end ${sicher(bewertung)}" cx="${lx}" cy="${ly}" r="4.5"/>` +
     `<text class="mess-endtext" x="${lx + 7}" y="${ly + 4}">${sicher(zahl(letzte.kg, 2))}</text>` +
     ersteDatum +
@@ -181,11 +184,17 @@ export function messungHtml(werte) {
   if (!mitVergleich) return karte(kopf + `<p class="leise">Das Tempo erscheint ab dem zweiten Wiegen.</p>`);
 
   const { prozent, bewertung } = werte;
-  const tempo = `${prozent < 0 ? "Zunahme " : ""}${sicher(zahl(Math.abs(prozent), 1))}${NB}% pro Woche`;
+  // Zahl nahe den Grenzen mit zwei Stellen in Richtung des Urteils (tempoZahl), nie „2,0 · schneller als 2 %“.
+  const zahlText = `${prozent < 0 ? "Zunahme " : ""}${sicher(tempoZahl(prozent))}${NB}%`;
+  // Warnung „zu schnell“ über das Mittel aktiv (seit 0.40.1): Karte folgt ihr, die Woche selbst bleibt als Zahl stehen.
+  const wochen = GRENZEN.tageZuSchnell / 7;
+  const [tempo, urteil] = werte.mittelZuSchnell
+    ? [`${zahlText} letzte Woche`, `im Mittel über ${grenzZahl(wochen)}${NB}${wochen === 1 ? "Woche" : "Wochen"} zu schnell`]
+    : [`${zahlText} pro Woche`, URTEIL_KURZ[bewertung] ?? ""];
   return karte(
     kopf +
       (werte.kurve ? kurveSvg(werte.kurve, bewertung) : "") +
       `<div class="mess-tempo">${skalaSvg(prozent, bewertung)}` +
-      `<p class="mess-urteil ${sicher(bewertung)}"><b>${tempo}</b> · ${sicher(URTEIL_KURZ[bewertung] ?? "")}</p></div>`
+      `<p class="mess-urteil ${sicher(bewertung)}"><b>${tempo}</b> · ${sicher(urteil)}</p></div>`
   );
 }
