@@ -184,7 +184,7 @@ export function tempoRueckmeldung({ gewichte, freigaben, kg, datum, ohneId }) {
   if (prozent > GRENZEN.abnahmeMax + 1e-9) {
     bewertung = "zu-schnell";
     text =
-      `${p} % pro Woche, schneller als 2 %. Eine einzelne Wägung schwankt; Kilossos warnt, wenn das Mittel über zwei Wochen ` +
+      `${p} % pro Woche, schneller als 2 %. Das Gewicht schwankt von Mal zu Mal; Kilossos warnt, wenn das Mittel über zwei Wochen ` +
       "zu schnell ist. Nicht selbst die Menge ändern, bei Sorge mit dem Tierarzt sprechen.";
   } else if (!nachFreigabe) {
     text = `${prozent < 0 ? `Zunahme von ${p} %` : `${p} %`} pro Woche. Bewertet wird das Tempo erst mit einer Freigabe vom Tierarzt.`;
@@ -193,11 +193,11 @@ export function tempoRueckmeldung({ gewichte, freigaben, kg, datum, ohneId }) {
     text = `${p} % pro Woche, im sicheren Bereich (0,5 bis 2 %).`;
   } else if (prozent < 0) {
     bewertung = "zunahme";
-    text = `Zunahme von ${p} % pro Woche. Eine einzelne Wägung schwankt; behalte den Verlauf im Blick.`;
+    text = `Zunahme von ${p} % pro Woche. Das Gewicht schwankt von Mal zu Mal; behalte den Verlauf im Blick.`;
   } else {
     bewertung = "langsam";
     text =
-      `${p} % pro Woche, langsamer als 0,5 %. Eine einzelne Wägung schwankt; bleibt es vier Wochen so, ` +
+      `${p} % pro Woche, langsamer als 0,5 %. Das Gewicht schwankt von Mal zu Mal; bleibt es vier Wochen so, ` +
       "rät Kilossos, den Plan mit dem Tierarzt zu besprechen.";
   }
   return { seit: vorher.datum, diffKg, prozent, bewertung, titel: `${kgText(diffKg)} kg seit dem ${kurzTag(vorher.datum)}`, text };

@@ -658,7 +658,7 @@ function zeichneGewicht() {
             <button type="button" class="knopf-loeschen" data-aktion="gewicht-loeschen" data-id="${sicher(g.id)}" aria-label="Gewicht vom ${datumText(g.datum)} löschen">${SYMBOL.loeschen}</button></div>`;
         })
         .join("");
-      const anzahl = monat.eintraege.length === 1 ? "1 Wägung" : `${monat.eintraege.length} Wägungen`;
+      const anzahl = monat.eintraege.length === 1 ? "einmal gewogen" : `${monat.eintraege.length}-mal gewogen`;
       return aufklappKarte({
         id: "monat-" + monat.schluessel,
         offen: index === 0,

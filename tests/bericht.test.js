@@ -361,13 +361,13 @@ const kitoRoh = kitoWaegungen.map((g) => G2(g.datum, g.kg, g.notiz));
 // Zellen des Rasters als Text: Monat | Tag kg Änderung | … | Bilanz
 const rasterZeilen = (html) =>
   [...html.match(/<table class="wg-raster">([^]*?)<\/table>/)[1].matchAll(/<tr( class="wg-letzte")?>([^]*?)<\/tr>/g)]
-    .filter((m) => !m[2].includes("Wägungen in kg"))
+    .filter((m) => !m[2].includes("Gewogen (in kg)"))
     .map((m) => [...m[2].matchAll(/<t[hd][^>]*>([^]*?)<\/t[hd]>/g)].map((z) => z[1].replace(/<(span|b|small|sup)[^>]*>/g, " ").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim()));
 
 test("berichtHtml: Wägungen als Monatsraster statt Tabelle untereinander", () => {
   const html = mitWaegungen(kitoRoh);
   assert.doesNotMatch(html, /<th>Datum<\/th><th>kg<\/th>/);
-  assert.match(html, /<th colspan="5">Wägungen in kg <span class="wg-erkl">Datum, Gewicht, Änderung zur Wägung davor<\/span><\/th><th>Monat<\/th>/);
+  assert.match(html, /<th colspan="5">Gewogen \(in kg\) <span class="wg-erkl">Datum, Gewicht, Änderung seit dem Wiegen davor<\/span><\/th><th>Monat<\/th>/);
   assert.deepEqual(rasterZeilen(html), [
     ["Okt 2026", "2.10. 9,32 –", "9.10. 9,30 −20 g", "16.10. 9,27 −30 g", "23.10. 9,25 a −20 g", "30.10. 9,26 +10 g", "−60 g 0,16 % KM/Woche"],
     ["Nov 2026", "6.11. 9,20 −60 g", "13.11. 9,16 −40 g", "", "", "", "−100 g 0,54 % KM/Woche"],
@@ -381,7 +381,7 @@ test("berichtHtml: Notizen als Buchstabe am Gewicht und ausgeschrieben unter dem
   assert.match(html, /<p class="wg-notizen"><span><sup>a<\/sup> 9\.10\. &lt;i&gt;Arm&lt;\/i&gt;<\/span><span><sup>b<\/sup> 16\.10\. andere Waage<\/span><\/p>/);
   assert.doesNotMatch(mitWaegungen([G2("2026-10-02", 9.32), G2("2026-10-09", 9.3)]), /wg-notizen/);
   // Der Kopf der Übersicht verweist auf die Anmerkungen statt auf die alte Spalte „Notiz“.
-  assert.match(html, /andere Wiegeart steht als Anmerkung unter den Wägungen/);
+  assert.match(html, /andere Wiegeart steht als Anmerkung beim jeweiligen Gewicht/);
   assert.doesNotMatch(html, /Spalte Notiz/);
 });
 

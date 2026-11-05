@@ -30,7 +30,7 @@ export function speicherAnzeige(zeichen, grenze = GRENZE_ZEICHEN) {
   const hinweis = {
     ok: "",
     knapp: "Der Speicher wird knapp. Speichere eine Sicherung, damit nichts verloren geht.",
-    voll: "Der Speicher ist fast voll. Speichere eine Sicherung und entferne ältere Fotos (Foto in der Wägungsliste antippen), sonst lassen sich bald keine Einträge mehr speichern.",
+    voll: "Der Speicher ist fast voll. Speichere eine Sicherung und entferne ältere Fotos (Foto in der Liste unter „Gewicht“ antippen), sonst lassen sich bald keine Einträge mehr speichern.",
   }[stufe];
   return { prozent, stufe, hinweis, text: prozent < 1 ? "Speicher: fast leer (unter 1 % belegt)." : `Speicher: etwa ${prozent} % belegt.` };
 }

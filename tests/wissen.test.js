@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { BEGRIFFE, begriffKarte, begriffeHtml, kcalSpanne, hinweisKnopf } from "../js/wissen.js";
 import { FUTTERLISTE } from "../js/futterliste.js";
 import { zustandVergessen } from "../js/aufklappen.js";
@@ -173,11 +173,36 @@ test("Willkommensseite verspricht nichts, was die App nicht halten kann (Stefan,
   assert.doesNotMatch(html, /ohne Fettleber-Risiko|für jede Sorte/);
 });
 
-test("Version 0.36.7: Cache v73 mit js/freigaben.js, Versionszeile unter „Mehr“", () => {
+test("Version 0.36.8: Cache v74 mit js/freigaben.js, Versionszeile unter „Mehr“", () => {
   const sw = lies("sw.js");
-  assert.match(sw, /const CACHE_NAME = "kilossos-v73";/);
+  assert.match(sw, /const CACHE_NAME = "kilossos-v74";/);
   assert.match(sw, /"js\/wissen\.js",/);
   assert.match(sw, /"js\/besondere-tage\.js",/);
   assert.match(sw, /"js\/freigaben\.js",/);
-  assert.match(lies("index.html"), /id="version">Version 0\.36\.7</);
+  assert.match(lies("index.html"), /id="version">Version 0\.36\.8</);
+});
+
+// 0.36.8: „gewogen“ statt „Wägung“ in allen sichtbaren Texten (Entscheidung des Halters, 05.11.2026).
+// Kommentare und Namen im Code dürfen „Wägung“/„waegung“ behalten.
+const ohneKommentare = (text) =>
+  text
+    .replace(/<!--[^]*?-->/g, "")
+    .replace(/\/\*[^]*?\*\//g, "")
+    .replace(/(^|[^:"'\\])\/\/.*$/gm, "$1");
+
+test("0.36.8: kein „Wägung“ mehr in sichtbaren Texten von App, Erklärseiten und PDF", () => {
+  const dateien = ["app.js", "index.html", ...readdirSync(new URL("../js/", import.meta.url)).filter((d) => d.endsWith(".js")).map((d) => `js/${d}`)];
+  assert.ok(dateien.length > 10);
+  for (const datei of dateien) assert.doesNotMatch(ohneKommentare(lies(datei)), /Wägung/i, datei);
+});
+
+test("0.36.8: die neuen Formulierungen mit „gewogen“", () => {
+  const app = lies("app.js");
+  assert.match(app, /=== 1 \? "einmal gewogen" : `\$\{monat\.eintraege\.length\}-mal gewogen`/);
+  assert.equal(lies("js/zusammenfassung.js").match(/Das Gewicht schwankt von Mal zu Mal;/g)?.length, 3);
+  const html = lies("index.html");
+  assert.match(html, /Einmal wiegen reicht dafür nicht, weil Waagen zu Hause schwanken\./);
+  assert.match(html, /und das Gewicht schwankt von Mal zu Mal\./);
+  assert.match(lies("js/speicher.js"), /Foto in der Liste unter „Gewicht“ antippen/);
+  assert.match(lies("js/verlauf.js"), /Für jedes Wiegen auf 7 Tage umgerechnet\./);
 });

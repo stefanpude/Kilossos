@@ -164,6 +164,10 @@ test("warnungen: Stillstand über 4 Wochen nur mit Freigabe", () => {
   const mitFreigabe = { ...basis, tag: "2026-11-29", heute: "2026-11-30", freigabe: { ...freigabe, datum: "2026-11-01" } };
   assert.deepEqual(arten(warnungen({ ...mitFreigabe, gewichte: still })), ["hinweis:stillstand"]);
   assert.deepEqual(arten(warnungen({ ...mitFreigabe, freigabe: null, kcal: 300, gewichte: still })), []);
+  // 0.36.8: keine Mengenangabe mehr („üblich: 10 % weniger kcal“), die Menge legt nur der Tierarzt fest.
+  const [hinweis] = warnungen({ ...mitFreigabe, gewichte: still });
+  assert.match(hinweis.text, /^Seit 28 Tagen weniger als 0,5 % Abnahme pro Woche\. Beim nächsten Tierarzttermin den Plan besprechen – nicht selbst kürzen\.$/);
+  assert.doesNotMatch(hinweis.text, /kcal|üblich/);
 });
 
 test("warnungen: Freigabe älter als 3 Monate und Ziel erreicht", () => {

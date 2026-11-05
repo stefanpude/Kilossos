@@ -57,7 +57,7 @@ test("zeichneVerlauf: Zeitraum mit weniger als zwei Wägungen zeigt einen Satz s
     heute: "2026-11-24",
     kopf: "",
   });
-  assert.match(html, /Im gewählten Zeitraum gibt es weniger als zwei Wägungen\./);
+  assert.match(html, /Im gewählten Zeitraum wurde weniger als zweimal gewogen\./);
   assert.doesNotMatch(html, /class="kurve"/);
   assert.match(html, /data-aktion="zeitraum"/);
 });

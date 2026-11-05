@@ -285,7 +285,7 @@ function waegungsRaster(gewichte, berichtBis) {
         .map((n) => `<span><sup>${n.buchstabe}</sup> ${mitJahr ? datum(n.datum) : tagMonat(n.datum)} ${sicher(n.notiz)}</span>`)
         .join("")}</p>`
     : "";
-  return `<table class="wg-raster"><thead><tr><th></th><th colspan="${WAEGUNGEN_PRO_ZEILE}">Wägungen in kg <span class="wg-erkl">Datum, Gewicht, Änderung zur Wägung davor</span></th><th>Monat</th></tr></thead>
+  return `<table class="wg-raster"><thead><tr><th></th><th colspan="${WAEGUNGEN_PRO_ZEILE}">Gewogen (in kg) <span class="wg-erkl">Datum, Gewicht, Änderung seit dem Wiegen davor</span></th><th>Monat</th></tr></thead>
     <tbody>${zeilen.join("")}</tbody></table>${fuss}`;
 }
 
@@ -313,7 +313,7 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
     ${profilZeile(tier, erstellt)}
     ${demo ? `<p class="bericht-demo">DEMO – simulierte Daten, nicht von ${sicher(tier.name)}</p>` : ""}
     <p class="bericht-klein">Alle Werte hat der Halter zu Hause erfasst: Futter mit der Küchenwaage, Gewicht mit der eigenen Waage
-      (andere Wiegeart steht als Anmerkung unter den Wägungen, z. B. „auf dem Arm gewogen“). Die Warnregeln der App
+      (andere Wiegeart steht als Anmerkung beim jeweiligen Gewicht, z. B. „auf dem Arm gewogen“). Die Warnregeln der App
       beruhen auf den Sicherheitsgrenzen in docs/sicherheitsgrenzen.md (AAHA 2014, WSAVA 2011, Flanagan et al. 2018)
       und gelten erst nach tierärztlicher Prüfung. Kilossos ist kein Medizinprodukt.</p>
   </header>`);

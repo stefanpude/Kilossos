@@ -400,7 +400,7 @@ export function warnungen({ name, tag, heute, kcal, leckerli, freigabe, gewichte
         id: "stillstand",
         text:
           `Seit ${still.tage} Tagen weniger als 0,5 % Abnahme pro Woche. Beim nächsten Tierarzttermin den Plan ` +
-          "besprechen (üblich: 10 % weniger kcal) – nicht selbst kürzen.",
+          "besprechen – nicht selbst kürzen.",
         quelle: QUELLEN.abnahme,
       });
     }

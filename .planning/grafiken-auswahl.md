@@ -5,6 +5,8 @@ leichter lesbar machen. Je Stelle gab es 2–3 klickbare Entwürfe (A/B/C) und d
 vier Stellen gewählt. Diese Datei beschreibt, was gebaut wird.
 **Freigegeben am 05.11.2026 („So bauen, nach 13.11.“), samt den Entscheidungen beim Schreiben (unten).
 Gebaut wird nach dem Tierarzttermin am 13.11.2026.**
+**Nachtrag 05.11.2026 (0.36.8):** In sichtbaren Texten heißt es jetzt „gewogen“ statt „Wägung“ (Entscheidung des
+Halters). Die Texte unten beim Bau entsprechend umformulieren, z. B. „Das Tempo erscheint ab dem zweiten Wiegen.“
 
 | Stelle | Gewählt |
 |---|---|

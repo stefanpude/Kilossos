@@ -538,7 +538,7 @@ function tempoKarte(gewichte, freigaben, von) {
     })
     .join("");
   const erklaerung = freigaben.length
-    ? "Band: 0,5 bis 2 % pro Woche gelten als sicher. Je Wägung, auf 7 Tage umgerechnet."
+    ? "Band: 0,5 bis 2 % pro Woche gelten als sicher. Für jedes Wiegen auf 7 Tage umgerechnet."
     : "Band: 0,5 bis 2 % pro Woche gelten als sicher. Bewertet wird erst ab der Freigabe vom Tierarzt; über 2 % ist immer markiert.";
   return `<section class="karte" aria-labelledby="tempo-titel">
     <h2 id="tempo-titel">Tempo pro Woche</h2>
@@ -663,7 +663,7 @@ export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, besondereTage 
       ? `<div class="papier"><div class="kurve-feld">${svg}${leiste}<div class="infoblase" id="infoblase" hidden></div></div></div>
          ${legende(svg, !!leiste)}
          <p class="tipp">${tipp} Alle Gewichte als Liste stehen unter „Gewicht“.</p>`
-      : `<p class="leer">Im gewählten Zeitraum gibt es weniger als zwei Wägungen.</p>`;
+      : `<p class="leer">Im gewählten Zeitraum wurde weniger als zweimal gewogen.</p>`;
   const gewichtKarte = `<section class="karte" aria-label="Gewicht">
     <div class="diagramm-kopf">
       <div><span class="label">Gewicht</span><div class="wert">${zahl(aktuell.kg, 2)} <small>kg</small></div></div>
