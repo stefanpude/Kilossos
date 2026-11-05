@@ -563,9 +563,14 @@ function tempoDiagramm(raten, { vonMs, bisMs }, durchschnitt) {
       const cx = x(ms(r.datum));
       const cy = yk(r.prozent);
       const pfeil = r.prozent > hi + 1e-9 ? "▲" : r.prozent < lo - 1e-9 ? "▼" : "";
+      // Nahe am rechten Rand links vom Punkt, sonst ragt der Pfeil in die Ø-Spalte (0.42.2; Pfeil etwa 8 breit).
+      const pfeilLinks = cx + 6 + 8 > W - R;
+      const pfeilText = pfeilLinks
+        ? `<text class="tempo-pfeil" x="${r1(cx - 6)}" y="${r1(cy + 3.5)}" text-anchor="end">${pfeil}</text>`
+        : `<text class="tempo-pfeil" x="${r1(cx + 6)}" y="${r1(cy + 3.5)}">${pfeil}</text>`;
       return (
         `<circle class="tempo-p ${sicher(r.bewertung)}" cx="${cx}" cy="${cy}" r="${i === liste.length - 1 ? 5 : 3.5}"><title>${sicher(titel)}</title></circle>` +
-        (pfeil ? `<text class="tempo-pfeil" x="${r1(cx + 6)}" y="${r1(cy + 3.5)}">${pfeil}</text>` : "")
+        (pfeil ? pfeilText : "")
       );
     })
     .join("");
@@ -632,7 +637,7 @@ function tempoKarte(gewichte, freigaben, von, heute) {
     : `Jeder Punkt steht für ein Wiegen, auf 7 Tage umgerechnet. Bewertet wird erst ab der Freigabe vom Tierarzt; schneller als ${schnell} ist immer rot. Unter der Nulllinie: zugenommen.`;
   return `<section class="karte" aria-labelledby="tempo-titel">
     <h2 id="tempo-titel">Tempo pro Woche</h2>
-    <p>Ø ${zahl(z.durchschnitt, 2)} % pro Woche${bereich}</p>
+    <p>Ø ${mitMinus(z.durchschnitt, 2)}${NB}% pro Woche${bereich}</p>
     ${tempoDiagramm(raten, { vonMs, bisMs }, z.durchschnitt)}
     <p class="tipp tempo-erklaerung">${sicher(erklaerung)}</p>
     ${aufklappKarte({

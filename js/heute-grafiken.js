@@ -43,7 +43,15 @@ export function gefuettertHtml(werte) {
   const rest = soll - werte.kcal;
   // Reststück nur, wenn auch die Kachel einen Rest zeigt (gleiche Rundung wie gefuettertWerte: 219,6 von 220 = „Noch 0“).
   const restTeil = Math.round(werte.kcal - soll) < 0 ? `<i class="gef-st rest" style="flex-grow:${sicher(rest.toFixed(1))}"></i>` : "";
-  const links = `left:${sicher((marke * 100).toFixed(1))}%`;
+  // Zwischen den Stücken liegen je 2 px Lücke (gap in .gef-bahn), die flex-grow nicht mitzählt. Die Marke sitzt bei
+  // marke × (Breite − alle Lücken) plus den Lücken davor (0.42.2); px fasst beides zusammen, 0 ergibt reine Prozent.
+  const LUECKE = 2;
+  const teile = werte.stuecke.length + (restTeil ? 1 : 0);
+  let bis = 0;
+  const davor = werte.stuecke.filter((s) => (bis += s.kcal) < soll - 1e-9).length;
+  const px = Math.round((LUECKE * davor - marke * LUECKE * Math.max(0, teile - 1)) * 10) / 10;
+  const prozent = (marke * 100).toFixed(1);
+  const links = px === 0 ? `left:${prozent}%` : `left:calc(${prozent}% ${px < 0 ? "-" : "+"} ${Math.abs(px).toFixed(1)}px)`;
   const drueber =
     ueberdeckung === "keine" ? "" : `<span class="gef-drueber${ueberdeckung === "bernstein" ? " stark" : ""}" style="${links}"></span>`;
   const balken =
@@ -180,7 +188,7 @@ export function messungHtml(werte) {
   const kopf =
     `<div class="mess-kopf">` +
     `<div class="mess-zeile"><span class="label">Letzte Messung · ${sicher(wochentag(letzte.datum))}</span>` +
-    `<button type="button" class="mess-link" data-ziel="verlauf">Verlauf ›</button></div>` +
+    `<button type="button" class="mess-link" data-ziel="verlauf">Verlauf<span aria-hidden="true"> ›</span></button></div>` +
     `<div class="mess-gewicht"><span class="wert">${sicher(zahl(letzte.kg, 2))}<small>${NB}kg</small></span>${diff}</div>` +
     `</div>`;
   if (!mitVergleich) return karte(kopf + `<p class="leise">Das Tempo erscheint ab dem zweiten Wiegen.</p>`);
@@ -195,7 +203,8 @@ export function messungHtml(werte) {
     : [`${zahlText} pro Woche`, URTEIL_KURZ[bewertung] ?? ""];
   return karte(
     kopf +
-      (werte.kurve ? kurveSvg(werte.kurve, bewertung) : "") +
+      // Kurve erst ab zwei verschiedenen Tagen (0.42.2); sonst stünden alle Punkte senkrecht übereinander.
+      (werte.kurve && new Set(werte.kurve.map((g) => g.datum)).size >= 2 ? kurveSvg(werte.kurve, bewertung) : "") +
       `<div class="mess-tempo">${skalaSvg(prozent, bewertung)}` +
       `<p class="mess-urteil ${sicher(bewertung)}"><b>${tempo}</b> · ${sicher(urteil)}</p></div>`
   );

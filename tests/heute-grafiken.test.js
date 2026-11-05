@@ -44,8 +44,9 @@ test("0.38.0: gefuettertHtml über der Tagesmenge: grau bis zum Spielraum, darü
   const grau = html(tagMit(230));
   assert.match(grau, /Darüber/);
   assert.ok(grau.includes("10 kcal"));
-  assert.match(grau, /class="gef-drueber" style="left:95\.7%"/);
-  assert.match(grau, /class="gef-marke" style="left:95\.7%"/);
+  // Seit 0.42.2 mit Lücken-Ausgleich: 1 Lücke davor (2 px) − 95,65 % von 1 Lücke = 0,1 px.
+  assert.match(grau, /class="gef-drueber" style="left:calc\(95\.7% \+ 0\.1px\)"/);
+  assert.match(grau, /class="gef-marke" style="left:calc\(95\.7% \+ 0\.1px\)"/);
   assert.doesNotMatch(grau, /stark|warn/);
   assert.doesNotMatch(grau, /gef-st rest/);
 
@@ -160,7 +161,7 @@ test("0.39.0: messungHtml mit einem Gewicht: Kopf mit Datum und Knopf, Satz zum 
   const h = mess([G("2026-11-05", 6.12)]);
   assert.match(h, /<span class="label">Letzte Messung · [^<]*5\.? Nov[^<]*<\/span>/);
   assert.ok(h.includes(`6,12<small>${NB}kg</small>`));
-  assert.match(h, /<button type="button" class="mess-link" data-ziel="verlauf">Verlauf ›<\/button>/);
+  assert.match(h, /<button type="button" class="mess-link" data-ziel="verlauf">Verlauf<span aria-hidden="true"> ›<\/span><\/button>/);
   assert.match(h, /Das Tempo erscheint ab dem zweiten Wiegen\./);
   assert.doesNotMatch(h, /mess-kurve|mess-skala|mess-urteil/);
   assert.doesNotMatch(h, /g seit/);
@@ -320,4 +321,39 @@ test("0.42.1: Tempo-Skala zeigt am linken Ende Strich und „−0,5“ (Bereich 
   assert.match(h, /<line class="mess-sk-strich" x1="12" x2="12" y1="17" y2="21"\/>/);
   assert.match(h, /<text class="achse" x="12" y="32" text-anchor="middle">−0,5<\/text>/, "echtes Minuszeichen U+2212");
   assert.doesNotMatch(h, />-0,5</, "kein Bindestrich als Minus");
+});
+
+// ---------- 0.42.2: Grafik-Kleinigkeiten aus der Gesamtprüfung (Ledger grafiken-umsetzung) ----------
+test("0.42.2: Kurve erst ab zwei verschiedenen Tagen (sonst senkrechter Strich), Skala bleibt", () => {
+  const h = mess([G("2026-08-01", 6.6), { ...G("2026-11-05", 6.2), id: "a" }, { ...G("2026-11-05", 6.1), id: "b" }]);
+  assert.doesNotMatch(h, /mess-kurve/);
+  assert.match(h, /class="mess-skala"/);
+});
+
+test("0.42.2: „Verlauf ›“ liest sich vor als „Verlauf“ (Pfeil aria-hidden)", () => {
+  const h = mess([G("2026-10-29", 6.24), G("2026-11-05", 6.19)]);
+  assert.match(h, /<button type="button" class="mess-link" data-ziel="verlauf">Verlauf<span aria-hidden="true"> ›<\/span><\/button>/);
+});
+
+test("0.42.2: Legende ergibt zusammen die große Zahl (Rest geht an den größten Nachkommarest)", () => {
+  // 120,3 + 99,4 = 219,7 → 220. Einzeln gerundet wären es 120 + 99 = 219.
+  const w = gefuettertWerte({
+    mahlzeiten: [MZ("n", 120.3, "08:00"), MZ("t", 24.85, "12:00")],
+    futterNachId: SORTEN, freigabe, tag: "2026-11-05", heute: "2026-11-05",
+  });
+  assert.deepEqual(w.arten.map((a) => a.kcal), [120, 100]);
+  assert.equal(w.arten.reduce((s, a) => s + a.kcal, 0), Math.round(w.kcal));
+  // Ohne Rundungsrest bleibt alles wie bisher: 89 / 120 / 2.
+  const drei = gefuettertWerte({ mahlzeiten: DREI, futterNachId: SORTEN, freigabe, tag: "2026-11-05", heute: "2026-11-05" });
+  assert.deepEqual(drei.arten.map((a) => a.kcal), [89, 120, 2]);
+});
+
+test("0.42.2: Marke rechnet die 2-px-Lücken zwischen den Stücken mit ein", () => {
+  // 150 Nass + 100 Trocken = 250, Ziel 220: Marke bei 88 % der Fläche ohne Lücken, plus eine Lücke (2 px) davor,
+  // minus 88 % der einen Lücke im ganzen Balken: 2 − 1,76 = 0,24 px.
+  const h = html(tagMit(250));
+  assert.match(h, /class="gef-marke" style="left:calc\(88\.0% \+ 0\.2px\)"/);
+  assert.match(h, /class="gef-drueber stark" style="left:calc\(88\.0% \+ 0\.2px\)"/);
+  // Unter dem Ziel steht die Marke am Ende des Reststücks, ohne Korrektur.
+  assert.match(html(DREI), /class="gef-marke" style="left:100\.0%"/);
 });

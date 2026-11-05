@@ -89,7 +89,7 @@ test("zeichneVerlauf: Kennzahl-Kacheln folgen dem Zeitraum", () => {
 
 test("zeichneVerlauf: ohne Freigabe kein „im sicheren Bereich“", () => {
   const html = zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [], futterNachId: new Map(), zeitraum: "alles", heute: "2026-10-20", kopf: "" });
-  assert.match(html, /Ø [\d,]+ % pro Woche/);
+  assert.match(html, /Ø −?[\d,]+ % pro Woche/);
   assert.doesNotMatch(html, /im sicheren Bereich/);
   const mit = zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [freigabe], futterNachId: new Map(), zeitraum: "alles", heute: "2026-10-20", kopf: "" });
   assert.match(mit, /von 1 Wochen? im sicheren Bereich/);
@@ -689,7 +689,7 @@ test("Tempo pro Woche: Ø-Text innen weicht dem Wert des neuesten Punkts aus", (
 test("Tempo pro Woche: „Alle Wochen“ bleibt, Kopfzeile unverändert", () => {
   const html = tVerlauf();
   assert.match(html, /Alle Wochen<small>15 Werte, neueste zuerst<\/small>/);
-  assert.match(html, /<p>Ø [\d,]+ % pro Woche · \d+ von 9 Wochen im sicheren Bereich<\/p>/);
+  assert.match(html, /<p>Ø −?[\d,]+ % pro Woche · \d+ von 9 Wochen im sicheren Bereich<\/p>/);
   assert.doesNotMatch(html, /class="tempo"/);
   assert.doesNotMatch(html, /saeule/);
 });
@@ -705,4 +705,22 @@ test("0.40.1: Wert am neuesten Tempo-Punkt an den Grenzen nie auf der falschen S
   assert.equal(ende(9.9548), `0,45${NB}%`); // 0,452 % langsamer
   assert.equal(ende(9.9), `1,0${NB}%`);
   assert.equal(ende(10.1), `−1,0${NB}%`); // Zunahme mit echtem Minus
+});
+
+// ---------- 0.42.2: Grafik-Kleinigkeiten aus der Gesamtprüfung ----------
+test("0.42.2: Tempo-Kopf mit echtem Minus und geschütztem Leerzeichen vor %", () => {
+  const g = [G("2026-10-01", 9.0), G("2026-10-08", 9.018), G("2026-10-15", 9.0721)];
+  const html = tVerlauf({ gewichte: g, freigaben: [], heute: "2026-10-15" });
+  assert.ok(html.includes(`<p>Ø −0,40${NB}% pro Woche</p>`), html.match(/<p>Ø[^<]*<\/p>/)?.[0]);
+  assert.doesNotMatch(html, /Ø -/);
+});
+
+test("0.42.2: Pfeil eines Ausreißers am rechten Rand steht links vom Punkt, nicht in der Ø-Spalte", () => {
+  // Wiegen am Folgetag: 8,98 → 8,70 kg in einem Tag, auf 7 Tage umgerechnet weit über der Achse; heute = letzte Wägung.
+  const g = [G("2026-10-01", 9.0), G("2026-10-08", 8.98), G("2026-10-09", 8.7)];
+  const svgText = tempoSvg(tVerlauf({ gewichte: g, freigaben: [], heute: "2026-10-09" }));
+  const pfeil = svgText.match(/<text class="tempo-pfeil" x="([\d.]+)" y="[\d.]+"( text-anchor="end")?>▲<\/text>/);
+  assert.ok(pfeil, "Pfeil ▲ vorhanden");
+  assert.equal(pfeil[2], ' text-anchor="end"');
+  assert.ok(Number(pfeil[1]) <= 340 - 40, `Pfeil bei x ${pfeil[1]}`);
 });

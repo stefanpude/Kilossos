@@ -162,10 +162,16 @@ export function gefuettertWerte({ mahlzeiten, futterNachId, freigabe, tag, heute
     if (!futter) continue;
     stuecke.push({ typ: ARTEN.includes(futter.typ) ? futter.typ : "nass", kcal: kcalFuer(m.gramm, futter.kcalPro100g) });
   }
-  const arten = ARTEN.filter((typ) => stuecke.some((s) => s.typ === typ)).map((typ) => ({
+  // Legende: ganze kcal je Art, die zusammen die gerundete Summe ergeben (0.42.2, Methode des größten Rests);
+  // einzeln gerundet wären es z. B. 120 + 99 = 219 unter einer großen „220“.
+  const genau = ARTEN.filter((typ) => stuecke.some((s) => s.typ === typ)).map((typ) => ({
     typ,
-    kcal: Math.round(stuecke.filter((s) => s.typ === typ).reduce((a, s) => a + s.kcal, 0)),
+    kcal: stuecke.filter((s) => s.typ === typ).reduce((a, s) => a + s.kcal, 0),
   }));
+  const arten = genau.map((a) => ({ typ: a.typ, kcal: Math.floor(a.kcal + 1e-9) }));
+  let fehlt = Math.round(genau.reduce((a, s) => a + s.kcal, 0)) - arten.reduce((a, s) => a + s.kcal, 0);
+  const nachRest = genau.map((a, i) => ({ i, rest: a.kcal - arten[i].kcal })).sort((p, q) => q.rest - p.rest);
+  for (const { i } of nachRest) if (fehlt-- > 0) arten[i].kcal += 1;
   let ziel = null;
   if (freigabe) {
     const soll = freigabe.kcalProTag;
