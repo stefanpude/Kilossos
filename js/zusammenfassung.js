@@ -241,8 +241,31 @@ export function tempoRueckmeldung({ gewichte, freigaben, kg, datum, ohneId }) {
   return { seit: vorher.datum, diffKg, prozent, bewertung, titel: `${kgText(diffKg)} kg seit dem ${kurzTag(vorher.datum)}`, text };
 }
 
-// Wägungen der letzten 8 Wochen (56 Tage bis "heute"), älteste zuerst – für die Mini-Kurve auf „Heute“.
+// Wägungen der letzten 8 Wochen (56 Tage bis "heute"), älteste zuerst – für die Kurve auf „Heute“.
 export function achtWochen(gewichte, heute) {
   const von = plusTage(heute, -56);
   return [...gewichteSortiert(gewichte)].reverse().filter((g) => g.datum >= von && g.datum <= heute);
+}
+
+// Werte für die Karte „Letzte Messung“ (ab 0.39.0). gewichte und freigaben: nur dieses Tier und nur bis „tag“.
+// Vergleich und Bewertung genau wie tempoRueckmeldung (Wägung davor = letzte mit früherem Datum; zwei am selben
+// Tag ergeben also keinen Vergleich). Die Kurve braucht mindestens zwei Wägungen in den 8 Wochen bis „tag“.
+export function messungWerte({ gewichte, freigaben, tag }) {
+  const sortiert = gewichteSortiert(gewichte);
+  const letzte = sortiert[0];
+  if (!letzte) return { art: "keine" };
+  const r = tempoRueckmeldung({ gewichte, freigaben, kg: letzte.kg, datum: letzte.datum });
+  if (!r) return { art: "ohneVergleich", letzte };
+  const vorher = sortiert.find((g) => g.datum < letzte.datum);
+  const kurve = achtWochen(gewichte, tag);
+  return {
+    art: "mitVergleich",
+    letzte,
+    vorher: { datum: vorher.datum, kg: vorher.kg },
+    // „|| 0“: Math.round(-0,3) ergibt -0, das würde als „-0 g“ erscheinen.
+    diffG: Math.round((letzte.kg - vorher.kg) * 1000) || 0,
+    prozent: r.prozent,
+    bewertung: r.bewertung,
+    kurve: kurve.length >= 2 ? kurve : null,
+  };
 }

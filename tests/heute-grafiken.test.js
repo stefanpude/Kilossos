@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { gefuettertHtml, zahl, sicher } from "../js/heute-grafiken.js";
-import { gefuettertWerte } from "../js/zusammenfassung.js";
+import { readFileSync } from "node:fs";
+import { gefuettertHtml, zahl, sicher, URTEIL_KURZ, skalaPunkt, messungHtml } from "../js/heute-grafiken.js";
+import { gefuettertWerte, messungWerte } from "../js/zusammenfassung.js";
 import { GRENZEN } from "../js/rechnen.js";
 
 // Beispiel-Katze mit Freigabe 220 kcal und drei Sorten (nur Testdaten).
@@ -114,4 +115,138 @@ test("0.38.0: zahl ohne „-0“, sicher maskiert HTML", () => {
   assert.equal(zahl(1234.5, 1), "1.234,5");
   assert.equal(zahl(-12), "-12");
   assert.equal(sicher(`<b a="x">'&`), "&lt;b a=&quot;x&quot;&gt;&#39;&amp;");
+});
+
+// ---------- 0.39.0: „Letzte Messung“ mit Kurve und Tempo-Skala (Plan .planning/grafiken-auswahl.md, Stelle 2) ----------
+
+const NB = "\u00a0";
+const G = (datum, kg) => ({ id: datum, tierId: "k", datum, kg, notiz: "" });
+const mess = (liste, mitFreigabe = false, tag = "2026-11-05") =>
+  messungHtml(messungWerte({ gewichte: liste, freigaben: mitFreigabe ? [{ ...freigabe, datum: "2026-09-01" }] : [], tag }));
+const ohneKommentare = (text) =>
+  text
+    .replace(/\/\*[^]*?\*\//g, "")
+    .replace(/(^|[^:"'\\])\/\/.*$/gm, "$1");
+
+test("0.39.0: URTEIL_KURZ je Bewertung, Zahlen aus GRENZEN", () => {
+  assert.equal(URTEIL_KURZ.gut, "sicher");
+  assert.equal(URTEIL_KURZ.langsam, `langsamer als 0,5${NB}%`);
+  assert.equal(URTEIL_KURZ["zu-schnell"], `schneller als 2${NB}%`);
+  assert.equal(URTEIL_KURZ.zunahme, "im Blick behalten");
+  assert.equal(URTEIL_KURZ.neutral, "noch ohne Bewertung");
+  // Keine Grenzwerte als Zahl im Quelltext (ohne Kommentare): alles aus GRENZEN gebildet.
+  const quelle = ohneKommentare(readFileSync(new URL("../js/heute-grafiken.js", import.meta.url), "utf8"));
+  assert.doesNotMatch(quelle, /als 0,5|als 2 %|>0,5<|>2</);
+});
+
+test("0.39.0: skalaPunkt: −0,5 bis 3 % auf 12 bis 288, außerhalb am Rand festgehalten", () => {
+  assert.deepEqual(skalaPunkt(-0.5), { x: 12, raus: null });
+  assert.deepEqual(skalaPunkt(3), { x: 288, raus: null });
+  assert.deepEqual(skalaPunkt(3.4), { x: 288, raus: "rechts" });
+  assert.deepEqual(skalaPunkt(-1), { x: 12, raus: "links" });
+  assert.equal(skalaPunkt(0).x, Math.round((12 + (0.5 / 3.5) * 276) * 10) / 10);
+  assert.equal(skalaPunkt(GRENZEN.abnahmeMax).x, Math.round((12 + (2.5 / 3.5) * 276) * 10) / 10);
+});
+
+test("0.39.0: messungHtml ohne Gewicht: Satz wie bisher, kein Knopf „Verlauf ›“", () => {
+  const h = mess([]);
+  assert.match(h, /Noch nicht gewogen\./);
+  assert.match(h, /Am besten 1× pro Woche, immer zur gleichen Zeit\./);
+  assert.doesNotMatch(h, /data-ziel="verlauf"/);
+  assert.match(h, /aria-label="Letzte Messung"/);
+});
+
+test("0.39.0: messungHtml mit einem Gewicht: Kopf mit Datum und Knopf, Satz zum Tempo, keine Kurve, keine Skala", () => {
+  const h = mess([G("2026-11-05", 6.12)]);
+  assert.match(h, /<span class="label">Letzte Messung · [^<]*5\.? Nov[^<]*<\/span>/);
+  assert.ok(h.includes(`6,12<small>${NB}kg</small>`));
+  assert.match(h, /<button type="button" class="mess-link" data-ziel="verlauf">Verlauf ›<\/button>/);
+  assert.match(h, /Das Tempo erscheint ab dem zweiten Wiegen\./);
+  assert.doesNotMatch(h, /mess-kurve|mess-skala|mess-urteil/);
+  assert.doesNotMatch(h, /g seit/);
+  assert.match(h, /aria-label="Letzte Messung"/);
+});
+
+test("0.39.0: messungHtml mit Vergleich und Kurve: Gramm seit, Kurve, Skala, Urteil", () => {
+  const h = mess([G("2026-09-10", 6.5), G("2026-10-29", 6.24), G("2026-11-05", 6.12)]);
+  assert.ok(h.includes(`−120${NB}g seit 29.10.`), "Vorzeichen −, Datum ohne führende Null");
+  assert.match(h, /<svg class="mess-kurve" viewBox="0 0 320 58" aria-hidden="true">/);
+  assert.match(h, /<svg class="mess-skala" viewBox="0 0 300 35" aria-hidden="true">/);
+  assert.ok(h.includes(`<p class="mess-urteil neutral"><b>1,9${NB}% pro Woche</b> · noch ohne Bewertung</p>`));
+  // Erstes und letztes Datum unter der Kurve, Gewicht neben dem letzten Punkt, Hilfslinien mit kg.
+  assert.match(h, />10\.9\.</);
+  assert.match(h, />5\.11\.</);
+  assert.match(h, /class="mess-end neutral"/);
+  assert.match(h, />6,12<\/text>/);
+  assert.match(h, />6,6<\/text>/); // oben: 6,5 + 0,05 aufgerundet
+  assert.match(h, />6,0<\/text>/); // unten: 6,12 − 0,08 abgerundet
+  // Skala: Striche aus GRENZEN, grüner Bereich, Punkt in der Farbe der Bewertung.
+  assert.match(h, />0,5</);
+  assert.match(h, />2</);
+  assert.match(h, />3 %</);
+  assert.match(h, /class="mess-sk-zone"/);
+  assert.match(h, /class="mess-sk-punkt neutral" cx="[\d.]+" cy="10" r="6"/);
+  assert.doesNotMatch(h, /[‹›]<\/text>/);
+});
+
+test("0.39.0: messungHtml Bewertungen: sicher, zu schnell, Zunahme", () => {
+  const gut = mess([G("2026-10-29", 6.24), G("2026-11-05", 6.19)], true);
+  assert.ok(gut.includes(`<p class="mess-urteil gut"><b>0,8${NB}% pro Woche</b> · sicher</p>`));
+  assert.match(gut, /class="mess-sk-punkt gut"/);
+  assert.match(gut, /class="mess-end gut"/);
+  const schnell = mess([G("2026-10-29", 6.24), G("2026-11-05", 6.084)]);
+  assert.ok(schnell.includes(`<p class="mess-urteil zu-schnell"><b>2,5${NB}% pro Woche</b> · schneller als 2${NB}%</p>`));
+  const zunahme = mess([G("2026-10-29", 6.12), G("2026-11-05", 6.14)], true);
+  assert.ok(zunahme.includes(`<p class="mess-urteil zunahme"><b>Zunahme 0,3${NB}% pro Woche</b> · im Blick behalten</p>`));
+  assert.ok(zunahme.includes(`+20${NB}g seit 29.10.`));
+  // Außerhalb der Skala: Punkt am Rand, daneben „›“ bzw. „‹“.
+  const sehrSchnell = mess([G("2026-10-29", 6.24), G("2026-11-05", 5.9)]);
+  assert.match(sehrSchnell, /class="mess-sk-punkt zu-schnell" cx="288"/);
+  assert.match(sehrSchnell, />›<\/text>/);
+  const sehrViel = mess([G("2026-10-29", 6.0), G("2026-11-05", 6.1)]);
+  assert.match(sehrViel, /class="mess-sk-punkt neutral" cx="12"/);
+  assert.match(sehrViel, />‹<\/text>/);
+});
+
+test("0.39.0: messungHtml Vergleich ohne Kurve (Messung davor älter als 8 Wochen): Skala ja, Kurve nein", () => {
+  const h = mess([G("2026-08-01", 6.6), G("2026-11-05", 6.12)]);
+  assert.doesNotMatch(h, /mess-kurve/);
+  assert.match(h, /class="mess-skala"/);
+  assert.match(h, /g seit 1\.8\./);
+});
+
+test("0.39.0: messungHtml gleiches Gewicht: „±0 g“, kein NaN, kein „-0“", () => {
+  const h = mess([G("2026-10-22", 6.12), G("2026-10-29", 6.12), G("2026-11-05", 6.12)]);
+  assert.ok(h.includes(`±0${NB}g seit 29.10.`));
+  assert.match(h, /class="mess-kurve"/);
+  assert.doesNotMatch(h, /NaN|undefined|Infinity|-0[^.,\d]/);
+  // Zwei Messungen am selben Tag in der Kurve: keine Teilung durch 0.
+  const gleicherTag = mess([G("2026-08-01", 6.3), { ...G("2026-11-05", 6.2), id: "a" }, { ...G("2026-11-05", 6.12), id: "b" }]);
+  assert.doesNotMatch(gleicherTag, /NaN|undefined|Infinity/);
+});
+
+test("0.39.0: messungHtml: kein „Wägung“, alle SVG aria-hidden, Texte maskiert", () => {
+  const faelle = [
+    mess([]),
+    mess([G("2026-11-05", 6.12)]),
+    mess([G("2026-10-29", 6.24), G("2026-11-05", 6.12)]),
+    mess([G("2026-10-29", 6.24), G("2026-11-05", 6.19)], true),
+    mess([G("2026-08-01", 6.6), G("2026-11-05", 6.12)]),
+  ];
+  for (const h of faelle) {
+    assert.doesNotMatch(h, /Wägung/i);
+    assert.doesNotMatch(h, /NaN|undefined|Infinity/);
+    assert.equal((h.match(/<svg /g) ?? []).length, (h.match(/<svg [^>]*aria-hidden="true"/g) ?? []).length);
+  }
+  // Fremde Werte (z. B. aus einer veränderten Sicherung) landen maskiert im HTML.
+  const fremd = messungHtml({
+    art: "mitVergleich",
+    letzte: { datum: "2026-11-05", kg: 6.12 },
+    vorher: { datum: "2026-10-29", kg: 6.24 },
+    diffG: -120,
+    prozent: 1.9,
+    bewertung: '"><script>',
+    kurve: null,
+  });
+  assert.doesNotMatch(fremd, /<script>|undefined/);
 });

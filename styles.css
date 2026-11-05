@@ -596,13 +596,42 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .notfall-kasten { font-size: 1.0625rem; font-weight: 400; }
 .notfall-kasten strong { display: block; margin-bottom: 2px; }
 
-/* Gewicht auf „Heute“: Mini-Kurve der letzten 8 Wochen */
-.mini-zeile { display: flex; gap: 14px; align-items: center; }
-.mini-zeile p { margin: 0; font-size: 0.9375rem; }
-.mini-zeile b { font-family: var(--serif); font-weight: 600; font-variant-numeric: tabular-nums; }
-.mini { flex: none; width: 96px; height: 44px; display: block; }
-.mini polyline { fill: none; stroke: var(--text); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 300; stroke-dashoffset: 300; animation: zeichnen 1.2s 0.2s ease forwards; }
-.mini circle { fill: var(--akzent); }
+/* ---------- Heute: Letzte Messung (ab 0.39.0, Mischung flach, ohne Korridor) ---------- */
+.mess-kopf { display: grid; gap: 4px; }
+.mess-zeile { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+/* „Verlauf ›“: klein, Tippfläche 48 px über Innenabstand, der negative Rand hält die Zeile niedrig */
+.mess-link {
+  min-height: 48px; min-width: 48px; padding: 14px 8px; margin: -14px -8px -14px 0;
+  border: 0; background: none; cursor: pointer; border-radius: var(--rund-klein);
+  color: var(--akzent-stark); font: inherit; font-size: 0.875rem; font-weight: 700; line-height: 1.4; white-space: nowrap;
+}
+.mess-gewicht { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 4px 10px; }
+.mess-gewicht .wert { font-family: var(--serif); font-size: 2rem; font-weight: 500; line-height: 1; font-variant-numeric: tabular-nums; }
+.mess-gewicht .wert small { font-size: 1rem; color: var(--text-leise); font-family: var(--sans); }
+.mess-kurve, .mess-skala { width: 100%; height: auto; display: block; overflow: visible; }
+.mess-kurve .achse, .mess-skala .achse { fill: var(--text-leise); font-size: 11px; font-family: var(--sans); font-variant-numeric: tabular-nums; }
+.mess-kurve .gitter { stroke: var(--rand); }
+.mess-linie {
+  fill: none; stroke: var(--text); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round;
+  stroke-dasharray: 600; stroke-dashoffset: 600; animation: zeichnen 1.2s 0.2s ease forwards; /* 600 > längste Linie (8 Wochen) */
+}
+.mess-punkt { fill: var(--text); }
+.mess-endtext { fill: var(--text); font-size: 13px; font-family: var(--serif); font-weight: 500; }
+.mess-sk-spur { stroke: var(--rand-stark); stroke-width: 2; stroke-linecap: round; }
+.mess-sk-zone { fill: var(--akzent-hell); }
+:root[data-theme="dunkel"] .mess-sk-zone { fill: color-mix(in srgb, var(--akzent) 35%, var(--flaeche)); }
+.mess-sk-strich { stroke: var(--text-leise); stroke-width: 1; }
+/* Punkt auf der Skala und letzter Punkt der Kurve in der Farbe der Bewertung; grau = nicht bewertet */
+.mess-sk-punkt, .mess-end { stroke: var(--flaeche); stroke-width: 2; fill: var(--text-leise); }
+.mess-sk-punkt.gut, .mess-end.gut { fill: var(--gut); }
+.mess-sk-punkt.langsam, .mess-end.langsam, .mess-sk-punkt.zunahme, .mess-end.zunahme { fill: var(--warnung); }
+.mess-sk-punkt.zu-schnell, .mess-end.zu-schnell { fill: var(--gefahr); }
+.mess-tempo { display: grid; gap: 0; }
+.mess-urteil { margin: 0; font-size: 0.9375rem; color: var(--text-leise); }
+.mess-urteil b { color: var(--text); font-family: var(--serif); font-weight: 600; }
+.mess-urteil.gut { color: var(--gut); }
+.mess-urteil.langsam, .mess-urteil.zunahme { color: var(--warnung); }
+.mess-urteil.zu-schnell { color: var(--gefahr); }
 @keyframes zeichnen { to { stroke-dashoffset: 0; } }
 .leckerli-zeile { display: grid; gap: 6px; }
 .leckerli-zeile .oben { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }

@@ -55,8 +55,8 @@ import {
   findeNachEan,
 } from "./js/futterliste.js";
 import { kameraScanMoeglich, starteScanner } from "./js/scanner.js";
-import { leckerliKachel, monatsGruppen, tempoRueckmeldung, achtWochen, gefuettertWerte } from "./js/zusammenfassung.js";
-import { gefuettertHtml } from "./js/heute-grafiken.js";
+import { leckerliKachel, monatsGruppen, tempoRueckmeldung, gefuettertWerte, messungWerte } from "./js/zusammenfassung.js";
+import { gefuettertHtml, messungHtml } from "./js/heute-grafiken.js";
 import { SYMBOL } from "./js/symbole.js";
 import { leseAnzeige, merkeAnzeige, aufgeloest } from "./js/anzeige.js";
 import { aufklappKarte, merkeZustand, zustandVon, zustandVergessen, aufklappenAnmelden } from "./js/aufklappen.js";
@@ -402,18 +402,6 @@ function zaehleKcal(kcal, vonNull) {
   kcalZahl = kcal;
 }
 
-// Mini-Kurve der Wägungen aus den letzten 8 Wochen (älteste zuerst), letzter Punkt in Tanne.
-function miniKurve(liste) {
-  if (liste.length < 2) return "";
-  const kgs = liste.map((g) => g.kg);
-  const min = Math.min(...kgs);
-  const max = Math.max(...kgs);
-  const punkte = liste.map((g, i) => [4 + (i / (liste.length - 1)) * 88, 6 + ((max - g.kg) / (max - min || 1)) * 32]);
-  const [lx, ly] = punkte.at(-1);
-  const linie = punkte.map((p) => p.map((v) => v.toFixed(1)).join(",")).join(" ");
-  return `<svg class="mini" viewBox="0 0 96 44" aria-hidden="true"><polyline points="${linie}"/><circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="3.5"/></svg>`;
-}
-
 function zeichneHeute(vonNull = false) {
   const tag = tagSchluessel(gewaehlterTag);
   const heute = tagSchluessel(new Date());
@@ -525,27 +513,14 @@ function zeichneHeute(vonNull = false) {
     $("heute-mahlzeiten").innerHTML = `<ul class="protokoll">${zeilen}</ul>`;
   }
 
-  // Gewicht: Mini-Kurve der letzten 8 Wochen, Änderung zur Messung davor und Tempo (Regeln wie im Verlauf).
-  const letzte = sortiert[0];
-  let gewichtText;
-  if (!letzte) {
-    gewichtText = `<p>Noch nicht gewogen.<br><span class="leise">Am besten 1× pro Woche, immer zur gleichen Zeit.</span></p>`;
-  } else {
-    const r = tempoRueckmeldung({
-      gewichte: sortiert.slice(1),
-      freigaben: daten.freigaben.filter((f) => f.tierId === tier.id && f.datum <= tag),
-      kg: letzte.kg,
-      datum: letzte.datum,
-    });
-    const bewertung = { gut: ", sicher", langsam: ", langsamer als 0,5 %", "zu-schnell": ", schneller als 2 %", zunahme: "" };
-    const tempo = r
-      ? `${r.prozent < 0 ? "Zunahme " : ""}${zahl(Math.abs(r.prozent), 1)} % pro Woche${bewertung[r.bewertung] ?? ""}`
-      : `gewogen am ${datumText(letzte.datum)}`;
-    const kopf = r ? `Letzte Messung <b>${sicher(r.titel.split(" seit")[0])}</b>` : `<b>${zahl(letzte.kg, 2)} kg</b>`;
-    gewichtText = `<p>${kopf}<br><span class="leise">${tempo}</span></p>`;
-  }
-  $("heute-gewicht").innerHTML = `<section class="karte" aria-label="Gewicht in den letzten 8 Wochen">
-      <div class="mini-zeile">${miniKurve(achtWochen(gewichte, tag))}${gewichtText}</div></section>`;
+  // Letzte Messung (ab 0.39.0): Gewicht, Gramm seit der Messung davor, Kurve der letzten 8 Wochen, Tempo-Skala.
+  // Alles bis zum gewählten Tag (gewichte ist schon bis „tag“ gefiltert, Freigaben ebenso).
+  const messung = messungWerte({
+    gewichte,
+    freigaben: daten.freigaben.filter((f) => f.tierId === tier.id && f.datum <= tag),
+    tag,
+  });
+  $("heute-gewicht").innerHTML = messungHtml(messung);
 
   zeichneBesondereTage(tag, heute);
 

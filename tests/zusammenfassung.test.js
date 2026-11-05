@@ -14,6 +14,7 @@ import {
   tempoRueckmeldung,
   achtWochen,
   gefuettertWerte,
+  messungWerte,
 } from "../js/zusammenfassung.js";
 import { GRENZEN } from "../js/rechnen.js";
 
@@ -334,4 +335,68 @@ test("0.38.0: gefuettertWerte ohne Mahlzeit mit Freigabe: „Noch 220 kcal“, k
   assert.deepEqual(w.arten, []);
   assert.deepEqual(w.ziel.kachel, { wort: "Noch", kcal: 220, warnung: false });
   assert.equal(w.ziel.marke, 1);
+});
+
+// ---------- 0.39.0: „Letzte Messung“ mit Kurve und Tempo-Skala (Plan .planning/grafiken-auswahl.md, Stelle 2) ----------
+
+const messung = (liste, freigaben = [], tag = "2026-11-05") => messungWerte({ gewichte: liste, freigaben, tag });
+
+test("0.39.0: messungWerte ohne Gewicht: „keine“", () => {
+  assert.deepEqual(messung([]), { art: "keine" });
+});
+
+test("0.39.0: messungWerte mit einem Gewicht oder zwei am selben Tag: „ohneVergleich“", () => {
+  const eins = messung([G("2026-11-05", 6.12)]);
+  assert.equal(eins.art, "ohneVergleich");
+  assert.equal(eins.letzte.kg, 6.12);
+  assert.equal(eins.letzte.datum, "2026-11-05");
+  // Zwei am selben Tag: tempoRueckmeldung findet keine frühere, also kein Vergleich und kein NaN.
+  const gleicherTag = messung([{ ...G("2026-11-05", 6.2), id: "a" }, { ...G("2026-11-05", 6.12), id: "b" }]);
+  assert.equal(gleicherTag.art, "ohneVergleich");
+  assert.equal(gleicherTag.diffG, undefined);
+});
+
+test("0.39.0: messungWerte mit Vergleich: Gramm, Datum davor, Tempo und Kurve", () => {
+  const w = messung([G("2026-10-29", 6.24), G("2026-11-05", 6.12)]);
+  assert.equal(w.art, "mitVergleich");
+  assert.equal(w.letzte.kg, 6.12);
+  assert.deepEqual(w.vorher, { datum: "2026-10-29", kg: 6.24 });
+  assert.equal(w.diffG, -120);
+  nahe(w.prozent, (0.12 / 6.24) * 100);
+  nahe(w.prozent, 1.92, 0.01);
+  assert.equal(w.bewertung, "neutral");
+  assert.equal(w.kurve.length, 2);
+  assert.deepEqual(w.kurve.map((g) => g.datum), ["2026-10-29", "2026-11-05"]);
+});
+
+test("0.39.0: messungWerte gleiches Gewicht: diffG ist 0, nicht -0", () => {
+  const w = messung([G("2026-10-29", 6.12), G("2026-11-05", 6.12)]);
+  assert.ok(Object.is(w.diffG, 0));
+  // Winzige Zunahme, die auf 0 g rundet, ergibt ebenfalls 0 statt -0.
+  assert.ok(Object.is(messung([G("2026-10-29", 6.1204), G("2026-11-05", 6.1201)]).diffG, 0));
+});
+
+test("0.39.0: messungWerte Vergleich mit einer Messung älter als 8 Wochen: keine Kurve", () => {
+  const w = messung([G("2026-08-01", 6.6), G("2026-11-05", 6.12)]);
+  assert.equal(w.art, "mitVergleich");
+  assert.equal(w.vorher.datum, "2026-08-01");
+  assert.equal(w.kurve, null);
+});
+
+test("0.39.0: messungWerte ohne Freigabe: über 2 % rot, darunter neutral; mit Freigabe gut", () => {
+  const schnell = messung([G("2026-10-29", 6.24), G("2026-11-05", 6.084)]);
+  nahe(schnell.prozent, 2.5);
+  assert.equal(schnell.bewertung, "zu-schnell");
+  const ruhig = messung([G("2026-10-29", 6.24), G("2026-11-05", 6.19)]);
+  nahe(ruhig.prozent, 0.8, 0.01);
+  assert.equal(ruhig.bewertung, "neutral");
+  const mitFreigabe = messung([G("2026-10-29", 6.24), G("2026-11-05", 6.19)], [{ ...freigabe, datum: "2026-10-01" }]);
+  assert.equal(mitFreigabe.bewertung, "gut");
+});
+
+test("0.39.0: messungWerte vergangener Tag: nur Messungen bis zu diesem Tag zählen für die Kurve", () => {
+  // Die Liste ist schon bis zum Tag gefiltert (gewichteBis); die Kurve reicht 56 Tage vor den Tag zurück.
+  const w = messung([G("2026-08-20", 6.6), G("2026-09-05", 6.5), G("2026-10-01", 6.4), G("2026-10-29", 6.24)], [], "2026-10-29");
+  assert.deepEqual(w.kurve.map((g) => g.datum), ["2026-09-05", "2026-10-01", "2026-10-29"]);
+  assert.equal(w.vorher.datum, "2026-10-01");
 });

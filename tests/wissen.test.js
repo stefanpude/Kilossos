@@ -173,14 +173,14 @@ test("Willkommensseite verspricht nichts, was die App nicht halten kann (Stefan,
   assert.doesNotMatch(html, /ohne Fettleber-Risiko|für jede Sorte/);
 });
 
-test("Version 0.38.0: Cache v76 mit js/heute-grafiken.js, Versionszeile unter „Mehr“", () => {
+test("Version 0.39.0: Cache v77 mit js/heute-grafiken.js, Versionszeile unter „Mehr“", () => {
   const sw = lies("sw.js");
-  assert.match(sw, /const CACHE_NAME = "kilossos-v76";/);
+  assert.match(sw, /const CACHE_NAME = "kilossos-v77";/);
   assert.match(sw, /"js\/wissen\.js",/);
   assert.match(sw, /"js\/besondere-tage\.js",/);
   assert.match(sw, /"js\/freigaben\.js",/);
   assert.match(sw, /"js\/heute-grafiken\.js",/);
-  assert.match(lies("index.html"), /id="version">Version 0\.38\.0</);
+  assert.match(lies("index.html"), /id="version">Version 0\.39\.0</);
 });
 
 // 0.36.8: „gewogen“ statt „Wägung“ in allen sichtbaren Texten (Entscheidung des Halters, 05.11.2026).
