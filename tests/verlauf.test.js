@@ -122,6 +122,24 @@ test("zeichneVerlauf: Tipp zur Kurve steht in der Gewichtskarte unter der Legend
   assert.doesNotMatch(ohneKurve, /Tippe auf die Kurve/);
 });
 
+test("zeichneVerlauf: Legende nennt Ziel und sicheren Bereich nur, wenn die Kurve sie zeigt (0.32.1)", () => {
+  const verlauf = (freigaben) =>
+    zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben, futterNachId: new Map(), zeitraum: "3m", heute: "2026-10-20", kopf: "" });
+  const legende = (text) => {
+    const start = text.indexOf('class="legende-zeile"');
+    return text.slice(start, text.indexOf("</p>", start));
+  };
+  // Ziel 7,2 kg liegt weit unter der Kurve (9,0 bis 9,32 kg): keine Linie, also auch kein Eintrag.
+  assert.doesNotMatch(legende(verlauf([freigabe])), /Ziel vom Tierarzt/);
+  assert.match(legende(verlauf([{ ...freigabe, zielgewichtKg: 9.1 }])), /Ziel vom Tierarzt/);
+  // Freigabe am Tag der letzten Wägung (z. B. Wiegen beim Tierarzt): noch kein sicherer Bereich gezeichnet.
+  const amEnde = { ...freigabe, datum: "2026-10-15" };
+  assert.doesNotMatch(weicheKurve(gewichte, [amEnde]), /class="band"/);
+  assert.doesNotMatch(legende(verlauf([amEnde])), /sicher:/);
+  assert.match(legende(verlauf([amEnde])), /Freigabe/);
+  assert.match(legende(verlauf([freigabe])), /sicher: 0,5 bis 2 % pro Woche/);
+});
+
 test("zeichneVerlauf: Fotos erscheinen auch, wenn es noch keinen Verlauf gibt", () => {
   const html = zeichneVerlauf({ gewichte: gewichte.slice(0, 1), mahlzeiten: [], freigaben: [], futterNachId: new Map(), zeitraum: "3m", heute: "2026-10-20", kopf: "", fotos: "<section id=\"fotos-test\"></section>" });
   assert.match(html, /Sobald mindestens zwei Gewichte/);

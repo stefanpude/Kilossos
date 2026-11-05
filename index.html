@@ -11,6 +11,12 @@
       document.documentElement.dataset.theme = d ? "dunkel" : "hell";
       if (d) document.getElementById("theme-farbe").content = "#131b1a";
     } catch (e) { document.documentElement.dataset.theme = "hell"; }
+    // Gemerkten Bereich (app.js, merkeAnsicht) schon vor dem ersten Zeichnen kennen, damit beim Aktualisieren
+    // nicht kurz „Heute“ aufblitzt. app.js nimmt die Marke nach dem Start wieder weg.
+    try {
+      var a = sessionStorage.getItem(new URLSearchParams(location.search).has("demo") ? "kilossos-demo-ansicht" : "kilossos-ansicht");
+      if (a === "gewicht" || a === "verlauf" || a === "futter" || a === "mehr") document.documentElement.dataset.start = a;
+    } catch (e) {}
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Kilossos</title>
@@ -111,7 +117,7 @@
         </div>
         <div class="tier-text tier-feld" id="tier-feld">
           <button type="button" class="tier-wechsel" id="tier-wechsel" data-aktion="tier-wahl" aria-haspopup="menu" aria-expanded="false">
-            <b><span id="tiername">Kito</span><span class="pfeil" id="tier-pfeil" aria-hidden="true" hidden> <svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 9.5l6 6 6-6"/></svg></span></b><small id="kopf-gewicht"></small>
+            <b><span id="tiername"></span><span class="pfeil" id="tier-pfeil" aria-hidden="true" hidden> <svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 9.5l6 6 6-6"/></svg></span></b><small id="kopf-gewicht"></small>
           </button>
         </div>
         <div class="datum" id="kopf-datum"></div>
@@ -325,7 +331,7 @@
           <span data-symbol="dokument"></span><span class="text">Nutzungsbedingungen</span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.32.0</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.32.1</span>
         </div>
       </div>
     </section>

@@ -2523,3 +2523,4 @@ zeichneHeute(true);
 zeigeSpeicherStatus();
 if (einrichtungLaeuft) einrichtungZeigen();
 else gemerkteAnsichtZeigen();
+delete document.documentElement.dataset.start; // Marke aus dem Kopf-Skript in index.html: ab jetzt steuert zeigeAnsicht

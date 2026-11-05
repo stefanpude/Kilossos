@@ -181,6 +181,8 @@ main {
 
 .ansicht { display: grid; gap: 12px; padding-top: 8px; }
 .ansicht[hidden] { display: none; }
+/* Beim Aktualisieren in einem anderen Bereich: „Heute“ nicht kurz aufblitzen lassen (Marke aus dem Kopf-Skript, app.js nimmt sie weg). */
+html[data-start] .ansicht[data-ansicht="heute"] { display: none; }
 .ansicht > * { min-width: 0; }
 .ansicht.rein { animation: hereinfahren 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
 @keyframes hereinfahren { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }

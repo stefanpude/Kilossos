@@ -307,13 +307,14 @@ export function weicheKurve(gewichte, freigaben, von = null) {
   </svg>`;
 }
 
-// Legende passend zu dem, was die Kurve gerade zeigt.
-function legende(freigaben, von, bis) {
+// Legende passend zu dem, was die Kurve gerade zeigt. Ziel und sicherer Bereich nur, wenn die fertige Kurve sie enthält
+// (Ziel unter dem Ausschnitt, Freigabe erst am Tag der letzten Wägung; Handy-Test 05.11.2026).
+function legende(freigaben, von, bis, kurve) {
   const teile = ['<span><i></i>Gewicht</span>'];
   if (freigaben.length) {
-    teile.push('<span><i class="ziel"></i>Ziel vom Tierarzt</span>');
+    if (kurve.includes('class="ziel"')) teile.push('<span><i class="ziel"></i>Ziel vom Tierarzt</span>');
     if (freigaben.some((f) => (!von || f.datum >= von) && f.datum <= bis)) teile.push('<span><i class="freigabe"></i>Freigabe</span>');
-    teile.push('<span><i class="band"></i>sicher: 0,5 bis 2 % pro Woche</span>');
+    if (kurve.includes('class="band"')) teile.push('<span><i class="band"></i>sicher: 0,5 bis 2 % pro Woche</span>');
   }
   return `<p class="legende-zeile">${teile.join("")}</p>`;
 }
@@ -496,10 +497,11 @@ export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, futterNachId, 
     // Neutral: ob eine Abnahme gut ist, bewertet nur „Tempo pro Woche“ (mit Freigabe, über 2 % immer markiert).
     aenderung = `<span class="marke">${vorzeichen(diff, 2)} kg</span>`;
   }
+  const svg = imZeitraum.length >= 2 ? weicheKurve(gewichte, freigaben, von) : "";
   const kurve =
     imZeitraum.length >= 2
-      ? `<div class="papier"><div class="kurve-feld">${weicheKurve(gewichte, freigaben, von)}<div class="infoblase" id="infoblase" hidden></div></div></div>
-         ${legende(freigaben, von, aktuell.datum)}
+      ? `<div class="papier"><div class="kurve-feld">${svg}<div class="infoblase" id="infoblase" hidden></div></div></div>
+         ${legende(freigaben, von, aktuell.datum, svg)}
          <p class="tipp">Tippe auf die Kurve, um Datum und Gewicht zu sehen. Alle Gewichte als Liste stehen unter „Gewicht“.</p>`
       : `<p class="leer">Im gewählten Zeitraum gibt es weniger als zwei Wägungen.</p>`;
   const gewichtKarte = `<section class="karte" aria-label="Gewicht">
