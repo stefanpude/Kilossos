@@ -234,11 +234,13 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
     // Zeitleiste mit derselben Achse: von der ersten Wägung im Zeitraum bis zum Berichtsende (seit 0.33.0).
     // Beide in einem Rahmen: Im Druck gilt die Breite für beide gleich, und ein Seitenumbruch trennt sie nicht.
     const erste = imZeitraum.map((g) => g.datum).sort()[0];
+    const leiste = zeitleiste(b.besondereTage ?? [], { vonTag: erste, bisTag: b.bis, ...PDF_RAND });
+    // Eine Zeile Erklärung unter der Zeitleiste (0.34.1, Review 0.33.0 Fund b), im selben Rahmen wie Diagramm und Leiste.
+    const leisteText = leiste
+      ? `<p class="bericht-klein zl-text">Streifen unter der Kurve: besondere Tage auf derselben Zeitachse. Balken = mehrere Tage, Punkt = ein Tag, rot = Futter verweigert. Einzelheiten im Abschnitt „Besondere Tage“.</p>`
+      : "";
     teile.push(
-      `<div class="bericht-grafik">${gewichtDiagramm(imZeitraum, freigaben.filter((f) => f.datum <= b.bis), b.bis)}${zeitleiste(
-        b.besondereTage ?? [],
-        { vonTag: erste, bisTag: b.bis, ...PDF_RAND }
-      )}</div>`
+      `<div class="bericht-grafik">${gewichtDiagramm(imZeitraum, freigaben.filter((f) => f.datum <= b.bis), b.bis)}${leiste}${leisteText}</div>`
     );
   }
   if (b.gewichte.length) {

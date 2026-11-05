@@ -220,7 +220,20 @@ test("berichtHtml: Zeitleiste direkt unter dem Gewichtsdiagramm, Achse bis zum B
 test("berichtHtml: Diagramm und Zeitleiste stehen in einem gemeinsamen Rahmen (gleiche Breite im Druck)", () => {
   // Review 05.11.: Im Druck war das Diagramm auf 150 mm begrenzt, die Zeitleiste nicht; die Tage lagen versetzt.
   const html = mitBesonderen(besondere);
-  assert.match(html, /<div class="bericht-grafik"><svg viewBox="0 0 340 \d+" class="diagramm"[^]*?<\/svg><svg viewBox="0 0 340 \d+" class="zeitleiste"[^]*?<\/svg><\/div>/);
+  assert.match(html, /<div class="bericht-grafik"><svg viewBox="0 0 340 \d+" class="diagramm"[^]*?<\/svg><svg viewBox="0 0 340 \d+" class="zeitleiste"[^]*?<\/svg><p class="bericht-klein zl-text">[^<]*<\/p><\/div>/);
   // ohne besondere Tage steht das Diagramm allein im Rahmen
   assert.match(mitBesonderen([]), /<div class="bericht-grafik"><svg viewBox="0 0 340 \d+" class="diagramm"[^]*?<\/svg><\/div>/);
+});
+
+test("berichtHtml: eine Zeile unter der Zeitleiste erklärt Balken, Punkt und Rot (0.34.1)", () => {
+  // Review 0.33.0, Fund b: Ohne Beschriftung versteht der Tierarzt die Streifen erst über die Tabelle weiter unten.
+  const html = mitBesonderen(besondere);
+  const text = html.match(/<p class="bericht-klein zl-text">([^<]*)<\/p>/)[1];
+  assert.equal(
+    text,
+    "Streifen unter der Kurve: besondere Tage auf derselben Zeitachse. Balken = mehrere Tage, Punkt = ein Tag, rot = Futter verweigert. Einzelheiten im Abschnitt „Besondere Tage“."
+  );
+  // ohne Zeitleiste keine Zeile, auch wenn ein Eintrag nur vor der ersten Wägung liegt
+  assert.doesNotMatch(mitBesonderen([]), /zl-text/);
+  assert.doesNotMatch(mitBesonderen([BT({ von: "2026-10-20", bis: "2026-10-20" })]), /zl-text/);
 });
