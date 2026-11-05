@@ -21,10 +21,15 @@ export function sicherungPruefen(neu, heute) {
 export function einleseFrage(neu, { kaputt, fotos, angaben }, ersetzen) {
   // besondereTage hat sicherungPruefen schon angelegt (bei alten Sicherungen leer).
   const besondere = neu.besondereTage?.length ?? 0;
+  const m = neu.mahlzeiten.length;
+  const g = neu.gewichte.length;
+  // Dativ nach „mit“, Einzahl bei genau einem Eintrag („1 Mahlzeit und 1 Gewicht“, seit 0.41.0).
+  const mahlzeiten = `${m} ${m === 1 ? "Mahlzeit" : "Mahlzeiten"}`;
+  const gewichte = `${g} ${g === 1 ? "Gewicht" : "Gewichten"}`;
   const anzahl =
     besondere > 0
-      ? `${neu.mahlzeiten.length} Mahlzeiten, ${neu.gewichte.length} Gewichten und ${besondere} ${besondere === 1 ? "besonderen Tag" : "besonderen Tagen"}`
-      : `${neu.mahlzeiten.length} Mahlzeiten und ${neu.gewichte.length} Gewichten`;
+      ? `${mahlzeiten}, ${gewichte} und ${besondere} ${besondere === 1 ? "besonderen Tag" : "besonderen Tagen"}`
+      : `${mahlzeiten} und ${gewichte}`;
   const kaputtText =
     kaputt > 0
       ? ` ${kaputt === 1 ? "Ein Eintrag war" : `${kaputt} Einträge waren`} beschädigt und ${kaputt === 1 ? "wird" : "werden"} entfernt oder repariert.`

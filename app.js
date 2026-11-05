@@ -691,7 +691,7 @@ function zeichneFreigabe() {
           .map((f) => {
             const unten = [f.tierarzt, freigabeKurz(f), befundText(f)].filter(Boolean).map(sicher).join(" · ");
             return `<div class="zeile"><button type="button" class="waegung-knopf freigabe-zeile tippbar" data-aktion="freigabe-bearbeiten" data-id="${sicher(f.id)}">
-              <span class="name"><b>${datumText(f.datum)}</b><small>${unten}</small></span>
+              <span class="name"><b>${sicher(datumText(f.datum))}</b><small>${unten}</small></span>
               <span class="stift" aria-hidden="true">${SYMBOL.stift}</span><span class="nur-vorlesen">, korrigieren oder löschen</span></button></div>`;
           })
           .join(""),
@@ -884,6 +884,12 @@ beimSpeichern("form-profil", "profil-fehler", (werte) => {
       tier = aktivesTier(daten, tier.id);
       bearbeitetesTier = daten.tiere.find((t) => t.id === id) ?? null;
       zeichneAlles();
+      if (profilFoto) {
+        // Das bisherige Foto wieder einstellen, sonst ginge es beim nächsten „Foto entfernen“ mit verloren.
+        profilFoto = fotoGueltig(bearbeitetesTier?.foto) ? bearbeitetesTier.foto : null;
+        zeigeProfilFoto();
+        return "Das neue Foto passt nicht mehr in den Speicher. Es ist wieder das bisherige Foto eingestellt. Speichere noch einmal, dann bleiben die übrigen Angaben erhalten.";
+      }
       return zuVoll;
     }
     return void zeichneAlles();
@@ -1103,7 +1109,9 @@ for (const dialog of document.querySelectorAll("dialog")) {
       const fokus = document.activeElement;
       const verloren = !fokus || fokus === document.body || !fokus.isConnected || fokus.closest("dialog:not([open])");
       if (!merk?.aktion || !verloren) return;
-      const passend = [...document.querySelectorAll(`[data-aktion="${CSS.escape(merk.aktion)}"]`)].filter((el) => el.getClientRects().length);
+      // checkVisibility: Knöpfe in zugeklappten Karten (visibility: hidden) zählen nicht als sichtbar (seit 0.41.0).
+      const sichtbar = (el) => (el.checkVisibility ? el.checkVisibility({ visibilityProperty: true }) : el.getClientRects().length > 0);
+      const passend = [...document.querySelectorAll(`[data-aktion="${CSS.escape(merk.aktion)}"]`)].filter(sichtbar);
       const knopf = passend.find((el) => el.dataset.id === merk.id) ?? passend[0];
       knopf?.focus({ preventScroll: true });
     });
@@ -1334,7 +1342,7 @@ function zeigeFotoAngebot() {
   $("gewicht-foto-wiegetag-tipp").hidden = !zustand.tipp;
   if (!zustand.bereich) return;
   // Foto gewählt, und der Foto-Zeitraum hat schon eins: vorher sagen, nicht erst beim Speichern.
-  const belegt = gewichtFoto ? fotoImZeitraum(daten.gewichte, tier.id, $("form-gewicht").datum.value, tier.wiegetag) : null;
+  const belegt = gewichtFoto && /^\d{4}-\d{2}-\d{2}$/.test($("form-gewicht").datum.value) ? fotoImZeitraum(daten.gewichte, tier.id, $("form-gewicht").datum.value, tier.wiegetag) : null;
   $("gewicht-foto-belegt").hidden = !belegt;
   if (belegt) $("gewicht-foto-belegt").textContent = `Seit dem letzten Foto-Tag gibt es schon ein Monatsfoto (vom ${datumText(belegt.datum)}). Beim Speichern fragt die App, ob das neue es ersetzen soll.`;
 }
@@ -1720,6 +1728,9 @@ function oeffneFreigabe(freigabe = null) {
   $("freigabe-titel").textContent = freigabe ? `Freigabe für ${tier.name} ändern` : `Freigabe für ${tier.name}`;
   $("freigabe-hinweis-aendern").textContent = HINWEIS_AENDERN;
   $("freigabe-hinweis-aendern").hidden = !freigabe;
+  // Die Vorlesefunktion liest den Hinweis „Nur für Fehler beim Eintragen …“ beim Öffnen mit (seit 0.41.0).
+  if (freigabe) $("dialog-freigabe").setAttribute("aria-describedby", "freigabe-hinweis-aendern");
+  else $("dialog-freigabe").removeAttribute("aria-describedby");
   $("freigabe-loeschen").hidden = !freigabe;
   zeigeFehler("freigabe-fehler", "");
   const heute = tagSchluessel(new Date());
@@ -1804,13 +1815,17 @@ beimSpeichern("form-freigabe", "freigabe-fehler", (werte) => {
   };
   if (plan.frage && !confirm(plan.frage)) return TEXT_DATUM_PRUEFEN;
   if (plan.ersetzen && !confirm(ersetzenFrage(plan.ueberschrieben))) return TEXT_GLEICHER_TAG_NICHT_GESPEICHERT;
-  if (plan.ueberschrieben) {
-    freigabeAendern(plan.ueberschrieben, neu);
+  let gespeichert = plan.ueberschrieben;
+  if (gespeichert) {
+    freigabeAendern(gespeichert, neu);
   } else {
-    const freigabe = { id: neueId(), tierId: tier.id };
-    freigabeAendern(freigabe, neu);
-    daten.freigaben.push(freigabe);
+    gespeichert = { id: neueId(), tierId: tier.id };
+    freigabeAendern(gespeichert, neu);
+    daten.freigaben.push(gespeichert);
   }
+  // Landet die Freigabe unter „Frühere Freigaben“ (z. B. älteres Datum), die Liste aufklappen: Dort sieht man sie,
+  // und die Fokus-Rückgabe findet ihren Knopf (zugeklappt wäre er unsichtbar, seit 0.41.0).
+  if (fruehereFreigaben(eigeneFreigaben()).includes(gespeichert)) merkeZustand("freigaben-frueher", true);
   sichern();
 });
 

@@ -206,3 +206,13 @@ test("Speicher voll beim Umstellen alter Startwerte: laden() zeigt die Daten tro
   const daten = laden(s);
   assert.equal(daten.futter.find((f) => f.listeId === "sheba-fresh-fine-huhn-gefluegel-truthahn").kcalPro100g, 77);
 });
+
+test("0.41.0: einleseFrage mit Einzahl bei genau einer Mahlzeit bzw. einem Gewicht", async () => {
+  const { einleseFrage } = await import("../js/sicherung.js");
+  const ohne = { kaputt: 0, fotos: 0, angaben: 0 };
+  const mit = (m, g, b = 0) => ({ mahlzeiten: Array(m).fill({}), gewichte: Array(g).fill({}), besondereTage: Array(b).fill({}) });
+  assert.equal(einleseFrage(mit(1, 1), ohne, ""), "Sicherung mit 1 Mahlzeit und 1 Gewicht einlesen?");
+  assert.equal(einleseFrage(mit(1, 2), ohne, ""), "Sicherung mit 1 Mahlzeit und 2 Gewichten einlesen?");
+  assert.equal(einleseFrage(mit(0, 1, 1), ohne, ""), "Sicherung mit 0 Mahlzeiten, 1 Gewicht und 1 besonderen Tag einlesen?");
+  assert.equal(einleseFrage(mit(3, 0, 2), ohne, ""), "Sicherung mit 3 Mahlzeiten, 0 Gewichten und 2 besonderen Tagen einlesen?");
+});

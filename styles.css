@@ -839,8 +839,10 @@ dialog .haken-zeile input[type="checkbox"] {
 .waage { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .stufe {
   width: 56px; height: 56px; border-radius: 50%; border: 1px solid var(--rand-stark); background: var(--hintergrund);
-  color: var(--text); font-size: 0.9375rem; font-weight: 700; cursor: pointer; flex: none; padding: 0;
+  color: var(--text); font-weight: 700; cursor: pointer; flex: none; padding: 0;
   font-variant-numeric: tabular-nums; transition: transform 0.1s;
+  /* Große Handy-Schrift: „−10 g“ bleibt einzeilig im Kreis, die große Zahl daneben behält ihren Platz (0.41.0). */
+  font-size: min(0.9375rem, 18px); white-space: nowrap;
 }
 .stufe:active { transform: scale(0.92); }
 .waage-anzeige { flex: 1; min-width: 0; display: flex; align-items: baseline; justify-content: center; gap: 4px; }
@@ -989,7 +991,13 @@ dialog .wert-eingabe input:not([type="hidden"]) { padding-right: calc(12px + 1.4
 .ergebnis .annahme { color: var(--text); background: var(--warnung-hell); border-left: 3px solid var(--warnung); padding: 6px 10px; border-radius: 4px; }
 .ergebnis .knopf-haupt { width: 100%; }
 .ergebnis .uebernommen { color: var(--gut); font-weight: 700; }
-.knoepfe { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.knoepfe { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; container-type: inline-size; }
+/* Schmal (Handy) mit Löschen-Knopf: „Abbrechen | Speichern“ bleiben zusammen oben, der rote Knopf steht links darunter.
+   Vorher brach „Speichern“ allein in die zweite Zeile (0.41.0). Die leere Zeile per ::before erzwingt den Umbruch. */
+@container (max-width: 30rem) {
+  .knoepfe:has(> .knopf-gefahr:not([hidden]))::before { content: ""; order: 1; flex-basis: 100%; height: 0; }
+  .knoepfe > .knopf-gefahr { order: 2; }
+}
 .fuss { margin: 0; text-align: center; color: var(--text-leise); font-size: 0.8125rem; }
 
 /* ---------- Bestätigung unten ---------- */
