@@ -984,6 +984,24 @@ dialog .wert-eingabe input:not([type="hidden"]) { padding-right: calc(12px + 1.4
 .bericht th, .bericht td { text-align: left; padding: 4px 6px 4px 0; border-bottom: 1px solid var(--rand); vertical-align: top; }
 .bericht th { font-size: 0.75rem; color: var(--text-leise); font-weight: 700; }
 .bericht-notizen .linie { border-bottom: 1px solid var(--text-leise); height: 28px; }
+/* Wägungen als Monatsraster (ab 0.36.0, js/bericht.js waegungsRaster): eine Zeile je Monat, bis zu 5 Wägungen nebeneinander.
+   Feste Spaltenbreiten, damit die Wägungen aller Monate untereinander stehen. Auf dem Handy breiter als der Schirm:
+   scrollt innen wie die anderen breiten Tabellen (min-width), im Druck reicht die Seite (182 mm). */
+.bericht table.wg-raster { table-layout: fixed; min-width: 34rem; }
+.wg-raster th, .wg-raster td { border-bottom: 0; padding: 4px 6px 4px 0; }
+.wg-raster thead th { border-bottom: 1px solid var(--rand); }
+.wg-raster thead th:first-child { width: 21mm; }
+.wg-raster thead th:last-child { width: 30mm; }
+.wg-erkl { font-weight: 400; margin-left: 6px; }
+.wg-raster tr.wg-letzte > *, .wg-raster .wg-monat, .wg-raster .wg-summe { border-bottom: 1px solid var(--rand); }
+.wg-raster .wg-monat { font-size: 0.8125rem; font-weight: 700; color: var(--text); white-space: nowrap; }
+.wg-tag, .wg-diff { display: block; font-size: 0.75rem; color: var(--text-leise); line-height: 1.25; }
+.wg-kg { display: block; font-size: 0.9375rem; line-height: 1.3; }
+.wg-marke { font-size: 0.625rem; font-weight: 700; margin-left: 1px; }
+.wg-summe b { display: block; }
+.wg-summe small { display: block; font-size: 0.75rem; color: var(--text-leise); }
+.wg-notizen { margin: 4px 0 0; font-size: 0.75rem; display: flex; flex-wrap: wrap; gap: 2px 14px; }
+.wg-notizen sup { font-weight: 700; }
 
 /* Der Ausdruck ist immer hell, auch wenn die App auf „Dunkel“ steht. */
 @media print {

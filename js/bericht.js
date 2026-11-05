@@ -210,6 +210,84 @@ function besondereListe(liste, bis, nummern) {
   return `<table class="bt-liste"><tbody>${zeilen.join("")}</tbody></table>`;
 }
 
+// ---------- Wägungen als Monatsraster (seit 0.36.0, Spezifikation .planning/waegungen-pdf.md) ----------
+// Wunsch des Halters 05.11.2026: „höchstens 4, 5 Wägungen im Monat … optisch angenehmer“. Eine Zeile je Monat mit bis zu
+// 5 Wägungen nebeneinander (Datum, kg, Änderung zur Wägung davor); wer öfter wiegt, bekommt weitere Zeilen im selben Monat.
+// Bilanz je Monat: von der letzten Wägung des Vormonats bis zur letzten des Monats, im ersten Monat ab seiner ersten Wägung.
+// % KM/Woche bezogen auf das Gewicht am Anfang (Regel 1a in docs/sicherheitsgrenzen.md); positiv = Abnahme wie im Kopf.
+// Statt einer Prozentzahl je Wägung (schwankt stark) steht der Monatswert da; zu schnell meldet weiter „Auffälligkeiten“.
+// Notizen bekommen Buchstaben (a, b, …, z, aa, …), damit man sie nicht mit den Nummern der besonderen Tage verwechselt.
+export const WAEGUNGEN_PRO_ZEILE = 5;
+// Fest statt toLocaleDateString: Node und Browser kürzen unterschiedlich („Mär“ oder „März“).
+const MONATE_KURZ = ["Jan", "Feb", "März", "Apr", "Mai", "Juni", "Juli", "Aug", "Sep", "Okt", "Nov", "Dez"];
+const buchstabe = (i) => (i >= 26 ? buchstabe(Math.floor(i / 26) - 1) : "") + String.fromCharCode(97 + (i % 26));
+
+// gewichte: b.gewichte aus berichtDaten (datum, kg, notiz, diffG), nach Datum aufsteigend.
+export function waegungsMonate(gewichte) {
+  const gruppen = [];
+  const notizen = [];
+  for (const g of gewichte) {
+    const schluessel = g.datum.slice(0, 7);
+    if (gruppen.at(-1)?.schluessel !== schluessel) {
+      gruppen.push({ schluessel, liste: [], basis: gruppen.at(-1)?.liste.at(-1) ?? null });
+    }
+    const eintrag = { ...g, buchstabe: null };
+    if (g.notiz) {
+      eintrag.buchstabe = buchstabe(notizen.length);
+      notizen.push({ buchstabe: eintrag.buchstabe, datum: g.datum, notiz: g.notiz });
+    }
+    gruppen.at(-1).liste.push(eintrag);
+  }
+  const monate = gruppen.map(({ schluessel, liste, basis }) => {
+    const von = basis ?? liste[0];
+    const bis = liste.at(-1);
+    const tage = tageZwischen(von.datum, bis.datum);
+    const zeilen = [];
+    for (let i = 0; i < liste.length; i += WAEGUNGEN_PRO_ZEILE) zeilen.push(liste.slice(i, i + WAEGUNGEN_PRO_ZEILE));
+    return {
+      schluessel,
+      titel: `${MONATE_KURZ[Number(schluessel.slice(5, 7)) - 1]} ${schluessel.slice(0, 4)}`,
+      zeilen,
+      bilanz:
+        von === bis || tage <= 0
+          ? null
+          : { diffG: Math.round((bis.kg - von.kg) * 1000), prozentProWoche: ((von.kg - bis.kg) / von.kg / (tage / 7)) * 100 },
+    };
+  });
+  return { monate, notizen };
+}
+
+function waegungsRaster(gewichte, berichtBis) {
+  const { monate, notizen } = waegungsMonate(gewichte);
+  const zelle = (g) => {
+    const marke = g.buchstabe ? `<sup class="wg-marke">${g.buchstabe}</sup>` : "";
+    const diff = g.diffG === null ? "–" : `${vorzeichen(g.diffG)} g`;
+    return `<td class="wg-zelle"><span class="wg-tag">${tagMonat(g.datum)}</span><b class="wg-kg">${zahl(g.kg, 2)}${marke}</b><span class="wg-diff">${diff}</span></td>`;
+  };
+  const bilanzText = (b) =>
+    b
+      ? `<b>${vorzeichen(b.diffG)} g</b><small>${b.prozentProWoche < 0 ? "Zunahme " : ""}${zahl(Math.abs(b.prozentProWoche), 2)} % KM/Woche</small>`
+      : "–";
+  const zeilen = monate.flatMap((m) =>
+    m.zeilen.map((liste, i) => {
+      const n = m.zeilen.length;
+      const kopf = i === 0 ? `<th scope="row" class="wg-monat" rowspan="${n}">${m.titel}</th>` : "";
+      const leer = '<td class="wg-zelle"></td>'.repeat(WAEGUNGEN_PRO_ZEILE - liste.length);
+      const ende = i === 0 ? `<td class="wg-summe" rowspan="${n}">${bilanzText(m.bilanz)}</td>` : "";
+      return `<tr${i === n - 1 ? ' class="wg-letzte"' : ""}>${kopf}${liste.map(zelle).join("")}${leer}${ende}</tr>`;
+    })
+  );
+  // Datum der Anmerkung kurz wie in der Liste „Besondere Tage“; mit Jahr, wenn eins nicht im Jahr des Berichtsendes liegt.
+  const mitJahr = notizen.some((n) => n.datum.slice(0, 4) !== berichtBis.slice(0, 4));
+  const fuss = notizen.length
+    ? `<p class="wg-notizen">${notizen
+        .map((n) => `<span><sup>${n.buchstabe}</sup> ${mitJahr ? datum(n.datum) : tagMonat(n.datum)} ${sicher(n.notiz)}</span>`)
+        .join("")}</p>`
+    : "";
+  return `<table class="wg-raster"><thead><tr><th></th><th colspan="${WAEGUNGEN_PRO_ZEILE}">Wägungen in kg <span class="wg-erkl">Datum, Gewicht, Änderung zur Wägung davor</span></th><th>Monat</th></tr></thead>
+    <tbody>${zeilen.join("")}</tbody></table>${fuss}`;
+}
+
 function fotoTeil(gewichte, von, bis) {
   const liste = gewichte
     .filter((g) => typeof g.datum === "string" && g.datum >= von && g.datum <= bis && fotoGueltig(g.foto))
@@ -234,7 +312,7 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
     ${profilZeile(tier, erstellt)}
     ${demo ? `<p class="bericht-demo">DEMO – simulierte Daten, nicht von ${sicher(tier.name)}</p>` : ""}
     <p class="bericht-klein">Alle Werte hat der Halter zu Hause erfasst: Futter mit der Küchenwaage, Gewicht mit der eigenen Waage
-      (andere Wiegeart steht in der Spalte Notiz, z. B. „auf dem Arm gewogen“). Die Warnregeln der App
+      (andere Wiegeart steht als Anmerkung unter den Wägungen, z. B. „auf dem Arm gewogen“). Die Warnregeln der App
       beruhen auf den Sicherheitsgrenzen in docs/sicherheitsgrenzen.md (AAHA 2014, WSAVA 2011, Flanagan et al. 2018)
       und gelten erst nach tierärztlicher Prüfung. Kilossos ist kein Medizinprodukt.</p>
   </header>`);
@@ -263,13 +341,7 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
     }
   }
   if (b.gewichte.length) {
-    teile.push(`<table><thead><tr><th>Datum</th><th>kg</th><th>Änderung</th><th>% KM/Woche</th><th>Notiz</th></tr></thead><tbody>
-      ${b.gewichte
-        .map(
-          (g) => `<tr><td>${datum(g.datum)}</td><td>${zahl(g.kg, 2)}</td><td>${g.diffG === null ? "–" : vorzeichen(g.diffG) + " g"}</td>
-            <td>${g.prozentProWoche === null ? "–" : zahl(g.prozentProWoche, 2)}</td><td>${sicher(g.notiz)}</td></tr>`
-        )
-        .join("")}</tbody></table>`);
+    teile.push(waegungsRaster(b.gewichte, b.bis));
   } else {
     teile.push(`<p>Im Zeitraum ist kein Gewicht eingetragen.</p>`);
   }
