@@ -741,14 +741,23 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
   border: 1px solid var(--text); font-size: 0.6875rem; font-weight: 700; line-height: 1;
 }
 .bt-nr-kreis.notfall { background: var(--gefahr); border-color: var(--gefahr); color: #fff; }
-.tempo { width: 100%; height: auto; display: block; }
-.tempo .band { fill: var(--akzent-hell); }
-.tempo .saeule { fill: var(--text-leise); }
-.tempo .saeule.gut { fill: var(--gut); }
-.tempo .saeule.langsam { fill: var(--warnung); }
-.tempo .saeule.zu-schnell { fill: var(--gefahr); }
-.tempo .achse { fill: var(--text-leise); font-size: 11px; font-family: var(--sans); }
-.tempo .grundlinie { stroke: var(--rand-stark); }
+/* Tempo pro Woche (0.40.0): Punkte über der Zeit auf Millimeterpapier, Zeitachse wie die Gewichtskurve. */
+.tempo-diagramm { width: 100%; height: auto; display: block; overflow: visible; }
+.tempo-diagramm .gitter { stroke: var(--rand-stark); stroke-width: 0.6; }
+.tempo-diagramm .achse { fill: var(--text-leise); font-size: 11px; font-family: var(--sans); font-variant-numeric: tabular-nums; }
+.tempo-diagramm .achsen-strich { stroke: var(--text-leise); stroke-width: 1; }
+.tempo-null { stroke: var(--text-leise); stroke-width: 1.2; }
+.tempo-band { fill: var(--akzent-hell); opacity: 0.7; }
+:root[data-theme="dunkel"] .tempo-band { opacity: 1; }
+.tempo-band-text { fill: var(--akzent); font-size: 10.5px; font-family: var(--sans); }
+.tempo-verbindung { fill: none; stroke: var(--text-leise); stroke-width: 1; opacity: 0.6; }
+.tempo-p { stroke: var(--flaeche); stroke-width: 2; fill: var(--text-leise); }
+.tempo-p.gut { fill: var(--gut); }
+.tempo-p.langsam { fill: var(--warnung); }
+.tempo-p.zu-schnell { fill: var(--gefahr); }
+.tempo-durch { stroke: var(--text); stroke-width: 1.2; stroke-dasharray: 4 3; }
+.tempo-durch-text { fill: var(--text); font-size: 11px; font-family: var(--sans); }
+.tempo-end-text { fill: var(--text); font-size: 12px; font-family: var(--serif); font-weight: 600; }
 .infoblase {
   position: absolute; pointer-events: none; background: var(--text); color: var(--hintergrund);
   font-size: 0.8125rem; padding: 6px 9px; border-radius: var(--rund-klein); white-space: nowrap;

@@ -173,14 +173,14 @@ test("Willkommensseite verspricht nichts, was die App nicht halten kann (Stefan,
   assert.doesNotMatch(html, /ohne Fettleber-Risiko|für jede Sorte/);
 });
 
-test("Version 0.39.0: Cache v77 mit js/heute-grafiken.js, Versionszeile unter „Mehr“", () => {
+test("Version 0.40.0: Cache v78 mit js/heute-grafiken.js, Versionszeile unter „Mehr“", () => {
   const sw = lies("sw.js");
-  assert.match(sw, /const CACHE_NAME = "kilossos-v77";/);
+  assert.match(sw, /const CACHE_NAME = "kilossos-v78";/);
   assert.match(sw, /"js\/wissen\.js",/);
   assert.match(sw, /"js\/besondere-tage\.js",/);
   assert.match(sw, /"js\/freigaben\.js",/);
   assert.match(sw, /"js\/heute-grafiken\.js",/);
-  assert.match(lies("index.html"), /id="version">Version 0\.39\.0</);
+  assert.match(lies("index.html"), /id="version">Version 0\.40\.0</);
 });
 
 // 0.36.8: „gewogen“ statt „Wägung“ in allen sichtbaren Texten (Entscheidung des Halters, 05.11.2026).
@@ -205,5 +205,5 @@ test("0.36.8: die neuen Formulierungen mit „gewogen“", () => {
   assert.match(html, /Einmal wiegen reicht dafür nicht, weil Waagen zu Hause schwanken\./);
   assert.match(html, /und das Gewicht schwankt von Mal zu Mal\./);
   assert.match(lies("js/speicher.js"), /Foto in der Liste unter „Gewicht“ antippen/);
-  assert.match(lies("js/verlauf.js"), /Für jedes Wiegen auf 7 Tage umgerechnet\./);
+  assert.match(lies("js/verlauf.js"), /Jeder Punkt steht für ein Wiegen, auf 7 Tage umgerechnet\./);
 });

@@ -10,7 +10,10 @@ import {
   PDF_RAND,
   pdfZeitleiste,
   kcalDiagramm,
+  tempoAchse,
 } from "../js/verlauf.js";
+import { wochenRaten } from "../js/zusammenfassung.js";
+import { GRENZEN } from "../js/rechnen.js";
 
 const G = (datum, kg) => ({ id: datum, tierId: "k", datum, kg, notiz: "" });
 const gewichte = [G("2026-10-15", 9.0), G("2026-10-01", 9.32), G("2026-10-08", 9.25)];
@@ -507,4 +510,127 @@ test("kcalDiagramm (PDF): Woche ohne Einträge bleibt als Lücke, die Säulen st
   const soll = [0.5, 1.5, 3.5].map((k) => PDF_RAND.links + (innen * k) / 4); // 4 Wochen: 5.10., 12.10., (19.10. leer), 26.10.
   assert.equal(mitten.length, 3);
   mitten.forEach((x, i) => assert.ok(Math.abs(x - soll[i]) < 0.01, `Säule ${i + 1} bei x=${x}, erwartet ${soll[i]}`));
+});
+
+// ---------- 0.40.0: „Tempo pro Woche“ als Punkte über der Zeit ----------
+// Beispiel-Katze: 16 Wochen, Freigabe in Woche 6. Davor grau (nicht bewertet), danach gut, langsamer (auch eine
+// Zunahme), einmal zu schnell (2,41 %).
+const T_START = "2026-08-03";
+const T_KG = [9.6, 9.55, 9.5, 9.45, 9.4, 9.3, 9.25, 9.18, 9.2, 9.12, 8.9, 8.86, 8.8, 8.74, 8.68, 8.62];
+const tGewichte = T_KG.map((kg, i) => G(plusWochen(T_START, i), kg));
+const tFreigabe = { ...freigabe, datum: plusWochen(T_START, 6) };
+const tVerlauf = ({ freigaben = [tFreigabe], zeitraum = "alles", heute = plusWochen(T_START, 15), gewichte: g = tGewichte } = {}) =>
+  zeichneVerlauf({ gewichte: g, mahlzeiten: [], freigaben, futterNachId: new Map(), zeitraum, heute, kopf: "" });
+const tempoSvg = (html) => html.match(/<svg class="tempo-diagramm"[^]*?<\/svg>/)[0];
+const tempoPunkte = (html) =>
+  [...tempoSvg(html).matchAll(/<circle class="tempo-p ([^"]+)" cx="([\d.]+)" cy="([\d.]+)" r="([\d.]+)"><title>([^<]+)<\/title><\/circle>/g)].map(
+    (m) => ({ klasse: m[1], x: Number(m[2]), y: Number(m[3]), r: m[4], titel: m[5] })
+  );
+const tempoText = (html) => html.match(/<p class="tipp tempo-erklaerung">([^<]*)<\/p>/)[1];
+const NB = " ";
+
+test("tempoAchse: 0 bis mindestens 2,5; tiefer bei Zunahme, höher bei Ausreißern", () => {
+  assert.deepEqual(tempoAchse([0.6, 1.4]), { lo: 0, hi: 2.5 });
+  assert.equal(tempoAchse([-0.3, 1]).lo, -0.5);
+  assert.equal(tempoAchse([2.8]).hi, 3);
+  const gleich = tempoAchse([1, 1]);
+  assert.ok(Number.isFinite(gleich.lo) && Number.isFinite(gleich.hi) && gleich.hi > gleich.lo);
+  assert.ok(!Object.is(tempoAchse([0.4]).lo, -0)); // kein „-0“ an der Achse
+});
+
+test("Tempo pro Woche: jede Wägung im Zeitraum ein Punkt (mehr als 12), Farbe nach Bewertung", () => {
+  const html = tVerlauf();
+  const raten = wochenRaten(tGewichte, [tFreigabe]);
+  assert.ok(raten.length > 12);
+  const punkte = tempoPunkte(html);
+  assert.equal((tempoSvg(html).match(/class="tempo-p /g) ?? []).length, raten.length);
+  assert.equal(punkte.length, raten.length);
+  // älteste zuerst, Klasse = Bewertung aus wochenRaten
+  assert.deepEqual(punkte.map((p) => p.klasse), [...raten].reverse().map((r) => r.bewertung));
+  for (const klasse of ["gut", "langsam", "zu-schnell", "neutral"]) assert.ok(punkte.some((p) => p.klasse === klasse), klasse);
+  assert.match(tempoSvg(html), /aria-hidden="true"/);
+  assert.doesNotMatch(html, /NaN/);
+});
+
+test("Tempo pro Woche: neuester Punkt groß mit Wert, alle anderen klein, je Punkt ein Titel", () => {
+  const html = tVerlauf();
+  const punkte = tempoPunkte(html);
+  assert.equal(punkte.at(-1).r, "5");
+  assert.ok(punkte.slice(0, -1).every((p) => p.r === "3.5"));
+  assert.equal((tempoSvg(html).match(/<title>/g) ?? []).length, punkte.length);
+  // (8,68 − 8,62) / 8,68 = 0,69 % → „0,7 %“
+  assert.match(tempoSvg(html), new RegExp(`class="tempo-end-text"[^>]*>0,7${NB}%</text>`));
+  assert.equal(punkte.at(-1).titel, `16. Nov.: 0,69${NB}% abgenommen`);
+  assert.ok(punkte.some((p) => p.klasse === "langsam" && p.titel.endsWith(`0,22${NB}% zugenommen`)));
+});
+
+test("Tempo pro Woche: Band „sicherer Bereich“ aus GRENZEN, Nulllinie kräftiger", () => {
+  const svgText = tempoSvg(tVerlauf());
+  const raten = wochenRaten(tGewichte, [tFreigabe]);
+  const { lo, hi } = tempoAchse(raten.map((r) => r.prozent));
+  assert.deepEqual({ lo, hi }, { lo: -0.5, hi: 3 });
+  const y = (v) => 10 + ((hi - v) / (hi - lo)) * (176 - 10 - 22);
+  const [, by, bh] = svgText.match(/<rect class="tempo-band" x="34" y="([\d.]+)" width="266" height="([\d.]+)"/).map(Number);
+  assert.ok(Math.abs(by - y(GRENZEN.abnahmeMax)) < 0.06, `Band oben bei ${by}`);
+  assert.ok(Math.abs(by + bh - y(GRENZEN.abnahmeMin)) < 0.15, `Band unten bei ${by + bh}`);
+  assert.match(svgText, /class="tempo-band-text"[^>]*>sicherer Bereich</);
+  const nullY = Number(svgText.match(/<line class="tempo-null" x1="34" x2="300" y1="([\d.]+)"/)[1]);
+  assert.ok(Math.abs(nullY - y(0)) < 0.06);
+  // Hilfslinien alle 0,5 %, Zahlen bei 0,5 und ganzen Werten, oberste ganze Zahl mit „ %“
+  assert.equal((svgText.match(/<line class="(gitter|tempo-null)"/g) ?? []).length, 8); // −0,5 bis 3
+  const zahlen = [...svgText.matchAll(/<text class="achse" x="29" y="[\d.]+" text-anchor="end">([^<]+)<\/text>/g)].map((m) => m[1]);
+  assert.deepEqual(zahlen, ["0", "0,5", "1", "2", `3${NB}%`]);
+  // Ø-Marke rechts
+  assert.match(svgText, /class="tempo-durch"/);
+  assert.match(svgText, /class="tempo-durch-text"[^>]*>Ø [\d,]+</);
+});
+
+test("Tempo pro Woche: Erklärsatz mit und ohne Freigabe, „Grau“ nur bei nicht bewerteten Punkten", () => {
+  const satz = `Jeder Punkt steht für ein Wiegen, auf 7 Tage umgerechnet. Grün: im sicheren Bereich, Bernstein: langsamer, Rot: schneller als 2${NB}%. Unter der Nulllinie: zugenommen.`;
+  assert.equal(tempoText(tVerlauf()), `${satz} Grau: vor der Freigabe, noch nicht bewertet.`);
+  // Freigabe vor der ersten Wägung: alles bewertet, kein grauer Punkt
+  const frueh = tVerlauf({ freigaben: [{ ...freigabe, datum: "2026-08-01" }] });
+  assert.ok(tempoPunkte(frueh).every((p) => p.klasse !== "neutral"));
+  assert.equal(tempoText(frueh), satz);
+  const ohne = tVerlauf({ freigaben: [] });
+  assert.equal(
+    tempoText(ohne),
+    `Jeder Punkt steht für ein Wiegen, auf 7 Tage umgerechnet. Bewertet wird erst ab der Freigabe vom Tierarzt; schneller als 2${NB}% ist immer rot. Unter der Nulllinie: zugenommen.`
+  );
+  assert.ok(tempoPunkte(ohne).every((p) => p.klasse === "neutral" || p.klasse === "zu-schnell"));
+});
+
+test("Tempo pro Woche: Punkte stehen unter den Wägungen der Gewichtskurve (gleiche Zeitachse)", () => {
+  for (const heute of [plusWochen(T_START, 15), "2026-11-25"]) {
+    const html = tVerlauf({ zeitraum: "3m", heute });
+    const kurveX = JSON.parse(unmaskiert(html.match(/data-punkte="([^"]*)"/)[1])).map((p) => p[0]);
+    assert.deepEqual(tempoPunkte(html).map((p) => p.x), kurveX);
+    // Beschriftung der Zeitachse wie im PDF, an der Unterkante des Tempo-Diagramms
+    assert.match(tempoSvg(html), /<line class="achsen-strich" x1="[\d.]+" x2="[\d.]+" y1="154" y2="158"\/><text class="achse" x="[\d.]+" y="170" text-anchor="middle">/);
+  }
+  // Letzte Wägung nach „heute“ (falsche Geräteuhr): Achse endet an der letzten Wägung.
+  const falsch = tVerlauf({ zeitraum: "3m", heute: "2026-11-10" });
+  assert.equal(tempoPunkte(falsch).at(-1).x, 300);
+  assert.doesNotMatch(falsch, /NaN/);
+});
+
+test("Tempo pro Woche: nur ein Wert im Zeitraum – ein Punkt, Achse ab dem Wiegen davor, kein NaN", () => {
+  // „1 Monat“ bis 14.12.: nur das Wiegen am 16.11. liegt im Zeitraum, verglichen mit dem 9.11.
+  const html = tVerlauf({ zeitraum: "1m", heute: "2026-12-14" });
+  assert.doesNotMatch(html, /class="kurve"/);
+  const punkte = tempoPunkte(html);
+  assert.equal(punkte.length, 1);
+  assert.equal(punkte[0].r, "5");
+  // Achse 9.11. bis 14.12. (35 Tage), Punkt am 16.11.: 34 + 7/35 × 266
+  assert.equal(punkte[0].x, 87.2);
+  assert.match(tempoSvg(html), /class="tempo-end-text"/);
+  assert.doesNotMatch(html, /NaN/);
+});
+
+test("Tempo pro Woche: „Alle Wochen“ bleibt, Kopfzeile unverändert", () => {
+  const html = tVerlauf();
+  assert.match(html, /Alle Wochen<small>15 Werte, neueste zuerst<\/small>/);
+  assert.match(html, /<p>Ø [\d,]+ % pro Woche · \d+ von 9 Wochen im sicheren Bereich<\/p>/);
+  assert.doesNotMatch(html, /class="tempo"/);
+  assert.doesNotMatch(html, /saeule/);
 });

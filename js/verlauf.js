@@ -59,7 +59,8 @@ function yAchse(werte, y, stellen = 0, einheit = "") {
 // bis 6 Wochen jeder Montag als „5.10.“, bis 12 Wochen jeder zweite Montag, darüber die Monatsanfänge (bei mehr als
 // 8 Monaten nur jeder zweite oder dritte). So überlappen die Beschriftungen nicht (höchstens 6 Daten oder 8 Monate).
 // Kleine Striche an der Grundlinie zeigen, wo die Tage liegen.
-function zeitAchse(vonMs, bisMs, x) {
+// unten/hoehe (seit 0.40.0): Grundlinie und Höhe der Zeichenfläche; das PDF ruft ohne sie auf (190 hoch, Grundlinie 168).
+function zeitAchse(vonMs, bisMs, x, unten = H - RAND.unten, hoehe = H) {
   const tage = Math.round((bisMs - vonMs) / TAG_MS); // gerundet: Zeitumstellung
   const marken = [];
   const d = new Date(vonMs);
@@ -77,11 +78,10 @@ function zeitAchse(vonMs, bisMs, x) {
       .filter((_, i) => i % schritt === 0)
       .forEach((t) => marken.push([t, new Date(t).toLocaleDateString("de-DE", { month: "short" })]));
   }
-  const unten = H - RAND.unten;
   return marken
     .map(([t, text]) => {
       const mx = Math.round(x(t) * 10) / 10;
-      return `<line class="achsen-strich" x1="${mx}" x2="${mx}" y1="${unten}" y2="${unten + 4}"/><text class="achse" x="${mx}" y="${H - 6}" text-anchor="middle">${text}</text>`;
+      return `<line class="achsen-strich" x1="${mx}" x2="${mx}" y1="${unten}" y2="${unten + 4}"/><text class="achse" x="${mx}" y="${hoehe - 6}" text-anchor="middle">${text}</text>`;
     })
     .join("");
 }
@@ -491,40 +491,101 @@ function eckdaten(liste, freigaben) {
 
 const vorzeichen = (wert, stellen) => (wert > 0 ? "+" : wert < 0 ? "−" : "±") + zahl(Math.abs(wert), stellen);
 
-// Tempo pro Woche: Säulen der letzten 12 Wochenraten im Band 0,5 bis 2 %. Farben wie die Bewertung in wochenRaten.
-function tempoDiagramm(raten) {
-  const liste = raten.slice(0, 12).reverse();
-  const TB = 300;
-  const TH = 90;
-  const breite = 268;
-  const oben = 6;
-  const unten = TH - 6;
-  const y = skala(-0.5, 2.6, unten, oben);
-  const klemm = (v) => Math.min(2.6, Math.max(-0.5, v));
-  const slot = breite / liste.length;
-  const saeulen = liste
-    .map((r, i) => {
-      const v = klemm(r.prozent);
-      const y0 = y(0);
-      const y1 = y(v);
-      const w = Math.min(14, slot * 0.5);
-      return `<rect class="saeule ${r.bewertung}" x="${(i * slot + (slot - w) / 2).toFixed(1)}" y="${Math.min(y0, y1).toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(1.5, Math.abs(y1 - y0)).toFixed(1)}" rx="1.5"/>`;
-    })
-    .join("");
-  return `<svg class="tempo" viewBox="0 0 ${TB} ${TH}" aria-hidden="true">
-    <rect class="band" x="0" y="${y(GRENZEN.abnahmeMax)}" width="${breite}" height="${y(GRENZEN.abnahmeMin) - y(GRENZEN.abnahmeMax)}"/>
-    <text class="achse" x="${TB}" y="${y(GRENZEN.abnahmeMax) + 4}" text-anchor="end">2 %</text>
-    <text class="achse" x="${TB}" y="${y(GRENZEN.abnahmeMin) + 4}" text-anchor="end">0,5 %</text>
-    <line class="grundlinie" x1="0" x2="${breite}" y1="${y(0)}" y2="${y(0)}"/>
-    ${saeulen}
-  </svg>`;
+const NB = " "; // geschütztes Leerzeichen zwischen Zahl und Einheit
+const grenzeText = (wert) => wert.toLocaleString("de-DE"); // Grenze aus GRENZEN als Text, z. B. „2“ oder „0,5“
+// Zahl mit echtem Minuszeichen; nie „-0“ oder „−0,0“ (zahl(-0) ergibt in V8 „-0“).
+const mitMinus = (wert, stellen) => {
+  const text = zahl(Math.abs(wert), stellen);
+  return wert < 0 && /[1-9]/.test(text) ? `−${text}` : text;
+};
+
+// Höhe des Tempo-Diagramms (seit 0.40.0) in % pro Woche: von 0 (bei Zunahmen tiefer: Minimum − 0,1, auf 0,5
+// abgerundet) bis 0,5 über der oberen Grenze (2,5) oder Maximum + 0,2, auf 0,5 aufgerundet. 1e-9 gleicht
+// Rundungsfehler aus (2,8 + 0,2 ist im Rechner nicht genau 3). hi liegt immer über lo: nie Teilen durch 0.
+export function tempoAchse(werte) {
+  const hi = Math.max(GRENZEN.abnahmeMax + 0.5, Math.ceil((Math.max(...werte) + 0.2) * 2 - 1e-9) / 2);
+  const lo = Math.min(0, Math.floor((Math.min(...werte) - 0.1) * 2 + 1e-9) / 2);
+  return { lo: lo || 0, hi }; // || 0: kein -0
 }
 
-function tempoKarte(gewichte, freigaben, von) {
+// Tempo pro Woche (seit 0.40.0): jede Wägung im Zeitraum ein Punkt über der Zeit, auf Millimeterpapier wie die
+// Gewichtskurve. vonMs/bisMs: dieselbe Zeitachse wie die Kurve darüber (gleiche Ränder KURVE_RAND, Breite 340),
+// damit die Punkte unter den Wägungen der Kurve stehen. Band aus GRENZEN, Farben wie die Bewertung in wochenRaten,
+// Ø als kurzer Strich am rechten Rand. Nur Bild (aria-hidden); die Aussagen stehen in Kopfzeile und Erklärsatz.
+const TEMPO = { breite: 340, hoehe: 176, oben: 10, unten: 22 };
+
+function tempoDiagramm(raten, { vonMs, bisMs }, durchschnitt) {
+  const W = TEMPO.breite;
+  const TH = TEMPO.hoehe;
+  const L = KURVE_RAND.links;
+  const R = KURVE_RAND.rechts;
+  const grund = TH - TEMPO.unten;
+  const r1 = (v) => Math.round(v * 10) / 10;
+  const liste = [...raten].reverse(); // älteste zuerst
+  const { lo, hi } = tempoAchse(liste.map((r) => r.prozent));
+  const sx = skala(vonMs, bisMs, L, W - R);
+  const sy = skala(lo, hi, grund, TEMPO.oben);
+  const x = (t) => r1(sx(t));
+  const y = (v) => r1(sy(v));
+
+  // Hilfslinien alle 0,5 %, Zahlen bei 0,5 und ganzen Werten, die oberste ganze Zahl mit „%“; Nulllinie kräftiger.
+  const stufen = [];
+  for (let v = lo; v <= hi + 1e-9; v += 0.5) stufen.push(Math.round(v * 10) / 10 || 0);
+  const obersteGanze = Math.max(...stufen.filter(Number.isInteger));
+  const gitter = stufen
+    .map((v) => {
+      const linie = `<line class="${v === 0 ? "tempo-null" : "gitter"}" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/>`;
+      if (!Number.isInteger(v) && v !== 0.5) return linie;
+      const text = mitMinus(v, Number.isInteger(v) ? 0 : 1) + (v === obersteGanze ? `${NB}%` : "");
+      return `${linie}<text class="achse" x="${L - 5}" y="${r1(y(v) + 4)}" text-anchor="end">${sicher(text)}</text>`;
+    })
+    .join("");
+
+  const yOben = y(GRENZEN.abnahmeMax);
+  const band = `<rect class="tempo-band" x="${L}" y="${yOben}" width="${W - L - R}" height="${r1(y(GRENZEN.abnahmeMin) - yOben)}"/>
+    <text class="tempo-band-text" x="${L + 5}" y="${r1(yOben + 12)}">sicherer Bereich</text>`;
+
+  const linie =
+    liste.length > 1 ? `<polyline class="tempo-verbindung" points="${liste.map((r) => `${x(ms(r.datum))},${y(r.prozent)}`).join(" ")}"/>` : "";
+  const punkte = liste
+    .map((r, i) => {
+      const titel = `${kurzDatum(r.datum)}: ${zahl(Math.abs(r.prozent), 2)}${NB}% ${r.prozent < 0 ? "zugenommen" : "abgenommen"}`;
+      return `<circle class="tempo-p ${sicher(r.bewertung)}" cx="${x(ms(r.datum))}" cy="${y(r.prozent)}" r="${i === liste.length - 1 ? 5 : 3.5}"><title>${sicher(titel)}</title></circle>`;
+    })
+    .join("");
+
+  // Wert der neuesten Wägung links über ihrem Punkt; ganz links (nur ein Punkt) rechts daneben, damit er nicht in die Zahlen läuft.
+  const letzte = liste.at(-1);
+  const lx = x(ms(letzte.datum));
+  const ly = y(letzte.prozent);
+  const links = lx - 2 > L + 34;
+  const endText = `<text class="tempo-end-text" x="${links ? r1(lx - 2) : r1(lx + 8)}" y="${r1(ly - 9)}" text-anchor="${links ? "end" : "start"}">${sicher(mitMinus(letzte.prozent, 1))}${NB}%</text>`;
+
+  // Ø im rechten Rand, wenn der Text dort hineinpasst (geschätzt 6 Einheiten je Zeichen, 4 Einheiten Innenabstand
+  // des Papiers dürfen mitgenutzt werden); sonst innen am rechten Rand.
+  const yd = y(durchschnitt);
+  const dText = `Ø ${mitMinus(durchschnitt, 2)}`;
+  const imRand = W - R + 8 + dText.length * 6 <= W + 4;
+  const durch = imRand
+    ? `<line class="tempo-durch" x1="${W - R}" x2="${W - R + 6}" y1="${yd}" y2="${yd}"/><text class="tempo-durch-text" x="${W - R + 8}" y="${r1(yd + 4)}">${sicher(dText)}</text>`
+    : `<line class="tempo-durch" x1="${W - R - 6}" x2="${W - R}" y1="${yd}" y2="${yd}"/><text class="tempo-durch-text" x="${W - R - 8}" y="${r1(yd + 4)}" text-anchor="end">${sicher(dText)}</text>`;
+
+  return `<div class="papier"><svg class="tempo-diagramm" viewBox="0 0 ${W} ${TH}" aria-hidden="true">
+    ${band}${gitter}${durch}${linie}${punkte}${endText}${zeitAchse(vonMs, bisMs, sx, grund, TH)}
+  </svg></div>`;
+}
+
+// heute (seit 0.40.0): Ende der Zeitachse wie bei der Gewichtskurve.
+function tempoKarte(gewichte, freigaben, von, heute) {
   const raten = wochenRaten(gewichte, freigaben).filter((r) => !von || r.datum >= von);
   if (raten.length === 0) return "";
   const z = abnahmeZusammenfassung(raten);
   const bereich = z.bewertet > 0 ? ` · ${z.imBereich} von ${z.bewertet} ${z.bewertet === 1 ? "Woche" : "Wochen"} im sicheren Bereich` : "";
+  // Zeitachse wie weicheKurve: von der ersten Wägung im Zeitraum bis heute, mindestens bis zur letzten Wägung.
+  // Ohne Kurve darüber (weniger als 2 Wägungen im Zeitraum) ab der Wägung vor dem ältesten Punkt.
+  const imZeitraum = verlaufGewichte(gewichte, von);
+  const vonMs = ms(imZeitraum.length >= 2 ? imZeitraum[0].datum : raten.at(-1).vonDatum);
+  const bisMs = achsenEnde(heute, imZeitraum.at(-1).datum);
   const marke = { gut: "marke-gut", langsam: "marke-warnung", "zu-schnell": "marke-gefahr", neutral: "" };
   const zeilen = raten
     .map((r) => {
@@ -537,14 +598,16 @@ function tempoKarte(gewichte, freigaben, von) {
       </div>`;
     })
     .join("");
+  const schnell = `${grenzeText(GRENZEN.abnahmeMax)}${NB}%`;
   const erklaerung = freigaben.length
-    ? "Band: 0,5 bis 2 % pro Woche gelten als sicher. Für jedes Wiegen auf 7 Tage umgerechnet."
-    : "Band: 0,5 bis 2 % pro Woche gelten als sicher. Bewertet wird erst ab der Freigabe vom Tierarzt; über 2 % ist immer markiert.";
+    ? `Jeder Punkt steht für ein Wiegen, auf 7 Tage umgerechnet. Grün: im sicheren Bereich, Bernstein: langsamer, Rot: schneller als ${schnell}. Unter der Nulllinie: zugenommen.` +
+      (raten.some((r) => r.bewertung === "neutral") ? " Grau: vor der Freigabe, noch nicht bewertet." : "")
+    : `Jeder Punkt steht für ein Wiegen, auf 7 Tage umgerechnet. Bewertet wird erst ab der Freigabe vom Tierarzt; schneller als ${schnell} ist immer rot. Unter der Nulllinie: zugenommen.`;
   return `<section class="karte" aria-labelledby="tempo-titel">
     <h2 id="tempo-titel">Tempo pro Woche</h2>
     <p>Ø ${zahl(z.durchschnitt, 2)} % pro Woche${bereich}</p>
-    ${tempoDiagramm(raten)}
-    <p class="tipp">${erklaerung}</p>
+    ${tempoDiagramm(raten, { vonMs, bisMs }, z.durchschnitt)}
+    <p class="tipp tempo-erklaerung">${sicher(erklaerung)}</p>
     ${aufklappKarte({
       id: "abnahme",
       klasse: "tag-klapp",
@@ -677,7 +740,7 @@ export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, besondereTage 
     (imZeitraum.length >= 2 ? eckdaten(imZeitraum, freigaben) : "") +
     umschalter +
     gewichtKarte +
-    tempoKarte(gewichte, freigaben, von) +
+    tempoKarte(gewichte, freigaben, von, heute) +
     (mahlzeiten.length ? futterKarte(mahlzeiten, futterNachId, freigaben, von, heute) : "") +
     befundKarte(freigaben) +
     fotos
