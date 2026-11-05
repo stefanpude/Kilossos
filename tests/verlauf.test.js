@@ -8,6 +8,7 @@ import {
   naechsterZeitleistenEintrag,
   gewichtDiagramm,
   PDF_RAND,
+  pdfZeitleiste,
 } from "../js/verlauf.js";
 
 const G = (datum, kg) => ({ id: datum, tierId: "k", datum, kg, notiz: "" });
@@ -325,4 +326,105 @@ test("zeichneVerlauf: Zeitleiste ist hoch genug zum Antippen (mindestens 56 Einh
   assert.deepEqual(eintraegeVon(zwei).map((e) => e[2]), [21, 35]);
   // im PDF bleibt sie schmal (direkter Aufruf ohne Mindesthöhe)
   assert.match(zeitleiste([BT({})], OKT), /viewBox="0 0 340 18"/);
+});
+
+// ---------- 0.35.0: Besondere Tage im PDF: Streifen mit Nummern, genauere Zeitachse ----------
+// Achse wie im PDF (PDF_RAND): 1. Nov. bei 34, 30. Nov. bei 288; im November gibt es keine Zeitumstellung.
+const NOV = { vonTag: "2026-11-01", bisTag: "2026-11-30" };
+const kreise = (svg) =>
+  [...svg.matchAll(/<circle class="bt-kreis( notfall)?" cx="([\d.]+)" cy="([\d.]+)"[^>]*\/><text class="bt-nr(?: notfall)?"[^>]*>(\d+)<\/text>/g)].map(
+    (m) => ({ nr: Number(m[4]), x: Number(m[2]), y: Number(m[3]), notfall: Boolean(m[1]) })
+  );
+const linien = (svg, klasse) =>
+  [...svg.matchAll(new RegExp(`<line class="${klasse}(?: notfall)?" x1="([\\d.]+)" x2="([\\d.]+)"`, "g"))].map((m) => [Number(m[1]), Number(m[2])]);
+const hoehe = (svg) => Number(svg.match(/viewBox="0 0 340 ([\d.]+)"/)[1]);
+
+test("pdfZeitleiste: leer, wenn kein Eintrag die Achse berührt", () => {
+  assert.equal(pdfZeitleiste([], NOV), "");
+  assert.equal(pdfZeitleiste([BT({ von: "2026-10-20", bis: "2026-10-31" }), BT({ von: "2026-12-01", bis: "2026-12-01" })], NOV), "");
+});
+
+test("pdfZeitleiste: ein Tag nur als Kreis, mehrere Tage als Linie mit Querstrich, laufende Phase mit Pfeil bis zum Rand", () => {
+  const svg = pdfZeitleiste(
+    [
+      BT({ von: "2026-11-01", bis: "2026-11-09" }),
+      BT({ art: "genascht", von: "2026-11-05", bis: "2026-11-05" }),
+      BT({ art: "weniger-bewegung", von: "2026-11-20", bis: null }),
+    ],
+    NOV
+  );
+  assert.match(svg, /^<svg viewBox="0 0 340 [\d.]+" class="bt-leiste" role="img" aria-label="[^"]+">/);
+  assert.doesNotMatch(svg, /NaN/);
+  assert.deepEqual(kreise(svg).map(({ nr, x }) => [nr, x]), [[1, 34], [2, 69], [3, 200.4]]);
+  assert.deepEqual(linien(svg, "bt-linie"), [[34, 104.1], [200.4, 288]]); // der einzelne Tag (2) hat keine Linie
+  assert.deepEqual(linien(svg, "bt-ende").map(([x1]) => x1), [104.1]); // Querstrich nur an der beendeten Phase
+  assert.equal((svg.match(/class="bt-pfeil"/g) ?? []).length, 1);
+  assert.match(svg, /class="bt-pfeil" d="M[\d.]+,[\d.]+ L288,/);
+});
+
+test("pdfZeitleiste: geht eine Phase über das Achsenende hinaus, steht dort der Pfeil statt des Querstrichs", () => {
+  // Bericht für einen früheren Zeitraum: Die Phase endete erst danach.
+  const svg = pdfZeitleiste([BT({ von: "2026-11-20", bis: "2026-12-05" })], NOV);
+  assert.deepEqual(linien(svg, "bt-linie"), [[200.4, 288]]);
+  assert.equal((svg.match(/class="bt-pfeil"/g) ?? []).length, 1);
+  assert.doesNotMatch(svg, /bt-ende/);
+});
+
+test("pdfZeitleiste: Nummer = Platz in der Liste, auch wenn ein früherer Eintrag vor der Achse liegt", () => {
+  const svg = pdfZeitleiste([BT({ von: "2026-10-20", bis: "2026-10-22" }), BT({ von: "2026-11-05", bis: "2026-11-05" })], NOV);
+  assert.deepEqual(kreise(svg).map((k) => k.nr), [2]);
+});
+
+test("pdfZeitleiste: überlappende Einträge rutschen in die nächste Reihe, so viele wie nötig", () => {
+  const eine = pdfZeitleiste([BT({ von: "2026-11-02", bis: "2026-11-12" })], NOV);
+  const drei = pdfZeitleiste(
+    [BT({ von: "2026-11-02", bis: "2026-11-12" }), BT({ von: "2026-11-04", bis: "2026-11-08" }), BT({ von: "2026-11-06", bis: "2026-11-06" })],
+    NOV
+  );
+  const ys = kreise(drei).map((k) => k.y);
+  assert.ok(ys[0] < ys[1] && ys[1] < ys[2], ys.join());
+  assert.ok(hoehe(drei) > hoehe(eine));
+  // weit auseinander: alle in der ersten Reihe, Streifen so niedrig wie mit einem Eintrag
+  const auseinander = pdfZeitleiste(
+    [BT({ von: "2026-11-02", bis: "2026-11-04" }), BT({ von: "2026-11-15", bis: "2026-11-15" }), BT({ von: "2026-11-25", bis: "2026-11-27" })],
+    NOV
+  );
+  assert.equal(new Set(kreise(auseinander).map((k) => k.y)).size, 1);
+  assert.equal(hoehe(auseinander), hoehe(eine));
+});
+
+test("pdfZeitleiste: „Futter verweigert“ als gefüllter Kreis, Titel maskiert, unbekannte Art heißt „Sonstiges“", () => {
+  const svg = pdfZeitleiste(
+    [
+      BT({ art: "futter-verweigert", von: "2026-11-05", bis: "2026-11-06" }),
+      BT({ art: "zukunft-art", von: "2026-11-20", bis: "2026-11-20", notiz: "<script>x</script>" }),
+    ],
+    NOV
+  );
+  assert.deepEqual(kreise(svg).map((k) => k.notfall), [true, false]);
+  assert.match(svg, /<line class="bt-linie notfall"/);
+  assert.doesNotMatch(svg, /<script/);
+  assert.match(svg, /<title>2 · Sonstiges: [^<]*20\. Nov\.[^<]* · &lt;script&gt;x&lt;\/script&gt;<\/title>/);
+});
+
+// Beschriftung der Zeitachse in den PDF-Diagrammen (y = 184, Mitte), Wunsch 05.11.2026: „Jetzt steht da nur November.“
+const achsenText = (svg) => [...svg.matchAll(/<text class="achse" x="[\d.]+" y="184" text-anchor="middle">([^<]+)<\/text>/g)].map((m) => m[1]);
+const zwischen = (von, bis) => gewichtDiagramm([G(von, 9.3), G(bis, 9.1)], [], bis);
+
+test("gewichtDiagramm (PDF): bis 6 Wochen steht jeder Montag an der Achse, mit Strich an der Grundlinie", () => {
+  const svg = zwischen("2026-10-02", "2026-11-13"); // genau 42 Tage, über die Zeitumstellung am 25.10.
+  assert.deepEqual(achsenText(svg), ["5.10.", "12.10.", "19.10.", "26.10.", "2.11.", "9.11."]);
+  assert.equal((svg.match(/class="achsen-strich"/g) ?? []).length, 6);
+});
+
+test("gewichtDiagramm (PDF): bis 12 Wochen jeder zweite Montag, darüber die Monatsanfänge", () => {
+  assert.deepEqual(achsenText(zwischen("2026-09-01", "2026-11-13")), ["7.9.", "21.9.", "5.10.", "19.10.", "2.11."]);
+  assert.deepEqual(achsenText(zwischen("2026-08-21", "2026-11-13")), ["24.8.", "7.9.", "21.9.", "5.10.", "19.10.", "2.11."]); // 84 Tage
+  assert.deepEqual(achsenText(zwischen("2026-08-20", "2026-11-13")), ["Sep", "Okt", "Nov"]); // 85 Tage
+  assert.deepEqual(achsenText(zwischen("2026-06-01", "2026-11-13")), ["Jul", "Aug", "Sep", "Okt", "Nov"]);
+});
+
+test("gewichtDiagramm (PDF): bis 8 Monate jeder Monat, darüber nur jeder zweite, damit nichts überlappt", () => {
+  assert.deepEqual(achsenText(zwischen("2026-03-12", "2026-11-05")), ["Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov"]);
+  assert.deepEqual(achsenText(zwischen("2025-11-01", "2026-11-13")), ["Dez", "Feb", "Apr", "Jun", "Aug", "Okt"]);
 });

@@ -668,6 +668,29 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .zeitleiste .zl-punkt { fill: var(--text-leise); stroke: var(--flaeche); stroke-width: 1.5; } /* heller Rand: sichtbar auf einem Balken */
 .zeitleiste .zl-balken.notfall { stroke: var(--gefahr); }
 .zeitleiste .zl-punkt.notfall { fill: var(--gefahr); }
+/* Besondere Tage im PDF (0.35.0): dünne Linien mit Nummernkreis unter der Kurve, Liste mit denselben Nummern darunter. */
+.bt-leiste { width: 100%; height: auto; display: block; overflow: visible; margin-top: 2px; }
+.bt-leiste .bt-linie { stroke: var(--text-leise); stroke-width: 2; }
+.bt-leiste .bt-ende, .bt-leiste .bt-pfeil { stroke: var(--text-leise); stroke-width: 1.5; fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.bt-leiste .bt-linie.notfall, .bt-leiste .bt-ende.notfall, .bt-leiste .bt-pfeil.notfall { stroke: var(--gefahr); }
+.bt-leiste .bt-kreis { fill: var(--flaeche); stroke: var(--text); stroke-width: 1; }
+.bt-leiste .bt-kreis.notfall { fill: var(--gefahr); stroke: var(--gefahr); }
+.bt-leiste .bt-nr { fill: var(--text); font-family: var(--sans); font-size: 7.5px; font-weight: 700; text-anchor: middle; }
+.bt-leiste .bt-nr.notfall { fill: #fff; }
+.diagramm .achsen-strich { stroke: var(--text-leise); stroke-width: 1; }
+.bericht-besonders { margin-bottom: 12px; }
+.bericht-besonders h3 { margin: 4px 0 2px; font-family: var(--sans); font-size: 0.8125rem; font-weight: 700; }
+.bericht-besonders h3 small { margin-left: 6px; font-size: 0.75rem; font-weight: 400; color: var(--text-leise); }
+.bericht .bt-liste { width: auto; margin-top: 2px; font-size: 0.8125rem; }
+.bericht .bt-liste td { border-bottom: 0; padding: 1px 12px 1px 0; vertical-align: baseline; }
+.bericht .bt-liste td:first-child:has(.bt-nr-kreis) { padding-right: 6px; }
+.bericht .bt-liste td:nth-last-child(3) { white-space: nowrap; } /* Zeitraum */
+.bericht .bt-liste tr.notfall td { color: var(--gefahr); font-weight: 700; }
+.bt-nr-kreis {
+  display: inline-grid; place-items: center; width: 1.5em; height: 1.5em; border-radius: 50%;
+  border: 1px solid var(--text); font-size: 0.6875rem; font-weight: 700; line-height: 1;
+}
+.bt-nr-kreis.notfall { background: var(--gefahr); border-color: var(--gefahr); color: #fff; }
 .tempo { width: 100%; height: auto; display: block; }
 .tempo .band { fill: var(--akzent-hell); }
 .tempo .saeule { fill: var(--text-leise); }

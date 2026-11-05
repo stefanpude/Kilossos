@@ -51,7 +51,7 @@ Die Liste für Kito: [tierarzt-fragen-kito.md](tierarzt-fragen-kito.md). Fragen 
       Eintrag „Besonderer Tag“, als einzelner Tag oder als Phase über mehrere Tage, mit diesen Arten:
       mehr Bewegung, weniger Bewegung, krank, Futter verweigert, außer der Reihe genascht,
       Auffälligkeit beim Fressen (z. B. nur die Hälfte gefressen, erbrochen, sehr gierig), Futterumstellung, Sonstiges.
-      In der PDF-Übersicht stehen sie als Streifen unter der Gewichtskurve und als Tabelle.
+      In der PDF-Übersicht stehen sie nummeriert unter der Gewichtskurve, mit einer kurzen Liste direkt darunter.
       Fehlt etwas, oder ist etwas davon unwichtig?
 
 ## Antworten

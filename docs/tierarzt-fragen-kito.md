@@ -49,7 +49,7 @@ Die Liste für Zuki: [tierarzt-fragen-zuki.md](tierarzt-fragen-zuki.md).
       Eintrag „Besonderer Tag“, als einzelner Tag oder als Phase über mehrere Tage, mit diesen Arten:
       mehr Bewegung, weniger Bewegung, krank, Futter verweigert, außer der Reihe genascht,
       Auffälligkeit beim Fressen (z. B. nur die Hälfte gefressen, erbrochen, sehr gierig), Futterumstellung, Sonstiges.
-      In der PDF-Übersicht stehen sie als Streifen unter der Gewichtskurve und als Tabelle.
+      In der PDF-Übersicht stehen sie nummeriert unter der Gewichtskurve, mit einer kurzen Liste direkt darunter.
       Fehlt etwas, oder ist etwas davon unwichtig?
 - [ ] Kito geht wegen der Baustelle gerade nicht raus. Soll ich mich melden, wenn er wieder rausgeht?
       (Mehr Bewegung, aber vielleicht auch Futter bei Nachbarn.)

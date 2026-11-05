@@ -1,6 +1,6 @@
 // Ansicht "Verlauf": Eckdaten, Zeitraum-Umschalter, Gewichtskurve auf Millimeterpapier, Tempo pro Woche und
 // zwei aufklappbare Karten (Futter pro Tag, Befunde vom Tierarzt) – alles als HTML-Text, ohne Zusatzpakete.
-// gewichtDiagramm und kcalDiagramm sind die älteren Diagramme; sie bleiben unverändert für den PDF-Bericht.
+// gewichtDiagramm und kcalDiagramm sind die älteren Diagramme; sie dienen nur noch dem PDF-Bericht.
 // Farben kommen aus styles.css (--reihe-1, --reihe-2, --akzent, --gut, --rand, --text-leise).
 
 import { GRENZEN, gewichteSortiert, tagesSumme, leckerliKcal, tagSchluessel, aktuelleFreigabe, kcalFuer } from "./rechnen.js";
@@ -55,18 +55,35 @@ function yAchse(werte, y, stellen = 0, einheit = "") {
     .join("");
 }
 
-// Monatsanfänge als Beschriftung der Zeitachse.
+// Beschriftung der Zeitachse (PDF-Diagramme). Seit 0.35.0 genauer (Wunsch 05.11.2026: „Jetzt steht da nur November“):
+// bis 6 Wochen jeder Montag als „5.10.“, bis 12 Wochen jeder zweite Montag, darüber die Monatsanfänge (bei mehr als
+// 8 Monaten nur jeder zweite oder dritte). So überlappen die Beschriftungen nicht (höchstens 6 Daten oder 8 Monate).
+// Kleine Striche an der Grundlinie zeigen, wo die Tage liegen.
 function zeitAchse(vonMs, bisMs, x) {
-  const teile = [];
+  const tage = Math.round((bisMs - vonMs) / TAG_MS); // gerundet: Zeitumstellung
+  const marken = [];
   const d = new Date(vonMs);
-  d.setDate(1);
-  d.setMonth(d.getMonth() + 1);
-  for (; d.getTime() <= bisMs; d.setMonth(d.getMonth() + 1)) {
-    teile.push(
-      `<text class="achse" x="${x(d.getTime())}" y="${H - 6}" text-anchor="middle">${d.toLocaleDateString("de-DE", { month: "short" })}</text>`
-    );
+  if (tage <= 84) {
+    const schritt = tage <= 42 ? 7 : 14;
+    d.setDate(d.getDate() + ((8 - d.getDay()) % 7)); // erster Montag ab dem Start
+    for (; d.getTime() <= bisMs; d.setDate(d.getDate() + schritt)) marken.push([d.getTime(), `${d.getDate()}.${d.getMonth() + 1}.`]);
+  } else {
+    d.setDate(1);
+    d.setMonth(d.getMonth() + 1);
+    const monate = [];
+    for (; d.getTime() <= bisMs; d.setMonth(d.getMonth() + 1)) monate.push(d.getTime());
+    const schritt = Math.ceil(monate.length / 8); // Monatsnamen sind kurz: 8 passen nebeneinander
+    monate
+      .filter((_, i) => i % schritt === 0)
+      .forEach((t) => marken.push([t, new Date(t).toLocaleDateString("de-DE", { month: "short" })]));
   }
-  return teile.join("");
+  const unten = H - RAND.unten;
+  return marken
+    .map(([t, text]) => {
+      const mx = Math.round(x(t) * 10) / 10;
+      return `<line class="achsen-strich" x1="${mx}" x2="${mx}" y1="${unten}" y2="${unten + 4}"/><text class="achse" x="${mx}" y="${H - 6}" text-anchor="middle">${text}</text>`;
+    })
+    .join("");
 }
 
 const svg = (inhalt, titel) =>
@@ -329,11 +346,12 @@ function legende(kurve, mitZeitleiste) {
 }
 
 // ---------- Zeitleiste der besonderen Tage (seit 0.33.0) ----------
-// Schmaler Streifen unter der Gewichtskurve bzw. dem PDF-Diagramm, mit derselben Zeitachse (gleiche Breite, gleiche
+// Schmaler Streifen unter der Gewichtskurve im Verlauf der App, mit derselben Zeitachse (gleiche Breite, gleiche
 // Ränder). Phasen als Balken mit runden Enden, eintägige Ereignisse als Punkte; überlappende in einer zweiten Reihe.
+// Antippen zeigt, was war (app.js). Das PDF hat seit 0.35.0 einen eigenen Streifen mit Nummern (pdfZeitleiste, unten).
 // eintraege: nur die des Tiers. vonTag/bisTag: Anfang und Ende der Achse ("JJJJ-MM-TT"). Leer ohne Einträge im Zeitraum.
 // minHoehe: Höhe in Einheiten, mindestens; die Reihen stehen dann in der Mitte. Im Verlauf 56, damit der Streifen bei
-// 375 px Breite rund 48 px hoch ist (Tippfläche, Review 05.11.); im PDF schmal.
+// 375 px Breite rund 48 px hoch ist (Tippfläche, Review 05.11.).
 const ZL = { halb: 4, abstand: 5, oben: 9, reihe: 14 };
 const kurzNotiz = (text) => (text.length > 60 ? `${text.slice(0, 59).trimEnd()}…` : text);
 
@@ -387,6 +405,49 @@ export function naechsterZeitleistenEintrag(liste, x, y) {
     const db = abstand(b);
     return db < da || (db === da && breite(b) < breite(a)) ? b : a;
   });
+}
+
+// ---------- Streifen der besonderen Tage im PDF (seit 0.35.0) ----------
+// Ruhiger als die Zeitleiste der App: dünne Linien, am Anfang ein Kreis mit der Nummer aus der Liste darunter
+// (bericht.js). Ein Tag = nur der Kreis; mehrere Tage = Linie mit Querstrich am letzten Tag; läuft noch (oder geht über
+// das Achsenende hinaus) = Linie mit Pfeil bis zum rechten Rand. „Futter verweigert“: Kreis gefüllt in der Notfall-Farbe,
+// auch im Schwarzweiß-Druck erkennbar. Überlappende Einträge kommen in die nächste freie Reihe, so viele wie nötig.
+// eintraege: die Liste des Berichts (nach Beginn sortiert); die Nummer ist der Platz darin, auch wenn ein Eintrag nicht
+// auf der Achse liegt. vonTag/bisTag: Anfang und Ende der Achse wie bei gewichtDiagramm (Ränder PDF_RAND).
+// Leer, wenn kein Eintrag die Achse berührt. Spezifikation: .planning/besondere-tage-pdf.md.
+const PZ = { radius: 5.5, luft: 1.5, oben: 7, reihe: 14 };
+
+export function pdfZeitleiste(eintraege, { vonTag, bisTag }) {
+  const vonMs = ms(vonTag);
+  const bisMs = ms(bisTag);
+  const x = skala(vonMs, bisMs, PDF_RAND.links, B - PDF_RAND.rechts);
+  const rund = (wert) => Math.round(wert * 10) / 10;
+  const belegt = []; // je Reihe: bis wohin sie schon belegt ist
+  const teile = eintraege
+    .map((e, i) => ({ e, nr: i + 1 }))
+    .filter(({ e }) => beruehrt(e, vonTag, bisTag))
+    .map(({ e, nr }) => {
+      const x1 = rund(x(Math.max(ms(e.von), vonMs)));
+      const weiter = e.bis === null || ms(e.bis) > bisMs;
+      const x2 = rund(x(weiter ? bisMs : ms(e.bis)));
+      let reihe = belegt.findIndex((ende) => x1 - PZ.radius - PZ.luft >= ende);
+      if (reihe < 0) reihe = belegt.push(-Infinity) - 1;
+      belegt[reihe] = Math.max(x2 + 2, x1 + PZ.radius) + PZ.luft;
+      return { e, nr, x1, x2, weiter, y: PZ.oben + reihe * PZ.reihe };
+    });
+  if (teile.length === 0) return "";
+  const formen = teile.map(({ e, nr, x1, x2, weiter, y }) => {
+    const art = artVon(e.art);
+    const notfall = art.notfall ? " notfall" : "";
+    const ende = weiter
+      ? `<path class="bt-pfeil${notfall}" d="M${rund(x2 - 4)},${y - 3} L${x2},${y} L${rund(x2 - 4)},${y + 3}"/>`
+      : `<line class="bt-ende${notfall}" x1="${x2}" x2="${x2}" y1="${y - 3}" y2="${y + 3}"/>`;
+    const linie = x2 > x1 ? `<line class="bt-linie${notfall}" x1="${x1}" x2="${x2}" y1="${y}" y2="${y}"/>${ende}` : "";
+    const text = `${nr} · ${art.text}: ${zeitraumText(e)}${e.notiz ? ` · ${kurzNotiz(e.notiz)}` : ""}`;
+    return `<g class="bt-eintrag"><title>${sicher(text)}</title>${linie}<circle class="bt-kreis${notfall}" cx="${x1}" cy="${y}" r="${PZ.radius}"/><text class="bt-nr${notfall}" x="${x1}" y="${rund(y + 2.6)}">${nr}</text></g>`;
+  });
+  const hoehe = Math.max(...teile.map((t) => t.y)) + PZ.oben;
+  return `<svg viewBox="0 0 ${B} ${hoehe}" class="bt-leiste" role="img" aria-label="Besondere Tage auf der Zeitachse, Nummern wie in der Liste darunter">${formen.join("")}</svg>`;
 }
 
 // Eckdaten wie auf einer Gewichtskarte: Start, Jetzt und – mit Freigabe – wie weit es noch bis zum Ziel ist.

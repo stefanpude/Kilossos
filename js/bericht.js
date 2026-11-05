@@ -12,7 +12,7 @@ import {
   gewichteBis,
   warnungen,
 } from "./rechnen.js";
-import { gewichtDiagramm, kcalDiagramm, zeitleiste, PDF_RAND } from "./verlauf.js";
+import { gewichtDiagramm, kcalDiagramm, pdfZeitleiste } from "./verlauf.js";
 import { artVon, beruehrt } from "./besondere-tage.js";
 import { normalesFutterKcal } from "./futterliste.js";
 import { fotoGueltig, bcsGueltig, MCS } from "./daten.js";
@@ -179,19 +179,35 @@ function profilZeile(tier, heute) {
   return teile.length ? `<p>${teile.map(sicher).join(" · ")}</p>` : "";
 }
 
-// „03.11.2026“, „30.10.2026 bis 02.11.2026“, „seit 03.11.2026, läuft noch“.
-function besondererZeitraum(e) {
-  if (e.bis === null) return `seit ${datum(e.von)}, läuft noch`;
-  return e.bis === e.von ? datum(e.von) : `${datum(e.von)} bis ${datum(e.bis)}`;
+// Zeitraum in der Liste „Besondere Tage“ (seit 0.35.0): kurz ohne Jahr („24.10.“, „28.–30.10.“, „30.10.–2.11.“,
+// „seit 20.10.“), das Jahr steht im Kopf des Berichts. Lang mit Jahr („28.10.2026 bis 30.10.2026“, „seit 30.12.2025“),
+// wenn ein Datum der Liste nicht im Jahr des Berichtsendes liegt; dann in jeder Zeile, damit die Liste einheitlich bleibt.
+const tagMonat = (iso) => `${Number(iso.slice(8))}.${Number(iso.slice(5, 7))}.`;
+function besondererZeitraum(e, mitJahr) {
+  if (mitJahr) {
+    if (e.bis === null) return `seit ${datum(e.von)}`;
+    return e.bis === e.von ? datum(e.von) : `${datum(e.von)} bis ${datum(e.bis)}`;
+  }
+  if (e.bis === null) return `seit ${tagMonat(e.von)}`;
+  if (e.bis === e.von) return tagMonat(e.von);
+  if (e.von.slice(0, 7) === e.bis.slice(0, 7)) return `${Number(e.von.slice(8))}.–${tagMonat(e.bis)}`;
+  return `${tagMonat(e.von)}–${tagMonat(e.bis)}`;
 }
 
-function besondereTageTeil(liste) {
-  return `<section class="bericht-teil"><h2>Besondere Tage</h2>
-    <p class="bericht-klein">Vom Halter festgehalten, ohne Mengenangaben.</p>
-    <table><thead><tr><th>Zeitraum</th><th>Art</th><th>Notiz</th></tr></thead><tbody>
-      ${liste
-        .map((e) => `<tr><td>${besondererZeitraum(e)}</td><td>${sicher(artVon(e.art).text)}</td><td>${sicher(e.notiz ?? "")}</td></tr>`)
-        .join("")}</tbody></table></section>`;
+// Liste „Besondere Tage“ (seit 0.35.0 statt der Tabelle weiter unten): eine Zeile je Eintrag mit Zeitraum, Art und Notiz,
+// „läuft noch“ hinter der Notiz. nummern: Kreis mit der Nummer wie im Streifen unter der Kurve (nur, wenn es ihn gibt).
+// „Futter verweigert“ wird hervorgehoben. Spezifikation: .planning/besondere-tage-pdf.md.
+function besondereListe(liste, bis, nummern) {
+  const jahr = bis.slice(0, 4);
+  const mitJahr = liste.some((e) => e.von.slice(0, 4) !== jahr || (e.bis !== null && e.bis.slice(0, 4) !== jahr));
+  const zeilen = liste.map((e, i) => {
+    const art = artVon(e.art);
+    const notfall = art.notfall ? " notfall" : "";
+    const notiz = [e.notiz ? sicher(e.notiz) : "", e.bis === null ? "läuft noch" : ""].filter(Boolean).join(" · ");
+    const nr = nummern ? `<td><span class="bt-nr-kreis${notfall}">${i + 1}</span></td>` : "";
+    return `<tr${notfall ? ' class="notfall"' : ""}>${nr}<td>${besondererZeitraum(e, mitJahr)}</td><td>${sicher(art.text)}</td><td>${notiz}</td></tr>`;
+  });
+  return `<table class="bt-liste"><tbody>${zeilen.join("")}</tbody></table>`;
 }
 
 function fotoTeil(gewichte, von, bis) {
@@ -231,17 +247,20 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
       ${a.diffG >= 0 ? "−" : "+"}${zahl(Math.abs(a.diffG))} g (${zahl(a.prozent, 1)} %), im Mittel <strong>${zahl(a.proWoche, 2)} % KM/Woche</strong>
       (Zielbereich ${zahl(GRENZEN.abnahmeMin, 1)}–${zahl(GRENZEN.abnahmeMax)} %).</p>`);
     const imZeitraum = gewichte.filter((g) => g.datum >= b.von && g.datum <= b.bis);
-    // Zeitleiste mit derselben Achse: von der ersten Wägung im Zeitraum bis zum Berichtsende (seit 0.33.0).
+    // Streifen der besonderen Tage mit derselben Achse: von der ersten Wägung im Zeitraum bis zum Berichtsende.
     // Beide in einem Rahmen: Im Druck gilt die Breite für beide gleich, und ein Seitenumbruch trennt sie nicht.
+    // Gleich darunter die Liste mit denselben Nummern (seit 0.35.0; vorher eigener Abschnitt weiter unten).
     const erste = imZeitraum.map((g) => g.datum).sort()[0];
-    const leiste = zeitleiste(b.besondereTage ?? [], { vonTag: erste, bisTag: b.bis, ...PDF_RAND });
-    // Eine Zeile Erklärung unter der Zeitleiste (0.34.1, Review 0.33.0 Fund b), im selben Rahmen wie Diagramm und Leiste.
-    const leisteText = leiste
-      ? `<p class="bericht-klein zl-text">Streifen unter der Kurve: besondere Tage auf derselben Zeitachse. Balken = mehrere Tage, Punkt = ein Tag, rot = Futter verweigert. Einzelheiten im Abschnitt „Besondere Tage“.</p>`
-      : "";
+    const besondere = b.besondereTage ?? [];
+    const leiste = pdfZeitleiste(besondere, { vonTag: erste, bisTag: b.bis });
     teile.push(
-      `<div class="bericht-grafik">${gewichtDiagramm(imZeitraum, freigaben.filter((f) => f.datum <= b.bis), b.bis)}${leiste}${leisteText}</div>`
+      `<div class="bericht-grafik">${gewichtDiagramm(imZeitraum, freigaben.filter((f) => f.datum <= b.bis), b.bis)}${leiste}</div>`
     );
+    if (besondere.length) {
+      teile.push(
+        `<div class="bericht-besonders"><h3>Besondere Tage <small>vom Halter festgehalten, ohne Mengen</small></h3>${besondereListe(besondere, b.bis, leiste !== "")}</div>`
+      );
+    }
   }
   if (b.gewichte.length) {
     teile.push(`<table><thead><tr><th>Datum</th><th>kg</th><th>Änderung</th><th>% KM/Woche</th><th>Notiz</th></tr></thead><tbody>
@@ -259,8 +278,12 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
   // Fotos (nur auf Wunsch, ab 0.26.0): erstes und letztes Foto im Zeitraum, zum Vergleich.
   if (fotos) teile.push(fotoTeil(gewichte, b.von, b.bis));
 
-  // Besondere Tage (seit 0.33.0): erklären Knicke in der Kurve, deshalb direkt nach dem Gewicht. Ohne Einträge kein Abschnitt.
-  if (b.besondereTage?.length) teile.push(besondereTageTeil(b.besondereTage));
+  // Besondere Tage ohne Kurve (weniger als zwei Wägungen im Zeitraum): eigener Abschnitt mit derselben Liste, ohne Nummern.
+  // Mit Kurve stehen sie seit 0.35.0 direkt darunter (oben). Ohne Einträge kein Abschnitt.
+  if (!a && b.besondereTage?.length) {
+    teile.push(`<section class="bericht-teil"><h2>Besondere Tage</h2>
+    <p class="bericht-klein">Vom Halter festgehalten, ohne Mengen.</p>${besondereListe(b.besondereTage, b.bis, false)}</section>`);
+  }
 
   // Fütterung
   const f = b.fuetterung;

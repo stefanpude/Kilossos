@@ -185,55 +185,106 @@ test("berichtDaten: besondere Tage, die den Zeitraum berühren, nach Beginn sort
   assert.deepEqual(berichtDaten(eingabe).besondereTage, []);
 });
 
-test("berichtHtml: Abschnitt „Besondere Tage“ nach dem Gewicht, mit ganzem Zeitraum und maskierter Notiz", () => {
+// ---------- 0.35.0: Besondere Tage als Liste direkt unter Kurve und Streifen ----------
+// Wunsch des Halters 05.11.2026: Der Tierarzt soll sehen, was war, ohne weiter unten in einer Tabelle zu suchen.
+// Zeilen der Liste als [Nummer?, Zeitraum, Art, Notiz, "notfall"?]; Tags in den Zellen (Nummernkreis) entfernt.
+const listenZeilen = (html) => {
+  const liste = html.match(/<table class="bt-liste">([^]*?)<\/table>/)[1];
+  return [...liste.matchAll(/<tr( class="notfall")?>([^]*?)<\/tr>/g)].map((m) => [
+    ...[...m[2].matchAll(/<td>([^]*?)<\/td>/g)].map((z) => z[1].replace(/<[^>]+>/g, "")),
+    ...(m[1] ? ["notfall"] : []),
+  ]);
+};
+const streifenVon = (html) => html.match(/<svg[^>]*class="bt-leiste"[^]*?<\/svg>/)[0];
+const streifenNummern = (html) => [...streifenVon(html).matchAll(/class="bt-nr( notfall)?"[^>]*>(\d+)</g)].map((m) => m[2] + (m[1] ?? ""));
+
+test("berichtHtml: besondere Tage stehen im Abschnitt Gewicht: Kurve, Streifen, Liste, dann die Wägungen", () => {
   const html = mitBesonderen(besondere);
-  const abschnitt = html.indexOf("<h2>Besondere Tage</h2>");
-  assert.ok(abschnitt > html.indexOf("<h2>Gewicht</h2>") && abschnitt < html.indexOf("<h2>Fütterung</h2>"));
-  const teil = html.slice(abschnitt, html.indexOf("</section>", abschnitt));
-  assert.match(teil, /Vom Halter festgehalten, ohne Mengenangaben\./);
-  assert.match(teil, /<th>Zeitraum<\/th><th>Art<\/th><th>Notiz<\/th>/);
-  assert.match(teil, /<td>30\.10\.2026 bis 02\.11\.2026<\/td><td>Krank<\/td><td>&lt;b&gt;Durchfall&lt;\/b&gt;<\/td>/);
-  assert.match(teil, /<td>02\.11\.2026<\/td><td>Außer der Reihe genascht<\/td><td><\/td>/);
-  assert.match(teil, /<td>seit 03\.11\.2026, läuft noch<\/td><td>Weniger Bewegung<\/td>/);
-  assert.match(teil, /<td>04\.11\.2026<\/td><td>Sonstiges<\/td><td>aus einer neueren Fassung<\/td>/);
-  assert.doesNotMatch(teil, /20\.10\.2026/);
+  const gewicht = html.indexOf("<h2>Gewicht</h2>");
+  const streifen = html.indexOf('class="bt-leiste"');
+  const liste = html.indexOf("<h3>Besondere Tage");
+  const waegungen = html.indexOf("<th>Datum</th><th>kg</th>");
+  assert.ok(gewicht < streifen && streifen < liste && liste < waegungen, [gewicht, streifen, liste, waegungen].join());
+  assert.ok(waegungen < html.indexOf("<h2>Fütterung</h2>"));
+  assert.match(html, /<h3>Besondere Tage <small>vom Halter festgehalten, ohne Mengen<\/small><\/h3>/);
+  // kein eigener Abschnitt weiter unten und keine Erklärzeile mehr (0.34.1)
+  assert.doesNotMatch(html, /<h2>Besondere Tage<\/h2>/);
+  assert.doesNotMatch(html, /zl-text|Streifen unter der Kurve/);
+});
+
+test("berichtHtml: Liste mit Nummer, kurzem Zeitraum ohne Jahr, Art und maskierter Notiz", () => {
+  const html = mitBesonderen(besondere);
+  assert.deepEqual(listenZeilen(html), [
+    ["1", "30.10.–2.11.", "Krank", "&lt;b&gt;Durchfall&lt;/b&gt;"],
+    ["2", "2.11.", "Außer der Reihe genascht", ""],
+    ["3", "seit 3.11.", "Weniger Bewegung", "läuft noch"],
+    ["4", "4.11.", "Sonstiges", "aus einer neueren Fassung"],
+  ]);
+  assert.match(html, /<td><span class="bt-nr-kreis">1<\/span><\/td>/);
+  assert.deepEqual(streifenNummern(html), ["1", "2", "3", "4"]);
+  assert.doesNotMatch(html, /20\.10\./); // liegt vor dem Zeitraum
   assert.doesNotMatch(html, /<b>Durchfall/);
 });
 
-test("berichtHtml: ohne besondere Tage kein Abschnitt und keine Zeitleiste", () => {
-  const html = mitBesonderen([]);
-  assert.doesNotMatch(html, /Besondere Tage/);
-  assert.doesNotMatch(html, /class="zeitleiste"/);
-  assert.doesNotMatch(mitBesonderen([BT({ von: "2026-10-20", bis: "2026-10-20" })]), /Besondere Tage/);
+test("berichtHtml: „Futter verweigert“ hervorgehoben, „läuft noch“ hinter der Notiz", () => {
+  const html = mitBesonderen([
+    BT({ art: "futter-verweigert", von: "2026-11-02", bis: "2026-11-02" }),
+    BT({ art: "weniger-bewegung", von: "2026-11-01", bis: null, notiz: "nur drinnen" }),
+  ]);
+  assert.deepEqual(listenZeilen(html), [
+    ["1", "seit 1.11.", "Weniger Bewegung", "nur drinnen · läuft noch"],
+    ["2", "2.11.", "Futter verweigert", "", "notfall"],
+  ]);
+  assert.match(html, /<td><span class="bt-nr-kreis notfall">2<\/span><\/td>/);
+  assert.deepEqual(streifenNummern(html), ["1", "2 notfall"]);
 });
 
-test("berichtHtml: Zeitleiste direkt unter dem Gewichtsdiagramm, Achse bis zum Berichtsende", () => {
+test("berichtHtml: ein Eintrag vor der ersten Wägung steht mit Nummer in der Liste, aber nicht im Streifen", () => {
+  // Zeitraum ab 30.10., erste Wägung darin am 01.11.: dort beginnt die Achse
+  const html = mitBesonderen([BT({ von: "2026-10-31", bis: "2026-10-31" }), BT({ art: "genascht", von: "2026-11-02", bis: "2026-11-02" })], {
+    von: "2026-10-30",
+  });
+  assert.deepEqual(listenZeilen(html).map((z) => z.slice(0, 2)), [["1", "31.10."], ["2", "2.11."]]);
+  assert.deepEqual(streifenNummern(html), ["2"]);
+});
+
+test("berichtHtml: liegt ein Datum in einem anderen Jahr als das Berichtsende, steht in jeder Zeile das Jahr", () => {
+  const html = mitBesonderen([BT({ art: "weniger-bewegung", von: "2025-12-30", bis: null }), BT({ von: "2026-11-02", bis: "2026-11-03" })]);
+  assert.deepEqual(listenZeilen(html).map((z) => z.slice(0, 2)), [["1", "seit 30.12.2025"], ["2", "02.11.2026 bis 03.11.2026"]]);
+});
+
+test("berichtHtml: Kurve und Streifen in einem Rahmen (gleiche Breite im Druck), die Liste gleich danach", () => {
+  // Review 05.11.: Im Druck war das Diagramm auf 150 mm begrenzt, die Zeitleiste nicht; die Tage lagen versetzt.
   const html = mitBesonderen(besondere);
-  assert.match(html, /<\/svg><svg viewBox="0 0 340 \d+" class="zeitleiste"/);
-  assert.doesNotMatch(html, /NaN/);
+  assert.match(
+    html,
+    /<div class="bericht-grafik"><svg viewBox="0 0 340 \d+" class="diagramm"[^]*?<\/svg><svg viewBox="0 0 340 [\d.]+" class="bt-leiste"[^]*?<\/svg><\/div><div class="bericht-besonders"><h3>/
+  );
+  // ohne besondere Tage steht das Diagramm allein im Rahmen
+  assert.match(mitBesonderen([]), /<div class="bericht-grafik"><svg viewBox="0 0 340 \d+" class="diagramm"[^]*?<\/svg><\/div>/);
   // Bericht bis zum 10.11., letzte Wägung am 04.11.: Endpunkt links vom rechten Rand (288)
   const spaeter = mitBesonderen(besondere, { bis: "2026-11-10", heute: "2026-11-10" });
   const endX = Number(spaeter.match(/class="endpunkt" cx="([\d.]+)"/)[1]);
   assert.ok(endX < 288, `Endpunkt bei ${endX}`);
+  assert.doesNotMatch(spaeter, /NaN/);
 });
 
-test("berichtHtml: Diagramm und Zeitleiste stehen in einem gemeinsamen Rahmen (gleiche Breite im Druck)", () => {
-  // Review 05.11.: Im Druck war das Diagramm auf 150 mm begrenzt, die Zeitleiste nicht; die Tage lagen versetzt.
-  const html = mitBesonderen(besondere);
-  assert.match(html, /<div class="bericht-grafik"><svg viewBox="0 0 340 \d+" class="diagramm"[^]*?<\/svg><svg viewBox="0 0 340 \d+" class="zeitleiste"[^]*?<\/svg><p class="bericht-klein zl-text">[^<]*<\/p><\/div>/);
-  // ohne besondere Tage steht das Diagramm allein im Rahmen
-  assert.match(mitBesonderen([]), /<div class="bericht-grafik"><svg viewBox="0 0 340 \d+" class="diagramm"[^]*?<\/svg><\/div>/);
+test("berichtHtml: ohne besondere Tage weder Streifen noch Liste", () => {
+  const html = mitBesonderen([]);
+  assert.doesNotMatch(html, /Besondere Tage/);
+  assert.doesNotMatch(html, /bt-leiste|bt-liste/);
+  assert.doesNotMatch(mitBesonderen([BT({ von: "2026-10-20", bis: "2026-10-20" })]), /Besondere Tage/);
 });
 
-test("berichtHtml: eine Zeile unter der Zeitleiste erklärt Balken, Punkt und Rot (0.34.1)", () => {
-  // Review 0.33.0, Fund b: Ohne Beschriftung versteht der Tierarzt die Streifen erst über die Tabelle weiter unten.
-  const html = mitBesonderen(besondere);
-  const text = html.match(/<p class="bericht-klein zl-text">([^<]*)<\/p>/)[1];
-  assert.equal(
-    text,
-    "Streifen unter der Kurve: besondere Tage auf derselben Zeitachse. Balken = mehrere Tage, Punkt = ein Tag, rot = Futter verweigert. Einzelheiten im Abschnitt „Besondere Tage“."
-  );
-  // ohne Zeitleiste keine Zeile, auch wenn ein Eintrag nur vor der ersten Wägung liegt
-  assert.doesNotMatch(mitBesonderen([]), /zl-text/);
-  assert.doesNotMatch(mitBesonderen([BT({ von: "2026-10-20", bis: "2026-10-20" })]), /zl-text/);
+test("berichtHtml: ohne Kurve (nur eine Wägung) eigener Abschnitt mit derselben Liste, ohne Nummern", () => {
+  const html = mitBesonderen(besondere, { von: "2026-11-03" }); // im Zeitraum nur die Wägung vom 04.11.
+  const gewichtTeil = html.slice(html.indexOf("<h2>Gewicht</h2>"), html.indexOf("</section>", html.indexOf("<h2>Gewicht</h2>")));
+  assert.doesNotMatch(gewichtTeil, /class="diagramm"|bt-leiste|Besondere Tage/);
+  const abschnitt = html.indexOf("<h2>Besondere Tage</h2>");
+  assert.ok(abschnitt > html.indexOf("<h2>Gewicht</h2>") && abschnitt < html.indexOf("<h2>Fütterung</h2>"));
+  assert.doesNotMatch(html, /bt-nr-kreis/);
+  assert.deepEqual(listenZeilen(html), [
+    ["seit 3.11.", "Weniger Bewegung", "läuft noch"],
+    ["4.11.", "Sonstiges", "aus einer neueren Fassung"],
+  ]);
 });
