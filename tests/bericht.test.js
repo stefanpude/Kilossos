@@ -466,3 +466,12 @@ test("styles.css: im Druck keine ineinander steckenden Raster in der Übersicht"
 test("styles.css: im Druck bleiben Überschrift und Legende beim Diagramm", () => {
   assert.match(druckCss(), /\.bericht h3, \.bericht \.legende \{ break-after: avoid; \}/);
 });
+
+// 0.42.6: Zielgewicht in der Tabelle „Tierärztliche Freigaben“ mit zwei Nachkommastellen (vorher 7,25 → „7,3 kg“).
+test("0.42.6: Freigaben-Tabelle im PDF zeigt das Ziel mit zwei Nachkommastellen", () => {
+  const fr = { ...freigabe, zielgewichtKg: 7.25 };
+  const b = berichtDaten({ ...eingabe, freigaben: [fr] });
+  const html = berichtHtml(b, { tier: { name: "Kito" }, gewichte, mahlzeiten, freigaben: [fr], futterNachId: new Map(futter.map((f) => [f.id, f])), erstellt: "2026-11-04", demo: false });
+  assert.ok(html.includes("<td>7,25 kg</td>"));
+  assert.ok(!html.includes("7,3 kg"));
+});

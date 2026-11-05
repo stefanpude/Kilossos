@@ -748,3 +748,17 @@ test("0.42.4: „Alle Wochen“ rundet an den Grenzen wie der Tempo-Punkt", () =
   const marken = [...html.matchAll(/<span class="marke[^"]*">([^<]*%)<\/span>/g)].map((m) => m[1]);
   assert.deepEqual(marken, ["−0,30 %", "1,99 %", "2,01 %", "0,49 %", "0,51 %", "0,67 %"]);
 });
+
+// 0.42.6: Das Zielgewicht steht überall mit zwei Nachkommastellen, wie auf der Freigabe-Tafel und im Verlauf.
+// Vorher machten Befunde-Karte und PDF-Kurve aus 7,25 kg „7,3“.
+test("0.42.6: Befunde-Karte und PDF-Kurve zeigen das Ziel mit zwei Nachkommastellen", () => {
+  const fg = { ...freigabe, zielgewichtKg: 7.25 };
+  const karte = zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [fg], futterNachId: new Map(), zeitraum: "alles", heute: "2026-10-20", kopf: "" });
+  assert.ok(karte.includes("Ziel 7,25 kg · 220 kcal pro Tag"), "Befunde-Karte");
+  assert.ok(!karte.includes("Ziel 7,3"), "nirgends auf eine Stelle gerundet");
+  const svgText = gewichtDiagramm(gewichte, [fg]);
+  assert.ok(svgText.includes(">Ziel 7,25</text>"), "Beschriftung an der PDF-Kurve");
+  // Rechtsbündig am Rand, damit auch „Ziel 10,00“ in die Zeichenfläche (340) passt; linksbündig ab 292 ragte es bis 344.
+  const gross = gewichtDiagramm([G("2026-10-01", 12.4), G("2026-10-15", 12.2)], [{ ...fg, zielgewichtKg: 10 }]);
+  assert.ok(gross.includes('x="338" y="') && gross.includes('text-anchor="end">Ziel 10,00</text>'));
+});

@@ -128,7 +128,7 @@ export function gewichtDiagramm(gewichte, freigaben, bis = null, alle = gewichte
   }
   const zielLinie = ziel
     ? `<line class="ziel" x1="${RAND.links}" x2="${B - RAND.rechts}" y1="${y(ziel)}" y2="${y(ziel)}"/>
-       <text class="beschriftung" x="${B - RAND.rechts + 4}" y="${y(ziel) + 12}">Ziel ${zahl(ziel, 1)}</text>`
+       <text class="beschriftung" x="${B - 2}" y="${y(ziel) + 12}" text-anchor="end">Ziel ${zahl(ziel, 2)}</text>`
     : "";
   const linie = liste.map((g) => `${x(ms(g.datum))},${y(g.kg)}`).join(" ");
   const letzte = liste.at(-1);
@@ -719,7 +719,7 @@ function befundKarte(freigaben) {
     .map(
       (f) => `<div class="zeile"><span class="icon" aria-hidden="true">${SYMBOL.tierarzt}</span>
         <span class="name">${befundText(f) || "ohne BCS"}<small>${langDatum(f.datum)} · ${sicher(f.tierarzt)}<br>
-          Ziel ${zahl(f.zielgewichtKg, 1)} kg · ${zahl(f.kcalProTag)} kcal pro Tag</small></span></div>`
+          Ziel ${zahl(f.zielgewichtKg, 2)} kg · ${zahl(f.kcalProTag)} kcal pro Tag</small></span></div>`
     )
     .join("");
   const neueste = befundText(sortiert[0]) || "ohne BCS";

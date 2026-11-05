@@ -401,7 +401,7 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
         ? `<table><thead><tr><th>Datum</th><th>Zielgewicht</th><th>kcal/Tag</th><th>BCS</th><th>MCS</th><th>Tierarzt</th><th>Notiz</th></tr></thead><tbody>
           ${b.freigaben
             .map(
-              (fr) => `<tr><td>${datum(fr.datum)}</td><td>${zahl(fr.zielgewichtKg, 1)} kg</td><td>${zahl(fr.kcalProTag)}</td>
+              (fr) => `<tr><td>${datum(fr.datum)}</td><td>${zahl(fr.zielgewichtKg, 2)} kg</td><td>${zahl(fr.kcalProTag)}</td>
                 <td>${bcsGueltig(fr.bcs) ? fr.bcs : "–"}</td><td>${Object.hasOwn(MCS, fr.mcs) ? MCS[fr.mcs] : "–"}</td>
                 <td>${sicher(fr.tierarzt)}</td><td>${sicher(fr.notiz ?? "")}</td></tr>`
             )
