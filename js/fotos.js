@@ -55,3 +55,22 @@ export function vorherNachher(gewichte, tierId) {
   const liste = mitFoto(gewichte, tierId).sort((a, b) => a.datum.localeCompare(b.datum) || String(a.id).localeCompare(String(b.id)));
   return { vorher: liste[0] ?? null, nachher: liste.length > 1 ? liste.at(-1) : null };
 }
+
+// Was der Gewicht-Dialog zum Foto zeigt (0.41.0, reine Funktion für die Tests):
+// bereich = Foto-Feld offen, link = ruhiger Link, tipp = Hinweis auf den Wiegetag.
+// Beim Ändern einer Wägung mit Foto nichts (das Foto ändert man über das kleine Bild in der Liste);
+// ohne Foto an jedem Tag der Link „Foto nachtragen“. Ein schon gewähltes Foto bleibt sichtbar, damit man es entfernen kann.
+export function fotoFeld({ angebot, gewaehlt, nachgeholt, aendern, hatFoto, wiegetag }) {
+  if (aendern) {
+    if (hatFoto) return { bereich: false, link: false, linkText: "Foto nachtragen (freiwillig)", tipp: false };
+    const bereich = Boolean(gewaehlt || nachgeholt);
+    return { bereich, link: !bereich, linkText: "Foto nachtragen (freiwillig)", tipp: false };
+  }
+  const bereich = angebot === "fototag" || Boolean(gewaehlt) || (angebot === "nachholen" && Boolean(nachgeholt));
+  return {
+    bereich,
+    link: !bereich && angebot === "nachholen",
+    linkText: "Monatsfoto nachholen (freiwillig)",
+    tipp: !Number.isInteger(wiegetag) && angebot !== "keins",
+  };
+}

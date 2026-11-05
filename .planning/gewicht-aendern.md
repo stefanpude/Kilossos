@@ -43,6 +43,9 @@ genauso tippen.
 
 - Kein Foto-Bereich im Ändern-Fenster. Foto ansehen, tauschen und entfernen weiter über das kleine Bild
   (`dialog-foto`). Ein Foto nachträglich an eine alte Wägung hängen geht wie bisher nicht (wäre eine eigene Idee).
+  **Nachtrag 0.41.0 (Wunsch aus Stefans Test):** Hat die Wägung noch kein Foto, zeigt das Fenster den ruhigen Link
+  „Foto nachtragen (freiwillig)“, an jedem Tag. Gleiche Regel wie beim Eintragen: höchstens ein Foto je Foto-Zeitraum,
+  ein vorhandenes ersetzt das neue nur nach Rückfrage. Mit Foto bleibt es beim kleinen Bild in der Liste.
 - Datum geändert: Das Foto wandert mit. Liegt danach ein zweites Foto im selben Foto-Zeitraum, bleibt es so.
   Der Bericht zeigt ohnehin nur das erste und das letzte Foto, Vorher/Nachher nimmt das älteste und das neueste.
 - „Auf dem Arm gewogen?“ bleibt im Fenster nutzbar (zum Nachrechnen). Die Arm-Notiz wird nur vorgeschlagen, wenn

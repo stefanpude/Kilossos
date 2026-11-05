@@ -79,7 +79,7 @@ import {
   TEXT_DATUM_KORRIGIEREN,
   TEXT_ZIEL_PRUEFEN,
 } from "./js/freigaben.js";
-import { fotoImZeitraum, fotoAngebot, istFotoTag, vorherNachher } from "./js/fotos.js";
+import { fotoImZeitraum, fotoAngebot, fotoFeld, istFotoTag, vorherNachher } from "./js/fotos.js";
 import { belegteZeichen, speicherAnzeige } from "./js/speicher.js";
 import { sicherungPruefen, einleseFrage } from "./js/sicherung.js";
 
@@ -762,6 +762,39 @@ function tierWahlAntippen() {
 
 // Das Profil-Blatt dient zum Bearbeiten (einTier) und zum Anlegen (null).
 let bearbeitetesTier = null;
+// Foto im Profil (0.41.0): erst beim Speichern übernommen, Abbrechen verwirft es. null = kein Foto.
+let profilFoto = null;
+let profilFotoLauf = 0; // wie fotoLauf: ein spät fertiges Bild landet nicht im falschen Fenster
+
+function zeigeProfilFoto() {
+  const initiale = sicher(($("form-profil").name.value.trim()[0] ?? "?").toLocaleUpperCase("de-DE"));
+  $("profil-avatar").innerHTML = profilFoto
+    ? `<img src="${sicher(profilFoto)}" alt="">`
+    : `<span class="initiale" aria-hidden="true">${initiale}</span>`;
+  $("profil-foto-knopf").textContent = profilFoto ? "Anderes Foto" : "Foto wählen";
+  $("profil-foto-entfernen").hidden = !profilFoto;
+}
+
+$("form-profil").name.addEventListener("input", () => {
+  if (!profilFoto) zeigeProfilFoto();
+});
+
+$("profil-foto-datei").addEventListener("change", async (ereignis) => {
+  const datei = ereignis.target.files[0];
+  ereignis.target.value = "";
+  if (!datei) return;
+  const lauf = ++profilFotoLauf;
+  try {
+    const foto = await fotoZuschneiden(datei);
+    if (lauf !== profilFotoLauf) return;
+    profilFoto = foto;
+    zeigeFehler("profil-fehler", "");
+  } catch {
+    if (lauf !== profilFotoLauf) return;
+    zeigeFehler("profil-fehler", "Dieses Bild lässt sich nicht öffnen. Bitte ein anderes Foto wählen.");
+  }
+  zeigeProfilFoto();
+});
 
 function oeffneProfil(einTier) {
   bearbeitetesTier = einTier;
@@ -769,6 +802,8 @@ function oeffneProfil(einTier) {
   const form = $("form-profil");
   form.reset();
   zeigeFehler("profil-fehler", "");
+  profilFoto = fotoGueltig(p.foto) ? p.foto : null;
+  profilFotoLauf += 1;
   $("profil-titel").textContent = einTier ? `Profil von ${einTier.name}` : "Neues Tier";
   $("profil-entfernen").hidden = !einTier || daten.tiere.length <= 1;
   form.name.value = p.name ?? "";
@@ -802,6 +837,7 @@ function oeffneProfil(einTier) {
   form.schlank.value = p.schlankKg ? String(p.schlankKg).replace(".", ",") : "";
   form.praxis.value = p.tierarzt?.praxis ?? "";
   form.telefon.value = p.tierarzt?.telefon ?? "";
+  zeigeProfilFoto();
   $("dialog-profil").showModal();
 }
 
@@ -832,10 +868,34 @@ beimSpeichern("form-profil", "profil-fehler", (werte) => {
   setze("schlankKg", schlank);
   const tierarzt = { ...(praxis && { praxis }), ...(telefon && { telefon }) };
   setze("tierarzt", Object.keys(tierarzt).length ? tierarzt : null);
-  if (bearbeitetesTier) return sichern();
+  const fotoNeu = bearbeitetesTier ? profilFoto !== (fotoGueltig(bearbeitetesTier.foto) ? bearbeitetesTier.foto : null) : Boolean(profilFoto);
+  setze("foto", profilFoto);
+  const zuVoll = fotoNeu && profilFoto
+    ? "Das Foto passt nicht mehr in den Speicher. Entferne das Foto und speichere ohne Foto."
+    : "Der Speicher ist voll, nichts wurde gespeichert. Bitte speichere zuerst eine Sicherung.";
+  if (bearbeitetesTier) {
+    if (!fotoNeu) return sichern();
+    // Neues Foto: Passt es nicht in den Speicher, bleibt das Fenster offen (wie beim Gewicht mit Foto).
+    try {
+      speichern(daten);
+    } catch {
+      const id = bearbeitetesTier.id;
+      daten = laden();
+      tier = aktivesTier(daten, tier.id);
+      bearbeitetesTier = daten.tiere.find((t) => t.id === id) ?? null;
+      zeichneAlles();
+      return zuVoll;
+    }
+    return void zeichneAlles();
+  }
   // Ein neues Tier wird gleich angezeigt, damit die ersten Einträge nicht beim alten Tier landen.
   daten.tiere.push(ziel);
-  speichern(daten);
+  try {
+    speichern(daten);
+  } catch {
+    daten.tiere.pop();
+    return zuVoll;
+  }
   wechsleTier(ziel.id);
 });
 
@@ -1258,16 +1318,21 @@ function zeigeGewichtFoto() {
 // Foto-Feld offen nur am Foto-Tag (letzter Wiegetag im Monat, Datum im Dialog); sonst höchstens ein ruhiger Link, solange das Monatsfoto fehlt.
 // Ein schon gewähltes Foto bleibt sichtbar, damit man es wieder entfernen kann.
 function zeigeFotoAngebot() {
-  // Beim Ändern kein Foto-Bereich: Das Foto einer Wägung ändert man über das kleine Bild in der Liste.
-  if (bearbeiteteWaegung) {
-    for (const id of ["gewicht-foto-bereich", "gewicht-foto-nachholen", "gewicht-foto-wiegetag-tipp"]) $(id).hidden = true;
-    return;
-  }
-  const angebot = fotoAngebot({ gewichte: daten.gewichte, tierId: tier.id, datum: $("form-gewicht").datum.value, wiegetag: tier.wiegetag });
-  const offen = angebot === "fototag" || Boolean(gewichtFoto) || (angebot === "nachholen" && fotoNachgeholt);
-  $("gewicht-foto-bereich").hidden = !offen;
-  $("gewicht-foto-nachholen").hidden = offen || angebot !== "nachholen";
-  $("gewicht-foto-wiegetag-tipp").hidden = Number.isInteger(tier.wiegetag) || angebot === "keins";
+  // Beim Ändern einer Wägung mit Foto kein Foto-Bereich: Dieses Foto ändert man über das kleine Bild in der Liste.
+  // Ohne Foto (0.41.0): ruhiger Link „Foto nachtragen“, egal an welchem Tag.
+  const zustand = fotoFeld({
+    angebot: fotoAngebot({ gewichte: daten.gewichte, tierId: tier.id, datum: $("form-gewicht").datum.value, wiegetag: tier.wiegetag }),
+    gewaehlt: Boolean(gewichtFoto),
+    nachgeholt: fotoNachgeholt,
+    aendern: Boolean(bearbeiteteWaegung),
+    hatFoto: fotoGueltig(bearbeiteteWaegung?.foto),
+    wiegetag: tier.wiegetag,
+  });
+  $("gewicht-foto-bereich").hidden = !zustand.bereich;
+  $("gewicht-foto-nachholen").hidden = !zustand.link;
+  $("gewicht-foto-nachholen").textContent = zustand.linkText;
+  $("gewicht-foto-wiegetag-tipp").hidden = !zustand.tipp;
+  if (!zustand.bereich) return;
   // Foto gewählt, und der Foto-Zeitraum hat schon eins: vorher sagen, nicht erst beim Speichern.
   const belegt = gewichtFoto ? fotoImZeitraum(daten.gewichte, tier.id, $("form-gewicht").datum.value, tier.wiegetag) : null;
   $("gewicht-foto-belegt").hidden = !belegt;
@@ -1440,8 +1505,9 @@ $("form-gewicht").datum.addEventListener("change", zeigeFotoAngebot);
 $("form-gewicht").datum.addEventListener("input", zeigeFotoAngebot);
 // Sicherheitsnetz: Nach dem Schließen gilt das Fenster wieder als „neu eintragen“. Sonst überschriebe ein späteres
 // Öffnen ohne oeffneGewicht() beim Speichern eine alte Wägung. (Das close-Ereignis kommt erst nach dem Speichern.)
+// Ein verzögertes close (verstecktes Fenster) darf ein inzwischen neu geöffnetes Fenster nicht zurücksetzen.
 $("dialog-gewicht").addEventListener("close", () => {
-  bearbeiteteWaegung = null;
+  if (!$("dialog-gewicht").open) bearbeiteteWaegung = null;
 });
 
 beimSpeichern("form-gewicht", "gewicht-fehler", (werte) => {
@@ -1453,7 +1519,32 @@ beimSpeichern("form-gewicht", "gewicht-fehler", (werte) => {
     waegungAendern(bearbeiteteWaegung, { kg, datum: werte.get("datum"), notiz: werte.get("notiz") });
     // Zielmonat aufklappen: Rutscht die Wägung in einen zugeklappten Monat, sieht man sie dort, und der Fokus findet sie.
     merkeZustand("monat-" + bearbeiteteWaegung.datum.slice(0, 7), true);
-    return sichern();
+    if (!gewichtFoto) return sichern();
+    // Foto nachtragen (0.41.0, nur bei einer Wägung ohne Foto): gleiche Regel wie beim Eintragen, höchstens eins je Zeitraum.
+    const andere = daten.gewichte.filter((g) => g !== bearbeiteteWaegung);
+    const vorhanden = fotoImZeitraum(andere, bearbeiteteWaegung.tierId, bearbeiteteWaegung.datum, tier.wiegetag);
+    const ersetzen =
+      !vorhanden ||
+      confirm(`Seit dem letzten Foto-Tag gibt es schon ein Monatsfoto (vom ${datumText(vorhanden.datum)}). Soll das neue Foto es ersetzen?\n\n„Abbrechen“ speichert die Änderung ohne das neue Foto.`);
+    if (ersetzen) {
+      bearbeiteteWaegung.foto = gewichtFoto;
+      if (vorhanden) delete vorhanden.foto;
+    }
+    try {
+      speichern(daten);
+    } catch {
+      // Speicher voll: gespeicherten Stand neu laden, Fenster bleibt offen (wie beim Eintragen mit Foto).
+      const id = bearbeiteteWaegung.id;
+      daten = laden();
+      tier = aktivesTier(daten, tier.id);
+      bearbeiteteWaegung = daten.gewichte.find((g) => g.id === id) ?? null;
+      zeichneAlles();
+      return ersetzen
+        ? "Das Foto passt nicht mehr in den Speicher. Entferne das Foto und speichere die Änderung ohne Foto."
+        : "Der Speicher ist voll, die Änderung wurde nicht gespeichert. Bitte speichere zuerst eine Sicherung.";
+    }
+    zeichneAlles();
+    return ersetzen ? undefined : { toast: "✓ Gespeichert, ohne das neue Foto" };
   }
   const eintrag = { id: neueId(), tierId: tier.id, kg, datum: werte.get("datum"), notiz: werte.get("notiz").trim() };
   // Höchstens ein Monatsfoto (Zeitraum ab dem letzten Wiegetag im Monat): das neue ersetzt nach Rückfrage das alte, sonst ohne Foto.
@@ -1531,7 +1622,7 @@ $("form-besonders").addEventListener("change", zeigeBesondersFelder);
 $("form-besonders").von.addEventListener("input", zeigeBesondersFelder);
 // Wie beim Gewicht: Nach dem Schließen gilt das Fenster wieder als „neu eintragen“.
 $("dialog-besonders").addEventListener("close", () => {
-  bearbeiteterTag = null;
+  if (!$("dialog-besonders").open) bearbeiteterTag = null;
 });
 
 beimSpeichern("form-besonders", "besonders-fehler", (werte) => {
@@ -2734,6 +2825,13 @@ document.addEventListener("click", (ereignis) => {
       return oeffneProfil(id ? daten.tiere.find((t) => t.id === id) : tier);
     case "tier-neu":
       return oeffneProfil(null);
+    case "profil-foto-waehlen":
+      return $("profil-foto-datei").click();
+    case "profil-foto-entfernen":
+      profilFoto = null;
+      profilFotoLauf += 1;
+      zeigeProfilFoto();
+      return document.querySelector('[data-aktion="profil-foto-waehlen"]').focus();
     case "tier-wahl":
       return tierWahlAntippen();
     case "tier-waehlen":

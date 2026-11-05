@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { letzterWiegetag, fotoZeitraum, fotoImZeitraum, istFotoTag, fotoAngebot, vorherNachher } from "../js/fotos.js";
+import { letzterWiegetag, fotoZeitraum, fotoImZeitraum, istFotoTag, fotoAngebot, vorherNachher, fotoFeld } from "../js/fotos.js";
 
 const FOTO = "data:image/jpeg;base64,AAAA";
 const w = (id, datum, foto, tierId = "kito", kg = 9) => ({ id, tierId, kg, datum, notiz: "", ...(foto ? { foto } : {}) });
@@ -101,4 +101,36 @@ test("vorherNachher: gleiches Datum wird fest nach id geordnet", () => {
   const r = vorherNachher([w("b", "2026-11-02", FOTO), w("a", "2026-11-02", FOTO)], "kito");
   assert.equal(r.vorher.id, "a");
   assert.equal(r.nachher.id, "b");
+});
+
+// 0.41.0: Foto beim Ändern einer Wägung nachtragen (Fund B aus Stefans Nacht-Test)
+test("fotoFeld: neue Wägung verhält sich wie bisher", () => {
+  const basis = { gewaehlt: false, nachgeholt: false, aendern: false, hatFoto: false, wiegetag: 3 };
+  assert.deepEqual(fotoFeld({ ...basis, angebot: "fototag" }), { bereich: true, link: false, linkText: "Monatsfoto nachholen (freiwillig)", tipp: false });
+  assert.deepEqual(fotoFeld({ ...basis, angebot: "nachholen" }), { bereich: false, link: true, linkText: "Monatsfoto nachholen (freiwillig)", tipp: false });
+  assert.equal(fotoFeld({ ...basis, angebot: "nachholen", nachgeholt: true }).bereich, true);
+  assert.equal(fotoFeld({ ...basis, angebot: "keins" }).bereich, false);
+  assert.equal(fotoFeld({ ...basis, angebot: "keins" }).link, false);
+  assert.equal(fotoFeld({ ...basis, angebot: "keins", gewaehlt: true }).bereich, true, "gewähltes Foto bleibt sichtbar");
+  // Ohne Wiegetag: Tipp, solange ein Foto sinnvoll wäre
+  assert.equal(fotoFeld({ ...basis, wiegetag: undefined, angebot: "nachholen" }).tipp, true);
+  assert.equal(fotoFeld({ ...basis, wiegetag: undefined, angebot: "keins" }).tipp, false);
+});
+
+test("fotoFeld: Ändern einer Wägung mit Foto zeigt keinen Foto-Bereich", () => {
+  for (const angebot of ["fototag", "nachholen", "keins"]) {
+    const z = fotoFeld({ angebot, gewaehlt: false, nachgeholt: false, aendern: true, hatFoto: true, wiegetag: undefined });
+    assert.equal(z.bereich || z.link || z.tipp, false, angebot);
+  }
+});
+
+test("fotoFeld: Ändern einer Wägung ohne Foto bietet „Foto nachtragen“ an, an jedem Tag", () => {
+  for (const angebot of ["fototag", "nachholen", "keins"]) {
+    const z = fotoFeld({ angebot, gewaehlt: false, nachgeholt: false, aendern: true, hatFoto: false, wiegetag: 3 });
+    assert.deepEqual(z, { bereich: false, link: true, linkText: "Foto nachtragen (freiwillig)", tipp: false }, angebot);
+    assert.equal(fotoFeld({ angebot, gewaehlt: false, nachgeholt: true, aendern: true, hatFoto: false, wiegetag: 3 }).bereich, true);
+    assert.equal(fotoFeld({ angebot, gewaehlt: true, nachgeholt: false, aendern: true, hatFoto: false, wiegetag: 3 }).bereich, true);
+  }
+  // Kein Wiegetag-Tipp beim Ändern: der gehört zum Eintragen
+  assert.equal(fotoFeld({ angebot: "nachholen", gewaehlt: false, nachgeholt: false, aendern: true, hatFoto: false, wiegetag: undefined }).tipp, false);
 });

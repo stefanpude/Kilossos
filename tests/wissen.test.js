@@ -173,14 +173,32 @@ test("Willkommensseite verspricht nichts, was die App nicht halten kann (Stefan,
   assert.doesNotMatch(html, /ohne Fettleber-Risiko|für jede Sorte/);
 });
 
-test("Version 0.40.1: Cache v79 mit js/heute-grafiken.js, Versionszeile unter „Mehr“", () => {
+test("Version 0.41.0: Cache v80 mit js/heute-grafiken.js, Versionszeile unter „Mehr“", () => {
   const sw = lies("sw.js");
-  assert.match(sw, /const CACHE_NAME = "kilossos-v79";/);
+  assert.match(sw, /const CACHE_NAME = "kilossos-v80";/);
   assert.match(sw, /"js\/wissen\.js",/);
   assert.match(sw, /"js\/besondere-tage\.js",/);
   assert.match(sw, /"js\/freigaben\.js",/);
   assert.match(sw, /"js\/heute-grafiken\.js",/);
-  assert.match(lies("index.html"), /id="version">Version 0\.40\.1</);
+  assert.match(lies("index.html"), /id="version">Version 0\.41\.0</);
+});
+
+test("0.41.0: Foto im Profil-Fenster (auch beim Anlegen), gilt erst beim Speichern", () => {
+  const html = lies("index.html");
+  const profil = html.slice(html.indexOf('<dialog id="dialog-profil">'), html.indexOf("</dialog>", html.indexOf('<dialog id="dialog-profil">')));
+  assert.match(profil, /id="profil-foto-datei"/);
+  assert.match(profil, /data-aktion="profil-foto-waehlen"/);
+  assert.match(profil, /data-aktion="profil-foto-entfernen"/);
+  const app = lies("app.js");
+  assert.match(app, /setze\("foto", profilFoto\)/);
+  assert.match(app, /case "profil-foto-waehlen":/);
+  assert.match(app, /case "profil-foto-entfernen":/);
+});
+
+test("0.41.0: close-Handler setzen ihren Merker nur bei wirklich geschlossenem Fenster zurück", () => {
+  const app = lies("app.js");
+  assert.match(app, /if \(!\$\("dialog-gewicht"\)\.open\) bearbeiteteWaegung = null;/);
+  assert.match(app, /if \(!\$\("dialog-besonders"\)\.open\) bearbeiteterTag = null;/);
 });
 
 // 0.36.8: „gewogen“ statt „Wägung“ in allen sichtbaren Texten (Entscheidung des Halters, 05.11.2026).
