@@ -75,6 +75,7 @@ import {
   HINWEIS_AENDERN,
   TEXT_GLEICHER_TAG_NICHT_GESPEICHERT,
   TEXT_DATUM_PRUEFEN,
+  TEXT_DATUM_KORRIGIEREN,
 } from "./js/freigaben.js";
 import { fotoImZeitraum, fotoAngebot, istFotoTag, vorherNachher } from "./js/fotos.js";
 import { belegteZeichen, speicherAnzeige } from "./js/speicher.js";
@@ -1698,8 +1699,9 @@ function oeffneFreigabe(freigabe = null) {
   $("dialog-freigabe").showModal();
 }
 
-// Reihenfolge wie im Entwurf: Werte, Datum (gleicher Tag), 60-%-Rückfrage, „welche Freigabe gilt“, Ersetzen am
-// selben Tag. Geändert wird erst nach allen Rückfragen, ein Abbruch lässt also nichts halb geändert zurück.
+// Reihenfolge wie im Entwurf: Werte, Datum (gleicher Tag), „Stimmt das Datum?“ beim Korrigieren (0.36.5),
+// 60-%-Rückfrage, „welche Freigabe gilt“, Ersetzen am selben Tag. Geändert wird erst nach allen Rückfragen,
+// ein Abbruch lässt also nichts halb geändert zurück.
 beimSpeichern("form-freigabe", "freigabe-fehler", (werte) => {
   const ziel = leseZahl(werte.get("ziel"));
   const kcal = leseZahl(werte.get("kcal"));
@@ -1720,6 +1722,11 @@ beimSpeichern("form-freigabe", "freigabe-fehler", (werte) => {
     heute: tagSchluessel(new Date()),
   });
   if (plan.fehler) return plan.fehler;
+  // Vor der 60-%-Rückfrage: Ist das Korrigieren hier falsch (neuer Plan), wäre die andere Frage umsonst (seit 0.36.5).
+  if (plan.datumFrage && !confirm(plan.datumFrage)) {
+    $("form-freigabe").datum.focus();
+    return TEXT_DATUM_KORRIGIEREN;
+  }
   const grenze = Math.round(harteUntergrenze(ziel));
   const wertGeaendert = !alt || ziel !== alt.zielgewichtKg || kcal !== alt.kcalProTag;
   if (

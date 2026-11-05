@@ -11,8 +11,11 @@ import {
   TEXT_ZWEI_AM_TAG,
   TEXT_ANDERE_AM_TAG,
   speicherPlan,
+  datumsFrage,
+  TEXT_DATUM_KORRIGIEREN,
 } from "../js/freigaben.js";
 import { ersteDaten, speichern, laden } from "../js/daten.js";
+import { readFileSync } from "node:fs";
 
 // Beispielkatze (keine echten Werte, das Projekt ist öffentlich).
 const fr = (id, datum, ziel = 5.5, kcal = 210, extra = {}) => ({
@@ -242,4 +245,75 @@ test("speicherPlan: reicht die Rückfrage „welche Freigabe gilt“ durch", () 
   assert.equal(nurWert.frage, null);
   assert.equal(nurWert.ueberschrieben, g);
   assert.equal(nurWert.ersetzen, false);
+});
+
+// ---------- 0.36.5: Datum beim Korrigieren (Review B-F2) ----------
+// Wer eine Freigabe mit neuen Werten korrigiert und das alte Datum stehen lässt, macht die neuen Werte rückwirkend
+// gültig (z. B. echte Freigabe über eine Test-Freigabe vom Vortag). Dann vor dem Speichern nach dem Datum fragen.
+
+const df = (alt, datum, ziel = 5.5, kcal = 210, heute = "2026-11-15") =>
+  datumsFrage({ alt, datum, zielgewichtKg: ziel, kcalProTag: kcal, heute });
+
+test("datumsFrage: Tagesmenge korrigiert, altes Datum vor heute stehen gelassen, fragt mit Datum und neuen Werten", () => {
+  const a = fr("a", "2026-11-04", 5.5, 210);
+  assert.equal(
+    df(a, "2026-11-04", 5.5, 250),
+    "Du hast Ziel oder Tagesmenge geändert, das Datum ist aber noch der 4. Nov. 2026. " +
+      "Die neuen Werte (Ziel 5,50 kg, 250 kcal) gelten dann rückwirkend ab diesem Tag, " +
+      "auch in der Übersicht für den Tierarzt. Stimmt das Datum?"
+  );
+});
+
+test("datumsFrage: nur Zielgewicht korrigiert fragt auch", () => {
+  const a = fr("a", "2026-11-04", 5.5, 210);
+  assert.match(df(a, "2026-11-04", 5.2, 210), /Ziel 5,20 kg, 210 kcal/);
+});
+
+test("datumsFrage: Ziel und Tagesmenge unverändert (nur Praxis, BCS oder Notiz) fragt nicht", () => {
+  const a = fr("a", "2026-11-04", 5.5, 210);
+  assert.equal(df(a, "2026-11-04", 5.5, 210), null);
+});
+
+test("datumsFrage: Datum selbst geändert fragt nicht (das regelt die Frage „welche Freigabe gilt“)", () => {
+  const a = fr("a", "2026-11-04", 5.5, 210);
+  assert.equal(df(a, "2026-11-15", 5.2, 250), null);
+  assert.equal(df(a, "2026-11-01", 5.2, 250), null);
+});
+
+test("datumsFrage: Freigabe von heute korrigiert (Tippfehler gleich nach dem Eintragen) fragt nicht", () => {
+  const a = fr("a", "2026-11-15", 5.5, 210);
+  assert.equal(df(a, "2026-11-15", 5.2, 250), null);
+});
+
+test("datumsFrage: neu eintragen fragt nie", () => {
+  assert.equal(df(null, "2026-11-04", 5.2, 250), null);
+});
+
+test("speicherPlan: reicht die Datumsfrage durch, bei Fehler nicht", () => {
+  const a = fr("a", "2026-11-04", 5.5, 210);
+  const p = plan([a], a, "2026-11-04", 5.5, 250);
+  assert.equal(p.datumFrage, df(a, "2026-11-04", 5.5, 250));
+  assert.equal(p.ueberschrieben, a);
+  assert.equal(plan([a], a, "2026-11-04").datumFrage, null);
+  assert.equal(plan([a], null, "2026-11-04", 5.2, 250).datumFrage, null);
+  const c = fr("c", "2026-11-13");
+  assert.deepEqual(plan([a, c], a, "2026-11-13", 5.2, 250), { fehler: TEXT_ANDERE_AM_TAG });
+});
+
+test("TEXT_DATUM_KORRIGIEREN nennt den Weg für einen neuen Plan", () => {
+  assert.equal(
+    TEXT_DATUM_KORRIGIEREN,
+    "Nicht gespeichert: Bitte das Datum prüfen. Ein neuer Plan vom Tierarzt kommt über „Freigabe eintragen“ dazu."
+  );
+});
+
+test("app.js fragt nach dem Datum nach den Fehlern und vor der 60-%-Rückfrage, Abbrechen setzt den Fokus ins Datum", () => {
+  const app = readFileSync(new URL("../app.js", import.meta.url), "utf8");
+  const fehler = app.indexOf("if (plan.fehler) return plan.fehler;");
+  const datum = app.indexOf("if (plan.datumFrage && !confirm(plan.datumFrage))");
+  const sechzig = app.indexOf("60 % des Ruhebedarfs beim Zielgewicht");
+  assert.ok(fehler > 0 && datum > fehler && sechzig > datum, `Reihenfolge: ${fehler} < ${datum} < ${sechzig}`);
+  const block = app.slice(datum, sechzig);
+  assert.match(block, /datum\.focus\(\)/);
+  assert.match(block, /return TEXT_DATUM_KORRIGIEREN;/);
 });

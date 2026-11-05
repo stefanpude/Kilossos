@@ -15,6 +15,8 @@ export const TEXT_ZWEI_AM_TAG = "An diesem Tag gibt es zwei Freigaben. Bitte pr�
 export const TEXT_ANDERE_AM_TAG = "An diesem Tag gibt es schon eine andere Freigabe. Bitte das Datum prüfen.";
 export const TEXT_GLEICHER_TAG_NICHT_GESPEICHERT = "Nicht gespeichert: Für diesen Tag gibt es schon eine Freigabe.";
 export const TEXT_DATUM_PRUEFEN = "Nicht gespeichert: Bitte das Datum prüfen.";
+export const TEXT_DATUM_KORRIGIEREN =
+  "Nicht gespeichert: Bitte das Datum prüfen. Ein neuer Plan vom Tierarzt kommt über „Freigabe eintragen“ dazu.";
 
 // Ändert die Freigabe an Ort und Stelle; id und tierId bleiben. BCS/MCS ohne Angabe fehlen danach ganz.
 export function freigabeAendern(freigabe, { datum, zielgewichtKg, kcalProTag, tierarzt, notiz, bcs, mcs }) {
@@ -67,11 +69,12 @@ export function loeschFrage(freigaben, freigabe, name, heute) {
 
 // Entscheidet beim Speichern, was passiert, ohne etwas zu ändern oder zu fragen (nach dem Review rein und testbar).
 // freigaben: alle (die Funktion filtert selbst nach tierId); alt: die bearbeitete Freigabe oder null (neu eintragen).
-// Ergebnis: { fehler } oder { ueberschrieben, frage, ersetzen }:
+// Ergebnis: { fehler } oder { ueberschrieben, datumFrage, frage, ersetzen }:
 //   ueberschrieben – die Freigabe, die die neuen Werte bekommt (beim Ändern sie selbst, beim Neu-Eintragen die
 //                    vorhandene am selben Tag), sonst null (neue Freigabe anlegen);
+//   datumFrage     – Rückfrage „Stimmt das Datum?“ beim Korrigieren mit altem Datum (datumsFrage) oder null;
 //   frage          – Rückfrage „welche Freigabe gilt“ oder null; ersetzen – vorher „Soll die neue sie ersetzen?“ fragen.
-// Die 60-%-Rückfrage stellt app.js zwischen Fehlerprüfung und diesen Rückfragen (Reihenfolge wie im Entwurf).
+// app.js fragt in dieser Reihenfolge: datumFrage, 60-%-Rückfrage, frage, ersetzen.
 export function speicherPlan({ freigaben, tierId, alt, datum, zielgewichtKg, kcalProTag, heute }) {
   const eigene = freigaben.filter((f) => f.tierId === tierId);
   const andere = freigabenAmTag(eigene, datum, alt?.id ?? null);
@@ -86,9 +89,23 @@ export function speicherPlan({ freigaben, tierId, alt, datum, zielgewichtKg, kca
     : [...eigene, { id, datum, zielgewichtKg, kcalProTag }];
   return {
     ueberschrieben,
+    datumFrage: datumsFrage({ alt, datum, zielgewichtKg, kcalProTag, heute }),
     frage: geltungsFrage({ vorher: eigene, nachher, id, neu: !alt, heute }),
     ersetzen: !alt && ueberschrieben !== null,
   };
+}
+
+// Rückfrage beim Korrigieren (seit 0.36.5, Review B-F2): Ziel oder kcal geändert, das alte Datum vor heute aber stehen
+// gelassen. Dann gälten die neuen Werte rückwirkend ab diesem Tag, etwa eine echte Freigabe über einer Test-Freigabe.
+// Keine Frage beim Neu-Eintragen, bei geändertem Datum (das prüft geltungsFrage) und bei einer Freigabe von heute.
+export function datumsFrage({ alt, datum, zielgewichtKg, kcalProTag, heute }) {
+  if (!alt || datum !== alt.datum || datum >= heute) return null;
+  if (zielgewichtKg === alt.zielgewichtKg && kcalProTag === alt.kcalProTag) return null;
+  return (
+    `Du hast Ziel oder Tagesmenge geändert, das Datum ist aber noch der ${datumText(datum)}. ` +
+    `Die neuen Werte (${freigabeKurz({ zielgewichtKg, kcalProTag })}) gelten dann rückwirkend ab diesem Tag, ` +
+    "auch in der Übersicht für den Tierarzt. Stimmt das Datum?"
+  );
 }
 
 // Rückfrage, wenn sich durch das Datum ändert, welche Freigabe heute gilt; sonst null.
