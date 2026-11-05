@@ -74,3 +74,11 @@ test("styles.css: Hinweis als umrandetes Feld, Stift in der Zeile leise", () => 
   assert.match(css, /\.freigabe-hinweis \{[^}]*color: var\(--akzent-stark\);/);
   assert.match(css, /\.freigabe-zeile \.stift \{[^}]*color: var\(--text-leise\);/);
 });
+
+// 0.36.4: Neue Mahlzeit ohne vorgewählte Sorte (Sicherheits-Review 05.11.2026, Entscheidung des Halters). Vorher stand die
+// erste Sorte schon drin: 50 g „Sheba“ bei vorgewähltem Purina zählten 164 statt 38,5 kcal. Nur eine Sorte: bleibt vorgewählt.
+test("app.js: neue Mahlzeit wählt keine Sorte vor, außer es gibt nur eine", () => {
+  const app = lies("app.js");
+  assert.doesNotMatch(app, /futterMenue\(mahlzeit \? mahlzeit\.futterId : daten\.futter\[0\]\?\.id\)/);
+  assert.match(app, /futterMenue\(mahlzeit \? mahlzeit\.futterId : daten\.futter\.length === 1 \? daten\.futter\[0\]\.id : null\)/);
+});

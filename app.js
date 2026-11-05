@@ -1225,7 +1225,9 @@ function oeffneMahlzeit(mahlzeit = null) {
   form.reset();
   zeigeFehler("mahlzeit-fehler", "");
   $("mahlzeit-titel").textContent = mahlzeit ? `Mahlzeit von ${tier.name} ändern` : `Mahlzeit für ${tier.name}`;
-  futterMenue(mahlzeit ? mahlzeit.futterId : daten.futter[0]?.id);
+  // Neue Mahlzeit: keine Sorte vorgewählt, damit niemand aus Versehen die falsche einträgt (seit 0.36.4;
+  // vorher stand die erste Sorte drin). Gibt es nur eine Sorte, bleibt sie vorgewählt.
+  futterMenue(mahlzeit ? mahlzeit.futterId : daten.futter.length === 1 ? daten.futter[0].id : null);
   const zeit = mahlzeit ? new Date(mahlzeit.zeitpunkt) : new Date();
   form.uhrzeit.value = `${String(zeit.getHours()).padStart(2, "0")}:${String(zeit.getMinutes()).padStart(2, "0")}`;
   if (mahlzeit) form.gramm.value = String(mahlzeit.gramm).replace(".", ",");
