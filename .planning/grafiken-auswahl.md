@@ -10,6 +10,12 @@ Halters). Die Texte unten beim Bau entsprechend umformulieren, z. B. „Das Temp
 **Nachtrag 05.11.2026 abends:** Der Halter hat entschieden, die Stellen 1 bis 3 („Gefüttert“, „Letzte Messung“,
 „Tempo pro Woche“) schon vor dem Tierarzttermin zu bauen, jede als eigene Version. Stichtag Montag, 10.11.2026: Was bis
 dahin nicht sauber läuft, wird wieder herausgenommen. Das PDF (Stelle 4) bleibt bis nach dem 13.11.2026.
+**Stand 05.11.2026 spät: Stellen 1–3 gebaut in 0.38.0–0.42.2, PDF offen.** „Gefüttert“ kam mit 0.38.0, „Letzte
+Messung“ mit 0.39.0, „Tempo pro Woche“ mit 0.40.0; danach Korrekturen bis 0.42.2 (Bauplan
+`.planning/grafiken-umsetzung.md`). Abweichung von dieser Datei, vom Halter entschieden: Ist die Warnung „zu schnell“
+(Mittel über 14 Tage) aktiv, zeigt „Letzte Messung“ das ebenfalls rot an, statt nur die letzte Woche als „sicher“ zu
+bewerten. Die Tempo-Skala auf „Heute“ ist am linken Ende mit „−0,5“ beschriftet (Bereich für Zunahme). Stelle 4 (PDF)
+wird nach dem 13.11.2026 nach dieser Datei gebaut.
 
 | Stelle | Gewählt |
 |---|---|
