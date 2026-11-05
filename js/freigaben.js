@@ -1,7 +1,7 @@
 // Freigabe ändern und löschen (seit 0.34.0, Entwurf .planning/freigabe-aendern.md): reine Regeln und Texte,
 // damit sie ohne Browser testbar sind. Alle Listen sind die Freigaben EINES Tiers, der Aufrufer filtert nach tierId.
 // "heute" kommt immer als Parameter ("JJJJ-MM-TT"), damit Tests nicht vom echten Datum abhängen.
-import { aktuelleFreigabe } from "./rechnen.js";
+import { aktuelleFreigabe, GRENZEN } from "./rechnen.js";
 import { datumText } from "./mehr.js";
 
 const zahl = (wert, stellen = 0) =>
@@ -17,6 +17,7 @@ export const TEXT_GLEICHER_TAG_NICHT_GESPEICHERT = "Nicht gespeichert: Für dies
 export const TEXT_DATUM_PRUEFEN = "Nicht gespeichert: Bitte das Datum prüfen.";
 export const TEXT_DATUM_KORRIGIEREN =
   "Nicht gespeichert: Bitte das Datum prüfen. Ein neuer Plan vom Tierarzt kommt über „Freigabe eintragen“ dazu.";
+export const TEXT_ZIEL_PRUEFEN = "Nicht gespeichert: Bitte das Zielgewicht prüfen.";
 
 // Ändert die Freigabe an Ort und Stelle; id und tierId bleiben. BCS/MCS ohne Angabe fehlen danach ganz.
 export function freigabeAendern(freigabe, { datum, zielgewichtKg, kcalProTag, tierarzt, notiz, bcs, mcs }) {
@@ -69,13 +70,15 @@ export function loeschFrage(freigaben, freigabe, name, heute) {
 
 // Entscheidet beim Speichern, was passiert, ohne etwas zu ändern oder zu fragen (nach dem Review rein und testbar).
 // freigaben: alle (die Funktion filtert selbst nach tierId); alt: die bearbeitete Freigabe oder null (neu eintragen).
-// Ergebnis: { fehler } oder { ueberschrieben, datumFrage, frage, ersetzen }:
+// gewichte: alle Wägungen (gefiltert wird hier nach tierId), nur für die Zielfrage; ohne sie keine Prüfung.
+// Ergebnis: { fehler } oder { ueberschrieben, datumFrage, zielFrage, frage, ersetzen }:
 //   ueberschrieben – die Freigabe, die die neuen Werte bekommt (beim Ändern sie selbst, beim Neu-Eintragen die
 //                    vorhandene am selben Tag), sonst null (neue Freigabe anlegen);
 //   datumFrage     – Rückfrage „Stimmt das Datum?“ beim Korrigieren mit altem Datum (datumsFrage) oder null;
+//   zielFrage      – Rückfrage „Stimmt das Ziel?“ bei unplausiblem Zielgewicht (zielFrage) oder null;
 //   frage          – Rückfrage „welche Freigabe gilt“ oder null; ersetzen – vorher „Soll die neue sie ersetzen?“ fragen.
-// app.js fragt in dieser Reihenfolge: datumFrage, 60-%-Rückfrage, frage, ersetzen.
-export function speicherPlan({ freigaben, tierId, alt, datum, zielgewichtKg, kcalProTag, heute }) {
+// app.js fragt in dieser Reihenfolge: datumFrage, zielFrage, 60-%-Rückfrage, frage, ersetzen.
+export function speicherPlan({ freigaben, tierId, alt, datum, zielgewichtKg, kcalProTag, heute, gewichte = [] }) {
   const eigene = freigaben.filter((f) => f.tierId === tierId);
   const andere = freigabenAmTag(eigene, datum, alt?.id ?? null);
   // Zwei Freigaben am selben Tag gibt es nur aus alten Daten; dann erst eine löschen (sonst gälte still die andere).
@@ -90,6 +93,7 @@ export function speicherPlan({ freigaben, tierId, alt, datum, zielgewichtKg, kca
   return {
     ueberschrieben,
     datumFrage: datumsFrage({ alt, datum, zielgewichtKg, kcalProTag, heute }),
+    zielFrage: zielFrage({ alt, datum, zielgewichtKg, gewichte: gewichte.filter((g) => g.tierId === tierId) }),
     frage: geltungsFrage({ vorher: eigene, nachher, id, neu: !alt, heute }),
     ersetzen: !alt && ueberschrieben !== null,
   };
@@ -106,6 +110,44 @@ export function datumsFrage({ alt, datum, zielgewichtKg, kcalProTag, heute }) {
     `Die neuen Werte (${freigabeKurz({ zielgewichtKg, kcalProTag })}) gelten dann rückwirkend ab diesem Tag, ` +
     "auch in der Übersicht für den Tierarzt. Stimmt das Datum?"
   );
+}
+
+// Vergleichsgewicht für die Zielfrage: die letzte Wägung bis zum Datum der Freigabe (bei gleichem Datum die zuletzt
+// eingetragene), sonst die erste danach, ohne Wägung null.
+function vergleichsGewicht(gewichte, datum) {
+  let bis = null;
+  let danach = null;
+  for (const g of gewichte) {
+    if (g.datum <= datum) {
+      if (!bis || g.datum >= bis.datum) bis = g;
+    } else if (!danach || g.datum < danach.datum) {
+      danach = g;
+    }
+  }
+  return bis ?? danach;
+}
+
+// Rückfrage bei unplausiblem Zielgewicht (seit 0.36.6, Review B-F3), etwa ein Zahlendreher „2,7“ statt „7,2“:
+// Ziel nicht unter dem Vergleichsgewicht oder darunter als „Gewicht ÷ 1,4“ (GRENZEN.teilerOhneFreigabe: selbst bei
+// BCS 9 etwa 40 % Übergewicht). Nur eine Frage, keine Sperre: sehr dicke Katzen können darüber liegen.
+// Beim Korrigieren nur, wenn sich das Ziel geändert hat; ohne Wägung keine Prüfung.
+export function zielFrage({ alt, datum, zielgewichtKg, gewichte }) {
+  if (alt && zielgewichtKg === alt.zielgewichtKg) return null;
+  const g = vergleichsGewicht(gewichte, datum);
+  if (!g) return null;
+  const vergleich = `dem letzten Gewicht (${zahl(g.kg, 2)} kg am ${datumText(g.datum)})`;
+  const pruefen = "Bitte prüf, ob sich ein Zahlendreher eingeschlichen hat. Stimmt das Ziel?";
+  if (zielgewichtKg >= g.kg) {
+    return `Das Ziel ${zahl(zielgewichtKg, 2)} kg liegt nicht unter ${vergleich}. ${pruefen}`;
+  }
+  if (zielgewichtKg < g.kg / GRENZEN.teilerOhneFreigabe) {
+    const prozent = Math.round(((g.kg - zielgewichtKg) / g.kg) * 100);
+    return (
+      `Das Ziel ${zahl(zielgewichtKg, 2)} kg liegt ${prozent} % unter ${vergleich}. ` +
+      `Das ist ungewöhnlich viel. ${pruefen}`
+    );
+  }
+  return null;
 }
 
 // Rückfrage, wenn sich durch das Datum ändert, welche Freigabe heute gilt; sonst null.
