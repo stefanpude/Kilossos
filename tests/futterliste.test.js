@@ -97,7 +97,19 @@ test("Kitos Sorten stehen mit den Werten ihrer Packungen in der Liste", () => {
 test("Suche findet Einträge über mehrere Wörter, ohne auf Groß-/Kleinschreibung zu achten", () => {
   assert.deepEqual(
     sucheFutter("hill metab").map((e) => e.id),
-    ["hills-metabolic-trocken", "hills-metabolic-nass"]
+    [
+      "hills-metabolic-trocken",
+      "hills-metabolic-nass",
+      "hills-metabolic-meeresfisch-nass",
+      "hills-metabolic-lachs-trocken",
+      "hills-metabolic-mobility-trocken",
+      "hills-cd-stress-metabolic-trocken",
+      "hills-cd-stress-metabolic-nass",
+    ]
+  );
+  assert.deepEqual(
+    sucheFutter("metabolic meeresfisch").map((e) => e.id),
+    ["hills-metabolic-meeresfisch-nass"]
   );
   assert.equal(sucheFutter("").length, FUTTERLISTE.length);
   assert.equal(sucheFutter("gibt es nicht").length, 0);
@@ -119,8 +131,8 @@ test("Übernehmen erzeugt eine eigene Sorte mit Quelle, Stand und Diät-Hinweis"
     }
   );
   assert.match(futter.notiz, /^Diätfutter – nur nach Rücksprache mit dem Tierarzt\./);
-  assert.match(futter.notiz, /Protein 48 %, Fett 8 %, Asche 8 %, Faser 8 %, Feuchte nicht angegeben/);
-  assert.match(futter.notiz, /Stand 02\.11\.2026\. Bei Abweichung gilt die Packung\.$/);
+  assert.match(futter.notiz, /Protein 48 %, Fett 8 %, Asche 8 %, Faser 7,5 %, Feuchte nicht angegeben/);
+  assert.match(futter.notiz, /Stand 05\.11\.2026\. Bei Abweichung gilt die Packung\.$/);
 });
 
 test("geschätzte Sorten sagen in der Notiz, dass der Wert berechnet ist", () => {
@@ -207,4 +219,39 @@ test("eanBereinigen entfernt ungültige Nummern aus einer eingelesenen Sicherung
   assert.equal("ean" in daten.futter[2], false);
   assert.equal("ean" in daten.futter[3], false);
   assert.equal(eanBereinigen(daten), 0);
+});
+
+// ---------- 0.37.0: Diätfutter, vierte Runde (docs/futter-recherche.md) ----------
+
+test("0.37.0: jedes Diätfutter hat einen kcal-Wert vom Hersteller, keinen geschätzten", () => {
+  const diaet = FUTTERLISTE.filter((e) => e.diaet);
+  assert.ok(diaet.length >= 17, String(diaet.length));
+  for (const e of diaet) assert.equal(e.kcalQuelle, "hersteller", e.id);
+});
+
+test("0.37.0: neue Diätsorten mit den Werten der Hersteller", () => {
+  const kcal = (id) => FUTTERLISTE.find((e) => e.id === id)?.kcalPro100g;
+  assert.equal(kcal("hills-metabolic-meeresfisch-nass"), 66.5);
+  assert.equal(kcal("hills-metabolic-lachs-trocken"), 344.5);
+  assert.equal(kcal("hills-metabolic-mobility-trocken"), 346.1);
+  assert.equal(kcal("hills-cd-stress-metabolic-trocken"), 340.9);
+  assert.equal(kcal("hills-cd-stress-metabolic-nass"), 69);
+  assert.equal(kcal("josera-help-weight-diabetic-nass"), 72.8);
+  assert.equal(kcal("virbac-hpm-weight-loss-control-w2-trocken"), 342);
+  assert.equal(kcal("virbac-hpm-weight-loss-diabetes-w1-trocken"), 331);
+  assert.equal(kcal("farmina-vet-life-obesity-trocken"), 336.9);
+  assert.equal(kcal("hills-wd-nass"), 81.3); // vorher geschätzt 86, jetzt Herstellerwert
+});
+
+test("0.37.0: Hill's w/d sagt, dass es nicht zum Abnehmen deklariert ist", () => {
+  const wd = FUTTERLISTE.find((e) => e.id === "hills-wd-nass");
+  assert.match(wd.hinweis, /Diabetes/);
+  assert.match(wd.hinweis, /nicht zum Abnehmen/);
+});
+
+test("0.37.0: liegt ein gemessener Energiewert unter dem Packungswert, steht er im Hinweis", () => {
+  const hinweis = (id) => FUTTERLISTE.find((e) => e.id === id).hinweis;
+  assert.match(hinweis("virbac-hpm-weight-loss-control-w2-trocken"), /325 kcal/);
+  assert.match(hinweis("virbac-hpm-weight-loss-diabetes-w1-trocken"), /306 kcal/);
+  assert.match(hinweis("purina-om-trocken"), /322 kcal/);
 });

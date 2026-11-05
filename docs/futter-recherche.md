@@ -230,3 +230,70 @@ jede Nummer von einer zweiten Quelle demselben Produkt zugeordnet (Suche nach de
 - Pro Plan LiveClear: Weder Fressnapf noch zooplus.com nennen kcal. Nur ein einzelner Shop (vivapets) schreibt 350 kcal/100 g; das reicht nicht als Herstellerwert, deshalb bleibt die Nachrechnung (377, „geschätzt“). Bei einem Packungsfoto gilt die Packung.
 
 **Jetzt 33 von 49 Sorten mit EAN.**
+
+# Kilossos-Futterliste, vierte Runde: Diätfutter (Stand 05.11.2026, Version 0.37.0)
+
+Schwerpunkt Diätfuttermittel, weil Tierärzte sie beim Abnehmen oft verordnen. Liegt die Freigabe unter dem Ruhebedarf, warnt
+die App bei Handelsfutter. Ein selbst angelegtes Diätfutter zählt dabei als Handelsfutter. Deshalb sollen die gängigen
+Diätsorten in der Liste stehen. **9 neue Sorten, zusammen 58; 8 bestehende Diätsorten neu geprüft.**
+
+**Ablauf:** Drei Rechercheure (Hill's, Royal Canin und Purina, weitere Hersteller), danach zwei unabhängige Gegenprüfer, die
+jede Zahl an den Quellen nachgesehen haben. Regeln wie in Runde 2 und 3, dazu:
+- Bei Diätfutter zählt nur ein kcal-Wert vom Hersteller (Herstellerseite, Datenblatt oder Händlerseite mit der Deklaration).
+  Der neue Test verlangt das für jedes Diätfutter der Liste.
+- Zwei Quellen für eine EAN zählen nur, wenn es verschiedene Firmen sind (nicht zooplus.de und zooplus.com, nicht
+  shop-apotheke und redcare, nicht fressnapf und maxizoo).
+- Nennt ein Hersteller neben dem Packungswert einen niedrigeren, gemessenen Energiewert, gilt in der Liste der
+  Packungswert, und der Messwert steht im Hinweis. Mit dem Packungswert rechnet die App dann eher etwas zu viel kcal,
+  die Katze bekommt also eher etwas weniger als angezeigt.
+
+**Neue Sorten**
+
+| Sorte | Art | kcal/100 g | NRC-Nachrechnung | EAN | Quelle |
+|---|---|---|---|---|---|
+| Hill's PD Metabolic mit Meeresfisch (Beutel) | nass | 66,5 | 70,0 | 0052742062976 (12 × 85 g) | hillspet.de; EAN zooplus.de, fressnapf.de |
+| Hill's PD Metabolic mit Lachs (trocken) | trocken | 344,5 | 349,9 | 0052742088303, …8327, …8334 (1,5/3/8 kg) | hillspet.de; EAN zooplus.de, ipet.ch |
+| Hill's PD Metabolic + Mobility mit Huhn (trocken) | trocken | 346,1 | 350,5 | 0052742085555, …5517, …5579 (1,5/3/8 kg) | hillspet.de; EAN zooplus.de, ipet.ch |
+| Hill's PD c/d Multicare Stress + Metabolic mit Huhn (trocken) | trocken | 340,9 | 348,9 | 0052742037585, 0052742043814, 0052742037417 (1,5/3/8 kg) | hillspet.co.uk; EAN fressnapf.de, zooplus.de, ipet.ch |
+| Hill's PD c/d Multicare Stress + Metabolic mit Huhn (Beutel) | nass | 69 | 72,0 | 0052742038537 (12 × 85 g) | hillspet.de; EAN zooplus.de, ipet.ch |
+| Josera Help Weight & Diabetic Katze (Dose) | nass | 72,8 | 72,8 | 4032254768623 (200 g) | Josera-Datenblatt 10/2025; EAN brack.ch, zookauf-schneider.de |
+| Virbac Veterinary HPM Cat Weight Loss & Control W2 (trocken) | trocken | 342 | 341,7 | 3561963600968, …0975 (3/7 kg) | Virbac Deutschland, zooplus.de |
+| Virbac Veterinary HPM Cat Weight Loss & Diabetes W1 (trocken) | trocken | 331 | 330,9 | 3561963600937, …0944 (3/7 kg) | Virbac Deutschland, zooplus.de |
+| Farmina Vet Life Obesity Katze (trocken) | trocken | 336,9 | 329,5 | 8010276025333, 8010276031891 (2/5 kg) | farmina.com/de, zooplus.de |
+
+**Änderungen an bestehenden Diätsorten** (Stand jetzt 05.11.2026, Quelle wo möglich die Herstellerseite):
+- Hill's Metabolic trocken: Werte bestätigt (hillspet.de und hillspet.co.uk). Die offene Frage aus Runde 2 ist geklärt: Es sind
+  zwei Rezepturen im Umlauf. Die ältere (Huhn 16 % in der Zutatenliste, 38,2 / 12,8 / 5,9 / 9,3, 345 kcal) steht noch bei
+  einigen Händlern; der Hinweis sagt das jetzt. Für die kcal ohne Belang (341 gegen 345). Neu: 4 EANs (1,5/3/8/12 kg).
+- Hill's Metabolic nass: Asche 1,2 statt 1,4 %, Faser 2,2 statt 1,9 % (Hersteller), kcal gleich. Neu: EAN 0052742343808.
+- Hill's r/d trocken: Fett 9,8 statt 10,5 %, Faser 12,6 statt 12,9 %, Feuchte nicht deklariert (Hersteller und Fressnapf),
+  kcal gleich. Heißt im Handel jetzt „r/d Weight Loss“. Wird weiter verkauft, laut Hersteller höchstens 6 Monate am Stück.
+  Neu: EAN 3 kg.
+- **Hill's w/d nass: 81,3 statt geschätzt 86 kcal/100 g**, jetzt Herstellerwert (813 kcal/kg). In Deutschland ist w/d nur zur
+  Regulierung der Glucoseversorgung (Diabetes) deklariert, nicht zur Verringerung von Übergewicht. Es bleibt in der Gruppe
+  „Diätfutter vom Tierarzt“ (vorerst keine Änderung an den Warnungen), der Hinweis sagt es aber klar.
+  Wer w/d vor 0.37.0 übernommen hat, hat in der eigenen Kopie noch 86; bisher betrifft das niemanden.
+- Royal Canin Satiety trocken und nass: Werte bestätigt (royalcanin.com/de). Neu: EAN 3,5 kg.
+- Purina OM trocken: **Rohfaser 7,5 statt 8 %** (Purina-Datenblatt 2025 und vier Händler; zooplus.de zeigt 8 %, vermutlich
+  den Wert in der Trockenmasse), kcal 340 bestätigt. Purina UK nennt zusätzlich gemessen 322 kcal/100 g, das steht im Hinweis.
+  Name auf der Packung mit „St/Ox“. Neu: EANs 1,5 und 5 kg.
+- Purina OM nass: Werte bestätigt. Neu: EAN 10 × 85 g.
+
+**Nicht aufgenommen:**
+- animonda INTEGRA PROTECT Adipositas: gibt es nur für Hunde. Integra Protect Diabetes ist nicht zum Abnehmen deklariert.
+- Specific FRD (trocken): Werte nur von Händlern, der deutsche Katalog zeigt eine ältere Rezeptur. Specific FRW (nass): Rohasche
+  nirgends angegeben. → Packungsfoto.
+- Farmina Vet Life Obesity nass: deutsche Deklaration nicht gefunden, in Deutschland nur im Farmina-Shop.
+- Josera Help Weight & Diabetic trocken: laut Datenblatt nur bei Diabetes, nicht zum Abnehmen deklariert.
+- Happy Cat VET Adipositas, Trovet WRD: keine lesbare bzw. widersprüchliche Deklaration. MAC's Vetcare: keine Abnehm-Sorte für Katzen.
+- Royal Canin Satiety in Gelee oder als Mousse: gibt es für Katzen nicht. Purina OM gibt es nass nur mit Huhn.
+- Hill's Metabolic Mousse-Dose (bei keinem deutschen Händler), w/d trocken (nur Hyperlipidämie und Diabetes, kein kcal-Wert).
+
+**Offene Fragen an den Tierarzt:**
+- Hill's Metabolic trocken (Huhn, Lachs, + Mobility): hillspet.de nennt als Zweck formal nur Diabetes. „Verringerung von
+  Übergewicht“ steht bei zooplus.de und Fressnapf. Hill's gibt aber eine Fütterungsanleitung zur Gewichtsabnahme. Eine
+  Packung würde das klären.
+- Virbac W1/W2 und Farmina: Der gemessene Wert liegt bis 7,6 % unter dem Packungswert (Virbac) bzw. zwei Händler nennen
+  7 % weniger (Farmina). Bei einer Verordnung dieser Sorten lohnt die Frage, mit welchem Wert der Tierarzt rechnet.
+
+**Jetzt 46 von 58 Sorten mit EAN, 17 Diätsorten, alle mit Herstellerwert.**
