@@ -328,7 +328,7 @@ test("zeichneVerlauf: Zeitleiste ist hoch genug zum Antippen (mindestens 56 Einh
   const zwei = verlauf([BT({ von: "2026-10-05", bis: "2026-10-09" }), BT({ von: "2026-10-07", bis: "2026-10-12" })]);
   assert.match(zwei, /<svg viewBox="0 0 340 56" class="zeitleiste"/);
   assert.deepEqual(eintraegeVon(zwei).map((e) => e[2]), [21, 35]);
-  // im PDF bleibt sie schmal (direkter Aufruf ohne Mindesthöhe)
+  // Direkter Aufruf ohne Mindesthöhe bleibt schmal (das PDF nutzt seit 0.35.0 pdfZeitleiste, nicht zeitleiste)
   assert.match(zeitleiste([BT({})], OKT), /viewBox="0 0 340 18"/);
 });
 
