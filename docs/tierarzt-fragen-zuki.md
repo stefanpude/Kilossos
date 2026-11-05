@@ -37,6 +37,7 @@ Die Liste für Kito: [tierarzt-fragen-kito.md](tierarzt-fragen-kito.md). Fragen 
 ## 4. Sicherheit
 - [ ] Woran erkenne ich früh eine **Fettleber** (hepatische Lipidose)? Was tue ich, wenn Zuki nicht frisst?
 - [ ] Wie lange darf Zuki höchstens ohne Futter sein, bevor ich anrufen muss?
+      (Die App rät bisher: einen Tag oder länger gar nichts gefressen → sofort zum Tierarzt. Passt diese Grenze?)
 - [ ] Wie wichtig ist Zukis **Wasseraufnahme** beim Abnehmen? Katzen nehmen einen großen Teil ihres Wassers
       über Nassfutter auf; weniger Futter heißt auch weniger Wasser. Sollen wir etwas beachten
       (z. B. Wasser ins Nassfutter, Trinkbrunnen), und sollen die Nierenwerte vorher bestimmt werden?
@@ -46,9 +47,12 @@ Die Liste für Kito: [tierarzt-fragen-kito.md](tierarzt-fragen-kito.md). Fragen 
       gleicher Tag, gleiche Uhrzeit, gleiche Waage.)
 - [ ] Wann ist der nächste Kontrolltermin, und in welchem **Abstand** sollen wir danach zur Kontrolle kommen?
       (Die App könnte dann daran erinnern.)
-- [ ] Welche **Ausnahmen** soll ich in der App festhalten, damit Sie sie bei der Kontrolle sehen? Geplant ist ein
-      Eintrag „Besonderer Tag“: mehr Bewegung, weniger Bewegung, krank, Futter verweigert, Sonstiges.
-      Fehlt etwas (zum Beispiel Futterumstellung), oder ist etwas davon unwichtig?
+- [ ] Welche **Ausnahmen** soll ich in der App festhalten, damit Sie sie bei der Kontrolle sehen? Dafür gibt es den
+      Eintrag „Besonderer Tag“, als einzelner Tag oder als Phase über mehrere Tage, mit diesen Arten:
+      mehr Bewegung, weniger Bewegung, krank, Futter verweigert, außer der Reihe genascht,
+      Auffälligkeit beim Fressen (z. B. nur die Hälfte gefressen, erbrochen, sehr gierig), Futterumstellung, Sonstiges.
+      In der PDF-Übersicht stehen sie als Streifen unter der Gewichtskurve und als Tabelle.
+      Fehlt etwas, oder ist etwas davon unwichtig?
 
 ## Antworten
 | Frage | Antwort |
