@@ -9,6 +9,7 @@ import {
   gewichtDiagramm,
   PDF_RAND,
   pdfZeitleiste,
+  kcalDiagramm,
 } from "../js/verlauf.js";
 
 const G = (datum, kg) => ({ id: datum, tierId: "k", datum, kg, notiz: "" });
@@ -491,4 +492,19 @@ test("gewichtDiagramm (PDF): Freigabe am Berichtsende zeichnet kein leeres Band"
   const svgText = gewichtDiagramm(gewichte, [{ ...freigabe, datum: "2026-10-15" }], "2026-10-15");
   assert.doesNotMatch(svgText, /class="band"/);
   assert.doesNotMatch(svgText, /sicherer Bereich/);
+});
+
+// 0.36.2: kcal-Säulen im PDF stehen nach Datum, nicht nach Reihenfolge (Sicherheits-Review 05.11.2026). Fehlte eine
+// Woche ohne Einträge, rückten die folgenden Säulen nach links und standen über der falschen Wochen-Beschriftung.
+test("kcalDiagramm (PDF): Woche ohne Einträge bleibt als Lücke, die Säulen stehen an ihrer Woche", () => {
+  const futterNachId = new Map([["s", { id: "s", typ: "nass", kcalPro100g: 77 }]]);
+  const M = (tag) => ({ tierId: "k", futterId: "s", gramm: 200, zeitpunkt: new Date(`${tag}T08:00:00`).toISOString() });
+  const svgText = kcalDiagramm([M("2026-10-05"), M("2026-10-12"), M("2026-10-26")], futterNachId, []);
+  const mitten = [...svgText.matchAll(/<g class="treffer"[^>]*>[^]*?<rect x="([\d.]+)" y="[\d.]+" width="([\d.]+)"[^>]*fill="transparent"\/><\/g>/g)].map(
+    (m) => Number(m[1]) + Number(m[2]) / 2
+  );
+  const innen = 340 - PDF_RAND.links - PDF_RAND.rechts;
+  const soll = [0.5, 1.5, 3.5].map((k) => PDF_RAND.links + (innen * k) / 4); // 4 Wochen: 5.10., 12.10., (19.10. leer), 26.10.
+  assert.equal(mitten.length, 3);
+  mitten.forEach((x, i) => assert.ok(Math.abs(x - soll[i]) < 0.01, `Säule ${i + 1} bei x=${x}, erwartet ${soll[i]}`));
 });

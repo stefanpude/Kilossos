@@ -181,12 +181,20 @@ export function kcalDiagramm(mahlzeiten, futterNachId, freigaben) {
   const sortiert = [...freigaben].sort((a, b) => a.datum.localeCompare(b.datum));
   const yMax = Math.max(...wochen.map((w) => w.kcal), ...sortiert.map((f) => f.kcalProTag)) * 1.1;
   const y = skala(0, yMax, H - RAND.unten, RAND.oben);
-  const slot = innenB / wochen.length;
+  // Ein Feld je Kalenderwoche von der ersten bis zur letzten, auch für Wochen ohne Einträge (seit 0.36.2; vorher
+  // rückten die Säulen nach einer leeren Woche nach links und standen über der falschen Beschriftung).
+  const vonMs = ms(wochen[0].montag);
+  const [bj, bm, bt] = wochen.at(-1).montag.split("-").map(Number);
+  const bisMs = new Date(bj, bm - 1, bt + 7).getTime(); // Kalender statt + 7 × 24 h: sonst fehlt bei Zeitumstellung die letzte Achsenmarke
+  const wocheNr = (montag) => Math.round((ms(montag) - vonMs) / (7 * TAG_MS));
+  const anzahl = wocheNr(wochen.at(-1).montag) + 1;
+  const slot = innenB / anzahl;
   const breite = Math.min(24, Math.max(3, slot - 2));
   const x = (i) => RAND.links + slot * (i + 0.5);
   const ecke = Math.min(4, breite / 2);
   const saeulen = wochen
-    .map((w, i) => {
+    .map((w) => {
+      const i = wocheNr(w.montag);
       const links = x(i) - breite / 2;
       const rechts = x(i) + breite / 2;
       const yFutter = y(w.kcal - w.leckerli);
@@ -197,7 +205,9 @@ export function kcalDiagramm(mahlzeiten, futterNachId, freigaben) {
       const unten = w.leckerli > 0 ? yFutter - 2 : y(0);
       const klasse = w.leckerli > 0 ? "saeule-2" : "saeule";
       const kappe = `<path class="${klasse}" d="M${links},${unten} V${oben + ecke} Q${links},${oben} ${links + ecke},${oben} H${rechts - ecke} Q${rechts},${oben} ${rechts},${oben + ecke} V${unten} Z"/>`;
-      const freigabe = aktuelleFreigabe(sortiert, w.montag);
+      // Wie die Stufenlinie: die Freigabe, die am Sonntag der Woche galt (vorher Montag, Tooltip und Linie wichen ab).
+      const [wj, wm, wt] = w.montag.split("-").map(Number);
+      const freigabe = aktuelleFreigabe(sortiert, tagSchluessel(new Date(wj, wm - 1, wt + 6, 12)));
       const tip =
         `Woche ab ${kurzDatum(w.montag)}: Ø ${zahl(w.kcal)} kcal/Tag, davon ${zahl(w.leckerli)} Leckerli` +
         (freigabe ? ` · freigegeben ${zahl(freigabe.kcalProTag)}` : "");
@@ -207,16 +217,17 @@ export function kcalDiagramm(mahlzeiten, futterNachId, freigaben) {
   // Freigabe als Stufenlinie über die Wochen.
   let stufen = "";
   const punkte = [];
-  wochen.forEach((w, i) => {
-    const f = aktuelleFreigabe(sortiert, tagSchluessel(new Date(ms(w.montag) + 6 * TAG_MS)));
+  for (let i = 0; i < anzahl; i++) {
+    // Sonntag der Woche i; Kalenderrechnung statt + 6 × 24 h wegen der Zeitumstellung.
+    const montag = new Date(vonMs);
+    const sonntag = new Date(montag.getFullYear(), montag.getMonth(), montag.getDate() + 7 * i + 6, 12);
+    const f = aktuelleFreigabe(sortiert, tagSchluessel(sonntag));
     if (f) punkte.push([RAND.links + slot * i, y(f.kcalProTag)], [RAND.links + slot * (i + 1), y(f.kcalProTag)]);
-  });
+  }
   if (punkte.length) {
     stufen = `<polyline class="freigabe-linie" points="${punkte.map((p) => p.join(",")).join(" ")}"/>
       <text class="beschriftung" x="${B - RAND.rechts + 4}" y="${punkte.at(-1)[1] + 4}">Freigabe</text>`;
   }
-  const vonMs = ms(wochen[0].montag);
-  const bisMs = ms(wochen.at(-1).montag) + 7 * TAG_MS;
   return svg(
     yAchse(schritte(0, yMax), y) + zeitAchse(vonMs, bisMs, skala(vonMs, bisMs, RAND.links, B - RAND.rechts)) + saeulen + stufen,
     "Kalorien pro Tag, Wochendurchschnitt"
