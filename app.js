@@ -3026,6 +3026,8 @@ document.addEventListener("click", (ereignis) => {
       return $("dialog-alltag").showModal();
     case "tipps-erklaerung":
       return $("dialog-tipps").showModal();
+    case "fragen-erklaerung":
+      return $("dialog-fragen").showModal();
     case "gramm-minus":
       return grammSchritt(-5);
     case "gramm-plus":

@@ -165,6 +165,13 @@ body.willkommen-offen { overflow: hidden; }
 #dialog-nicht-ab h3 { margin: 4px 0 0; font-size: 1.0625rem; }
 #dialog-nicht-ab .notfall-hinweis { margin: 0 0 12px; }
 #dialog-begriffe h2:focus, #dialog-nicht-ab h2:focus { outline: none; }
+/* „Tipps fürs Abnehmen“ (0.57.0) und „Häufige Fragen“ (0.58.0) wie „Warum nimmt meine Katze nicht ab?“.
+   Verweise stehen als eigene Zeile; ein Link braucht inline-block, sonst greift min-height (48 px) nicht. */
+#dialog-tipps p, #dialog-fragen p { margin: 0 0 10px; }
+#dialog-tipps h3, #dialog-fragen h3 { margin: 4px 0 0; font-size: 1.0625rem; }
+#dialog-fragen .notfall-hinweis { margin: 0 0 12px; }
+#dialog-tipps h2:focus, #dialog-fragen h2:focus { outline: none; }
+a.knopf-text { display: inline-block; }
 #begriffe-liste { margin: 0 0 12px; border-top: 1px solid var(--rand); }
 .begriff { border-bottom: 1px solid var(--rand); }
 .begriff > .aufklapp-kopf .zusammen { font-weight: 600; }

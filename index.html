@@ -267,6 +267,9 @@
         <button type="button" class="eintrag" data-aktion="tipps-erklaerung">
           <span data-symbol="katzenkopf"></span><span class="text">Tipps fürs Abnehmen</span><span class="weiter" data-symbol="weiter"></span>
         </button>
+        <button type="button" class="eintrag" data-aktion="fragen-erklaerung">
+          <span data-symbol="frage"></span><span class="text">Häufige Fragen</span><span class="weiter" data-symbol="weiter"></span>
+        </button>
         <button type="button" class="eintrag" data-aktion="begriffe-erklaerung">
           <span data-symbol="buch"></span><span class="text">Begriffe kurz erklärt</span><span class="weiter" data-symbol="weiter"></span>
         </button>
@@ -353,7 +356,7 @@
           <span data-symbol="katzenkopf"></span><span class="text">Demo ansehen<small>Beispieldaten von Kito und Zuki über ein Jahr. Deine Einträge bleiben, wie sie sind.</small></span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.57.0</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.58.0</span>
         </div>
       </div>
     </section>
@@ -959,6 +962,45 @@
       <p><button type="button" class="knopf-text" data-aktion="alltag-erklaerung">Was hilft einer schweren Katze im Alltag?</button></p>
       <p class="tipp">Bewegung in kleinen Portionen, Stufen an die Lieblingsplätze, eine bequeme Toilette, Hilfe bei der
         Fellpflege, richtig hochheben.</p>
+      <div class="knoepfe">
+        <button value="abbrechen" class="knopf-haupt">Verstanden</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Blatt „Häufige Fragen“ (0.58.0, Ideen-Tafel „Tipps & Tricks, FAQ“, Stefan: Weg B). Kurze Antworten zur App.
+       Fachliches (Grenzen, Tipps, Begriffe) nur als Verweis auf die Erklärseiten, keine Zahlen hier.
+       Der Notfallsatz steht wörtlich wie in der Anleitung. -->
+  <dialog id="dialog-fragen">
+    <form method="dialog">
+      <h2 tabindex="-1" autofocus>Häufige Fragen</h2>
+      <h3>Kostet Kilossos etwas?</h3>
+      <p>Nein. Kilossos ist kostenlos, ohne Werbung und ohne Konto.</p>
+      <h3>Wo liegen meine Daten?</h3>
+      <p>Nur auf diesem Handy, im Speicher des Browsers. Es gibt kein Konto und keine Cloud, und deine Einträge
+        verlassen das Handy nicht von selbst.</p>
+      <p><a class="knopf-text" href="datenschutz.html">Datenschutzerklärung</a></p>
+      <h3>Was passiert, wenn ich das Handy wechsle?</h3>
+      <p>Deine Einträge kommen nur über eine Sicherung mit. Tippe auf dem alten Handy unter „Mehr“ auf
+        „Sicherung speichern“ und auf dem neuen auf „Sicherung einlesen“. Löschst du die Daten des Browsers oder
+        beim Entfernen der App auch ihre Daten, sind Einträge ohne Sicherung verloren.</p>
+      <h3>Warum schlägt Kilossos keine Futtermenge vor?</h3>
+      <p>Wie viel deine Katze bekommen soll, legt dein Tierarzt fest. Du trägst es unter „Mehr“ bei
+        „Freigabe eintragen“ ein. Ohne Freigabe zeichnet Kilossos nur auf und warnt.</p>
+      <p><button type="button" class="knopf-text" data-aktion="warum-kein-ziel">Warum keine Futtermenge?</button></p>
+      <h3>Wie schnell darf meine Katze abnehmen?</h3>
+      <p>Das entscheidet dein Tierarzt. Ab wann Kilossos warnt und woher die Grenzen stammen, steht hier:</p>
+      <p><button type="button" class="knopf-text" data-aktion="grenzen-erklaerung">Welche Grenzen gelten?</button></p>
+      <h3>Meine Katze nimmt nicht ab. Was nun?</h3>
+      <p>Oft steckt eine von wenigen Ursachen dahinter, zum Beispiel Leckerlis oder eine andere Katze, die mitfrisst.</p>
+      <p><button type="button" class="knopf-text" data-aktion="warum-nicht-ab">Warum nimmt meine Katze nicht ab?</button></p>
+      <h3>Was tue ich, wenn meine Katze nicht frisst?</h3>
+      <p class="notfall-hinweis"><strong>Frisst deine Katze einen Tag oder länger gar nicht, gehört sie sofort zum Tierarzt.</strong></p>
+      <h3>Ich habe mehrere Katzen. Geht das?</h3>
+      <p>Ja. Weitere Katzen legst du unter „Mehr“ mit „Tier hinzufügen“ an. Jede Katze braucht ihre eigene Freigabe.</p>
+      <p><button type="button" class="knopf-text" data-aktion="anleitung-erklaerung">So nutzt du Kilossos</button></p>
+      <h3>Was heißen BCS, RER und die anderen Begriffe?</h3>
+      <p><button type="button" class="knopf-text" data-aktion="begriffe-erklaerung">Begriffe kurz erklärt</button></p>
       <div class="knoepfe">
         <button value="abbrechen" class="knopf-haupt">Verstanden</button>
       </div>
