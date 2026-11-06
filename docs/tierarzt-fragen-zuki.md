@@ -36,7 +36,9 @@ Die Liste für Kito: [tierarzt-fragen-kito.md](tierarzt-fragen-kito.md). Fragen 
 - [ ] Wie viele Leckerlis sind erlaubt? (Die App warnt ab 10 % der Tageskalorien.)
 - [ ] Kito und Zuki fressen getrennt. Worauf soll ich achten, damit keiner beim anderen mitfrisst?
 - [ ] Falls bei Kito noch nicht gefragt: Was halten Sie von **veganem oder vegetarischem Katzenfutter**, besonders
-      beim Abnehmen? (Für einen neutralen Eintrag unter „Begriffe kurz erklärt“ in der App. Wir füttern es nicht.)
+      beim Abnehmen? (Seit Version 0.65.0 steht ein neutraler Eintrag unter „Begriffe kurz erklärt“. Wir füttern es nicht.)
+- [ ] Falls bei Kito noch nicht gefragt: Spielen **Zucker oder Getreide** im Futter beim Abnehmen eine Rolle, oder
+      zählen nur die kcal? Ist „getreidefrei“ für Zuki sinnvoll?
 
 ## 4. Sicherheit
 - [ ] Woran erkenne ich früh eine **Fettleber** (hepatische Lipidose)? Was tue ich, wenn Zuki nicht frisst?
@@ -83,3 +85,4 @@ Die Liste für Kito: [tierarzt-fragen-kito.md](tierarzt-fragen-kito.md). Fragen 
 | Fotos: hilfreich, welche Ansicht | |
 | Ausnahmen für die App | |
 | Veganes/vegetarisches Futter | |
+| Zucker/Getreide, getreidefrei | |

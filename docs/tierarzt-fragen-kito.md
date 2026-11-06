@@ -76,7 +76,10 @@ Die Liste für Zuki: [tierarzt-fragen-zuki.md](tierarzt-fragen-zuki.md).
 - [ ] In der PDF-Übersicht steht je Monat eine Bilanz in % pro Woche. Soll ein Monat mit mehr als 2 % pro Woche
       dort **markiert** sein? (Zu schnelle Phasen stehen bisher unter „Auffälligkeiten im Zeitraum“.)
 - [ ] Was halten Sie von **veganem oder vegetarischem Katzenfutter**, besonders beim Abnehmen?
-      (Für einen neutralen Eintrag unter „Begriffe kurz erklärt“ in der App, so wie bei BARF. Wir füttern es nicht.)
+      (Seit Version 0.65.0 steht ein neutraler Eintrag unter „Begriffe kurz erklärt“, bitte gegenlesen. Wir füttern es nicht.)
+- [ ] Spielen **Zucker oder Getreide** im Futter beim Abnehmen eine Rolle, oder zählen nur die kcal?
+      Ist „getreidefrei“ für Kito sinnvoll? (Für einen möglichen neutralen Eintrag „Zutatenliste“ in der App.)
+- [ ] Bitte den neuen Abschnitt **„Genug Wasser“** auf der Alltag-Seite gegenlesen (Nieren beim Nichtfressen, seit 0.66.0).
 
 ## Antworten
 | Frage | Antwort |
@@ -96,3 +99,5 @@ Die Liste für Zuki: [tierarzt-fragen-zuki.md](tierarzt-fragen-zuki.md).
 | Fotos: hilfreich, welche Ansicht | |
 | Ausnahmen für die App | |
 | Veganes/vegetarisches Futter | |
+| Zucker/Getreide, getreidefrei | |
+| Abschnitt „Genug Wasser“ | |
