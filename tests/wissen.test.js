@@ -12,7 +12,22 @@ const blatt = (html, id) => html.match(new RegExp(`<dialog id="${id}">([\\s\\S]*
 // Mengen wie "50 g pro Tag" oder "200 kcal am Tag" darf kein Erklärtext nennen (die Menge legt nur der Tierarzt fest).
 const MENGE_PRO_TAG = /\d[\d,.]*\s*(g|Gramm|kcal)\s*(pro|am|je|\/)\s*Tag/i;
 
-test("Begriffe: die 12 Begriffe aus dem Plan, alphabetisch sortiert", () => {
+// 0.65.0: „Vegan und vegetarisch“ (Ideen-Tafel, Stefan 06.11.2026 „so umsetzen“): neutral, mit Quelle, ohne Mengen,
+// ohne Sorten; Umstellung nur mit dem Tierarzt. Beim Termin am 13.11. gegenlesen lassen.
+test("0.65.0: Begriff „Vegan und vegetarisch“ neutral, mit Quellen beider Seiten und Verweis auf den Tierarzt", () => {
+  const b = BEGRIFFE.find((x) => x.id === "vegan");
+  assert.ok(b, "Begriff fehlt");
+  assert.equal(b.begriff, "Vegan und vegetarisch");
+  assert.match(b.text, /Taurin, Arachidonsäure und Vitamin A/);
+  assert.match(b.text, /besprich eine Umstellung vorher mit dem Tierarzt\.$/);
+  assert.match(b.text, /Fett und nicht Muskeln/);
+  assert.doesNotMatch(b.text, /gefährlich|ungesund|gesünder|Tierquälerei/i);
+  for (const quelle of ["NRC 2006", "Domínguez-Oliva et al. 2023", "Knight et al. 2023", "British Veterinary Association 2024", "AAHA 2014"]) {
+    assert.ok(b.quelle.includes(quelle), quelle);
+  }
+});
+
+test("Begriffe: die 13 Begriffe aus dem Plan, alphabetisch sortiert", () => {
   assert.deepEqual(BEGRIFFE.map((b) => b.begriff), [
     "Alleinfutter und Ergänzungsfutter",
     "Analytische Bestandteile",
@@ -25,6 +40,7 @@ test("Begriffe: die 12 Begriffe aus dem Plan, alphabetisch sortiert", () => {
     "Light und Sterilised",
     "Nassfutter und Trockenfutter",
     "RER (Ruheenergiebedarf)",
+    "Vegan und vegetarisch",
     "Zielgewicht",
   ]);
   const sortiert = [...BEGRIFFE].sort((a, b) => a.begriff.localeCompare(b.begriff, "de"));
@@ -174,9 +190,9 @@ test("Willkommensseite verspricht nichts, was die App nicht halten kann (Stefan,
   assert.doesNotMatch(html, /ohne Fettleber-Risiko|für jede Sorte/);
 });
 
-test("Version 0.64.0: Cache v119 mit js/rueckfrage.js, js/nachtragen.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
+test("Version 0.65.0: Cache v120 mit js/rueckfrage.js, js/nachtragen.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
   const sw = lies("sw.js");
-  assert.match(sw, /const CACHE_NAME = "kilossos-v119";/);
+  assert.match(sw, /const CACHE_NAME = "kilossos-v120";/);
   assert.match(sw, /"js\/nachtragen\.js",/);
   assert.match(sw, /"js\/rueckfrage\.js",/);
   assert.match(sw, /"demo\/kito-simulation\.json",/);
@@ -184,7 +200,7 @@ test("Version 0.64.0: Cache v119 mit js/rueckfrage.js, js/nachtragen.js und der 
   assert.match(sw, /"js\/besondere-tage\.js",/);
   assert.match(sw, /"js\/freigaben\.js",/);
   assert.match(sw, /"js\/heute-grafiken\.js",/);
-  assert.match(lies("index.html"), /id="version">Version 0\.64\.0</);
+  assert.match(lies("index.html"), /id="version">Version 0\.65\.0</);
 });
 
 // 0.42.7: Wiege-Tipp Transportbox im Bereich „Auf dem Arm gewogen?“ (Ideen-Tafel, Halter 06.11.2026).

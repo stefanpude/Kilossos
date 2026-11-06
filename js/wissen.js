@@ -126,6 +126,21 @@ export const BEGRIFFE = [
     quelle: "NRC 2006; AAHA 2014; Armstrong 2011 (WSAVA)",
   },
   {
+    // Seit 0.65.0 (Ideen-Tafel, Stefan 06.11.2026). Neutral: Stand der Forschung und Haltung eines Fachverbands,
+    // keine eigene Bewertung, keine Sorten, keine Mengen. Am 13.11. vom Tierarzt gegenlesen lassen.
+    id: "vegan",
+    begriff: "Vegan und vegetarisch",
+    text:
+      "Katzen sind Fleischfresser: Taurin, Arachidonsäure und Vitamin A müssen sie fertig mit dem Futter aufnehmen, " +
+      "veganes oder vegetarisches Katzenfutter setzt sie künstlich zu. Wie gut das auf Dauer klappt, ist wenig erforscht " +
+      "(die Studien sind klein oder beruhen auf Angaben der Halter), und der britische Tierärzteverband rät bei Katzen " +
+      "derzeit davon ab. Beim Abnehmen braucht die Katze genug Eiweiß, damit sie Fett und nicht Muskeln verliert, " +
+      "deshalb besprich eine Umstellung vorher mit dem Tierarzt.",
+    quelle:
+      "NRC 2006; Domínguez-Oliva et al. 2023 (systematische Übersicht, Veterinary Sciences); Knight et al. 2023 " +
+      "(Halter-Umfrage, PLOS ONE); British Veterinary Association 2024; AAHA 2014",
+  },
+  {
     id: "zielgewicht",
     begriff: "Zielgewicht",
     text:

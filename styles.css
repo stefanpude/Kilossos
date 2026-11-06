@@ -727,6 +727,7 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .kurve .linie { fill: none; stroke: var(--text); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 2000; stroke-dashoffset: 2000; animation: zeichnen 1.4s ease-out forwards; }
 .kurve .achse { fill: var(--text-leise); font-size: 11.5px; font-family: var(--sans); font-variant-numeric: tabular-nums; }
 .kurve .grundlinie { stroke: var(--rand-stark); stroke-width: 1; }
+.kurve .achsen-strich { stroke: var(--text-leise); stroke-width: 1; }
 .kurve .ziel { stroke: var(--akzent); stroke-width: 2; stroke-dasharray: 5 4; }
 .kurve .ziel-text { fill: var(--akzent); font-size: 12px; font-family: var(--serif); }
 .kurve .band { fill: var(--akzent-hell); opacity: 0.4; }

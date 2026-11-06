@@ -46,6 +46,18 @@ function schritte(min, max, anzahl = 4) {
   return werte;
 }
 
+// kg-Achse (seit 0.65.0, Wunsch 06.11.2026 „die Skalen könnten detaillierter sein“): nur Schritte 0,1 / 0,2 / 0,5 /
+// 1 / 2 kg, damit jede Zahl mit einer Nachkommastelle genau stimmt (vorher 0,25 kg: 6,25 stand als „6,3“ da).
+// Genommen wird der feinste Schritt, bei dem höchstens 9 Zahlen an der Achse stehen.
+function kgSchritte(min, max, hoechstens = 9) {
+  for (const schritt of [0.1, 0.2, 0.5, 1, 2, 5]) {
+    const werte = [];
+    for (let i = Math.ceil(min / schritt - 1e-6); i * schritt <= max + 1e-6; i++) werte.push(Math.round(i * schritt * 10) / 10);
+    if (werte.length <= hoechstens) return werte;
+  }
+  return [min, max];
+}
+
 function yAchse(werte, y, stellen = 0, einheit = "") {
   return werte
     .map(
@@ -140,7 +152,7 @@ export function gewichtDiagramm(gewichte, freigaben, bis = null, alle = gewichte
     )
     .join("");
   return svg(
-    yAchse(schritte(yMin, yMax), y, 1) +
+    yAchse(kgSchritte(yMin, yMax), y, 1) +
       zeitAchse(vonMs, bisMs, x) +
       band +
       zielLinie +
@@ -284,16 +296,11 @@ export function weicheKurve(gewichte, freigaben, von = null, bis = null) {
   const y = skala(yMin, yMax, KH - R.unten, R.oben);
   const unten = KH - R.unten;
 
-  const achse = schritte(yMin, yMax, 4)
+  const achse = kgSchritte(yMin, yMax)
     .map((w) => `<text class="achse" x="${R.links - 6}" y="${y(w) + 4}" text-anchor="end">${zahl(w, 1)}</text>`)
     .join("");
-  const monate = [];
-  const d = new Date(vonMs);
-  d.setDate(1);
-  d.setMonth(d.getMonth() + 1);
-  for (; d.getTime() <= bisMs; d.setMonth(d.getMonth() + 1)) {
-    monate.push(`<text class="achse" x="${x(d.getTime())}" y="${KH - 6}" text-anchor="middle">${d.toLocaleDateString("de-DE", { month: "short" })}</text>`);
-  }
+  // Zeitachse wie im PDF (seit 0.65.0): bis 6 Wochen jeder Montag, bis 12 Wochen jeder zweite, darüber Monate.
+  const zeit = zeitAchse(vonMs, bisMs, x, unten, KH);
 
   // Sicherer Bereich wie im PDF-Diagramm: ab der ersten Freigabe 0,5–2 % pro Woche vom Gewicht an diesem Tag.
   const sortiert = [...freigaben].sort((a, b) => a.datum.localeCompare(b.datum));
@@ -340,7 +347,7 @@ export function weicheKurve(gewichte, freigaben, von = null, bis = null) {
   const [lx, ly] = punkte.at(-1);
   const endText = ly < R.oben + 16 ? ly + 18 : ly - 9;
   return `<svg viewBox="0 0 ${KB} ${KH}" class="kurve" role="img" aria-label="Gewichtsverlauf von ${zahl(liste[0].kg, 2)} auf ${zahl(liste.at(-1).kg, 2)} kg" data-punkte="${sicher(JSON.stringify(tips))}">
-    ${band}${achse}${monate.join("")}
+    ${band}${achse}${zeit}
     <line class="grundlinie" x1="${R.links}" x2="${KB - R.rechts}" y1="${unten}" y2="${unten}"/>
     ${marken}${zielLinie}
     <path class="linie" d="${pfad}"/>
