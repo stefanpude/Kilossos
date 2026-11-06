@@ -2911,6 +2911,8 @@ document.addEventListener("click", (ereignis) => {
       return $("dialog-begriffe").showModal();
     case "warum-nicht-ab":
       return $("dialog-nicht-ab").showModal();
+    case "alltag-erklaerung":
+      return $("dialog-alltag").showModal();
     case "gramm-minus":
       return grammSchritt(-5);
     case "gramm-plus":
