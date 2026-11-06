@@ -305,3 +305,32 @@ test("Monatsfoto: „Abbrechen“ lässt beide Fenster-Wege offen, ohne etwas zu
   const eintragen = block.lastIndexOf("await frage(monatsfotoFrage(vorhanden))");
   assert.ok(eintragen < block.indexOf("daten.gewichte.push(eintrag)"), "vor dem Anlegen");
 });
+
+// ---------- Aufgabe 5: Einlesen und alle Daten löschen ----------
+test("Kein Browser-Fenster confirm() mehr in app.js und js/", () => {
+  const dateien = ["app.js", ...readdirSync(new URL("../js/", import.meta.url)).filter((d) => d.endsWith(".js")).map((d) => `js/${d}`)];
+  for (const datei of dateien) {
+    const code = lies(datei).replace(/\/\/.*$/gm, "");
+    assert.doesNotMatch(code, /\bconfirm\(/, datei);
+  }
+});
+
+test("Alle Daten löschen fragt zweimal, erst „Alles löschen“, dann „Endgültig löschen“, Texte gleich", () => {
+  const quelle = app();
+  const mehr = abschnitt(quelle, "async function allesLoeschen()", "\n}\n");
+  const notfall = abschnitt(quelle, '} else if (aktion === "loeschen") {', "location.reload();\n    }");
+  for (const [block, erste, zweite] of [
+    [mehr, "Wirklich ALLE Daten löschen? Einträge, Profil, Foto und Einstellungen auf diesem Handy gehen verloren.", "Letzte Rückfrage: Das lässt sich nicht rückgängig machen. Hast du eine Sicherung, falls du die Daten noch brauchst?"],
+    [notfall, "frage", "Letzte Rückfrage: Das lässt sich nicht rückgängig machen."],
+  ]) {
+    const a = block.indexOf(`await bestaetigt({ text: ${erste === "frage" ? "frage" : `"${erste}"`}, ja: "Alles löschen", gefahr: true })`);
+    const b = block.indexOf(`await bestaetigt({ text: "${zweite}", ja: "Endgültig löschen", gefahr: true })`);
+    assert.ok(a > 0 && b > a, `${a} < ${b}`);
+  }
+});
+
+test("Sicherung einlesen: Knopf „Einlesen“, rot, wenn Daten ersetzt werden", () => {
+  const quelle = app();
+  assert.ok(quelle.includes('await bestaetigt({ text: einleseFrage(neu, pruefung, ersetzen), ja: "Einlesen", gefahr: !einrichtungLaeuft })'));
+  assert.ok(quelle.includes('await bestaetigt({ text: einleseFrage(neu, pruefung, " Die unlesbaren Daten auf diesem Gerät werden dadurch ersetzt."), ja: "Einlesen", gefahr: true })'));
+});

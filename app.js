@@ -209,7 +209,7 @@ function zeigeLadeFehler(fehler) {
   </section>`;
   document.getElementById("lade-fehler-titel").focus();
   const karte = document.querySelector(".lade-fehler");
-  karte.addEventListener("click", (ereignis) => {
+  karte.addEventListener("click", async (ereignis) => {
     const aktion = ereignis.target.closest("[data-notfall]")?.dataset.notfall;
     if (aktion === "herunterladen") {
       const link = document.createElement("a");
@@ -229,8 +229,8 @@ function zeigeLadeFehler(fehler) {
         const frage = roh
           ? "Wirklich ALLE Daten löschen und neu anfangen? Hast du die gespeicherten Daten vorher heruntergeladen?"
           : "Wirklich ALLE Daten löschen und neu anfangen?";
-        if (!confirm(frage)) return;
-        if (!confirm("Letzte Rückfrage: Das lässt sich nicht rückgängig machen.")) return;
+        if (!(await bestaetigt({ text: frage, ja: "Alles löschen", gefahr: true }))) return;
+        if (!(await bestaetigt({ text: "Letzte Rückfrage: Das lässt sich nicht rückgängig machen.", ja: "Endgültig löschen", gefahr: true }))) return;
         for (const s of Object.keys(localStorage)) if (s.startsWith("kilossos-")) localStorage.removeItem(s);
       } catch {
         return alert("Der Speicher dieses Browsers ist gesperrt. Es wurde nichts gelöscht.");
@@ -250,7 +250,7 @@ function zeigeLadeFehler(fehler) {
     }
     const pruefung = sicherungPruefen(neu, tagSchluessel(new Date()));
     if (!pruefung) return alert("Diese Datei ist keine gültige Kilossos-Sicherung.");
-    if (!confirm(einleseFrage(neu, pruefung, " Die unlesbaren Daten auf diesem Gerät werden dadurch ersetzt."))) return;
+    if (!(await bestaetigt({ text: einleseFrage(neu, pruefung, " Die unlesbaren Daten auf diesem Gerät werden dadurch ersetzt."), ja: "Einlesen", gefahr: true }))) return;
     try {
       speichernInSpeicher(neu);
     } catch {
@@ -2723,7 +2723,8 @@ $("import-datei").addEventListener("change", async (ereignis) => {
     return;
   }
   const ersetzen = einrichtungLaeuft ? "" : " Alle Einträge auf diesem Handy werden dadurch ersetzt.";
-  if (!confirm(einleseFrage(neu, pruefung, ersetzen))) return;
+  // Rot, wenn die Sicherung Einträge ersetzt; in der Einrichtung gibt es noch nichts zu ersetzen.
+  if (!(await bestaetigt({ text: einleseFrage(neu, pruefung, ersetzen), ja: "Einlesen", gefahr: !einrichtungLaeuft }))) return;
   try {
     // Auch während der Einrichtung erlaubt: Die Sicherung ersetzt den Platzhalter vollständig.
     speichernInSpeicher(neu);
@@ -2735,10 +2736,10 @@ $("import-datei").addEventListener("change", async (ereignis) => {
 });
 
 // Recht auf Löschung (DSGVO): alles, was Kilossos auf diesem Gerät gespeichert hat. Doppelt nachfragen.
-function allesLoeschen() {
+async function allesLoeschen() {
   if (demo) return zeigeToast("In der Demo gibt es nichts Echtes zu löschen.", 2500);
-  if (!confirm("Wirklich ALLE Daten löschen? Einträge, Profil, Foto und Einstellungen auf diesem Handy gehen verloren.")) return;
-  if (!confirm("Letzte Rückfrage: Das lässt sich nicht rückgängig machen. Hast du eine Sicherung, falls du die Daten noch brauchst?")) return;
+  if (!(await bestaetigt({ text: "Wirklich ALLE Daten löschen? Einträge, Profil, Foto und Einstellungen auf diesem Handy gehen verloren.", ja: "Alles löschen", gefahr: true }))) return;
+  if (!(await bestaetigt({ text: "Letzte Rückfrage: Das lässt sich nicht rückgängig machen. Hast du eine Sicherung, falls du die Daten noch brauchst?", ja: "Endgültig löschen", gefahr: true }))) return;
   for (const schluessel of Object.keys(localStorage)) {
     if (schluessel.startsWith("kilossos-")) localStorage.removeItem(schluessel);
   }
