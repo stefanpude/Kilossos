@@ -27,7 +27,9 @@ Vor dem Bau: Skill `migration` (neues Feld im Profil), dann TDD. Den Satz für d
 2. **Neues freiwilliges Feld „Adresse der Praxis (optional)“** im Profil, unter dem Telefon, `maxlength` 80,
    Platzhalter z. B. „Musterstraße 1, 12345 Musterstadt“. Gespeichert als `tierarzt.adresse`.
 3. **Eintrag „Weg zur Praxis“** unter „Mehr“ in der Gruppe „Tierarzt“, direkt unter „‹Praxis› anrufen“, nur wenn
-   eine Adresse eingetragen ist. Öffnet in einem neuen Tab (`target="_blank" rel="noopener"`)
+   eine Adresse eingetragen ist. **Nachtrag 06.11. (0.45.0):** Die Gruppe „Tierarzt“ enthält seitdem nur noch
+   `#tierarzt-liste` mit „‹Praxis› anrufen“ und ist ohne Telefon ganz versteckt (`app.js`, `$("tierarzt-liste").hidden`).
+   Beim Bau die Liste also auch zeigen, wenn nur eine Adresse da ist. Öffnet in einem neuen Tab (`target="_blank" rel="noopener"`)
    `https://www.google.com/maps/search/?api=1&query=` + `encodeURIComponent(praxis + ", " + adresse)`
    (ohne Praxisname nur die Adresse). Auf dem Handy öffnet sich die Google-Maps-App, wenn sie installiert ist,
    sonst die Webseite. Das ist die von Google dokumentierte Form („Maps URLs“) und funktioniert auf Android,

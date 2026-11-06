@@ -1,5 +1,9 @@
 # „Mehr“ als ruhige Einstellungsliste – Umsetzungsplan (Version 0.24.0)
 
+> **Stand 06.11.2026: teils überholt.** Seit 0.45.0 stehen die Erklärseiten unter „Wissen“, unter „Tierarzt“ steht nur
+> noch „‹Praxis› anrufen“ (ohne Telefon ist die Gruppe versteckt), und „Fotos mitnehmen“ ist durch den Haken
+> „Fotos zeigen“ oben in der Übersicht ersetzt. Maßgeblich ist der Code (`index.html`, `app.js`).
+
 > **Für ausführende Agenten:** Pflicht-Skill: superpowers:executing-plans (oder superpowers:subagent-driven-development). Schritte mit Checkbox (`- [ ]`).
 
 **Ziel:** Der Bereich „Mehr“ wird eine ruhige Einstellungsliste im Wiegeprotokoll-Stil. Es ändern sich nur Look und Ordnung, keine Funktion und kein Sicherheitstext fällt weg.

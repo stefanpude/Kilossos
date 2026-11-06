@@ -21,6 +21,7 @@ Ausgangslage 0.25.0: Foto-Feld im Gewicht-Dialog immer sichtbar, höchstens 1 Fo
 
 ## Fotos im Bericht
 - Haken „Fotos mitnehmen“ unter „Mehr“ → erstes und letztes Foto im Zeitraum mit Datum und kg.
+  (Seit 0.45.0 heißt er „Fotos zeigen“ und steht oben in der Übersicht selbst, nicht mehr unter „Mehr“.)
 
 ## Geprüft
 - `npm test`, Browser 375 px hell/dunkel, 150 % Schrift, Code-Reviews eingearbeitet.
