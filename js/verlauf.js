@@ -175,8 +175,31 @@ export function gewichtDiagramm(gewichte, freigaben, bis = null, alle = gewichte
   );
 }
 
+const r1 = (v) => Math.round(v * 10) / 10;
+// Tag n nach einem Zeitpunkt, als Kalenderrechnung (Zeitumstellung), optional zu einer Uhrzeit.
+const plusTage = (zeitMs, n, stunde = 0) => {
+  const d = new Date(zeitMs);
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n, stunde).getTime();
+};
+
+// Bezugswert einer Woche (seit 0.68.0): Durchschnitt der Freigaben, die an den eingetragenen Tagen galten.
+// Galt an einem dieser Tage noch keine Freigabe (Woche der ersten Freigabe), gibt es keinen Bezugswert (null).
+// Vorher galt für die ganze Woche die Freigabe vom Sonntag; dann wurde die Woche der ersten Freigabe an der neuen
+// Menge gemessen, obwohl die Katze die halbe Woche noch normal gefressen hatte.
+export function wochenBezug(tage, freigaben) {
+  if (!tage.length) return null;
+  let summe = 0;
+  for (const tag of tage) {
+    const f = aktuelleFreigabe(freigaben, tag);
+    if (!f) return null;
+    summe += f.kcalProTag;
+  }
+  return summe / tage.length;
+}
+
 // Durchschnitt pro Woche (Montag bis Sonntag), damit auch lange Zeiträume lesbar bleiben.
-function wochenKcal(mahlzeiten, futterNachId) {
+// Seit 0.68.0 mit den eingetragenen Tagen und dem Bezugswert der Woche.
+export function wochenKcal(mahlzeiten, futterNachId, freigaben = []) {
   const proTag = new Map();
   for (const m of mahlzeiten) {
     const tag = tagSchluessel(new Date(m.zeitpunkt));
@@ -188,73 +211,198 @@ function wochenKcal(mahlzeiten, futterNachId) {
     const d = new Date(ms(tag));
     d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
     const montag = tagSchluessel(d);
-    const w = wochen.get(montag) ?? { montag, tage: 0, kcal: 0, leckerli: 0 };
-    w.tage += 1;
+    const w = wochen.get(montag) ?? { montag, tage: [], kcal: 0, leckerli: 0 };
+    w.tage.push(tag);
     w.kcal += tagesSumme(liste, futterNachId).kcal;
     w.leckerli += leckerliKcal(liste, futterNachId);
     wochen.set(montag, w);
   }
   return [...wochen.values()]
     .sort((a, b) => a.montag.localeCompare(b.montag))
-    .map((w) => ({ montag: w.montag, kcal: w.kcal / w.tage, leckerli: w.leckerli / w.tage }));
+    .map((w) => {
+      const tage = w.tage.sort();
+      return { montag: w.montag, tage, kcal: w.kcal / tage.length, leckerli: w.leckerli / tage.length, bezug: wochenBezug(tage, freigaben) };
+    });
 }
 
+// Achse des kcal-Diagramms (seit 0.68.0): eng, nicht ab 0, damit Abweichungen von der Freigabe sichtbar sind.
+// Mit Freigabe: Wochenwerte und Freigabe ±15 % (das Band ±10 % passt ganz hinein); ohne: Werte −10 % bis +8 %.
+// Auf 20 kcal gerundet, mindestens 80 kcal Spanne; Hilfslinien alle 20, bei mehr als 120 kcal Spanne alle 40.
+export function kcalAchse(werte, freigabeWerte) {
+  const mit = freigabeWerte.length > 0;
+  const puffer = GRENZEN.spielraum + 0.05; // das Band ±spielraum passt immer ganz hinein
+  const loRoh = Math.min(...werte.map((v) => (mit ? v : v * 0.9)), ...freigabeWerte.map((f) => f * (1 - puffer)));
+  // Oben etwas Luft über dem höchsten Wert (seit Prüfer-Fund 3): Punkt und Zahl stoßen nicht an den Rand.
+  const hiRoh = Math.max(...werte.map((v) => v * (mit ? 1.04 : 1.08)), ...freigabeWerte.map((f) => f * (1 + puffer)));
+  let lo = Math.floor(loRoh / 20) * 20;
+  let hi = Math.ceil(hiRoh / 20) * 20;
+  if (hi - lo < 80) lo = hi - 80;
+  if (lo < 0) {
+    lo = 0;
+    hi = Math.max(hi, 80);
+  }
+  // Hilfslinien alle 20, ab 120 kcal Spanne alle 40; bei Ausreißern (Prüfer-Fund 2, z. B. Tippfehler 4000 g)
+  // 100/200/500, damit höchstens 9 Zahlen an der Achse stehen. Ab 100 beginnt die Achse auf einem Vielfachen.
+  let schritt = hi - lo > 120 ? 40 : 20;
+  if ((hi - lo) / schritt > 8) schritt = [100, 200, 500, 1000, 2000].find((s) => (hi - lo) / s <= 8) ?? 5000;
+  if (schritt >= 100) lo = Math.floor(lo / schritt) * schritt;
+  // Oben endet die Achse auf einer Hilfslinie (im 40er-Raster sonst z. B. 220–360 mit Linien 220 … 340).
+  return { lo, hi: lo + Math.ceil((hi - lo) / schritt) * schritt, schritt };
+}
+
+// Mittellinie des Bands ±10 % als Punkte [Zeit, kcal] (seit 0.68.0): ab dem Start (Tag der ersten Freigabe bzw.
+// Achsenanfang) mit startWert, an jeder Wochenmitte genau deren Bezugswert, dazwischen weicher Übergang (Smoothstep,
+// 15 Zwischenpunkte). Ändert sich nichts, bleibt es gerade. Am Ende gerade bis endMs.
+export function kcalBand(bezuege, startWert, startMs, endMs) {
+  const p = [[startMs, startWert]];
+  for (const { mitteMs, bezug } of bezuege) {
+    if (mitteMs <= startMs || mitteMs >= endMs) continue;
+    const [t0, v0] = p.at(-1);
+    if (bezug !== v0) {
+      for (let s = 1; s < 16; s++) {
+        const t = s / 16;
+        p.push([t0 + (mitteMs - t0) * t, v0 + (bezug - v0) * t * t * (3 - 2 * t)]);
+      }
+    }
+    p.push([mitteMs, bezug]);
+  }
+  p.push([endMs, p.at(-1)[1]]);
+  return p;
+}
+
+// Maße des kcal-Diagramms (seit 0.68.0): höher als die anderen PDF-Diagramme, unten die Leckerli-Spur.
+const KD = { hoehe: 214, unten: 148, achseHoehe: 170, spurOben: 186, spurUnten: 206, spurMax: 15 };
+const NBSP = " "; // geschütztes Leerzeichen zwischen Zahl und Einheit
+
+// PDF „Kalorien pro Tag, Durchschnitt je Woche“ (seit 0.68.0, Spezifikation .planning/grafiken-auswahl.md
+// Abschnitt 4, Variante B mit weichem Übergang): ein Punkt je Woche auf enger Achse, Freigabe als Stufe am Tag der
+// Freigabe, Band ±10 % um den Bezugswert der Woche, Punkte außerhalb in Bernstein mit Wert, Leckerli-Anteil als Spur.
+// Vorher Säulen ab 0, darin sah der Tierarzt Abweichungen von der Freigabe kaum.
 export function kcalDiagramm(mahlzeiten, futterNachId, freigaben) {
-  const wochen = wochenKcal(mahlzeiten, futterNachId);
   const sortiert = [...freigaben].sort((a, b) => a.datum.localeCompare(b.datum));
-  const yMax = Math.max(...wochen.map((w) => w.kcal), ...sortiert.map((f) => f.kcalProTag)) * 1.1;
-  const y = skala(0, yMax, H - RAND.unten, RAND.oben);
-  // Ein Feld je Kalenderwoche von der ersten bis zur letzten, auch für Wochen ohne Einträge (seit 0.36.2; vorher
-  // rückten die Säulen nach einer leeren Woche nach links und standen über der falschen Beschriftung).
+  const wochen = wochenKcal(mahlzeiten, futterNachId, sortiert);
+  // Ein Feld je Kalenderwoche von der ersten bis zur letzten, auch für Wochen ohne Einträge (seit 0.36.2).
   const vonMs = ms(wochen[0].montag);
-  const [bj, bm, bt] = wochen.at(-1).montag.split("-").map(Number);
-  const bisMs = new Date(bj, bm - 1, bt + 7).getTime(); // Kalender statt + 7 × 24 h: sonst fehlt bei Zeitumstellung die letzte Achsenmarke
+  const bisMs = plusTage(ms(wochen.at(-1).montag), 7); // Kalender statt + 7 × 24 h wegen der Zeitumstellung
+  const vonTag = wochen[0].montag;
+  const bisTag = tagSchluessel(new Date(plusTage(bisMs, -1)));
   const wocheNr = (montag) => Math.round((ms(montag) - vonMs) / (7 * TAG_MS));
   const anzahl = wocheNr(wochen.at(-1).montag) + 1;
   const slot = innenB / anzahl;
-  const breite = Math.min(24, Math.max(3, slot - 2));
-  const x = (i) => RAND.links + slot * (i + 0.5);
-  const ecke = Math.min(4, breite / 2);
-  const saeulen = wochen
+  const xt = skala(vonMs, bisMs, RAND.links, B - RAND.rechts);
+  const mitteX = (montag) => r1(RAND.links + slot * (wocheNr(montag) + 0.5));
+
+  // Freigaben im Zeitraum als Wechselpunkte [Zeit, kcal]: die am Achsenanfang geltende und jede neue danach.
+  const wechsel = [];
+  const anfang = aktuelleFreigabe(sortiert, vonTag);
+  if (anfang) wechsel.push([vonMs, anfang.kcalProTag]);
+  for (const datum of new Set(sortiert.map((f) => f.datum))) {
+    if (datum > vonTag && datum <= bisTag) wechsel.push([ms(datum), aktuelleFreigabe(sortiert, datum).kcalProTag]);
+  }
+
+  const { lo, hi, schritt } = kcalAchse(
+    wochen.map((w) => w.kcal),
+    wechsel.map(([, v]) => v)
+  );
+  const y = (v) => r1(KD.unten - ((v - lo) / (hi - lo)) * (KD.unten - RAND.oben));
+  const gitter = [];
+  for (let v = lo; v <= hi + 1e-9; v += schritt) gitter.push(v);
+
+  let band = "";
+  let stufe = "";
+  if (wechsel.length) {
+    const linie = wechsel.flatMap(([t, v], i) => [`${r1(xt(t))},${y(v)}`, `${r1(xt(wechsel[i + 1]?.[0] ?? bisMs))},${y(v)}`]);
+    stufe = `<polyline class="freigabe-linie" points="${linie.join(" ")}"/>
+      <text class="beschriftung" x="${B - RAND.rechts + 4}" y="${y(wechsel.at(-1)[1]) + 4}">Freigabe</text>`;
+    // Bezugswerte aller Wochen; Wochen ohne Eintrag zählen mit allen 7 Tagen.
+    const nachMontag = new Map(wochen.map((w) => [w.montag, w]));
+    const bezuege = [];
+    for (let i = 0; i < anzahl; i++) {
+      const montagMs = plusTage(vonMs, 7 * i);
+      const montag = tagSchluessel(new Date(montagMs));
+      const bezug = nachMontag.has(montag)
+        ? nachMontag.get(montag).bezug
+        : wochenBezug(Array.from({ length: 7 }, (_, n) => tagSchluessel(new Date(plusTage(montagMs, n)))), sortiert);
+      if (bezug !== null) bezuege.push({ mitteMs: plusTage(montagMs, 3, 12), bezug });
+    }
+    const mitte = kcalBand(bezuege, wechsel[0][1], wechsel[0][0], bisMs);
+    const kante = (faktor) => mitte.map(([t, v]) => `${r1(xt(t))},${y(v * faktor)}`);
+    band = `<polygon class="kcal-band" points="${kante(1 + GRENZEN.spielraum)
+      .concat(kante(1 - GRENZEN.spielraum).reverse())
+      .join(" ")}"/>`;
+  }
+
+  // Wochenwerte: Linie nur zwischen aufeinanderfolgenden Wochen, leere Wochen unterbrechen sie.
+  const stuecke = [];
+  wochen.forEach((w, i) => {
+    if (i && wocheNr(w.montag) === wocheNr(wochen[i - 1].montag) + 1) stuecke.at(-1).push(w);
+    else stuecke.push([w]);
+  });
+  const linien = stuecke
+    .filter((s) => s.length > 1)
+    .map((s) => `<polyline class="kcal-linie" points="${s.map((w) => `${mitteX(w.montag)},${y(w.kcal)}`).join(" ")}"/>`)
+    .join("");
+  const r = anzahl > 20 ? 2.4 : 3.2;
+  // Zahlen über Ausreißern nur, wenn je Woche Platz für eine Zahl ist (Prüfer-Fund 4); sonst erkennt man sie am
+  // dunklen Rand des Punkts (auch schwarzweiß).
+  const mitZahl = slot >= 14;
+  const punkte = wochen
     .map((w) => {
-      const i = wocheNr(w.montag);
-      const links = x(i) - breite / 2;
-      const rechts = x(i) + breite / 2;
-      const yFutter = y(w.kcal - w.leckerli);
-      const yGesamt = y(w.kcal);
-      // Futter unten, Leckerli oben mit 2 px Lücke; das obere Stück bekommt die runde Ecke.
-      const futterTeil = w.leckerli > 0 ? `<rect class="saeule" x="${links}" y="${yFutter}" width="${breite}" height="${y(0) - yFutter}"/>` : "";
-      const oben = w.leckerli > 0 ? yGesamt : yFutter;
-      const unten = w.leckerli > 0 ? yFutter - 2 : y(0);
-      const klasse = w.leckerli > 0 ? "saeule-2" : "saeule";
-      const kappe = `<path class="${klasse}" d="M${links},${unten} V${oben + ecke} Q${links},${oben} ${links + ecke},${oben} H${rechts - ecke} Q${rechts},${oben} ${rechts},${oben + ecke} V${unten} Z"/>`;
-      // Wie die Stufenlinie: die Freigabe, die am Sonntag der Woche galt (vorher Montag, Tooltip und Linie wichen ab).
-      const [wj, wm, wt] = w.montag.split("-").map(Number);
-      const freigabe = aktuelleFreigabe(sortiert, tagSchluessel(new Date(wj, wm - 1, wt + 6, 12)));
-      const tip =
-        `Woche ab ${kurzDatum(w.montag)}: Ø ${zahl(w.kcal)} kcal/Tag, davon ${zahl(w.leckerli)} Leckerli` +
-        (freigabe ? ` · freigegeben ${zahl(freigabe.kcalProTag)}` : "");
-      return treffer(x(i), slot, tip, futterTeil + kappe);
+      // Gleiche Rechnung wie die Warnungen in rechnen.js: genau ±10 % gilt als eingehalten (Prüfer-Fund 1).
+      const raus = w.bezug !== null && (w.kcal > (1 + GRENZEN.spielraum) * w.bezug || w.kcal < (1 - GRENZEN.spielraum) * w.bezug);
+      const py = y(w.kcal);
+      const wertY = py < 24 ? py + 13 : py - 6; // ganz oben unter den Punkt, sonst darüber
+      const wert = raus && mitZahl ? `<text class="kcal-wert" x="${mitteX(w.montag)}" y="${r1(wertY)}" text-anchor="middle">${zahl(w.kcal)}</text>` : "";
+      return `<circle class="kcal-punkt${raus ? " raus" : ""}" cx="${mitteX(w.montag)}" cy="${y(w.kcal)}" r="${r}"/>${wert}`;
     })
     .join("");
-  // Freigabe als Stufenlinie über die Wochen.
-  let stufen = "";
-  const punkte = [];
-  for (let i = 0; i < anzahl; i++) {
-    // Sonntag der Woche i; Kalenderrechnung statt + 6 × 24 h wegen der Zeitumstellung.
-    const montag = new Date(vonMs);
-    const sonntag = new Date(montag.getFullYear(), montag.getMonth(), montag.getDate() + 7 * i + 6, 12);
-    const f = aktuelleFreigabe(sortiert, tagSchluessel(sonntag));
-    if (f) punkte.push([RAND.links + slot * i, y(f.kcalProTag)], [RAND.links + slot * (i + 1), y(f.kcalProTag)]);
-  }
-  if (punkte.length) {
-    stufen = `<polyline class="freigabe-linie" points="${punkte.map((p) => p.join(",")).join(" ")}"/>
-      <text class="beschriftung" x="${B - RAND.rechts + 4}" y="${punkte.at(-1)[1] + 4}">Freigabe</text>`;
-  }
-  return svg(
-    yAchse(schritte(0, yMax), y) + zeitAchse(vonMs, bisMs, skala(vonMs, bisMs, RAND.links, B - RAND.rechts)) + saeulen + stufen,
-    "Kalorien pro Tag, Wochendurchschnitt"
-  );
+
+  // Leckerli-Anteil je Woche als schmaler Balken, 0 bis 15 % (darüber abgeschnitten), Grenze leckerliMax.
+  const sy = (p) => r1(KD.spurUnten - (Math.min(p, KD.spurMax) / KD.spurMax) * (KD.spurUnten - KD.spurOben));
+  const sb = r1(Math.min(10, Math.max(2, slot - 3)));
+  const grenze = GRENZEN.leckerliMax * 100;
+  const spur = wochen
+    .map((w) => {
+      const p = w.kcal ? (w.leckerli / w.kcal) * 100 : 0;
+      return p > 0
+        ? `<rect class="kcal-leck${p > grenze ? " raus" : ""}" x="${r1(mitteX(w.montag) - sb / 2)}" y="${sy(p)}" width="${sb}" height="${r1(KD.spurUnten - sy(p))}"/>`
+        : "";
+    })
+    .join("");
+
+  // Tooltip je Woche (Übersicht in der App); in einer Woche mit Wechsel beide Freigaben.
+  const tipps = wochen
+    .map((w) => {
+      const teile = [];
+      let vorher = null;
+      for (const tag of w.tage) {
+        const f = aktuelleFreigabe(sortiert, tag);
+        const v = f?.kcalProTag ?? null;
+        // „ab“ mit dem echten Datum der Freigabe, auch wenn an dem Tag nichts eingetragen ist (Prüfer-Fund 7).
+        const ab = f && f.datum > w.montag ? f.datum : tag;
+        if (v !== null && v !== vorher) teile.push(teile.length || tag !== w.tage[0] ? `ab ${kurzDatum(ab)} ${zahl(v)}` : zahl(v));
+        vorher = v;
+      }
+      const tip = `Woche ab ${kurzDatum(w.montag)}: Ø ${zahl(w.kcal)} kcal/Tag, davon ${zahl(w.leckerli)} Leckerli` + (teile.length ? ` · freigegeben ${teile.join(", ")}` : "");
+      return treffer(RAND.links + slot * (wocheNr(w.montag) + 0.5), slot, tip);
+    })
+    .join("");
+
+  return `<svg viewBox="0 0 ${B} ${KD.hoehe}" class="diagramm" role="img" aria-label="Kalorien pro Tag, Wochendurchschnitt">${band}${gitter
+    .map(
+      // Die unterste Linie ohne Zahl: Der Wert steht im Hinweis oben, und die Zahl stieße sonst ans erste Datum.
+      (v) =>
+        `<line class="gitter" x1="${RAND.links}" x2="${B - RAND.rechts}" y1="${y(v)}" y2="${y(v)}"/>` +
+        (v === lo ? "" : `<text class="achse" x="${RAND.links - 6}" y="${y(v) + 3.5}" text-anchor="end">${zahl(v)}</text>`)
+    )
+    .join("")}${stufe}${linien}${punkte}
+    <text class="kcal-hinweis" x="${RAND.links}" y="${RAND.oben - 3}">Achse beginnt bei ${zahl(lo)}${NBSP}kcal</text>
+    ${zeitAchse(vonMs, bisMs, xt, KD.unten, KD.achseHoehe)}
+    <text class="achse" x="${RAND.links - 6}" y="${KD.spurOben + 8}" text-anchor="end">Leck.</text>
+    <line class="kcal-spur-grund" x1="${RAND.links}" x2="${B - RAND.rechts}" y1="${KD.spurUnten}" y2="${KD.spurUnten}"/>
+    <line class="kcal-grenze" x1="${RAND.links}" x2="${B - RAND.rechts}" y1="${sy(grenze)}" y2="${sy(grenze)}"/>
+    <text class="beschriftung" x="${B - RAND.rechts + 4}" y="${sy(grenze) + 4}">${zahl(grenze)}${NBSP}%</text>
+    ${spur}${tipps}</svg>`;
 }
 
 // ---------- Verlauf-Ansicht „Wiegeprotokoll“ (ab 0.23.0, vorher weiche Kurve seit 0.7.0) ----------

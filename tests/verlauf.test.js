@@ -500,7 +500,7 @@ test("gewichtDiagramm (PDF): Freigabe am Berichtsende zeichnet kein leeres Band"
 
 // 0.36.2: kcal-Säulen im PDF stehen nach Datum, nicht nach Reihenfolge (Sicherheits-Review 05.11.2026). Fehlte eine
 // Woche ohne Einträge, rückten die folgenden Säulen nach links und standen über der falschen Wochen-Beschriftung.
-test("kcalDiagramm (PDF): Woche ohne Einträge bleibt als Lücke, die Säulen stehen an ihrer Woche", () => {
+test("kcalDiagramm (PDF): Woche ohne Einträge bleibt als Lücke, die Trefferflächen stehen an ihrer Woche", () => {
   const futterNachId = new Map([["s", { id: "s", typ: "nass", kcalPro100g: 77 }]]);
   const M = (tag) => ({ tierId: "k", futterId: "s", gramm: 200, zeitpunkt: new Date(`${tag}T08:00:00`).toISOString() });
   const svgText = kcalDiagramm([M("2026-10-05"), M("2026-10-12"), M("2026-10-26")], futterNachId, []);

@@ -430,14 +430,18 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
       return t >= f.von && t <= f.bis;
     });
     if (mz.length) {
-      const diagramm = kcalDiagramm(mz, futterNachId, freigaben);
-      // „Freigabe“ nur in der Legende, wenn das Diagramm die Linie auch zeichnet (ohne Freigabe im Zeitraum keine).
-      const linie = diagramm.includes('class="freigabe-linie"')
-        ? `<li><span class="schluessel strich"></span>Freigabe</li>`
+      // Nur Freigaben bis zum Ende der Fütterungsdaten, wie bei der Gewichtskurve (Prüfer-Fund 5: am Termin
+      // eingetragene Freigabe erschien sonst in der letzten Woche).
+      const diagramm = kcalDiagramm(mz, futterNachId, freigaben.filter((fr) => fr.datum <= f.bis));
+      // „Freigabe“ und Band nur in der Legende, wenn das Diagramm sie auch zeichnet (ohne Freigabe im Zeitraum keine);
+      // dann steht stattdessen ein Satz unter dem Diagramm (seit 0.68.0).
+      const mitFreigabe = diagramm.includes('class="freigabe-linie"');
+      const freigabeTeil = mitFreigabe
+        ? `<li><span class="schluessel strich"></span>Freigabe</li><li><span class="schluessel kcal-band-s"></span>±${zahl(GRENZEN.spielraum * 100)} % gilt als eingehalten</li>`
         : "";
       teile.push(`<h3>Kalorien pro Tag, Durchschnitt je Woche</h3>
-        <ul class="legende"><li><span class="schluessel reihe-1"></span>Futter</li><li><span class="schluessel reihe-2"></span>Leckerli</li>${linie}</ul>
-        ${diagramm}`);
+        <ul class="legende"><li><span class="schluessel kcal-punkt-s"></span>Wochen-Ø (inkl. Leckerli)</li>${freigabeTeil}<li><span class="schluessel kcal-leck-s"></span>Leckerli-Anteil</li></ul>
+        ${diagramm}${mitFreigabe ? "" : `<p class="bericht-klein">Noch keine Freigabe im Zeitraum: nur die Wochenwerte, ohne Band.</p>`}`);
     }
   } else {
     teile.push(`<p>Im Zeitraum sind keine Mahlzeiten an abgeschlossenen Tagen eingetragen.</p>`);

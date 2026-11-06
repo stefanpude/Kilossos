@@ -159,8 +159,17 @@ test("berichtHtml: Legende „Freigabe“ nur, wenn das Diagramm eine Freigabe-L
   const spaeter = { ...freigabe, datum: "2026-12-01" };
   assert.doesNotMatch(html([spaeter]), /class="freigabe-linie"/);
   assert.doesNotMatch(html([spaeter]), legende);
-  // Futter und Leckerli stehen immer in der Legende
-  assert.match(html([]), /reihe-1"><\/span>Futter<\/li><li><span class="schluessel reihe-2"><\/span>Leckerli/);
+  // Seit 0.68.0: Wochen-Ø und Leckerli-Anteil stehen immer in der Legende, das Band nur mit Freigabe,
+  // ohne Freigabe steht ein Satz unter dem Diagramm.
+  assert.match(html([]), /kcal-punkt-s"><\/span>Wochen-Ø \(inkl\. Leckerli\)<\/li>/);
+  assert.match(html([]), /kcal-leck-s"><\/span>Leckerli-Anteil<\/li>/);
+  assert.match(html([freigabe]), /kcal-band-s"><\/span>±10 % gilt als eingehalten<\/li>/);
+  assert.doesNotMatch(html([]), /gilt als eingehalten/);
+  assert.match(html([]), /Noch keine Freigabe im Zeitraum: nur die Wochenwerte, ohne Band\./);
+  assert.doesNotMatch(html([freigabe]), /Noch keine Freigabe im Zeitraum/);
+  // Prüfer 5 (0.68.0): Freigabe nach dem Ende der Fütterungsdaten (am Termin eingetragen) zählt im kcal-Diagramm nicht.
+  assert.match(html([spaeter]), /Noch keine Freigabe im Zeitraum/);
+  assert.doesNotMatch(html([spaeter]), /gilt als eingehalten/);
 });
 
 // ---------- 0.33.0: Besondere Tage im Bericht ----------
