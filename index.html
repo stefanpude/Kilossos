@@ -201,6 +201,11 @@
         <button class="knopf-zweit" data-ziel="mehr"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.5 6l-6 6 6 6"/></svg>Zurück</button>
         <button class="knopf-haupt" data-aktion="bericht-drucken">Drucken / als PDF speichern</button>
         <p class="tipp">Im Druckfenster als Drucker „Als PDF speichern“ wählen.</p>
+        <!-- Fotos nur auf Wunsch (0.45.0, vorher „Fotos mitnehmen“ unter „Mehr“). Umschalten zeichnet die Übersicht neu; im Druck unsichtbar. -->
+        <label class="bericht-schalter">
+          <input type="checkbox" id="bericht-fotos">
+          <span>Fotos zeigen<small>erstes und letztes Foto im Zeitraum</small></span>
+        </label>
       </div>
       <article class="bericht" id="bericht-inhalt"></article>
     </section>
@@ -233,17 +238,9 @@
         <p class="tipp">Zielgewicht und Tagesmenge legt nur der Tierarzt fest. Ohne Freigabe zeichnet Kilossos nur auf und warnt, schlägt aber keine Mengen vor.</p>
         <button class="knopf-haupt" data-aktion="freigabe-neu">Freigabe eintragen</button>
       </div>
-      <div class="liste">
+      <!-- Unter „Tierarzt“ nur, womit man etwas tut (0.45.0). Ohne Telefonnummer ist die ganze Liste versteckt, kein leerer Kasten. -->
+      <div class="liste" id="tierarzt-liste" hidden>
         <a class="eintrag" id="praxis-anrufen" hidden></a>
-        <button type="button" class="eintrag" data-aktion="warum-kein-ziel">
-          <span data-symbol="frage"></span><span class="text">Warum keine Futtermenge?</span><span class="weiter" data-symbol="weiter"></span>
-        </button>
-        <button type="button" class="eintrag" data-aktion="bcs-erklaerung">
-          <span data-symbol="frage"></span><span class="text">Was ist der BCS?</span><span class="weiter" data-symbol="weiter"></span>
-        </button>
-        <button type="button" class="eintrag" data-aktion="grenzen-erklaerung">
-          <span data-symbol="frage"></span><span class="text">Welche Grenzen gelten?</span><span class="weiter" data-symbol="weiter"></span>
-        </button>
       </div>
 
       <h3 class="gruppe-titel">Übersicht für den Tierarzt</h3>
@@ -252,11 +249,6 @@
           <span data-symbol="kalender"></span><span class="text" id="label-bericht-zeitraum">Zeitraum</span>
           <div id="bericht-zeitraum-feld"></div>
         </div>
-        <label class="eintrag eintrag-haken">
-          <span data-symbol="kamera"></span>
-          <span class="text">Fotos mitnehmen<small>Erstes und letztes Foto im Zeitraum, zum Vergleich.</small></span>
-          <input type="checkbox" id="bericht-fotos">
-        </label>
         <button type="button" class="eintrag" data-aktion="bericht-oeffnen">
           <span data-symbol="dokument"></span>
           <span class="text">Übersicht öffnen
@@ -269,6 +261,15 @@
       <div class="liste">
         <button type="button" class="eintrag" data-aktion="begriffe-erklaerung">
           <span data-symbol="buch"></span><span class="text">Begriffe kurz erklärt</span><span class="weiter" data-symbol="weiter"></span>
+        </button>
+        <button type="button" class="eintrag" data-aktion="warum-kein-ziel">
+          <span data-symbol="frage"></span><span class="text">Warum keine Futtermenge?</span><span class="weiter" data-symbol="weiter"></span>
+        </button>
+        <button type="button" class="eintrag" data-aktion="bcs-erklaerung">
+          <span data-symbol="frage"></span><span class="text">Was ist der BCS?</span><span class="weiter" data-symbol="weiter"></span>
+        </button>
+        <button type="button" class="eintrag" data-aktion="grenzen-erklaerung">
+          <span data-symbol="frage"></span><span class="text">Welche Grenzen gelten?</span><span class="weiter" data-symbol="weiter"></span>
         </button>
         <button type="button" class="eintrag" data-aktion="warum-nicht-ab">
           <span data-symbol="frage"></span><span class="text">Warum nimmt meine Katze nicht ab?</span><span class="weiter" data-symbol="weiter"></span>
@@ -318,8 +319,8 @@
 
       <h3 class="gruppe-titel">Über Kilossos</h3>
       <div class="karte">
-        <p class="leise">Kilossos begleitet die Abnahme von Kito und anderen Katzen: Es zeichnet auf, rechnet nach und warnt.
-          <strong>Es ersetzt keinen Tierarzt</strong> und ist kein Medizinprodukt. Zielgewicht und Tagesmenge legt immer der Tierarzt fest.</p>
+        <p class="leise">Kilossos begleitet deine Katze beim Abnehmen: Es zeichnet auf, rechnet nach und warnt, wenn etwas aus dem
+          sicheren Bereich läuft. <strong>Es ersetzt keinen Tierarzt</strong> und ist kein Medizinprodukt. Zielgewicht und Tagesmenge legt immer der Tierarzt fest.</p>
         <p class="leise"><strong>Ist deine Katze krank</strong> (zum Beispiel Diabetes, Nieren-, Schilddrüsen- oder Lebererkrankung) oder frisst sie
           plötzlich schlecht, besprich jede Änderung am Futter vorher mit deinem Tierarzt.
           <strong>Frisst eine Katze einen Tag oder länger gar nicht, gehört sie sofort zum Tierarzt.</strong></p>
@@ -341,7 +342,7 @@
           <span data-symbol="dokument"></span><span class="text">Nutzungsbedingungen</span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.44.0</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.45.0</span>
         </div>
       </div>
     </section>

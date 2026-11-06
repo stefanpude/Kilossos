@@ -100,3 +100,92 @@ test("0.42.5: Freigabe-Fenster trennt Plan und Befund", () => {
   assert.doesNotMatch(fenster, /\(optional\)<\/span>/);
   assert.match(lies("styles.css"), /\.form-abschnitt\s*\{/);
 });
+
+// 0.45.0: „Mehr“ aufgeräumt (Funde 06.11.2026, Lösung C). Unter „Tierarzt“ steht nur, womit man etwas tut; alle Erklärungen
+// stehen unter „Wissen“. Der Fotos-Haken sitzt jetzt in der geöffneten Übersicht.
+const ansichtMehr = () => {
+  const html = lies("index.html");
+  const start = html.indexOf('<section class="ansicht" data-ansicht="mehr"');
+  return html.slice(start, html.indexOf("</section>", start));
+};
+const abschnitt = (mehr, titel) => {
+  const start = mehr.search(titel);
+  assert.ok(start >= 0, `fehlt: ${titel}`);
+  const ende = mehr.indexOf('<h3 class="gruppe-titel"', start + 1);
+  return mehr.slice(start, ende < 0 ? undefined : ende);
+};
+
+test("0.45.0: Erklärungen stehen unter „Wissen“ nach „Begriffe kurz erklärt“, vor „Warum nimmt meine Katze nicht ab?“", () => {
+  const wissen = abschnitt(ansichtMehr(), /<h3 class="gruppe-titel">Wissen<\/h3>/);
+  const reihe = ["begriffe-erklaerung", "warum-kein-ziel", "bcs-erklaerung", "grenzen-erklaerung", "warum-nicht-ab"].map((aktion) => {
+    const i = wissen.indexOf(`data-aktion="${aktion}"`);
+    assert.ok(i >= 0, `fehlt unter Wissen: ${aktion}`);
+    return i;
+  });
+  assert.deepEqual([...reihe].sort((a, b) => a - b), reihe);
+  assert.match(wissen, /<span class="text">Warum keine Futtermenge\?<\/span>/);
+  assert.match(wissen, /<span class="text">Was ist der BCS\?<\/span>/);
+  assert.match(wissen, /<span class="text">Welche Grenzen gelten\?<\/span>/);
+});
+
+test("0.45.0: Unter „Tierarzt“ bleibt nur „Praxis anrufen“, die Liste ist ohne Telefon ganz versteckt", () => {
+  const tierarzt = abschnitt(ansichtMehr(), /id="titel-tierarzt">Tierarzt<\/h3>/);
+  assert.doesNotMatch(tierarzt, /warum-kein-ziel|bcs-erklaerung|grenzen-erklaerung/);
+  assert.match(tierarzt, /<div class="liste" id="tierarzt-liste" hidden>\s*<a class="eintrag" id="praxis-anrufen" hidden><\/a>\s*<\/div>/);
+  // Kein leerer Kasten: die Liste hat eine eigene display-Regel, darum braucht [hidden] eine eigene Regel.
+  assert.match(lies("styles.css"), /\.liste\[hidden\] \{ display: none; \}/);
+  assert.match(zeichneFreigabe(), /\$\("tierarzt-liste"\)\.hidden = !link;/);
+});
+
+test("0.45.0: „Fotos mitnehmen“ steht nicht mehr unter „Mehr“, der Zeitraum bleibt dort", () => {
+  const mehr = ansichtMehr();
+  assert.doesNotMatch(mehr, /Fotos mitnehmen|id="bericht-fotos"/);
+  const uebersicht = abschnitt(mehr, /<h3 class="gruppe-titel">Übersicht für den Tierarzt<\/h3>/);
+  assert.match(uebersicht, /id="bericht-zeitraum-feld"/);
+  assert.match(uebersicht, /data-aktion="bericht-oeffnen"/);
+});
+
+test("0.45.0: Schalter „Fotos zeigen“ in der geöffneten Übersicht nach dem Druck-Tipp, standardmäßig aus", () => {
+  const html = lies("index.html");
+  const start = html.indexOf('<div class="bericht-werkzeuge">');
+  const werkzeuge = html.slice(start, html.indexOf('<article class="bericht"', start));
+  const tipp = werkzeuge.indexOf("Im Druckfenster als Drucker");
+  const schalter = werkzeuge.indexOf('<label class="bericht-schalter">');
+  assert.ok(tipp >= 0 && schalter > tipp, "Schalter steht nach dem Druck-Tipp");
+  assert.match(
+    werkzeuge,
+    /<label class="bericht-schalter">\s*<input type="checkbox" id="bericht-fotos">\s*<span>Fotos zeigen<small>erstes und letztes Foto im Zeitraum<\/small><\/span>\s*<\/label>/,
+  );
+  assert.doesNotMatch(werkzeuge, /id="bericht-fotos"[^>]*checked/);
+  // Im Druck verschwinden die Werkzeuge samt Schalter (bestehende Regel).
+  assert.match(lies("styles.css"), /@media print[\s\S]*\.bericht-werkzeuge,[^{]*\{ display: none !important; \}/);
+});
+
+test("0.45.0: Umschalten zeichnet die Übersicht sofort neu, zeichneBericht liest weiter den Haken", () => {
+  const app = lies("app.js");
+  assert.match(app, /\$\("bericht-fotos"\)\.addEventListener\("change", zeichneBericht\);/);
+  assert.match(app, /fotos: \$\("bericht-fotos"\)\.checked,/);
+  // Der Weg zur Übersicht bleibt: „Übersicht öffnen“ zeichnet und zeigt sie, „Drucken / als PDF speichern“ druckt.
+  assert.match(app, /case "bericht-oeffnen":\s*zeichneBericht\(\);\s*zeigeAnsicht\("bericht"\);/);
+  assert.match(app, /case "bericht-drucken":\s*return window\.print\(\);/);
+});
+
+test("0.45.0: Schalter in der Übersicht mit mindestens 48 px Tippfläche", () => {
+  const css = lies("styles.css");
+  assert.match(css, /\.bericht-schalter \{[^}]*min-height: 48px;/);
+  assert.match(css, /\.bericht-schalter input\[type="checkbox"\] \{[^}]*width: 24px; height: 24px;/);
+});
+
+// Lösung D: nur der erste Satz unter „Über Kilossos“ ist neu, der Rest bleibt wörtlich.
+test("0.45.0: erster Absatz „Über Kilossos“ mit neuem ersten Satz, Rest wörtlich gleich", () => {
+  const ueber = abschnitt(ansichtMehr(), /<h3 class="gruppe-titel">Über Kilossos<\/h3>/);
+  assert.match(
+    ueber,
+    /<p class="leise">Kilossos begleitet deine Katze beim Abnehmen: Es zeichnet auf, rechnet nach und warnt, wenn etwas aus dem\s+sicheren Bereich läuft\.\s+<strong>Es ersetzt keinen Tierarzt<\/strong> und ist kein Medizinprodukt\. Zielgewicht und Tagesmenge legt immer der Tierarzt fest\.<\/p>/,
+  );
+  assert.doesNotMatch(lies("index.html"), /begleitet die Abnahme von Kito und anderen Katzen/);
+  assert.match(
+    ueber,
+    /<p class="leise"><strong>Ist deine Katze krank<\/strong> \(zum Beispiel Diabetes, Nieren-, Schilddrüsen- oder Lebererkrankung\) oder frisst sie\s+plötzlich schlecht, besprich jede Änderung am Futter vorher mit deinem Tierarzt\.\s+<strong>Frisst eine Katze einen Tag oder länger gar nicht, gehört sie sofort zum Tierarzt\.<\/strong><\/p>/,
+  );
+});

@@ -371,6 +371,7 @@ button.eintrag:active, a.eintrag:active, label.eintrag:active { background: var(
 .liste > :last-child, .liste > :last-child > .eintrag:last-child { border-bottom-left-radius: var(--rund); border-bottom-right-radius: var(--rund); }
 .eintrag:focus-visible { outline-offset: -3px; }
 .eintrag[hidden] { display: none; }
+.liste[hidden] { display: none; }
 .liste > .eintrag[hidden]:first-child + .eintrag { border-top: 0; border-top-left-radius: var(--rund); border-top-right-radius: var(--rund); }
 /* Nur optisch versteckt: bleibt für Tastatur und Vorlesefunktion erreichbar (Sicherung einlesen). */
 .nur-vorlesen { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
@@ -387,7 +388,6 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .eintrag-tier .text b { font-family: var(--serif); font-weight: 500; font-size: 1.125rem; }
 /* Eintrag mit Auswahlmenü rechts (Wiegetag, Darstellung, Zeitraum) */
 .eintrag-auswahl { flex-wrap: wrap; row-gap: 0; }
-.eintrag-haken input[type="checkbox"] { width: 24px; height: 24px; margin: 0 4px 0 auto; flex: none; accent-color: var(--akzent); }
 /* Titel bricht nur zwischen Wörtern; reicht der Platz nicht, rutscht das Menü in die nächste Zeile (große Schrift). */
 .eintrag-auswahl .text { flex: 1 1 7.5rem; overflow-wrap: normal; }
 .eintrag-auswahl > .auswahl, .eintrag-auswahl > div > .auswahl { flex: 0 1 auto; min-width: 0; }
@@ -1046,6 +1046,11 @@ dialog .wert-eingabe input:not([type="hidden"]) { padding-right: calc(12px + 1.4
 /* ---------- Übersicht für den Tierarzt ---------- */
 .karte label { display: grid; gap: 6px; font-weight: 400; }
 .bericht-werkzeuge { display: grid; gap: 8px; }
+/* Schalter „Fotos zeigen“ (0.45.0): ganze Zeile antippbar, mindestens 48 px hoch; im Druck mit den Werkzeugen ausgeblendet. */
+.bericht-schalter { display: flex; align-items: center; gap: 12px; min-height: 48px; color: var(--text); font-size: 1rem; font-weight: 600; cursor: pointer; }
+.bericht-schalter input[type="checkbox"] { width: 24px; height: 24px; margin: 0; flex: none; accent-color: var(--akzent); }
+.bericht-schalter small { display: block; color: var(--text-leise); font-size: 0.875rem; font-weight: 400; }
+.bericht-schalter:has(input:focus-visible) { outline: 3px solid var(--fokus); outline-offset: 2px; border-radius: var(--rund-klein); }
 .bericht {
   background: var(--flaeche); border: 1px solid var(--rand); border-radius: var(--rund);
   padding: 16px; font-size: 0.875rem; display: grid; gap: 16px;

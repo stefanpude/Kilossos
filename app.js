@@ -702,6 +702,8 @@ function zeichneFreigabe() {
     : "";
   const link = telefonLink(tier.tierarzt?.telefon);
   $("praxis-anrufen").hidden = !link;
+  // Die Liste unter „Tierarzt“ enthält nur „Praxis anrufen“: ohne Telefon kein leerer Kasten (0.45.0).
+  $("tierarzt-liste").hidden = !link;
   if (link) {
     $("praxis-anrufen").href = link;
     $("praxis-anrufen").innerHTML = `<span data-symbol="telefon">${SYMBOL.telefon}</span>` +
@@ -1041,6 +1043,8 @@ function zeichneBericht() {
     fotos: $("bericht-fotos").checked,
   });
 }
+// Schalter „Fotos zeigen“ in der geöffneten Übersicht (0.45.0): zeichnet sofort neu, Standard aus.
+$("bericht-fotos").addEventListener("change", zeichneBericht);
 
 // Infoblase der Gewichtskurve: Antippen oder Ziehen zeigt den nächsten Punkt mit Datum und kg.
 function zeigeInfoblase(ereignis) {
