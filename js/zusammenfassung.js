@@ -37,16 +37,19 @@ export function zeitraumStart(zeitraum, heute) {
 }
 
 // Abnahme je Wägung, auf 7 Tage umgerechnet (wie das frühere Balkendiagramm). Neueste zuerst.
+// Seit 0.75.0 gegen die Vergleichsmessung (mindestens GRENZEN.tageTempo Tage davor, wie tempoRueckmeldung);
+// Wägungen ohne eine solche bekommen keinen Punkt. Wöchentlich gewogen ändert sich nichts.
 // Rot (über 2 %) gilt immer; Grün und Gelb nur für Wochen, die nach der ersten Freigabe beginnen.
 export function wochenRaten(gewichte, freigaben) {
-  const liste = [...gewichteSortiert(gewichte)].reverse();
+  const sortiert = gewichteSortiert(gewichte);
+  const liste = [...sortiert].reverse();
   const ersteFreigabe = [...freigaben].sort((a, b) => a.datum.localeCompare(b.datum))[0];
   const raten = [];
   for (let i = 1; i < liste.length; i++) {
-    const alt = liste[i - 1];
     const neu = liste[i];
+    const alt = vergleichsMessung(sortiert, neu.datum);
+    if (!alt) continue;
     const wochen = tageZwischen(alt.datum, neu.datum) / 7;
-    if (wochen <= 0) continue;
     const prozent = ((alt.kg - neu.kg) / alt.kg / wochen) * 100;
     const nachFreigabe = Boolean(ersteFreigabe) && alt.datum >= ersteFreigabe.datum;
     let bewertung = "neutral";
@@ -263,16 +266,44 @@ const kgText = (wert) =>
   Math.abs(wert).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const kurzTag = (iso) => `${iso.slice(8, 10)}.${iso.slice(5, 7)}.`;
 
-// Vergleicht ein neues Gewicht mit der letzten Messung vor seinem Datum. Gleiche Regeln wie wochenRaten:
-// über 2 % pro Woche immer markiert, „sicher“ und „langsamer“ nur, wenn die letzte Messung nach der ersten
+// Text, wenn keine Messung mindestens GRENZEN.tageTempo Tage zurückliegt (0.75.0, Wortlaut mit Stefans Ja).
+export const TEXT_TEMPO_ZU_NAH =
+  "Für ein Tempo liegen die Messungen noch zu nah beieinander. Es erscheint ab 7 Tagen Abstand. " +
+  "Das Gewicht schwankt von Tag zu Tag; am genauesten ist 1× pro Woche zur gleichen Zeit.";
+
+// Vergleichsmessung fürs Tempo (seit 0.75.0): die jüngste Wägung, die mindestens GRENZEN.tageTempo Tage vor "datum"
+// liegt. Vorher war es die direkt vorige; dann wurden 90 g an einem Tag zu „7,4 % pro Woche“ (Stefans Handy, 06.11.).
+// "sortiert": neueste zuerst (gewichteSortiert).
+function vergleichsMessung(sortiert, datum) {
+  return sortiert.find((g) => tageZwischen(g.datum, datum) >= GRENZEN.tageTempo);
+}
+
+// Vergleicht ein neues Gewicht mit der Vergleichsmessung (siehe oben). Gleiche Regeln wie wochenRaten:
+// über 2 % pro Woche immer markiert, „sicher“ und „langsamer“ nur, wenn die Vergleichsmessung nach der ersten
 // Freigabe liegt. Bewertet nur zur Information – gewarnt wird weiterhin erst über das Mittel von zwei Wochen.
 // bewertung: "gut" | "langsam" | "zunahme" | "zu-schnell" | "neutral". prozent: positiv = Abnahme.
+// Gibt es nur jüngere Messungen: kurz = true, prozent = null, neutral, Gramm zur direkt vorigen, Text TEXT_TEMPO_ZU_NAH.
 // ohneId (seit 0.31.0, „Gewicht ändern“): diese Wägung zählt nicht mit, sonst vergliche sie sich mit sich selbst.
 export function tempoRueckmeldung({ gewichte, freigaben, kg, datum, ohneId }) {
   if (!kg || !datum) return null;
   const andere = ohneId === undefined ? gewichte : gewichte.filter((g) => g.id !== ohneId);
-  const vorher = gewichteSortiert(andere).find((g) => g.datum < datum);
-  if (!vorher) return null;
+  const sortiert = gewichteSortiert(andere);
+  const direkt = sortiert.find((g) => g.datum < datum);
+  if (!direkt) return null;
+  const vorher = vergleichsMessung(sortiert, datum);
+  if (!vorher) {
+    const diff = kg - direkt.kg;
+    return {
+      seit: direkt.datum,
+      vorher: { datum: direkt.datum, kg: direkt.kg },
+      diffKg: diff,
+      prozent: null,
+      bewertung: "neutral",
+      kurz: true,
+      titel: `${kgText(diff)} kg seit dem ${kurzTag(direkt.datum)}`,
+      text: TEXT_TEMPO_ZU_NAH,
+    };
+  }
   const wochen = tageZwischen(vorher.datum, datum) / 7;
   const diffKg = kg - vorher.kg;
   const prozent = ((vorher.kg - kg) / vorher.kg / wochen) * 100;
@@ -300,7 +331,15 @@ export function tempoRueckmeldung({ gewichte, freigaben, kg, datum, ohneId }) {
       `${p} % pro Woche, langsamer als 0,5 %. Das Gewicht schwankt von Mal zu Mal; bleibt es vier Wochen so, ` +
       "rät Kilossos, den Plan mit dem Tierarzt zu besprechen.";
   }
-  return { seit: vorher.datum, diffKg, prozent, bewertung, titel: `${kgText(diffKg)} kg seit dem ${kurzTag(vorher.datum)}`, text };
+  return {
+    seit: vorher.datum,
+    vorher: { datum: vorher.datum, kg: vorher.kg },
+    diffKg,
+    prozent,
+    bewertung,
+    titel: `${kgText(diffKg)} kg seit dem ${kurzTag(vorher.datum)}`,
+    text,
+  };
 }
 
 // Wägungen der letzten 8 Wochen (56 Tage bis "heute"), älteste zuerst – für die Kurve auf „Heute“.
@@ -348,13 +387,16 @@ export function messungWerte({ gewichte, freigaben, tag, mittelZuSchnell = false
   if (!letzte) return { art: "keine" };
   const r = tempoRueckmeldung({ gewichte, freigaben, kg: letzte.kg, datum: letzte.datum });
   if (!r) return { art: "ohneVergleich", letzte };
-  const vorher = sortiert.find((g) => g.datum < letzte.datum);
+  // Seit 0.75.0 kommt „vorher“ aus tempoRueckmeldung: Gramm im Kopf und Tempo beziehen sich auf dieselbe Messung.
+  // r.kurz: keine Messung mindestens 7 Tage davor; Gramm zur direkt vorigen, statt Tempo ein Hinweis (heute-grafiken).
+  const { vorher } = r;
   const kurve = achtWochen(gewichte, tag);
-  const mittel = Boolean(mittelZuSchnell) && r.bewertung !== "zu-schnell";
+  const mittel = Boolean(mittelZuSchnell) && !r.kurz && r.bewertung !== "zu-schnell";
   return {
     art: "mitVergleich",
+    ...(r.kurz ? { kurz: true } : {}),
     letzte,
-    vorher: { datum: vorher.datum, kg: vorher.kg },
+    vorher,
     // „|| 0“: Math.round(-0,3) ergibt -0, das würde als „-0 g“ erscheinen.
     diffG: Math.round((letzte.kg - vorher.kg) * 1000) || 0,
     prozent: r.prozent,

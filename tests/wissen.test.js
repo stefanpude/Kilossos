@@ -190,9 +190,9 @@ test("Willkommensseite verspricht nichts, was die App nicht halten kann (Stefan,
   assert.doesNotMatch(html, /ohne Fettleber-Risiko|für jede Sorte/);
 });
 
-test("Version 0.74.2: Cache v133 mit js/rueckfrage.js, js/nachtragen.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
+test("Version 0.75.0: Cache v134 mit js/rueckfrage.js, js/nachtragen.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
   const sw = lies("sw.js");
-  assert.match(sw, /const CACHE_NAME = "kilossos-v133";/);
+  assert.match(sw, /const CACHE_NAME = "kilossos-v134";/);
   assert.match(sw, /"js\/nachtragen\.js",/);
   assert.match(sw, /"js\/rueckfrage\.js",/);
   assert.match(sw, /"demo\/kito-simulation\.json",/);
@@ -200,7 +200,7 @@ test("Version 0.74.2: Cache v133 mit js/rueckfrage.js, js/nachtragen.js und der 
   assert.match(sw, /"js\/besondere-tage\.js",/);
   assert.match(sw, /"js\/freigaben\.js",/);
   assert.match(sw, /"js\/heute-grafiken\.js",/);
-  assert.match(lies("index.html"), /id="version">Version 0\.74\.2</);
+  assert.match(lies("index.html"), /id="version">Version 0\.75\.0</);
 });
 
 // 0.42.7: Wiege-Tipp Transportbox im Bereich „Auf dem Arm gewogen?“ (Ideen-Tafel, Halter 06.11.2026).
@@ -283,5 +283,5 @@ test("0.36.8: die neuen Formulierungen mit „gewogen“", () => {
   assert.match(html, /Einmal wiegen reicht dafür nicht, weil Waagen zu Hause schwanken\./);
   assert.match(html, /und das Gewicht schwankt von Mal zu Mal\./);
   assert.match(lies("js/speicher.js"), /Foto in der Liste unter „Gewicht“ antippen/);
-  assert.match(lies("js/verlauf.js"), /Jeder Punkt steht für ein Wiegen, auf 7 Tage umgerechnet\./);
+  assert.match(lies("js/verlauf.js"), /Jeder Punkt steht für ein Wiegen, verglichen mit der Messung mindestens 7 Tage davor und auf 7 Tage umgerechnet\./);
 });

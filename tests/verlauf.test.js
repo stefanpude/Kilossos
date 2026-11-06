@@ -587,7 +587,7 @@ test("Tempo pro Woche: Band „sicherer Bereich“ aus GRENZEN, Nulllinie kräft
 });
 
 test("Tempo pro Woche: Erklärsatz mit und ohne Freigabe, „Grau“ nur bei nicht bewerteten Punkten", () => {
-  const satz = `Jeder Punkt steht für ein Wiegen, auf 7 Tage umgerechnet. Grün: im sicheren Bereich, Bernstein: langsamer, Rot: schneller als 2${NB}%. Unter der Nulllinie: zugenommen.`;
+  const satz = `Jeder Punkt steht für ein Wiegen, verglichen mit der Messung mindestens 7 Tage davor und auf 7 Tage umgerechnet. Grün: im sicheren Bereich, Bernstein: langsamer, Rot: schneller als 2${NB}%. Unter der Nulllinie: zugenommen.`;
   assert.equal(tempoText(tVerlauf()), `${satz} Grau: vor der Freigabe, noch nicht bewertet.`);
   // Freigabe vor der ersten Wägung: alles bewertet, kein grauer Punkt
   const frueh = tVerlauf({ freigaben: [{ ...freigabe, datum: "2026-08-01" }] });
@@ -596,7 +596,7 @@ test("Tempo pro Woche: Erklärsatz mit und ohne Freigabe, „Grau“ nur bei nic
   const ohne = tVerlauf({ freigaben: [] });
   assert.equal(
     tempoText(ohne),
-    `Jeder Punkt steht für ein Wiegen, auf 7 Tage umgerechnet. Bewertet wird erst ab der Freigabe vom Tierarzt; schneller als 2${NB}% ist immer rot. Unter der Nulllinie: zugenommen.`
+    `Jeder Punkt steht für ein Wiegen, verglichen mit der Messung mindestens 7 Tage davor und auf 7 Tage umgerechnet. Bewertet wird erst ab der Freigabe vom Tierarzt; schneller als 2${NB}% ist immer rot. Unter der Nulllinie: zugenommen.`
   );
   assert.ok(tempoPunkte(ohne).every((p) => p.klasse === "neutral" || p.klasse === "zu-schnell"));
 });
@@ -628,16 +628,17 @@ test("Tempo pro Woche: nur ein Wert im Zeitraum – ein Punkt, Achse ab dem Wieg
   assert.doesNotMatch(html, /NaN/);
 });
 
-// Fix-Runde 1 (Review 05.11.2026): Wiegen an aufeinanderfolgenden Tagen ergibt riesige Wochenraten. Ohne Grenze
-// wurden daraus 64 Hilfslinien, Zahlen übereinander und ein Band von wenigen Pixeln.
+// Fix-Runde 1 (Review 05.11.2026): Ausreißer ergeben riesige Wochenraten. Ohne Grenze wurden daraus 64 Hilfslinien,
+// Zahlen übereinander und ein Band von wenigen Pixeln. Seit 0.75.0 zählen Folgetage nicht mehr (mindestens 7 Tage
+// Abstand); Ausreißer kommen jetzt nur noch von echten Sprüngen oder Tippfehlern im Wochenabstand.
 const tAusreisser = [
   G("2026-10-01", 9.4),
   G("2026-10-08", 9.35),
   G("2026-10-15", 9.3),
   G("2026-10-22", 9.25),
-  G("2026-10-23", 9.05), // ein Tag später: 15,14 % pro Woche
-  G("2026-10-24", 9.25), // und zurück: 15,47 % zugenommen
-  G("2026-10-31", 9.2),
+  G("2026-10-29", 7.85), // eine Woche später: (9,25 − 7,85) / 9,25 = 15,14 % pro Woche
+  G("2026-11-05", 9.07), // und zurück: (9,07 − 7,85) / 7,85 = 15,54 % zugenommen
+  G("2026-11-12", 9.0),
 ];
 
 test("Tempo pro Woche: Achse bei Ausreißern begrenzt, Punkte am Rand mit Pfeil, Zahlen lesbar", () => {
@@ -651,7 +652,7 @@ test("Tempo pro Woche: Achse bei Ausreißern begrenzt, Punkte am Rand mit Pfeil,
   assert.equal(tempoAchse([2.8]).hi, 3);
   assert.equal(tempoAchse([-0.3, 1]).lo, -0.5);
 
-  const html = tVerlauf({ gewichte: tAusreisser, freigaben: [freigabe], heute: "2026-10-31" });
+  const html = tVerlauf({ gewichte: tAusreisser, freigaben: [freigabe], heute: "2026-11-12" });
   const svgText = tempoSvg(html);
   assert.doesNotMatch(html, /NaN/);
   assert.ok((svgText.match(/<line class="(gitter|tempo-null)"/g) ?? []).length <= 16);
@@ -663,9 +664,9 @@ test("Tempo pro Woche: Achse bei Ausreißern begrenzt, Punkte am Rand mit Pfeil,
   const oben = svgText.match(/<circle class="tempo-p zu-schnell" cx="[\d.]+" cy="([\d.]+)" r="[\d.]+"><title>([^<]+)<\/title><\/circle><text class="tempo-pfeil"[^>]*>▲<\/text>/);
   assert.ok(oben, "Punkt mit ▲");
   assert.ok(Number(oben[1]) >= 10 && Number(oben[1]) <= 154, `cy ${oben[1]}`);
-  assert.equal(oben[2], `23. Okt.: 15,14${NB}% abgenommen`);
+  assert.equal(oben[2], `29. Okt.: 15,14${NB}% abgenommen`);
   // nach unten: am unteren Rand, „▼“
-  const unten = svgText.match(/cy="([\d.]+)" r="[\d.]+"><title>[^<]*15,47[^<]*zugenommen<\/title><\/circle><text class="tempo-pfeil"[^>]*>▼<\/text>/);
+  const unten = svgText.match(/cy="([\d.]+)" r="[\d.]+"><title>[^<]*15,54[^<]*zugenommen<\/title><\/circle><text class="tempo-pfeil"[^>]*>▼<\/text>/);
   assert.ok(unten, "Punkt mit ▼");
   assert.ok(Number(unten[1]) <= 154);
   // Band bleibt lesbar breit, „sicherer Bereich“ steht darin
@@ -717,9 +718,10 @@ test("0.42.2: Tempo-Kopf mit echtem Minus und geschütztem Leerzeichen vor %", (
 });
 
 test("0.42.2: Pfeil eines Ausreißers am rechten Rand steht links vom Punkt, nicht in der Ø-Spalte", () => {
-  // Wiegen am Folgetag: 8,98 → 8,70 kg in einem Tag, auf 7 Tage umgerechnet weit über der Achse; heute = letzte Wägung.
-  const g = [G("2026-10-01", 9.0), G("2026-10-08", 8.98), G("2026-10-09", 8.7)];
-  const svgText = tempoSvg(tVerlauf({ gewichte: g, freigaben: [], heute: "2026-10-09" }));
+  // Großer Sprung in einer Woche: 8,98 → 8,40 kg = 6,46 %, weit über der Achse (bis 5 %); heute = letzte Wägung.
+  // (Bis 0.74 stand hier ein Wiegen am Folgetag; das ergibt seit 0.75.0 keinen Punkt mehr.)
+  const g = [G("2026-10-01", 9.0), G("2026-10-08", 8.98), G("2026-10-15", 8.4)];
+  const svgText = tempoSvg(tVerlauf({ gewichte: g, freigaben: [], heute: "2026-10-15" }));
   const pfeil = svgText.match(/<text class="tempo-pfeil" x="([\d.]+)" y="[\d.]+"( text-anchor="end")?>▲<\/text>/);
   assert.ok(pfeil, "Pfeil ▲ vorhanden");
   assert.equal(pfeil[2], ' text-anchor="end"');

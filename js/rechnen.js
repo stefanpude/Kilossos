@@ -243,6 +243,7 @@ export const GRENZEN = {
   abnahmeMin: 0.5, // % Körpergewicht pro Woche – AAHA 2014, Flanagan 2018
   abnahmeMax: 2, // % Körpergewicht pro Woche – AAHA 2014, Flanagan 2018
   tageZuSchnell: 14, // "zu schnell" erst im Mittel über 2 Wochen, wegen der Messunsicherheit zu Hause
+  tageTempo: 7, // Tempo (% pro Woche) nur gegen eine Messung mindestens so viele Tage davor (0.75.0); nur Darstellung
   tageStillstand: 28,
   harteUntergrenze: 0.6, // × RER beim Zielgewicht – AAHA 2014 (darunter Fachtierarzt für Ernährung)
   teilerOhneFreigabe: 1.4, // Zielgewicht bei BCS 9 – kleinstes Ziel, das der BCS-Schlüssel zulässt

@@ -805,9 +805,9 @@ function tempoKarte(gewichte, freigaben, von, heute) {
     .join("");
   const schnell = `${grenzeText(GRENZEN.abnahmeMax)}${NB}%`;
   const erklaerung = freigaben.length
-    ? `Jeder Punkt steht für ein Wiegen, auf 7 Tage umgerechnet. Grün: im sicheren Bereich, Bernstein: langsamer, Rot: schneller als ${schnell}. Unter der Nulllinie: zugenommen.` +
+    ? `Jeder Punkt steht für ein Wiegen, verglichen mit der Messung mindestens 7 Tage davor und auf 7 Tage umgerechnet. Grün: im sicheren Bereich, Bernstein: langsamer, Rot: schneller als ${schnell}. Unter der Nulllinie: zugenommen.` +
       (raten.some((r) => r.bewertung === "neutral") ? " Grau: vor der Freigabe, noch nicht bewertet." : "")
-    : `Jeder Punkt steht für ein Wiegen, auf 7 Tage umgerechnet. Bewertet wird erst ab der Freigabe vom Tierarzt; schneller als ${schnell} ist immer rot. Unter der Nulllinie: zugenommen.`;
+    : `Jeder Punkt steht für ein Wiegen, verglichen mit der Messung mindestens 7 Tage davor und auf 7 Tage umgerechnet. Bewertet wird erst ab der Freigabe vom Tierarzt; schneller als ${schnell} ist immer rot. Unter der Nulllinie: zugenommen.`;
   return `<section class="karte" aria-labelledby="tempo-titel">
     <h2 id="tempo-titel">Tempo pro Woche</h2>
     <p>Ø ${mitMinus(z.durchschnitt, 2)}${NB}% pro Woche${bereich}</p>

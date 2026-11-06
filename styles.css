@@ -679,7 +679,7 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .mess-sk-punkt.gut, .mess-end.gut { fill: var(--gut); }
 .mess-sk-punkt.langsam, .mess-end.langsam, .mess-sk-punkt.zunahme, .mess-end.zunahme { fill: var(--warnung); }
 .mess-sk-punkt.zu-schnell, .mess-end.zu-schnell { fill: var(--gefahr); }
-.mess-tempo { display: grid; gap: 0; }
+.mess-tempo { display: grid; gap: 6px; } /* 6 px: Skalenzahlen klebten am Satz (0.75.0); margin am p schlägt .karte p */
 .mess-urteil { margin: 0; font-size: 0.9375rem; color: var(--text-leise); }
 .mess-urteil b { color: var(--text); font-family: var(--serif); font-weight: 600; }
 .mess-urteil.gut { color: var(--gut); }

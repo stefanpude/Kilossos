@@ -133,6 +133,9 @@ export function gefuettertMehrHtml(mehr) {
 // Grenzwert als kurze deutsche Zahl („0,5“, „2“), immer aus GRENZEN gebildet.
 const grenzZahl = (wert) => wert.toLocaleString("de-DE", { maximumFractionDigits: 1 });
 
+// Statt Skala, wenn keine Messung mindestens 7 Tage zurückliegt (0.75.0, Wortlaut mit Stefans Ja).
+export const TEXT_TEMPO_KURZ = "Das Tempo erscheint, wenn zwei Messungen mindestens 7 Tage auseinanderliegen.";
+
 // Kurzwort hinter dem Tempo, je Bewertung aus tempoRueckmeldung.
 export const URTEIL_KURZ = {
   gut: "sicher",
@@ -253,6 +256,9 @@ export function messungHtml(werte) {
     `<div class="mess-gewicht"><span class="wert">${sicher(zahl(letzte.kg, 2))}<small>${NB}kg</small></span>${diff}</div>` +
     `</div>`;
   if (!mitVergleich) return karte(kopf + `<p class="leise">Das Tempo erscheint ab dem zweiten Wiegen.</p>`);
+  const kurve = werte.kurve && new Set(werte.kurve.map((g) => g.datum)).size >= 2 ? kurveSvg(werte.kurve, werte.bewertung) : "";
+  // 0.75.0: Keine Messung mindestens 7 Tage davor → keine Skala, sondern der Hinweis (Wortlaut mit Stefans Ja).
+  if (werte.kurz) return karte(kopf + kurve + `<p class="leise mess-kurz">${TEXT_TEMPO_KURZ}</p>`);
 
   const { prozent, bewertung } = werte;
   // Zahl nahe den Grenzen mit zwei Stellen in Richtung des Urteils (tempoZahl), nie „2,0 · schneller als 2 %“.
@@ -265,7 +271,7 @@ export function messungHtml(werte) {
   return karte(
     kopf +
       // Kurve erst ab zwei verschiedenen Tagen (0.42.2); sonst stünden alle Punkte senkrecht übereinander.
-      (werte.kurve && new Set(werte.kurve.map((g) => g.datum)).size >= 2 ? kurveSvg(werte.kurve, bewertung) : "") +
+      kurve +
       `<div class="mess-tempo">${skalaSvg(prozent, bewertung)}` +
       `<p class="mess-urteil ${sicher(bewertung)}"><b>${tempo}</b> · ${sicher(urteil)}</p></div>`
   );
