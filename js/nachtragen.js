@@ -7,6 +7,17 @@ import { datumText } from "./mehr.js";
 
 const hhmm = (zeit) => `${String(zeit.getHours()).padStart(2, "0")}:${String(zeit.getMinutes()).padStart(2, "0")}`;
 
+// Kalender am Tagestitel auf „Heute“ (seit 0.70.0, Stefan 06.11.): Wert des Datumsfelds ("JJJJ-MM-TT") → Tag um
+// Mitternacht (Ortszeit) oder null, wenn leer, kein echtes Datum oder in der Zukunft (dann bleibt der gezeigte Tag).
+export function tagAusKalender(wert, jetzt) {
+  const teile = /^(\d{4})-(\d{2})-(\d{2})$/.exec(wert ?? "");
+  if (!teile) return null;
+  const [j, m, t] = teile.slice(1).map(Number);
+  const tag = new Date(j, m - 1, t);
+  if (tag.getFullYear() !== j || tag.getMonth() !== m - 1 || tag.getDate() !== t) return null;
+  return tagSchluessel(tag) > tagSchluessel(jetzt) ? null : tag;
+}
+
 // → { uhrzeit: "HH:MM" oder "", tipp: Text oder null }
 export function uhrzeitVorbelegung({ mahlzeit = null, gewaehlterTag, jetzt }) {
   if (mahlzeit) return { uhrzeit: hhmm(new Date(mahlzeit.zeitpunkt)), tipp: null };

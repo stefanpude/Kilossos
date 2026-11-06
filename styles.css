@@ -276,6 +276,19 @@ html[data-start] .ansicht[data-ansicht="heute"] { display: none; }
 /* ---------- Tagesauswahl ---------- */
 .tagwahl { display: flex; align-items: center; justify-content: space-between; }
 .tagwahl h2 { margin: 0; font-size: 1.25rem; }
+/* Tagestitel als Knopf: öffnet den Kalender des Geräts (0.70.0). Das Datumsfeld liegt unsichtbar darunter, damit
+   der Kalender dort aufgeht; showPicker() verlangt ein gezeichnetes Feld, daher kein display: none. */
+.tag-titel-kopf { position: relative; min-width: 0; margin-inline: 4px; }
+.tag-titel-knopf {
+  min-height: 48px; padding: 0 6px; border: 0; border-radius: 24px; background: none; color: inherit;
+  font: inherit; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+}
+.tag-titel-knopf .ico { width: 18px; height: 18px; color: var(--text-leise); }
+.tag-titel-knopf:active { background: var(--flaeche); }
+.tag-kalender {
+  position: absolute; left: 50%; bottom: 0; width: 1px; height: 1px; padding: 0; border: 0;
+  opacity: 0; pointer-events: none;
+}
 
 .knopf-rund {
   width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--rand-stark); background: var(--flaeche);

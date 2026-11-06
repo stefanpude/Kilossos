@@ -125,7 +125,10 @@
 
       <div class="tagwahl">
         <button class="knopf-rund" data-aktion="tag-zurueck" aria-label="Vorheriger Tag"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.5 6l-6 6 6 6"/></svg></button>
-        <h2 id="tag-titel">Heute</h2>
+        <h2 class="tag-titel-kopf">
+          <button type="button" class="tag-titel-knopf tippbar" data-aktion="tag-kalender"><span id="tag-titel">Heute</span><span data-symbol="kalender"></span><span class="nur-vorlesen">, Tag im Kalender wählen</span></button>
+          <input type="date" id="tag-kalender" class="tag-kalender" tabindex="-1" aria-hidden="true">
+        </h2>
         <button class="knopf-rund" data-aktion="tag-vor" aria-label="Nächster Tag"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9.5 6l6 6-6 6"/></svg></button>
       </div>
 
@@ -348,7 +351,7 @@
           <span data-symbol="katzenkopf"></span><span class="text">Demo ansehen<small>Beispieldaten von Kito und Zuki über ein Jahr. Deine Einträge bleiben, wie sie sind.</small></span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.69.0</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.70.0</span>
         </div>
       </div>
     </section>

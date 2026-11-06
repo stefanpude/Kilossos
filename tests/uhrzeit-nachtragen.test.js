@@ -67,7 +67,7 @@ test("index.html: Hinweis zum Nachtragen unter der Uhrzeit, anfangs versteckt un
 
 test("oeffneMahlzeit: nutzt uhrzeitVorbelegung, Hinweis nur sichtbar, wenn es einen gibt", () => {
   const app = lies("app.js");
-  assert.match(app, /import \{ uhrzeitVorbelegung \} from "\.\/js\/nachtragen\.js";/);
+  assert.match(app, /import \{ uhrzeitVorbelegung, tagAusKalender \} from "\.\/js\/nachtragen\.js";/);
   const block = abschnitt(app, "function oeffneMahlzeit(", "\n}\n");
   assert.match(block, /const \{ uhrzeit, tipp \} = uhrzeitVorbelegung\(\{ mahlzeit, gewaehlterTag, jetzt: new Date\(\) \}\);/);
   assert.match(block, /form\.uhrzeit\.value = uhrzeit;/);

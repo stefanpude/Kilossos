@@ -88,7 +88,7 @@ import { fotoImZeitraum, fotoAngebot, fotoFeld, istFotoTag, vorherNachher, nachE
 import { belegteZeichen, speicherAnzeige } from "./js/speicher.js";
 import { sicherungPruefen, einleseFrage } from "./js/sicherung.js";
 import { frage, bestaetigt } from "./js/rueckfrage.js";
-import { uhrzeitVorbelegung } from "./js/nachtragen.js";
+import { uhrzeitVorbelegung, tagAusKalender } from "./js/nachtragen.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
 if ("serviceWorker" in navigator) {
@@ -378,6 +378,15 @@ function zeigeAnsicht(name, richtung = 0) {
   versteckeInfoblase();
   if (name === "heute") zeichneHeute(true);
 }
+
+// Kalender am Tagestitel (0.70.0): gewählter Tag wird gezeigt; leer, kaputt oder Zukunft ändert nichts.
+$("tag-kalender").addEventListener("change", () => {
+  const tag = tagAusKalender($("tag-kalender").value, new Date());
+  if (!tag) return;
+  const jetzt = new Date();
+  gewaehlterTag = tagSchluessel(tag) === tagSchluessel(jetzt) ? jetzt : tag; // heute wie beim Start: mit Uhrzeit
+  zeichneHeute(true);
+});
 
 function tagTitel(datum) {
   const heute = tagSchluessel(new Date());
@@ -3021,6 +3030,19 @@ document.addEventListener("click", (ereignis) => {
     case "tag-vor":
       gewaehlterTag = new Date(gewaehlterTag.getFullYear(), gewaehlterTag.getMonth(), gewaehlterTag.getDate() + 1);
       return zeichneHeute(true);
+    case "tag-kalender": {
+      // Kalender des Geräts öffnen, vorbelegt mit dem gezeigten Tag; die Zukunft ist gesperrt wie beim Pfeil „vor“.
+      const kalender = $("tag-kalender");
+      kalender.max = tagSchluessel(new Date());
+      kalender.value = tagSchluessel(gewaehlterTag);
+      try {
+        kalender.showPicker();
+      } catch {
+        kalender.focus(); // ältere Browser ohne showPicker()
+        kalender.click();
+      }
+      return;
+    }
     case "mahlzeit-neu":
       return oeffneMahlzeit();
     case "mahlzeit-bearbeiten":
