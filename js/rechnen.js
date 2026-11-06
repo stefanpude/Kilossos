@@ -331,6 +331,22 @@ export function gesternWenigGefressen(eingaben) {
   };
 }
 
+// Ab dieser Stunde (19:00) erinnert „Heute“ ruhig an einen leeren Tag (0.50.0). Kein medizinischer Grenzwert.
+export const ABEND_STUNDE = 19;
+
+// Ruhiger Hinweis am Abend, wenn für das gewählte Tier heute noch keine Mahlzeit eingetragen ist
+// (.planning/erinnerung-abends.md Teil 1). Nicht am ersten Tag der Nutzung, nicht beim Zurückblättern und nicht,
+// wenn heute „Futter verweigert“ eingetragen ist (dann zeigt der rote Notfall-Kasten, was zu tun ist).
+// Bewusst ohne Gesundheitsaussage: Er soll nur an das Eintragen erinnern. Ergebnis: Hinweis oder null.
+export function abendHinweis({ name, tag, heute, stunde, mahlzeitenHeute, fruehereMahlzeiten, futterVerweigert }) {
+  if (tag !== heute || stunde < ABEND_STUNDE || mahlzeitenHeute > 0 || !fruehereMahlzeiten || futterVerweigert) return null;
+  return {
+    art: "hinweis",
+    id: "abend-nichts-eingetragen",
+    text: `Für ${name} ist heute noch keine Mahlzeit eingetragen. Schon gefüttert? Dann trag es jetzt ein, damit der Tag vollständig ist.`,
+  };
+}
+
 // Alle Warnungen für einen Tag, die dringendsten zuerst. art: "sofort" | "achtung" | "hinweis".
 // tag/heute: "JJJJ-MM-TT"; kcal und leckerli: Summe des Tages; fruehereMahlzeiten: gab es vor "tag" schon Einträge?
 // normalesFutterKcal: kcal des Tages aus Futter, das kein Diätfutter ist (normalesFutterKcal in futterliste.js).

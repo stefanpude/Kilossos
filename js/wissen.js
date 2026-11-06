@@ -156,6 +156,7 @@ export function begriffeHtml() {
 // Hinweise auf „Heute“, die zu einer Erklärseite führen (Schlüssel = id aus warnungen() in js/rechnen.js).
 const HINWEIS_KNOEPFE = {
   stillstand: { aktion: "warum-nicht-ab", text: "Warum nimmt meine Katze nicht ab?" },
+  "abend-nichts-eingetragen": { aktion: "mahlzeit-neu", text: "Mahlzeit eintragen" },
 };
 
 export function hinweisKnopf(id) {

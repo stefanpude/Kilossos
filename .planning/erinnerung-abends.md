@@ -14,6 +14,12 @@ Eintragen vergessen wurde.
 
 ## Teil 1: ruhiger Hinweis am Abend in der App
 
+**✅ Gebaut in 0.50.0 (06.11.2026, vorgezogen vor den Tierarzttermin):** ab 19 Uhr (`ABEND_STUNDE`), reine Funktion
+`abendHinweis` in `js/rechnen.js`, Tests `tests/abend.test.js`. Text: „Für … ist heute noch keine Mahlzeit eingetragen.
+Schon gefüttert? Dann trag es jetzt ein, damit der Tag vollständig ist.“ Kurztitel „Heute noch nichts eingetragen“,
+Knopf „Mahlzeit eintragen“. Ein Leckerli allein zählt nicht als Mahlzeit. Nicht, wenn „Futter verweigert“ den roten
+Notfall-Kasten zeigt. Teil 2 (roter Morgentext) ist unverändert und braucht vor dem Bau das Ja des Halters.
+
 - **Wann:** Kilossos wird am Abend geöffnet (Vorschlag: ab 19 Uhr, beim Bau mit dem Halter festlegen), für das gewählte
   Tier ist heute noch keine Mahlzeit eingetragen, und es gab schon an früheren Tagen Einträge (nicht am ersten Tag der
   Nutzung).

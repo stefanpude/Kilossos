@@ -34,6 +34,8 @@ import {
   gewichteBis,
   warnungen,
   gesternWenigGefressen,
+  abendHinweis,
+  ABEND_STUNDE,
   armGewicht,
   restAbziehen,
   prozentInGramm,
@@ -112,6 +114,7 @@ const HINWEIS_TITEL = {
   stillstand: "Abnahme stockt",
   "ziel-erreicht": "Zielgewicht erreicht",
   "freigabe-alt": "Freigabe ist älter als 3 Monate",
+  "abend-nichts-eingetragen": "Heute noch nichts eingetragen",
 };
 
 // ---------- Darstellung Hell / Dunkel / Wie das Handy ----------
@@ -262,16 +265,20 @@ let zeitraum = "3m";
 
 // Bleibt der Tab über Nacht offen (Opera), stünde „Heute“ sonst noch auf dem Vortag, und neue Mahlzeiten landeten dort.
 // Beim Zurückkehren in den Tab nach einem Tageswechsel: auf den neuen Tag springen und neu zeichnen (seit 0.36.2).
+// Ebenso, wenn seit dem letzten Zeichnen 19 Uhr vorbei ist: Dann erscheint der ruhige Abend-Hinweis (0.50.0).
 let tagBeimZeichnen = tagSchluessel(new Date());
+let abendBeimZeichnen = new Date().getHours() >= ABEND_STUNDE;
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState !== "visible") return;
   const jetzt = tagSchluessel(new Date());
-  if (jetzt === tagBeimZeichnen) return;
+  const abend = new Date().getHours() >= ABEND_STUNDE;
+  if (jetzt === tagBeimZeichnen && abend === abendBeimZeichnen) return;
   // Ist ein Fenster offen (z. B. Mahlzeit um 23:50 angefangen), nicht springen: Die Eingabe gehört zum alten Tag.
   // Beim nächsten Zurückkehren ohne offenes Fenster wird nachgeholt.
   if (document.querySelector("dialog[open]")) return;
   if (tagSchluessel(gewaehlterTag) === tagBeimZeichnen) gewaehlterTag = new Date();
   tagBeimZeichnen = jetzt;
+  abendBeimZeichnen = abend;
   zeichneAlles();
 });
 // Hat ein zweiter Tab mit Kilossos gespeichert: neu laden. Sonst überschriebe dieser Tab dessen Einträge beim nächsten
@@ -472,6 +479,18 @@ function zeichneHeute(vonNull = false) {
       fruehereMahlzeiten: eigene.some((m) => tagSchluessel(new Date(m.zeitpunkt)) < gestern),
     });
     if (warnungGestern) liste.unshift(warnungGestern);
+    // Abends ruhig an einen leeren Tag erinnern (0.50.0), hinter allen Warnungen.
+    const abend = abendHinweis({
+      name: tier.name,
+      tag,
+      heute,
+      stunde: jetzt.getHours(),
+      // Ein Leckerli allein ist noch keine Mahlzeit (Prüfer-Fund 0.50.0).
+      mahlzeitenHeute: mahlzeiten.filter((m) => futter.get(m.futterId)?.typ !== "leckerli").length,
+      fruehereMahlzeiten: eigene.some((m) => tagSchluessel(new Date(m.zeitpunkt)) < heute),
+      futterVerweigert: notfallJetzt(daten.besondereTage, tier.id, heute),
+    });
+    if (abend) liste.push(abend);
   }
   $("warnungen-liste").innerHTML = liste
     .map((w) =>
@@ -480,7 +499,7 @@ function zeichneHeute(vonNull = false) {
             id: "hinweis-" + w.id,
             klasse: "hinweis",
             kopf: `<span class="punkt" aria-hidden="true">i</span><span class="zusammen">${sicher(HINWEIS_TITEL[w.id] ?? "Hinweis")}</span>`,
-            inhalt: `<p>${sicher(w.text)}</p>${hinweisKnopf(w.id)}<span class="quelle">Quelle: ${sicher(w.quelle)}</span>`,
+            inhalt: `<p>${sicher(w.text)}</p>${hinweisKnopf(w.id)}${w.quelle ? `<span class="quelle">Quelle: ${sicher(w.quelle)}</span>` : ""}`,
           })}</li>`
         : `<li class="warnung warnung-${w.art}">${sicher(w.text)}<span class="quelle">Quelle: ${sicher(w.quelle)}</span></li>`
     )
