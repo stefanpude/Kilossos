@@ -173,16 +173,17 @@ test("Willkommensseite verspricht nichts, was die App nicht halten kann (Stefan,
   assert.doesNotMatch(html, /ohne Fettleber-Risiko|für jede Sorte/);
 });
 
-test("Version 0.54.0: Cache v103 mit js/rueckfrage.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
+test("Version 0.54.1: Cache v104 mit js/rueckfrage.js, js/nachtragen.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
   const sw = lies("sw.js");
-  assert.match(sw, /const CACHE_NAME = "kilossos-v103";/);
+  assert.match(sw, /const CACHE_NAME = "kilossos-v104";/);
+  assert.match(sw, /"js\/nachtragen\.js",/);
   assert.match(sw, /"js\/rueckfrage\.js",/);
   assert.match(sw, /"demo\/kito-simulation\.json",/);
   assert.match(sw, /"js\/wissen\.js",/);
   assert.match(sw, /"js\/besondere-tage\.js",/);
   assert.match(sw, /"js\/freigaben\.js",/);
   assert.match(sw, /"js\/heute-grafiken\.js",/);
-  assert.match(lies("index.html"), /id="version">Version 0\.54\.0</);
+  assert.match(lies("index.html"), /id="version">Version 0\.54\.1</);
 });
 
 // 0.42.7: Wiege-Tipp Transportbox im Bereich „Auf dem Arm gewogen?“ (Ideen-Tafel, Halter 06.11.2026).

@@ -86,6 +86,7 @@ import { fotoImZeitraum, fotoAngebot, fotoFeld, istFotoTag, vorherNachher, nachE
 import { belegteZeichen, speicherAnzeige } from "./js/speicher.js";
 import { sicherungPruefen, einleseFrage } from "./js/sicherung.js";
 import { frage, bestaetigt } from "./js/rueckfrage.js";
+import { uhrzeitVorbelegung } from "./js/nachtragen.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
 if ("serviceWorker" in navigator) {
@@ -1330,11 +1331,12 @@ function oeffneMahlzeit(mahlzeit = null) {
   // Neue Mahlzeit: keine Sorte vorgewählt, damit niemand aus Versehen die falsche einträgt (seit 0.36.4;
   // vorher stand die erste Sorte drin). Gibt es nur eine Sorte, bleibt sie vorgewählt.
   futterMenue(mahlzeit ? mahlzeit.futterId : daten.futter.length === 1 ? daten.futter[0].id : null);
-  // Nachtragen für einen anderen Tag (seit 0.54.0): Uhrzeit leer statt „jetzt“. Sonst lagen mehrere Fütterungen,
-  // auf einmal nachgetragen, Minuten auseinander und zählten im PDF als eine Mahlzeit (Prüfer-Fund 0.53.0).
-  const nachtragen = !mahlzeit && tagSchluessel(gewaehlterTag) !== tagSchluessel(new Date());
-  const zeit = mahlzeit ? new Date(mahlzeit.zeitpunkt) : new Date();
-  form.uhrzeit.value = nachtragen ? "" : `${String(zeit.getHours()).padStart(2, "0")}:${String(zeit.getMinutes()).padStart(2, "0")}`;
+  // Nachtragen für einen anderen Tag (seit 0.54.0): Uhrzeit leer statt „jetzt“, Hinweis mit Datum (0.54.1). Sonst lagen
+  // mehrere Fütterungen, auf einmal nachgetragen, Minuten auseinander und zählten im PDF als eine Mahlzeit.
+  const { uhrzeit, tipp } = uhrzeitVorbelegung({ mahlzeit, gewaehlterTag, jetzt: new Date() });
+  const nachtragen = tipp !== null;
+  form.uhrzeit.value = uhrzeit;
+  $("uhrzeit-tipp").textContent = tipp ?? "";
   $("uhrzeit-tipp").hidden = !nachtragen;
   // Mit dem Fehlerfeld, damit die Vorlesefunktion „Bitte die Uhrzeit …“ nach dem Fokus mitliest (wie beim Rest-Feld).
   if (nachtragen) form.uhrzeit.setAttribute("aria-describedby", "uhrzeit-tipp mahlzeit-fehler");
