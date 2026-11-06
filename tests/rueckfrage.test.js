@@ -275,3 +275,33 @@ test("Freigabe löschen: eigenes Blatt mit rotem Knopf, schließt nach dem Ja se
   assert.match(block, /preventDefault\(\);[\s\S]*await bestaetigt\(\{ text: loeschFrage\(eigeneFreigaben\(\), weg, tier\.name, tagSchluessel\(new Date\(\)\)\), ja: "Freigabe löschen", gefahr: true \}\)/);
   assert.match(block, /\$\("dialog-freigabe"\)\.close\("loeschen"\)/);
 });
+
+// ---------- Aufgabe 4: Monatsfoto mit drei Wegen ----------
+const gewichtSpeichern = () => abschnitt(app(), 'beimSpeichern("form-gewicht"', "\n});\n");
+
+test("Monatsfoto: kein „Abbrechen speichert …“-Satz mehr, Text und drei Knöpfe fest", () => {
+  const quelle = app();
+  assert.ok(!quelle.includes("„Abbrechen“ speichert"));
+  const hilfe = abschnitt(quelle, "function monatsfotoFrage(", "\n}\n");
+  assert.ok(hilfe.includes("`Seit dem letzten Foto-Tag gibt es schon ein Monatsfoto (vom ${datumText(vorhanden.datum)}). Soll das neue Foto es ersetzen?`"));
+  assert.match(hilfe, /ja: "Foto ersetzen"/);
+  assert.match(hilfe, /dritte: "Ohne neues Foto speichern"/);
+  assert.doesNotMatch(hilfe, /nein:/, "Nein heißt „Abbrechen“ (Standard)");
+});
+
+test("Monatsfoto beim Ändern fragt, bevor die Wägung verändert wird, und mit dem neuen Datum", () => {
+  const block = gewichtSpeichern();
+  assert.match(block, /^beimSpeichern\("form-gewicht", "gewicht-fehler", async \(werte\) =>/);
+  const fragen = block.indexOf("await frage(monatsfotoFrage(vorhanden))");
+  const aendern = block.indexOf("waegungAendern(bearbeiteteWaegung");
+  assert.ok(fragen > 0 && aendern > fragen, `Frage ${fragen} vor Ändern ${aendern}`);
+  assert.match(block.slice(0, aendern), /fotoImZeitraum\(andere, bearbeiteteWaegung\.tierId, werte\.get\("datum"\), tier\.wiegetag\)/);
+});
+
+test("Monatsfoto: „Abbrechen“ lässt beide Fenster-Wege offen, ohne etwas zu speichern", () => {
+  const block = gewichtSpeichern();
+  const treffer = [...block.matchAll(/await frage\(monatsfotoFrage\(vorhanden\)\);\s*if \(antwort === "nein"\) return "";/g)];
+  assert.equal(treffer.length, 2, "Ändern und Eintragen");
+  const eintragen = block.lastIndexOf("await frage(monatsfotoFrage(vorhanden))");
+  assert.ok(eintragen < block.indexOf("daten.gewichte.push(eintrag)"), "vor dem Anlegen");
+});

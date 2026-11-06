@@ -1706,13 +1706,37 @@ $("dialog-gewicht").addEventListener("close", () => {
   }
 });
 
-beimSpeichern("form-gewicht", "gewicht-fehler", (werte) => {
+// Rückfrage, wenn es im Zeitraum schon ein Monatsfoto gibt (höchstens eins je Zeitraum). Drei Wege seit 0.52.0:
+// ersetzen, ohne das neue Foto speichern oder „Abbrechen“ (zurück ins Fenster, nichts gespeichert).
+function monatsfotoFrage(vorhanden) {
+  return {
+    text: `Seit dem letzten Foto-Tag gibt es schon ein Monatsfoto (vom ${datumText(vorhanden.datum)}). Soll das neue Foto es ersetzen?`,
+    ja: "Foto ersetzen",
+    dritte: "Ohne neues Foto speichern",
+  };
+}
+
+beimSpeichern("form-gewicht", "gewicht-fehler", async (werte) => {
   const kg = leseZahl(werte.get("kg"));
   if (!kg || kg < 0.5 || kg > 20) return "Bitte ein Gewicht zwischen 0,5 und 20 kg eingeben, z. B. 9,32.";
   // Ändern: dieselbe Wägung, das Foto bleibt. Speicher voll: sichern() lädt den gespeicherten Stand neu und meldet es
   // (wie bei „Mahlzeit ändern“).
   if (bearbeiteteWaegung) {
     const hatteFoto = fotoGueltig(bearbeiteteWaegung.foto);
+    // Foto nachtragen (0.41.0) oder ersetzen (0.43.0): gleiche Regel wie beim Eintragen, höchstens eins je Zeitraum.
+    // Rückfrage nur, wenn eine andere Wägung im Ziel-Zeitraum ein Foto hat (z. B. weil das Datum geändert wurde).
+    // Gefragt wird vor jeder Änderung an der Wägung (mit dem neuen Datum), damit „Abbrechen“ nichts verändert (0.52.0).
+    let vorhanden = null;
+    let ersetzen = true;
+    if (gewichtFoto) {
+      const andere = daten.gewichte.filter((g) => g !== bearbeiteteWaegung);
+      vorhanden = fotoImZeitraum(andere, bearbeiteteWaegung.tierId, werte.get("datum"), tier.wiegetag);
+      if (vorhanden) {
+        const antwort = await frage(monatsfotoFrage(vorhanden));
+        if (antwort === "nein") return "";
+        ersetzen = antwort === "ja";
+      }
+    }
     waegungAendern(bearbeiteteWaegung, { kg, datum: werte.get("datum"), notiz: werte.get("notiz") });
     // Zielmonat aufklappen: Rutscht die Wägung in einen zugeklappten Monat, sieht man sie dort, und der Fokus findet sie.
     merkeZustand("monat-" + bearbeiteteWaegung.datum.slice(0, 7), true);
@@ -1721,13 +1745,6 @@ beimSpeichern("form-gewicht", "gewicht-fehler", (werte) => {
       if (hatteFoto && fotoEntfernt) delete bearbeiteteWaegung.foto;
       return sichern();
     }
-    // Foto nachtragen (0.41.0) oder ersetzen (0.43.0): gleiche Regel wie beim Eintragen, höchstens eins je Zeitraum.
-    // Rückfrage nur, wenn eine andere Wägung im Ziel-Zeitraum ein Foto hat (z. B. weil das Datum geändert wurde).
-    const andere = daten.gewichte.filter((g) => g !== bearbeiteteWaegung);
-    const vorhanden = fotoImZeitraum(andere, bearbeiteteWaegung.tierId, bearbeiteteWaegung.datum, tier.wiegetag);
-    const ersetzen =
-      !vorhanden ||
-      confirm(`Seit dem letzten Foto-Tag gibt es schon ein Monatsfoto (vom ${datumText(vorhanden.datum)}). Soll das neue Foto es ersetzen?\n\n„Abbrechen“ speichert die Änderung ohne das neue Foto.`);
     if (ersetzen) {
       bearbeiteteWaegung.foto = gewichtFoto;
       if (vorhanden) delete vorhanden.foto;
@@ -1762,9 +1779,12 @@ beimSpeichern("form-gewicht", "gewicht-fehler", (werte) => {
   let ersetzt = null;
   if (gewichtFoto) {
     const vorhanden = fotoImZeitraum(daten.gewichte, tier.id, eintrag.datum, tier.wiegetag);
-    const ersetzen =
-      !vorhanden ||
-      confirm(`Seit dem letzten Foto-Tag gibt es schon ein Monatsfoto (vom ${datumText(vorhanden.datum)}). Soll das neue Foto es ersetzen?\n\n„Abbrechen“ speichert das Gewicht ohne das neue Foto.`);
+    let ersetzen = true;
+    if (vorhanden) {
+      const antwort = await frage(monatsfotoFrage(vorhanden));
+      if (antwort === "nein") return ""; // zurück ins Fenster, nichts angelegt
+      ersetzen = antwort === "ja";
+    }
     if (ersetzen) {
       eintrag.foto = gewichtFoto;
       if (vorhanden) {
