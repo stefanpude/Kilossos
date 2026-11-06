@@ -1,6 +1,6 @@
 // Erzeugt eine SIMULIERTE Kilossos-Sicherung mit zwei Katzen, innerhalb aller Grenzen aus docs/sicherheitsgrenzen.md:
-// Kito nimmt in 34 Wochen von 9,32 auf 7,2 kg ab; Zuki (seit 0.47.0) startet rund 20 Wochen vor heute mit 5,40 kg,
-// Ziel 4,30 kg, noch nicht erreicht. Alle Zahlen sind ausgedacht, echte Werte von Zuki gibt es noch nicht.
+// seit 0.55.0 ein ganzes Jahr (52 Wochen) für den Tierarzttermin: Kito 9,32 → 6,0 kg, Zuki 7,0 → 4,0 kg, beide Ziele
+// am Ende erreicht. Die Zielgewichte sind Beispiele von Stefan, kein Wert vom Tierarzt. Alle Zahlen sind ausgedacht.
 // Die App zeigt die Sicherung im Demo-Modus (Link mit "?demo") in einem eigenen Speicherplatz an.
 // Nie über "Sicherung einlesen" laden – das würde die echten Einträge ersetzen.
 // Aufruf: node werkzeuge/erzeuge-testdaten.js  →  demo/kito-simulation.json (Name bleibt, enthält Kito und Zuki)
@@ -146,23 +146,27 @@ function simuliere(p) {
   return { tier: p.tier, start, freigaben, gewichte, mahlzeiten, besondereTage, fehler };
 }
 
-// Kito: Tierarzt-Kontrollen mit 0,8 × RER(7,2 kg) ≈ 245 kcal; nach 12 Wochen wird die Abnahme langsamer
-// → 10 % weniger (AAHA 2014); danach Kontrollen spätestens alle 3 Monate.
+// Kito (seit 0.55.0): ein Jahr, 9,32 → 6,0 kg (im Mittel gut 0,8 % pro Woche). Kontrolle alle 12 Wochen mit neuer
+// Freigabe; die kcal sinken mit dem Gewicht, bleiben aber über RER(6,0 kg) ≈ 268 kcal, damit normales Futter reicht
+// (sonst Diätfutter-Hinweis, AAHA 2021). Realistisch: anfangs schneller, über die Feiertage (Wochen 6–8) langsamer,
+// später langsamer. BCS sinkt von 8 auf 5.
 const kito = simuliere({
   tier: { id: "kito", name: "Kito", art: "katze", geschlecht: "kater", kastriert: true },
   praefix: "",
   zufall: zufallsStrom(20261101),
-  wochen: 34,
+  wochen: 52,
   versatz: 0,
   startKg: 9.32,
-  zielKg: 7.2,
+  zielKg: 6.0,
   zielGenau: true,
-  rate: (w) => (w < 12 ? 0.95 : w < 24 ? 0.8 : 0.65),
+  rate: (w) => (w >= 6 && w <= 8 ? 0.65 : w < 12 ? 1.05 : w < 24 ? 0.95 : w < 36 ? 0.8 : 0.7),
   schwankung: 0.015,
   freigaben: [
-    { woche: 0, kcalProTag: 245, bcs: 8, mcs: "normal", notiz: "Simulation: Start 0,8 × RER(Ziel)" },
-    { woche: 12, kcalProTag: 220, bcs: 7, mcs: "normal", notiz: "Simulation: Abnahme langsamer, −10 %" },
-    { woche: 24, kcalProTag: 220, bcs: 6, mcs: "normal", notiz: "Simulation: Kontrolle, Plan bleibt" },
+    { woche: 0, kcalProTag: 300, bcs: 8, mcs: "normal", notiz: "Simulation: Start, Ziel 6,0 kg als Beispiel" },
+    { woche: 12, kcalProTag: 290, bcs: 8, mcs: "normal", notiz: "Simulation: Kontrolle, Abnahme gut, etwas weniger" },
+    { woche: 24, kcalProTag: 280, bcs: 7, mcs: "normal", notiz: "Simulation: Kontrolle, an das neue Gewicht angepasst" },
+    { woche: 36, kcalProTag: 275, bcs: 6, mcs: "normal", notiz: "Simulation: Kontrolle, Plan bleibt fast gleich" },
+    { woche: 48, kcalProTag: 270, bcs: 5, mcs: "normal", notiz: "Simulation: Ziel fast erreicht, danach Gewicht halten besprechen" },
   ],
   leckerli: { anteil: 3 / 7, von: 2, bis: 5 },
   zeiten: { nassMorgens: [7, 10], trockenMorgens: [7, 35], leckerli: [15, 0], nassAbends: [18, 5], trockenAbends: [21, 30] },
@@ -170,40 +174,47 @@ const kito = simuliere({
   // „Heute“ den Knopf „Beendet“.
   besondereTage: (letzterTag) => [
     { art: "genascht", von: 40, bis: 40, notiz: "Simulation: ein paar Stücke vom Hundefutter" },
+    { art: "genascht", von: 47, bis: 47, notiz: "Simulation: Feiertage, vom Festessen genascht" },
     { art: "mehr-bewegung", von: 61, bis: 61, notiz: "Simulation: lange im Garten gewesen" },
     { art: "genascht", von: 75, bis: 75, notiz: "Simulation: Maus gefangen" },
     { art: "krank", von: 15 * 7 + 2, bis: 15 * 7 + 4, notiz: "Simulation: Magen verstimmt, Tierarzt angerufen" },
     { art: "genascht", von: 130, bis: 130, notiz: "Simulation: vom Teller stibitzt" },
     { art: "futterumstellung", von: 20 * 7, bis: 20 * 7 + 6, notiz: "Simulation: neue Sorte langsam untergemischt" },
+    { art: "mehr-bewegung", von: 30 * 7, bis: 32 * 7, notiz: "Simulation: Baustelle fertig, wieder draußen" },
     { art: "genascht", von: letzterTag - 12, bis: letzterTag - 12, notiz: "Simulation: ein paar Stücke vom Hundefutter" },
     { art: "weniger-bewegung", von: letzterTag - 9, bis: null, notiz: "Simulation: Regenwetter, nur drinnen" },
   ],
 });
 
-// Zuki (seit 0.47.0): zierlich, im Verhältnis dicker als Kito, startet später. Freigabe 0,8 × RER(4,3 kg)
-// = 167 kcal, auf 5 gerundet 165 kcal; Kontrolle nach 12 Wochen, Plan bleibt. Gewogen 2 Tage vor Kito,
+// Zuki (seit 0.55.0): zierlich, im Verhältnis dicker als Kito, ein Jahr 7,0 → 4,0 kg (im Mittel gut 1 % pro Woche).
+// Freigaben sinken von 230 auf 200 kcal, bleiben über RER(4,0 kg) ≈ 198 kcal. BCS 9 → 5. Gewogen 2 Tage vor Kito,
 // damit die Demo beim Verschieben auf heute (neuestes Gewicht über alle Tiere = Kitos) beide sinnvoll zeigt.
 // Kleinere Leckerlis, damit sie bei der kleineren Tagesmenge unter 10 % bleiben. Getrennt gefüttert, eigene Zeiten.
 const zuki = simuliere({
   tier: { id: "zuki", name: "Zuki", art: "katze", geschlecht: "katze", kastriert: true, koerperbau: "zierlich" },
   praefix: "zuki-",
   zufall: zufallsStrom(20261106),
-  wochen: 20,
+  wochen: 52,
   versatz: 2,
-  startKg: 5.4,
-  zielKg: 4.3,
-  zielGenau: false,
-  rate: (w) => (w < 10 ? 0.9 : 0.8),
+  startKg: 7.0,
+  zielKg: 4.0,
+  zielGenau: true,
+  rate: (w) => (w >= 6 && w <= 8 ? 0.8 : w < 12 ? 1.3 : w < 24 ? 1.15 : w < 36 ? 1.0 : 0.9),
   schwankung: 0.008,
   freigaben: [
-    { woche: 0, kcalProTag: 165, bcs: 8, mcs: "normal", notiz: "Simulation: Start 0,8 × RER(Ziel)" },
-    { woche: 12, kcalProTag: 165, bcs: 7, mcs: "normal", notiz: "Simulation: Kontrolle, Plan bleibt" },
+    { woche: 0, kcalProTag: 230, bcs: 9, mcs: "normal", notiz: "Simulation: Start, Ziel 4,0 kg als Beispiel" },
+    { woche: 12, kcalProTag: 220, bcs: 8, mcs: "normal", notiz: "Simulation: Kontrolle, Abnahme gut, etwas weniger" },
+    { woche: 24, kcalProTag: 210, bcs: 7, mcs: "normal", notiz: "Simulation: Kontrolle, an das neue Gewicht angepasst" },
+    { woche: 36, kcalProTag: 205, bcs: 6, mcs: "normal", notiz: "Simulation: Kontrolle, Plan bleibt fast gleich" },
+    { woche: 48, kcalProTag: 200, bcs: 5, mcs: "normal", notiz: "Simulation: Ziel fast erreicht, danach Gewicht halten besprechen" },
   ],
   leckerli: { anteil: 2 / 7, von: 1, bis: 3 },
   zeiten: { nassMorgens: [6, 45], trockenMorgens: [7, 20], leckerli: [16, 30], nassAbends: [17, 50], trockenAbends: [21, 15] },
   besondereTage: () => [
+    { art: "genascht", von: 48, bis: 48, notiz: "Simulation: Feiertage, Sahne vom Tisch geschleckt" },
     { art: "mehr-bewegung", von: 9 * 7 + 3, bis: 9 * 7 + 3, notiz: "Simulation: lange mit der Federangel gespielt" },
-    { art: "genascht", von: 16 * 7 + 4, bis: 16 * 7 + 4, notiz: "Simulation: Sahne vom Tisch geschleckt" },
+    { art: "futterumstellung", von: 20 * 7, bis: 20 * 7 + 6, notiz: "Simulation: neue Sorte langsam untergemischt" },
+    { art: "genascht", von: 33 * 7 + 4, bis: 33 * 7 + 4, notiz: "Simulation: am Napf von Kito genascht" },
   ],
 });
 

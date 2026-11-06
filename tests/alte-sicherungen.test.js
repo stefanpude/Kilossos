@@ -191,37 +191,43 @@ test("0.47.0: Jeder Eintrag der Demo gehört zu einem vorhandenen Tier, Kennunge
   assert.ok(demo.gewichte.every((g) => !("foto" in g)), "keine Fotos in der Demo-Datei");
 });
 
-test("0.47.0: Kitos Demo-Daten bleiben wie bisher (Gewichte, Mahlzeiten, Freigaben, besondere Tage)", () => {
-  const demo = demoDaten();
-  const von = (feld) => demo[feld].filter((e) => e.tierId === "kito");
-  assert.equal(
-    von("gewichte").map((g) => g.kg).join(","),
-    "9.32,9.23,9.15,9.08,8.99,8.91,8.85,8.76,8.68,8.6,8.53,8.47,8.4,8.32,8.25,8.21,8.15,8.1,8.02,7.97,7.9,7.85,7.79,7.73,7.68,7.63,7.58,7.52,7.47,7.43,7.38,7.35,7.3,7.25,7.2",
-  );
-  assert.equal(von("mahlzeiten").length, 1059);
-  assert.equal(von("mahlzeiten").reduce((s, m) => s + m.gramm, 0), 34950);
-  assert.equal(von("freigaben").length, 3);
-  assert.equal(von("besondereTage").length, 8);
-});
+// 0.55.0: Demo für den Tierarzttermin, ein ganzes Jahr. Zielgewichte sind Stefans Beispiele (Kito 6,0, Zuki 4,0 kg).
+for (const { id, startKg, zielKg, startBcs } of [
+  { id: "kito", startKg: 9.32, zielKg: 6.0, startBcs: 8 },
+  { id: "zuki", startKg: 7.0, zielKg: 4.0, startBcs: 9 },
+]) {
+  test(`0.55.0: ${id} in der Demo: ein Jahr ${startKg} → ${zielKg} kg, Kontrolle alle 12 Wochen, kcal nie unter RER(Ziel)`, () => {
+    const demo = demoDaten();
+    const gewichte = demo.gewichte.filter((g) => g.tierId === id).sort((a, b) => a.datum.localeCompare(b.datum));
+    const freigaben = demo.freigaben.filter((f) => f.tierId === id).sort((a, b) => a.datum.localeCompare(b.datum));
+    assert.equal(gewichte[0].kg, startKg);
+    assert.equal(gewichte.at(-1).kg, zielKg, "Ziel am Ende erreicht");
+    assert.equal(tageZwischen(gewichte[0].datum, gewichte.at(-1).datum), 52 * 7, "ein Jahr");
+    assert.equal(freigaben[0].datum, gewichte[0].datum);
+    assert.equal(freigaben.length, 5);
+    assert.ok(freigaben.every((f) => f.zielgewichtKg === zielKg));
+    assert.equal(freigaben[0].bcs, startBcs);
+    assert.equal(freigaben.at(-1).bcs, 5);
+    // kcal sinken mit dem Gewicht, bleiben aber über dem Ruhebedarf beim Ziel (sonst Diätfutter-Hinweis).
+    for (let i = 1; i < freigaben.length; i++) assert.ok(freigaben[i].kcalProTag <= freigaben[i - 1].kcalProTag);
+    assert.ok(freigaben.every((f) => f.kcalProTag >= rer(zielKg)), "über RER(Ziel)");
+    assert.ok(freigaben.every((f) => f.tierarzt === "Testpraxis (Simulation)" && f.notiz.startsWith("Simulation:")));
+    // Spätestens alle 3 Monate eine Kontrolle, sonst stünde „Freigabe älter als 3 Monate“ da.
+    for (let i = 1; i < freigaben.length; i++) assert.ok(tageZwischen(freigaben[i - 1].datum, freigaben[i].datum) <= 90);
+    assert.ok(tageZwischen(freigaben.at(-1).datum, gewichte.at(-1).datum) <= 90);
+  });
+}
 
-test("0.47.0: Zuki in der Demo: 5,4 → Ziel 4,3 kg, Freigabe 0,8 × RER(Ziel), Ziel noch nicht erreicht", () => {
-  const demo = demoDaten();
-  const gewichte = demo.gewichte.filter((g) => g.tierId === "zuki").sort((a, b) => a.datum.localeCompare(b.datum));
-  const freigaben = demo.freigaben.filter((f) => f.tierId === "zuki").sort((a, b) => a.datum.localeCompare(b.datum));
-  assert.equal(gewichte[0].kg, 5.4);
-  assert.ok(gewichte.at(-1).kg > 4.3, "Ziel noch nicht erreicht");
-  assert.equal(freigaben[0].datum, gewichte[0].datum);
-  assert.equal(freigaben[0].zielgewichtKg, 4.3);
-  assert.equal(freigaben[0].kcalProTag, Math.round((0.8 * rer(4.3)) / 5) * 5);
-  assert.equal(freigaben[0].bcs, 8);
-  assert.equal(freigaben[0].mcs, "normal");
-  assert.ok(freigaben.every((f) => f.tierarzt === "Testpraxis (Simulation)" && f.notiz.startsWith("Simulation:")));
-  // Spätestens alle 3 Monate eine Kontrolle, sonst stünde „Freigabe älter als 3 Monate“ da.
-  const letzte = gewichte.at(-1).datum;
-  assert.ok(tageZwischen(freigaben.at(-1).datum, letzte) <= 90);
-  // Zuki startet später als Kito: rund 20 Wochen.
-  const wochen = tageZwischen(gewichte[0].datum, letzte) / 7;
-  assert.ok(wochen >= 18 && wochen <= 22, `${wochen} Wochen`);
+test("0.55.0: Kito nimmt sicher ab (2 Wochen höchstens 2 %, 4 Wochen mindestens 0,5 %)", () => {
+  const gewichte = demoDaten().gewichte.filter((g) => g.tierId === "kito").sort((a, b) => a.datum.localeCompare(b.datum));
+  for (let i = 2; i < gewichte.length; i++) {
+    const r = abnahmeProWoche(gewichte.slice(0, i + 1), 14).prozent;
+    assert.ok(r <= 2, `2 Wochen bis ${gewichte[i].datum}: ${r.toFixed(2)} %`);
+  }
+  for (let i = 4; i < gewichte.length; i++) {
+    const r = abnahmeProWoche(gewichte.slice(0, i + 1), 28).prozent;
+    assert.ok(r >= 0.5, `4 Wochen bis ${gewichte[i].datum}: ${r.toFixed(2)} %`);
+  }
 });
 
 test("0.47.0: Zuki nimmt 0,5–2 % pro Woche ab (Mittel über 2 Wochen wie die App, und insgesamt)", () => {
@@ -280,7 +286,7 @@ test("0.47.0: Neuestes Gewicht der Demo ist Kitos (Verschiebung auf heute), Zuki
   assert.equal(letzterTag("zuki"), letzterTag("kito"));
   // Zukis besondere Tage sind abgeschlossen; die eine laufende Phase bleibt Kitos.
   const zukiTage = demo.besondereTage.filter((b) => b.tierId === "zuki");
-  assert.ok(zukiTage.length >= 1 && zukiTage.length <= 2);
+  assert.ok(zukiTage.length >= 1);
   assert.ok(zukiTage.every((b) => b.bis !== null && b.notiz.startsWith("Simulation:")));
 });
 
