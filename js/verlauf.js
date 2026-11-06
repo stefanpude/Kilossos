@@ -72,27 +72,38 @@ function yAchse(werte, y, stellen = 0, einheit = "") {
 // 8 Monaten nur jeder zweite oder dritte). So überlappen die Beschriftungen nicht (höchstens 6 Daten oder 8 Monate).
 // Kleine Striche an der Grundlinie zeigen, wo die Tage liegen.
 // unten/hoehe (seit 0.40.0): Grundlinie und Höhe der Zeichenfläche; das PDF ruft ohne sie auf (190 hoch, Grundlinie 168).
+// Seit 0.67.0 (Wunsch 06.11.2026, „3 Monate“ zeigte nur „Sep Okt Nov“): Daten bis 14 statt 12 Wochen, damit
+// „3 Monate“ (92 Tage) jeden zweiten Montag zeigt. Dazu kleine Striche ohne Zahl: an den Montagen ohne Datum,
+// bei Monatsnamen bis 26 Wochen an jedem Montag, darüber an den Monaten ohne Namen.
 function zeitAchse(vonMs, bisMs, x, unten = H - RAND.unten, hoehe = H) {
   const tage = Math.round((bisMs - vonMs) / TAG_MS); // gerundet: Zeitumstellung
-  const marken = [];
+  const marken = []; // [Zeit, Text]; Text null = kleiner Strich ohne Zahl
+  const montage = [];
   const d = new Date(vonMs);
-  if (tage <= 84) {
-    const schritt = tage <= 42 ? 7 : 14;
-    d.setDate(d.getDate() + ((8 - d.getDay()) % 7)); // erster Montag ab dem Start
-    for (; d.getTime() <= bisMs; d.setDate(d.getDate() + schritt)) marken.push([d.getTime(), `${d.getDate()}.${d.getMonth() + 1}.`]);
+  d.setDate(d.getDate() + ((8 - d.getDay()) % 7)); // erster Montag ab dem Start
+  for (; d.getTime() <= bisMs; d.setDate(d.getDate() + 7)) montage.push(d.getTime());
+  if (tage <= 98) {
+    const jeder = tage <= 42 ? 1 : 2;
+    montage.forEach((t, i) => {
+      const m = new Date(t);
+      marken.push([t, i % jeder === 0 ? `${m.getDate()}.${m.getMonth() + 1}.` : null]);
+    });
   } else {
-    d.setDate(1);
-    d.setMonth(d.getMonth() + 1);
+    const m = new Date(vonMs);
+    m.setDate(1);
+    m.setMonth(m.getMonth() + 1);
     const monate = [];
-    for (; d.getTime() <= bisMs; d.setMonth(d.getMonth() + 1)) monate.push(d.getTime());
+    for (; m.getTime() <= bisMs; m.setMonth(m.getMonth() + 1)) monate.push(m.getTime());
     const schritt = Math.ceil(monate.length / 8); // Monatsnamen sind kurz: 8 passen nebeneinander
-    monate
-      .filter((_, i) => i % schritt === 0)
-      .forEach((t) => marken.push([t, new Date(t).toLocaleDateString("de-DE", { month: "short" })]));
+    const benannt = monate.filter((_, i) => i % schritt === 0);
+    benannt.forEach((t) => marken.push([t, new Date(t).toLocaleDateString("de-DE", { month: "short" })]));
+    const klein = tage <= 182 ? montage : monate;
+    klein.filter((t) => !benannt.includes(t)).forEach((t) => marken.push([t, null]));
   }
   return marken
     .map(([t, text]) => {
       const mx = Math.round(x(t) * 10) / 10;
+      if (text === null) return `<line class="achsen-strich klein" x1="${mx}" x2="${mx}" y1="${unten}" y2="${unten + 2.5}"/>`;
       return `<line class="achsen-strich" x1="${mx}" x2="${mx}" y1="${unten}" y2="${unten + 4}"/><text class="achse" x="${mx}" y="${hoehe - 6}" text-anchor="middle">${text}</text>`;
     })
     .join("");

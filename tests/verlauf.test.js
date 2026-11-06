@@ -421,10 +421,11 @@ test("gewichtDiagramm (PDF): bis 6 Wochen steht jeder Montag an der Achse, mit S
   assert.equal((svg.match(/class="achsen-strich"/g) ?? []).length, 6);
 });
 
-test("gewichtDiagramm (PDF): bis 12 Wochen jeder zweite Montag, darüber die Monatsanfänge", () => {
+test("gewichtDiagramm (PDF): bis 14 Wochen jeder zweite Montag, darüber die Monatsanfänge (Grenze seit 0.67.0)", () => {
   assert.deepEqual(achsenText(zwischen("2026-09-01", "2026-11-13")), ["7.9.", "21.9.", "5.10.", "19.10.", "2.11."]);
   assert.deepEqual(achsenText(zwischen("2026-08-21", "2026-11-13")), ["24.8.", "7.9.", "21.9.", "5.10.", "19.10.", "2.11."]); // 84 Tage
-  assert.deepEqual(achsenText(zwischen("2026-08-20", "2026-11-13")), ["Sep", "Okt", "Nov"]); // 85 Tage
+  assert.deepEqual(achsenText(zwischen("2026-08-20", "2026-11-13")), ["24.8.", "7.9.", "21.9.", "5.10.", "19.10.", "2.11."]); // 85 Tage
+  assert.deepEqual(achsenText(zwischen("2026-08-06", "2026-11-13")), ["Sep", "Okt", "Nov"]); // 99 Tage
   assert.deepEqual(achsenText(zwischen("2026-06-01", "2026-11-13")), ["Jul", "Aug", "Sep", "Okt", "Nov"]);
 });
 

@@ -57,7 +57,49 @@ test("App-Kurve: bis 6 Wochen steht jeder Montag an der Zeitachse, mit Strich an
   assert.equal((kurve.match(/class="achsen-strich"/g) ?? []).length, 6);
 });
 
-test("App-Kurve: bis 12 Wochen jeder zweite Montag, darüber Monate wie im PDF", () => {
+test("App-Kurve: bis 14 Wochen jeder zweite Montag, darüber Monate wie im PDF", () => {
   assert.deepEqual(zeitZahlen(weicheKurve([G("2026-09-01", 9.3), G("2026-11-13", 9.1)], [])), ["7.9.", "21.9.", "5.10.", "19.10.", "2.11."]);
   assert.deepEqual(zeitZahlen(weicheKurve([G("2026-06-01", 9.3), G("2026-11-13", 9.1)], [])), ["Jul", "Aug", "Sep", "Okt", "Nov"]);
+});
+
+// 0.67.0, Wunsch Stefan 06.11.2026 (Bild „3 Monate“ mit nur „Sep Okt Nov“): Zeitachse genauer, ohne Gedränge.
+// „3 Monate“ (92 Tage) zeigt jetzt jeden zweiten Montag als Datum (Grenze 14 statt 12 Wochen), die Montage
+// dazwischen bekommen einen kleinen Strich ohne Zahl. Bei Monatsnamen bis 26 Wochen kleine Striche an jedem Montag,
+// darüber an den Monaten ohne Namen.
+const kleineStriche = (svg) => (svg.match(/class="achsen-strich klein"/g) ?? []).length;
+const grosseStriche = (svg) => (svg.match(/class="achsen-strich"/g) ?? []).length;
+
+test("0.67.0: „3 Monate“ (92 Tage) mit jedem zweiten Montag als Datum, kleine Striche an den Montagen dazwischen", () => {
+  const kurve = weicheKurve([G("2026-08-06", 9.3), G("2026-11-06", 9.1)], []);
+  assert.deepEqual(zeitZahlen(kurve), ["10.8.", "24.8.", "7.9.", "21.9.", "5.10.", "19.10.", "2.11."]);
+  assert.equal(grosseStriche(kurve), 7);
+  assert.equal(kleineStriche(kurve), 6); // 17.8., 31.8., 14.9., 28.9., 12.10., 26.10.
+});
+
+test("0.67.0: Grenze 98 Tage noch Daten, 99 Tage Monatsnamen", () => {
+  assert.deepEqual(zeitZahlen(weicheKurve([G("2026-08-07", 9.3), G("2026-11-13", 9.1)], [])), ["10.8.", "24.8.", "7.9.", "21.9.", "5.10.", "19.10.", "2.11."]);
+  assert.deepEqual(zeitZahlen(weicheKurve([G("2026-08-06", 9.3), G("2026-11-13", 9.1)], [])), ["Sep", "Okt", "Nov"]);
+});
+
+test("0.67.0: bis 6 Wochen kein kleiner Strich, jeder Montag hat sein Datum", () => {
+  assert.equal(kleineStriche(weicheKurve([G("2026-10-02", 9.3), G("2026-11-13", 9.1)], [])), 0);
+});
+
+test("0.67.0: Monatsnamen bis 26 Wochen mit kleinem Strich an jedem Montag", () => {
+  const kurve = weicheKurve([G("2026-06-01", 9.3), G("2026-11-13", 9.1)], []); // 165 Tage, Montage 1.6. bis 9.11.
+  assert.deepEqual(zeitZahlen(kurve), ["Jul", "Aug", "Sep", "Okt", "Nov"]);
+  assert.equal(kleineStriche(kurve), 24);
+});
+
+test("0.67.0: über 26 Wochen kleine Striche nur an den Monaten ohne Namen, keine Wochen", () => {
+  const kurve = weicheKurve([G("2025-11-01", 9.3), G("2026-11-13", 9.1)], []);
+  assert.deepEqual(zeitZahlen(kurve), ["Dez", "Feb", "Apr", "Jun", "Aug", "Okt"]);
+  assert.equal(kleineStriche(kurve), 6); // Jan, März, Mai, Juli, Sep, Nov
+});
+
+test("0.67.0: PDF nutzt dieselbe Zeitachse", () => {
+  const svg = gewichtDiagramm([G("2026-08-06", 9.3), G("2026-11-06", 9.1)], [], "2026-11-06");
+  const texte = [...svg.matchAll(/<text class="achse" x="[\d.]+" y="184" text-anchor="middle">([^<]+)<\/text>/g)].map((m) => m[1]);
+  assert.deepEqual(texte, ["10.8.", "24.8.", "7.9.", "21.9.", "5.10.", "19.10.", "2.11."]);
+  assert.equal(kleineStriche(svg), 6);
 });
