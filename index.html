@@ -342,7 +342,7 @@
           <span data-symbol="dokument"></span><span class="text">Nutzungsbedingungen</span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.45.0</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.46.0</span>
         </div>
       </div>
     </section>
@@ -374,6 +374,25 @@
         <p class="tipp" id="gramm-tipp">Wiege das Futter, bevor du Wasser oder Brühe dazugibst. Sonst zählt das Wasser als Futter mit.</p>
       </div>
       <p class="vorschau" id="mahlzeit-vorschau"></p>
+      <!-- Rest zurückwiegen (0.46.0), nur beim Ändern: „gegeben“ und „übrig“ haben bewusst kein name und werden nie
+           gespeichert. Gespeichert wird nur die gefressene Menge oben. Gleicher Aufbau wie „Auf dem Arm gewogen?“. -->
+      <details class="arm rest" id="rest-bereich" hidden>
+        <summary>Etwas übrig gelassen?<span class="pfeil" data-symbol="runter" aria-hidden="true"></span></summary>
+        <div class="arm-inhalt">
+          <p class="tipp" id="rest-tipp">Wiege den Rest im Napf. Kilossos zieht ihn ab und trägt oben ein, was wirklich gefressen wurde. Nur diese Menge wird gespeichert.
+            Schon einmal einen Rest abgezogen? Dann bei „Anfangs gegeben“ die Menge vom Anfang eintragen, nicht die Zahl oben.</p>
+          <div class="arm-felder">
+            <label>Anfangs gegeben (g)
+              <input id="rest-gegeben" inputmode="decimal" autocomplete="off" aria-describedby="rest-fehler rest-tipp">
+            </label>
+            <label>Übrig (g)
+              <input id="rest-uebrig" inputmode="decimal" autocomplete="off" placeholder="z. B. 12" aria-describedby="rest-fehler">
+            </label>
+          </div>
+          <p class="arm-ergebnis" id="rest-ergebnis" role="status"></p>
+          <p class="fehler" id="rest-fehler" hidden></p>
+        </div>
+      </details>
       <p class="fehler" id="mahlzeit-fehler" hidden></p>
       <div class="knoepfe">
         <button value="abbrechen" formnovalidate class="knopf-zweit">Abbrechen</button>

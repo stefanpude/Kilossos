@@ -35,6 +35,7 @@ import {
   warnungen,
   gesternWenigGefressen,
   armGewicht,
+  restAbziehen,
   prozentInGramm,
   menschVergleich,
   kcalKasten,
@@ -1267,9 +1268,94 @@ function oeffneMahlzeit(mahlzeit = null) {
   const zeit = mahlzeit ? new Date(mahlzeit.zeitpunkt) : new Date();
   form.uhrzeit.value = `${String(zeit.getHours()).padStart(2, "0")}:${String(zeit.getMinutes()).padStart(2, "0")}`;
   if (mahlzeit) form.gramm.value = String(mahlzeit.gramm).replace(".", ",");
+  restZuruecksetzen(mahlzeit);
   zeigeMahlzeitVorschau();
   $("dialog-mahlzeit").showModal();
 }
+
+// ---------- Rest zurückwiegen (0.46.0, Ideen-Tafel „rest-zurueckwiegen“, Weg 1) ----------
+// Nur beim Ändern einer Mahlzeit. „Anfangs gegeben“ und „Übrig“ stehen nur in den Feldern (ohne name) und werden nie
+// gespeichert; der Bereich schreibt die gefressene Menge ins Gramm-Feld. Aufbau wie „Auf dem Arm gewogen?“.
+// „Anfangs gegeben“ wird bewusst NICHT mit der gespeicherten Menge vorbelegt (Prüfer-Fund 06.11.): Wurde schon
+// einmal ein Rest abgezogen, ist die gespeicherte Menge die gefressene, und der Rest würde doppelt abgezogen
+// (zu wenig gespeichert, größeres „Noch“, Gefahr des Nachfütterns). Die gespeicherte Menge steht nur als Platzhalter da.
+let restGramm = ""; // Wert, den der Bereich zuletzt ins Gramm-Feld geschrieben hat
+let grammVorbelegt = ""; // Gramm-Feld, bevor der Bereich zum ersten Mal hineingeschrieben hat, für die Rücknahme
+const TEXT_REST_OFFEN = "Der Rest ist noch nicht abgezogen. Bitte „Übrig“ prüfen oder das Feld leeren.";
+
+function restZuruecksetzen(mahlzeit) {
+  $("rest-bereich").hidden = !mahlzeit;
+  $("rest-bereich").open = false;
+  $("rest-gegeben").value = "";
+  $("rest-gegeben").placeholder = mahlzeit ? `z. B. ${String(mahlzeit.gramm).replace(".", ",")}` : "";
+  $("rest-uebrig").value = "";
+  $("rest-ergebnis").textContent = "";
+  zeigeFehler("rest-fehler", "");
+  restGramm = "";
+  grammVorbelegt = $("form-mahlzeit").gramm.value;
+}
+
+// Menge oben von Hand geändert (tippen oder ±5), nachdem der Bereich etwas abgezogen hat: Dann gilt die eigene Zahl.
+// „Übrig“ wird geleert, damit keine veraltete Zeile „Gefressen: … oben eingetragen“ stehen bleibt (Prüfer-Fund 06.11.).
+function restNachHandAenderung() {
+  if (!restGramm || $("form-mahlzeit").gramm.value === restGramm) return;
+  restGramm = "";
+  $("rest-uebrig").value = "";
+  $("rest-ergebnis").textContent = "Menge oben von Hand geändert: „Übrig“ geleert, es wird nichts mehr abgezogen.";
+}
+
+// fehlerZeigen: erst beim Verlassen eines Feldes, damit beim Tippen von „12“ nicht schon bei „1“ ein Fehler erscheint.
+function restRechnen(fehlerZeigen) {
+  const form = $("form-mahlzeit");
+  const textGegeben = $("rest-gegeben").value.trim();
+  const textUebrig = $("rest-uebrig").value.trim();
+  let fehler = "";
+  let ergebnis = null;
+  if (!textGegeben !== !textUebrig) fehler = "Bitte beide Mengen eintragen.";
+  else if (textGegeben && textUebrig) {
+    const gegeben = leseZahl(textGegeben);
+    const uebrig = leseZahl(textUebrig);
+    if (gegeben === null || uebrig === null) fehler = "Bitte Zahlen eingeben, zum Beispiel 12.";
+    else {
+      const r = restAbziehen(gegeben, uebrig);
+      if (r.fehler) fehler = r.fehler;
+      else ergebnis = r.gramm;
+    }
+  }
+  if (ergebnis !== null) {
+    if (!restGramm) grammVorbelegt = form.gramm.value; // eigene Korrektur oben bleibt für die Rücknahme erhalten
+    restGramm = String(ergebnis).replace(".", ",");
+    form.gramm.value = restGramm;
+    $("rest-ergebnis").textContent = `Gefressen: ${restGramm} g (${textGegeben} g gegeben, ${textUebrig} g übrig), oben eingetragen.`;
+    zeigeFehler("rest-fehler", "");
+    if ($("mahlzeit-fehler").textContent === TEXT_REST_OFFEN) zeigeFehler("mahlzeit-fehler", "");
+  } else {
+    // Ein Wert, den der Bereich selbst eingetragen hat, passt nicht mehr: zurück zur gespeicherten Menge.
+    // Eigene Eingaben im Gramm-Feld bleiben.
+    if (restGramm && form.gramm.value === restGramm) form.gramm.value = grammVorbelegt;
+    restGramm = "";
+    $("rest-ergebnis").textContent = "";
+    if (fehlerZeigen || !fehler) zeigeFehler("rest-fehler", fehler);
+  }
+  zeigeMahlzeitVorschau();
+}
+
+// Steht etwas unter „Übrig“, das nicht abgezogen werden konnte? Dann nicht speichern, sonst landet still die
+// volle Menge in den Daten (bei „alles übrig“ wäre eine Futterverweigerung verdeckt).
+function restUngeklaert() {
+  return !$("rest-bereich").hidden && $("rest-uebrig").value.trim() !== "" && !restGramm;
+}
+
+$("rest-bereich").addEventListener("input", () => restRechnen(false));
+$("rest-bereich").addEventListener("change", () => restRechnen(true));
+// Enter in den Rest-Feldern soll nicht speichern: weiter zum zweiten Feld bzw. Eingabe abschließen.
+$("rest-bereich").addEventListener("keydown", (ereignis) => {
+  if (ereignis.key !== "Enter" || ereignis.target.tagName !== "INPUT" || ereignis.isComposing) return;
+  ereignis.preventDefault();
+  ereignis.stopPropagation(); // sonst speichert der Enter-Listener des Formulars
+  if (ereignis.target.id === "rest-gegeben") $("rest-uebrig").focus();
+  else ereignis.target.blur();
+});
 
 function zeigeMahlzeitVorschau() {
   const form = $("form-mahlzeit");
@@ -1285,13 +1371,24 @@ function grammSchritt(schritt) {
   const jetzt = leseZahl(feld.value) ?? 0;
   const neu = Math.max(0, Math.round((jetzt + schritt) / 5) * 5);
   feld.value = neu ? String(neu) : "";
+  restNachHandAenderung();
   zeigeMahlzeitVorschau();
 }
 
-$("form-mahlzeit").addEventListener("input", zeigeMahlzeitVorschau);
+$("form-mahlzeit").addEventListener("input", () => {
+  restNachHandAenderung();
+  zeigeMahlzeitVorschau();
+});
 
 beimSpeichern("form-mahlzeit", "mahlzeit-fehler", (werte) => {
   if (!werte.get("futter")) return "Bitte eine Futtersorte wählen.";
+  if (restUngeklaert()) {
+    $("rest-bereich").open = true;
+    restRechnen(true);
+    // Fokus ins Feld, das fehlt (sonst „Übrig“): Die Vorlesefunktion liest dort den Grund mit (aria-describedby).
+    ($("rest-gegeben").value.trim() ? $("rest-uebrig") : $("rest-gegeben")).focus();
+    return TEXT_REST_OFFEN;
+  }
   const gramm = leseZahl(werte.get("gramm"));
   // Ab 0,1 g: ein einzelnes Leckerli wiegt etwa 0,5 g; „0,085“ (in kg gedacht) wird abgelehnt (seit 0.36.2).
   if (!gramm || gramm < 0.1 || gramm > 1000) return "Bitte eine Menge zwischen 0,1 und 1000 g eingeben.";

@@ -187,6 +187,24 @@ export function armGewicht(mitKatze, allein) {
   return { kg };
 }
 
+// Rest zurückwiegen (0.46.0): gegebene Menge minus Rest im Napf = gefressen, auf 0,1 g genau.
+// Gespeichert wird nur das Ergebnis. Alles übrig ist keine Mahlzeit mit 0 g, sondern wird gelöscht.
+export function restAbziehen(gegeben, uebrig) {
+  if (gegeben == null || uebrig == null) return { fehler: "Bitte beide Mengen eintragen." };
+  if (gegeben < 0.1 || gegeben > 1000) return { fehler: "Bitte eine gegebene Menge zwischen 0,1 und 1000 g eingeben." };
+  if (uebrig <= 0) return { fehler: "Der Rest muss größer als 0 sein." };
+  if (uebrig > gegeben) return { fehler: "Der Rest kann nicht mehr als gegeben sein. Bitte beide Zahlen prüfen." };
+  const gramm = Math.round((gegeben - uebrig) * 10) / 10;
+  if (gramm < 0.1) {
+    return {
+      fehler:
+        "Alles übrig: Dann diese Mahlzeit nicht ändern, sondern in der Liste löschen. " +
+        "Frisst deine Katze gar nicht, unter „Besonderer Tag“ „Futter verweigert“ eintragen.",
+    };
+  }
+  return { gramm };
+}
+
 // Anteil des Körpergewichts in ganzen Gramm, z. B. 1 % von 9,32 kg = 93 g.
 export function prozentInGramm(kg, prozent) {
   return Math.round(kg * prozent * 10);
