@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { letzterWiegetag, fotoZeitraum, fotoImZeitraum, istFotoTag, fotoAngebot, vorherNachher, fotoFeld } from "../js/fotos.js";
+import { letzterWiegetag, fotoZeitraum, fotoImZeitraum, istFotoTag, fotoAngebot, vorherNachher, fotoFeld, nachEntfernen } from "../js/fotos.js";
 
 const FOTO = "data:image/jpeg;base64,AAAA";
 const w = (id, datum, foto, tierId = "kito", kg = 9) => ({ id, tierId, kg, datum, notiz: "", ...(foto ? { foto } : {}) });
@@ -106,8 +106,9 @@ test("vorherNachher: gleiches Datum wird fest nach id geordnet", () => {
 // 0.41.0: Foto beim Ändern einer Wägung nachtragen (Fund B aus Stefans Nacht-Test)
 test("fotoFeld: neue Wägung verhält sich wie bisher", () => {
   const basis = { gewaehlt: false, nachgeholt: false, aendern: false, hatFoto: false, wiegetag: 3 };
-  assert.deepEqual(fotoFeld({ ...basis, angebot: "fototag" }), { bereich: true, link: false, linkText: "Monatsfoto nachholen (freiwillig)", tipp: false });
-  assert.deepEqual(fotoFeld({ ...basis, angebot: "nachholen" }), { bereich: false, link: true, linkText: "Monatsfoto nachholen (freiwillig)", tipp: false });
+  const neu = { label: "Monatsfoto (freiwillig)", speichertipp: false, hinweis: null };
+  assert.deepEqual(fotoFeld({ ...basis, angebot: "fototag" }), { bereich: true, link: false, linkText: "Monatsfoto nachholen (freiwillig)", tipp: false, ...neu });
+  assert.deepEqual(fotoFeld({ ...basis, angebot: "nachholen" }), { bereich: false, link: true, linkText: "Monatsfoto nachholen (freiwillig)", tipp: false, ...neu });
   assert.equal(fotoFeld({ ...basis, angebot: "nachholen", nachgeholt: true }).bereich, true);
   assert.equal(fotoFeld({ ...basis, angebot: "keins" }).bereich, false);
   assert.equal(fotoFeld({ ...basis, angebot: "keins" }).link, false);
@@ -117,20 +118,122 @@ test("fotoFeld: neue Wägung verhält sich wie bisher", () => {
   assert.equal(fotoFeld({ ...basis, wiegetag: undefined, angebot: "keins" }).tipp, false);
 });
 
-test("fotoFeld: Ändern einer Wägung mit Foto zeigt keinen Foto-Bereich", () => {
+// 0.43.0 (Funde 06.11., Paket A): Wo ein Foto zu sehen ist, kann man es dort ändern oder entfernen.
+test("fotoFeld: Ändern einer Wägung mit Foto zeigt das Foto mit „Anderes Foto“ und „Entfernen“", () => {
   for (const angebot of ["fototag", "nachholen", "keins"]) {
-    const z = fotoFeld({ angebot, gewaehlt: false, nachgeholt: false, aendern: true, hatFoto: true, wiegetag: undefined });
-    assert.equal(z.bereich || z.link || z.tipp, false, angebot);
+    for (const [gewaehlt, entfernt] of [[false, false], [true, false], [false, true], [true, true]]) {
+      const z = fotoFeld({ angebot, gewaehlt, nachgeholt: false, aendern: true, hatFoto: true, entfernt, wiegetag: undefined });
+      assert.deepEqual(z, {
+        bereich: true,
+        link: false,
+        linkText: "Foto nachtragen (freiwillig)",
+        tipp: false,
+        label: "Foto",
+        speichertipp: true,
+        hinweis: null,
+      }, `${angebot} ${gewaehlt} ${entfernt}`);
+    }
   }
+});
+
+test("fotoFeld: neue Wägung, Zeitraum hat schon ein Monatsfoto: ruhige Zeile und Link „ersetzen“", () => {
+  const basis = { angebot: "keins", gewaehlt: false, nachgeholt: false, aendern: false, hatFoto: false, wiegetag: 3, vorhandenDatum: "2026-11-05" };
+  assert.deepEqual(fotoFeld(basis), {
+    bereich: false,
+    link: true,
+    linkText: "Durch neues Foto ersetzen (freiwillig)",
+    tipp: false,
+    label: "Monatsfoto (freiwillig)",
+    speichertipp: false,
+    hinweis: "Das Monatsfoto ist schon da (vom 5. Nov. 2026).",
+  });
+  // Antippen öffnet den Foto-Bereich wie „Monatsfoto nachholen“; die Zeile bleibt, bis ein Foto gewählt ist
+  const offen = fotoFeld({ ...basis, nachgeholt: true });
+  assert.equal(offen.bereich, true);
+  assert.equal(offen.link, false);
+  assert.match(offen.hinweis, /^Das Monatsfoto ist schon da/);
+  // Gewählt: Die Zeile „Seit dem letzten Foto-Tag …“ im Bereich übernimmt, keine doppelte Aussage
+  const gewaehlt = fotoFeld({ ...basis, nachgeholt: true, gewaehlt: true });
+  assert.equal(gewaehlt.bereich, true);
+  assert.equal(gewaehlt.hinweis, null);
+  // Ohne Wiegetag auch kein Wiegetag-Tipp: Es gibt ja schon ein Foto
+  assert.equal(fotoFeld({ ...basis, wiegetag: undefined }).tipp, false);
+  // Ohne Datum der vorhandenen Wägung (z. B. kaputtes Datum im Feld) bleibt es still wie bisher
+  const still = fotoFeld({ ...basis, vorhandenDatum: undefined });
+  assert.equal(still.link || still.bereich, false);
+  assert.equal(still.hinweis, null);
 });
 
 test("fotoFeld: Ändern einer Wägung ohne Foto bietet „Foto nachtragen“ an, an jedem Tag", () => {
   for (const angebot of ["fototag", "nachholen", "keins"]) {
     const z = fotoFeld({ angebot, gewaehlt: false, nachgeholt: false, aendern: true, hatFoto: false, wiegetag: 3 });
-    assert.deepEqual(z, { bereich: false, link: true, linkText: "Foto nachtragen (freiwillig)", tipp: false }, angebot);
+    const erwartet = { bereich: false, link: true, linkText: "Foto nachtragen (freiwillig)", tipp: false, label: "Monatsfoto (freiwillig)", speichertipp: false, hinweis: null };
+    assert.deepEqual(z, erwartet, angebot);
+    // Auch wenn der Zeitraum schon ein Foto hat: beim Ändern unverändert „Foto nachtragen“ (Rückfrage erst beim Speichern)
+    assert.deepEqual(fotoFeld({ angebot, gewaehlt: false, nachgeholt: false, aendern: true, hatFoto: false, wiegetag: 3, vorhandenDatum: "2026-11-05" }), erwartet, angebot);
     assert.equal(fotoFeld({ angebot, gewaehlt: false, nachgeholt: true, aendern: true, hatFoto: false, wiegetag: 3 }).bereich, true);
     assert.equal(fotoFeld({ angebot, gewaehlt: true, nachgeholt: false, aendern: true, hatFoto: false, wiegetag: 3 }).bereich, true);
   }
   // Kein Wiegetag-Tipp beim Ändern: der gehört zum Eintragen
   assert.equal(fotoFeld({ angebot: "nachholen", gewaehlt: false, nachgeholt: false, aendern: true, hatFoto: false, wiegetag: undefined }).tipp, false);
+});
+
+// 0.43.0: Rückfrage beim Entfernen im Foto-Fenster sagt, was Vorher/Nachher danach zeigt.
+test("nachEntfernen: Foto nicht in Vorher/Nachher zu sehen → kein Zusatz", () => {
+  const gewichte = [w("a", "2026-09-17", FOTO), w("b", "2026-09-30", FOTO), w("c", "2026-11-05", FOTO)];
+  assert.equal(nachEntfernen(gewichte, "kito", gewichte[1]), "");
+  assert.equal(nachEntfernen(gewichte, "kito", w("x", "2026-10-01")), "", "Wägung ohne Foto");
+  assert.equal(nachEntfernen(gewichte, "kito", null), "");
+});
+
+test("nachEntfernen: Nachher-Foto weg, ein anderes rückt nach", () => {
+  const gewichte = [w("a", "2026-09-17", FOTO), w("b", "2026-09-30", FOTO), w("c", "2026-11-05", FOTO)];
+  assert.equal(nachEntfernen(gewichte, "kito", gewichte[2]), "Vorher/Nachher zeigt dann das Foto vom 30. Sept. 2026.");
+});
+
+test("nachEntfernen: Vorher-Foto weg, ein anderes rückt nach", () => {
+  const gewichte = [w("c", "2026-11-05", FOTO), w("a", "2026-09-17", FOTO), w("b", "2026-09-30", FOTO)];
+  assert.equal(nachEntfernen(gewichte, "kito", gewichte[1]), "Vorher/Nachher zeigt dann das Foto vom 30. Sept. 2026.");
+});
+
+test("nachEntfernen: nur noch ein Foto übrig → kein Nachher-Foto mehr", () => {
+  const gewichte = [w("a", "2026-09-17", FOTO), w("c", "2026-11-05", FOTO), w("z", "2026-12-01", FOTO, "zuki")];
+  assert.equal(nachEntfernen(gewichte, "kito", gewichte[1]), "Vorher/Nachher zeigt dann kein Nachher-Foto mehr.");
+  assert.equal(nachEntfernen(gewichte, "kito", gewichte[0]), "Vorher/Nachher zeigt dann kein Nachher-Foto mehr.");
+});
+
+test("nachEntfernen: das einzige Foto → Vorher/Nachher zeigt kein Foto mehr", () => {
+  const gewichte = [w("a", "2026-09-17", FOTO), w("b", "2026-09-30"), w("z", "2026-12-01", FOTO, "zuki")];
+  assert.equal(nachEntfernen(gewichte, "kito", gewichte[0]), "Vorher/Nachher zeigt dann kein Foto mehr.");
+});
+
+// 0.43.0: Markup und Verdrahtung (Text-Prüfung, die Oberfläche selbst prüft die Hauptsitzung im Browser)
+import { readFileSync } from "node:fs";
+const lies = (datei) => readFileSync(new URL(`../${datei}`, import.meta.url), "utf8");
+
+test("0.43.0: Gewicht-Fenster hat Zeile „Monatsfoto ist schon da“ vor dem Link und den Speicher-Hinweis im Foto-Bereich", () => {
+  const html = lies("index.html");
+  const vorhanden = html.indexOf('id="gewicht-foto-vorhanden"');
+  assert.ok(vorhanden > 0, "Zeile fehlt");
+  assert.ok(vorhanden < html.indexOf('id="gewicht-foto-nachholen"'), "Zeile steht vor dem Link");
+  const bereich = html.slice(html.indexOf('id="gewicht-foto-bereich"'), html.indexOf('id="gewicht-fehler"'));
+  assert.match(bereich, /<p class="tipp" id="gewicht-foto-monatstipp">Ein Foto im Monat reicht/);
+  assert.match(bereich, /<p class="tipp" id="gewicht-foto-speichertipp" hidden>„Anderes Foto“ und „Entfernen“ gelten erst beim Speichern\.<\/p>/);
+});
+
+test("0.43.0: Vorher/Nachher-Bilder sind Knöpfe zum Foto-Fenster, mit Stift-Plakette und Hinweis", () => {
+  const app = lies("app.js");
+  const karte = app.slice(app.indexOf("function vorherNachherKarte"), app.indexOf("function zeichneVerlaufAnsicht"));
+  assert.match(karte, /data-aktion="waegung-foto-ansehen" data-id="\$\{sicher\(w\.id\)\}"/);
+  assert.match(karte, /aria-label="\$\{titel\}-Foto ändern oder entfernen"/);
+  assert.match(karte, /class="vn-plakette" aria-hidden="true">\$\{SYMBOL\.stift\}Ändern</);
+  assert.match(karte, /Foto antippen, um es zu ändern oder zu entfernen\./);
+  // Der Hinweis nur, wenn mindestens ein Foto da ist
+  assert.match(karte, /vorher \? `<p class="tipp">Foto antippen/);
+});
+
+test("0.43.0: Entfernen im Foto-Fenster nennt, was Vorher/Nachher danach zeigt", () => {
+  const app = lies("app.js");
+  const entfernen = app.slice(app.indexOf("function fotoEntfernen"), app.indexOf('$("dialog-foto").addEventListener("close"'));
+  assert.match(entfernen, /nachEntfernen\(daten\.gewichte, tier\.id, waegung\)/);
 });

@@ -443,6 +443,15 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .vn-seite { margin: 0; display: grid; gap: 6px; min-width: 0; align-content: start; }
 .vn-seite img, .vn-platzhalter { width: 100%; aspect-ratio: 1; border-radius: var(--rund-klein); object-fit: cover; display: block; }
 .vn-seite img { border: 1px solid var(--rand); }
+/* 0.43.0: Foto ist ein Knopf zum Foto-Fenster (ändern oder entfernen); Tippfläche ist das ganze Bild. */
+.vn-bild { position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; border-radius: var(--rund-klein); cursor: pointer; color: inherit; font: inherit; }
+.vn-bild:active img { filter: brightness(0.92); }
+.vn-plakette {
+  position: absolute; top: 8px; right: 8px; display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px 4px 8px; border-radius: 999px; background: rgba(0, 0, 0, 0.62); color: #fff;
+  font-size: 0.8125rem; font-weight: 600; line-height: 1.2; pointer-events: none; white-space: nowrap;
+}
+.vn-plakette .ico { width: 16px; height: 16px; stroke-width: 2; }
 .vn-platzhalter {
   display: grid; place-content: center; justify-items: center; gap: 6px; color: var(--text-leise);
   background: var(--flaeche-2); border: 1px dashed var(--rand-stark); font-size: 0.8125rem;

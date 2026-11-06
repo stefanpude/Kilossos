@@ -341,7 +341,7 @@
           <span data-symbol="dokument"></span><span class="text">Nutzungsbedingungen</span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.42.7</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.43.0</span>
         </div>
       </div>
     </section>
@@ -426,6 +426,7 @@
       <label>Notiz (optional)
         <input name="notiz" autocomplete="off" placeholder="z. B. Tierarzt">
       </label>
+      <p class="tipp" id="gewicht-foto-vorhanden" hidden></p>
       <button type="button" class="knopf-text" data-aktion="gewicht-foto-nachholen" id="gewicht-foto-nachholen" hidden>Monatsfoto nachholen (freiwillig)</button>
       <p class="tipp" id="gewicht-foto-wiegetag-tipp" hidden>Tipp: Lege unter „Mehr“ einen Wiegetag fest. Am letzten Wiegetag im Monat fragt die App dann nach dem Foto.</p>
       <div class="feld" id="gewicht-foto-bereich"><span id="label-gewicht-foto">Monatsfoto (freiwillig)</span>
@@ -436,7 +437,8 @@
           <input type="file" accept="image/*" id="gewicht-foto-datei" class="nur-vorlesen" tabindex="-1" aria-hidden="true">
         </div>
         <p class="tipp" id="gewicht-foto-belegt" role="status" hidden></p>
-        <p class="tipp">Ein Foto im Monat reicht, damit man den Unterschied sieht: gleicher Ort, gleiches Licht, immer aus der gleichen Richtung. Es bleibt auf diesem Handy.</p>
+        <p class="tipp" id="gewicht-foto-monatstipp">Ein Foto im Monat reicht, damit man den Unterschied sieht: gleicher Ort, gleiches Licht, immer aus der gleichen Richtung. Es bleibt auf diesem Handy.</p>
+        <p class="tipp" id="gewicht-foto-speichertipp" hidden>„Anderes Foto“ und „Entfernen“ gelten erst beim Speichern.</p>
       </div>
       <p class="fehler" id="gewicht-fehler" hidden></p>
       <div class="knoepfe">

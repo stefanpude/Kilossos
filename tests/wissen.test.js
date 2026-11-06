@@ -173,14 +173,14 @@ test("Willkommensseite verspricht nichts, was die App nicht halten kann (Stefan,
   assert.doesNotMatch(html, /ohne Fettleber-Risiko|für jede Sorte/);
 });
 
-test("Version 0.42.7: Cache v88 mit js/heute-grafiken.js, Versionszeile unter „Mehr“", () => {
+test("Version 0.43.0: Cache v89 mit js/heute-grafiken.js, Versionszeile unter „Mehr“", () => {
   const sw = lies("sw.js");
-  assert.match(sw, /const CACHE_NAME = "kilossos-v88";/);
+  assert.match(sw, /const CACHE_NAME = "kilossos-v89";/);
   assert.match(sw, /"js\/wissen\.js",/);
   assert.match(sw, /"js\/besondere-tage\.js",/);
   assert.match(sw, /"js\/freigaben\.js",/);
   assert.match(sw, /"js\/heute-grafiken\.js",/);
-  assert.match(lies("index.html"), /id="version">Version 0\.42\.7</);
+  assert.match(lies("index.html"), /id="version">Version 0\.43\.0</);
 });
 
 // 0.42.7: Wiege-Tipp Transportbox im Bereich „Auf dem Arm gewogen?“ (Ideen-Tafel, Halter 06.11.2026).
@@ -235,7 +235,9 @@ test("0.41.0: Foto im Profil-Fenster (auch beim Anlegen), gilt erst beim Speiche
 
 test("0.41.0: close-Handler setzen ihren Merker nur bei wirklich geschlossenem Fenster zurück", () => {
   const app = lies("app.js");
-  assert.match(app, /if \(!\$\("dialog-gewicht"\)\.open\) bearbeiteteWaegung = null;/);
+  // Seit 0.43.0 setzt der Block auch den Merker „Foto entfernt“ zurück
+  assert.match(app, /if \(!\$\("dialog-gewicht"\)\.open\) \{\s*bearbeiteteWaegung = null;\s*fotoEntfernt = false;\s*\}/);
+  assert.match(app, /if \(\$\("dialog-foto"\)\.open\) return;/);
   assert.match(app, /if \(!\$\("dialog-besonders"\)\.open\) bearbeiteterTag = null;/);
 });
 

@@ -79,7 +79,7 @@ import {
   TEXT_DATUM_KORRIGIEREN,
   TEXT_ZIEL_PRUEFEN,
 } from "./js/freigaben.js";
-import { fotoImZeitraum, fotoAngebot, fotoFeld, istFotoTag, vorherNachher } from "./js/fotos.js";
+import { fotoImZeitraum, fotoAngebot, fotoFeld, istFotoTag, vorherNachher, nachEntfernen } from "./js/fotos.js";
 import { belegteZeichen, speicherAnzeige } from "./js/speicher.js";
 import { sicherungPruefen, einleseFrage } from "./js/sicherung.js";
 
@@ -944,11 +944,13 @@ function verlaufKopf() {
 }
 
 // Vorher/Nachher: ältestes und neuestes Foto an Wägungen; fehlt eins, steht der gezeichnete Katzenkopf da.
+// Seit 0.43.0 ist jedes Foto ein Knopf zum Foto-Fenster (ändern oder entfernen); die Plakette „Ändern“ ist nur Schmuck,
+// Tippfläche ist das ganze Bild.
 function vorherNachherKarte() {
   const { vorher, nachher } = vorherNachher(daten.gewichte, tier.id);
   const seite = (titel, w, leer) =>
     `<figure class="vn-seite">
-      ${w ? `<img src="${sicher(w.foto)}" alt="${titel}: ${sicher(tier.name)} am ${datumText(w.datum)}">` : `<div class="vn-platzhalter" role="img" aria-label="${titel}: noch kein Foto">${SYMBOL.katzenkopf}<span>Noch kein Foto</span></div>`}
+      ${w ? `<button type="button" class="vn-bild" data-aktion="waegung-foto-ansehen" data-id="${sicher(w.id)}" aria-label="${titel}-Foto ändern oder entfernen"><img src="${sicher(w.foto)}" alt=""><span class="vn-plakette" aria-hidden="true">${SYMBOL.stift}Ändern</span></button>` : `<div class="vn-platzhalter" role="img" aria-label="${titel}: noch kein Foto">${SYMBOL.katzenkopf}<span>Noch kein Foto</span></div>`}
       <figcaption><span class="label">${titel}</span>${w ? `<b>${zahl(w.kg, 2)} kg</b><small>${datumText(w.datum)}</small>` : `<small>${leer}</small>`}</figcaption>
     </figure>`;
   const diff = vorher && nachher ? vorher.kg - nachher.kg : null;
@@ -960,6 +962,7 @@ function vorherNachherKarte() {
     <span class="label">Vorher / Nachher</span>
     <div class="vn-paar">${seite("Vorher", vorher, "erstes Foto")}${seite("Nachher", nachher, "neuestes Foto")}</div>
     <p class="tipp">${satz}</p>
+    ${vorher ? `<p class="tipp">Foto antippen, um es zu ändern oder zu entfernen.</p>` : ""}
   </section>`;
 }
 
@@ -1311,40 +1314,67 @@ let gewichtFoto = null;
 let bearbeiteteWaegung = null;
 let kgVorbelegt = ""; // Inhalt des kg-Felds beim Öffnen (beim Ändern das gespeicherte Gewicht), für die Arm-Rücknahme
 let fotoNachgeholt = false; // „Monatsfoto nachholen“ angetippt
+// Ändern einer Wägung mit Foto (0.43.0): „Entfernen“ angetippt. Drei Fälle beim Speichern: unverändert (kein neues Foto,
+// nicht entfernt), ersetzt (gewichtFoto), entfernt (fotoEntfernt ohne gewichtFoto). gewichtFoto allein reicht nicht,
+// weil „vorhanden“ nicht „neu gewählt“ ist.
+let fotoEntfernt = false;
 let fotoLauf = 0; // zählt Dialog-Öffnungen und Bildauswahlen, damit ein spät fertiges Bild nicht im falschen Dialog landet
 
+// Was die Vorschau zeigt: ein neu gewähltes Foto, sonst beim Ändern das vorhandene (solange es nicht entfernt ist).
+function gezeigtesGewichtFoto() {
+  if (gewichtFoto) return gewichtFoto;
+  return !fotoEntfernt && fotoGueltig(bearbeiteteWaegung?.foto) ? bearbeiteteWaegung.foto : null;
+}
+
 function zeigeGewichtFoto() {
+  const foto = gezeigtesGewichtFoto();
   const vorschau = $("gewicht-foto-vorschau");
-  vorschau.hidden = !gewichtFoto;
-  if (gewichtFoto) vorschau.src = gewichtFoto;
+  vorschau.hidden = !foto;
+  if (foto) vorschau.src = foto;
   else vorschau.removeAttribute("src");
-  $("gewicht-foto-entfernen").hidden = !gewichtFoto;
-  $("gewicht-foto-knopf").textContent = gewichtFoto ? "Anderes Foto" : "Foto hinzufügen";
+  $("gewicht-foto-entfernen").hidden = !foto;
+  $("gewicht-foto-knopf").textContent = foto ? "Anderes Foto" : "Foto hinzufügen";
   zeigeFotoAngebot();
 }
 
 // Foto-Feld offen nur am Foto-Tag (letzter Wiegetag im Monat, Datum im Dialog); sonst höchstens ein ruhiger Link, solange das Monatsfoto fehlt.
 // Ein schon gewähltes Foto bleibt sichtbar, damit man es wieder entfernen kann.
 function zeigeFotoAngebot() {
-  // Beim Ändern einer Wägung mit Foto kein Foto-Bereich: Dieses Foto ändert man über das kleine Bild in der Liste.
+  // Beim Ändern einer Wägung mit Foto (seit 0.43.0): Foto mit „Anderes Foto“ und „Entfernen“, beides gilt erst beim Speichern.
   // Ohne Foto (0.41.0): ruhiger Link „Foto nachtragen“, egal an welchem Tag.
+  // Neue Wägung, Zeitraum hat schon ein Monatsfoto (0.43.0): ruhige Zeile mit dem Datum und Link „Durch neues Foto ersetzen“.
+  const datum = $("form-gewicht").datum.value;
+  const gueltig = /^\d{4}-\d{2}-\d{2}$/.test(datum);
+  // Beim Ändern zählt die bearbeitete Wägung selbst nicht als „anderes“ Monatsfoto.
+  const andere = bearbeiteteWaegung ? daten.gewichte.filter((g) => g !== bearbeiteteWaegung) : daten.gewichte;
+  const angebot = fotoAngebot({ gewichte: daten.gewichte, tierId: tier.id, datum, wiegetag: tier.wiegetag });
+  const vorhanden = angebot === "keins" && gueltig ? fotoImZeitraum(daten.gewichte, tier.id, datum, tier.wiegetag) : null;
+  const hatFoto = fotoGueltig(bearbeiteteWaegung?.foto);
   const zustand = fotoFeld({
-    angebot: fotoAngebot({ gewichte: daten.gewichte, tierId: tier.id, datum: $("form-gewicht").datum.value, wiegetag: tier.wiegetag }),
+    angebot,
     gewaehlt: Boolean(gewichtFoto),
     nachgeholt: fotoNachgeholt,
     aendern: Boolean(bearbeiteteWaegung),
-    hatFoto: fotoGueltig(bearbeiteteWaegung?.foto),
+    hatFoto,
     wiegetag: tier.wiegetag,
+    vorhandenDatum: vorhanden?.datum,
   });
   $("gewicht-foto-bereich").hidden = !zustand.bereich;
+  $("gewicht-foto-vorhanden").hidden = !zustand.hinweis;
+  $("gewicht-foto-vorhanden").textContent = zustand.hinweis ?? "";
   $("gewicht-foto-nachholen").hidden = !zustand.link;
   $("gewicht-foto-nachholen").textContent = zustand.linkText;
   $("gewicht-foto-wiegetag-tipp").hidden = !zustand.tipp;
+  $("label-gewicht-foto").textContent = zustand.label;
+  $("gewicht-foto-monatstipp").hidden = zustand.speichertipp;
+  $("gewicht-foto-speichertipp").hidden = !zustand.speichertipp;
   if (!zustand.bereich) return;
-  // Foto gewählt, und der Foto-Zeitraum hat schon eins: vorher sagen, nicht erst beim Speichern.
-  const belegt = gewichtFoto && /^\d{4}-\d{2}-\d{2}$/.test($("form-gewicht").datum.value) ? fotoImZeitraum(daten.gewichte, tier.id, $("form-gewicht").datum.value, tier.wiegetag) : null;
-  $("gewicht-foto-belegt").hidden = !belegt;
+  // Foto gewählt, und der Foto-Zeitraum hat schon eins (von einer anderen Wägung): vorher sagen, nicht erst beim Speichern.
+  const belegt = gewichtFoto && gueltig ? fotoImZeitraum(andere, tier.id, datum, tier.wiegetag) : null;
+  const entfernt = hatFoto && fotoEntfernt && !gewichtFoto;
+  $("gewicht-foto-belegt").hidden = !belegt && !entfernt;
   if (belegt) $("gewicht-foto-belegt").textContent = `Seit dem letzten Foto-Tag gibt es schon ein Monatsfoto (vom ${datumText(belegt.datum)}). Beim Speichern fragt die App, ob das neue es ersetzen soll.`;
+  else if (entfernt) $("gewicht-foto-belegt").textContent = "Das Foto wird beim Speichern entfernt.";
 }
 
 function fotoNachholen() {
@@ -1393,6 +1423,7 @@ function oeffneGewicht(waegung = null) {
   kgVorbelegt = form.kg.value;
   gewichtFoto = null;
   fotoNachgeholt = false;
+  fotoEntfernt = false;
   fotoLauf += 1;
   zeigeGewichtFoto();
   armZuruecksetzen(bezug);
@@ -1515,7 +1546,10 @@ $("form-gewicht").datum.addEventListener("input", zeigeFotoAngebot);
 // Öffnen ohne oeffneGewicht() beim Speichern eine alte Wägung. (Das close-Ereignis kommt erst nach dem Speichern.)
 // Ein verzögertes close (verstecktes Fenster) darf ein inzwischen neu geöffnetes Fenster nicht zurücksetzen.
 $("dialog-gewicht").addEventListener("close", () => {
-  if (!$("dialog-gewicht").open) bearbeiteteWaegung = null;
+  if (!$("dialog-gewicht").open) {
+    bearbeiteteWaegung = null;
+    fotoEntfernt = false;
+  }
 });
 
 beimSpeichern("form-gewicht", "gewicht-fehler", (werte) => {
@@ -1524,11 +1558,17 @@ beimSpeichern("form-gewicht", "gewicht-fehler", (werte) => {
   // Ändern: dieselbe Wägung, das Foto bleibt. Speicher voll: sichern() lädt den gespeicherten Stand neu und meldet es
   // (wie bei „Mahlzeit ändern“).
   if (bearbeiteteWaegung) {
+    const hatteFoto = fotoGueltig(bearbeiteteWaegung.foto);
     waegungAendern(bearbeiteteWaegung, { kg, datum: werte.get("datum"), notiz: werte.get("notiz") });
     // Zielmonat aufklappen: Rutscht die Wägung in einen zugeklappten Monat, sieht man sie dort, und der Fokus findet sie.
     merkeZustand("monat-" + bearbeiteteWaegung.datum.slice(0, 7), true);
-    if (!gewichtFoto) return sichern();
-    // Foto nachtragen (0.41.0, nur bei einer Wägung ohne Foto): gleiche Regel wie beim Eintragen, höchstens eins je Zeitraum.
+    if (!gewichtFoto) {
+      // Entfernt (0.43.0): ohne weitere Rückfrage, „Abbrechen“ im Fenster war der Rückweg. Sonst bleibt das Foto, wie es war.
+      if (hatteFoto && fotoEntfernt) delete bearbeiteteWaegung.foto;
+      return sichern();
+    }
+    // Foto nachtragen (0.41.0) oder ersetzen (0.43.0): gleiche Regel wie beim Eintragen, höchstens eins je Zeitraum.
+    // Rückfrage nur, wenn eine andere Wägung im Ziel-Zeitraum ein Foto hat (z. B. weil das Datum geändert wurde).
     const andere = daten.gewichte.filter((g) => g !== bearbeiteteWaegung);
     const vorhanden = fotoImZeitraum(andere, bearbeiteteWaegung.tierId, bearbeiteteWaegung.datum, tier.wiegetag);
     const ersetzen =
@@ -1537,6 +1577,8 @@ beimSpeichern("form-gewicht", "gewicht-fehler", (werte) => {
     if (ersetzen) {
       bearbeiteteWaegung.foto = gewichtFoto;
       if (vorhanden) delete vorhanden.foto;
+    } else if (hatteFoto && fotoEntfernt) {
+      delete bearbeiteteWaegung.foto; // „ohne das neue Foto“ heißt hier: wie ohne Auswahl, also entfernt
     }
     try {
       speichern(daten);
@@ -1547,6 +1589,13 @@ beimSpeichern("form-gewicht", "gewicht-fehler", (werte) => {
       tier = aktivesTier(daten, tier.id);
       bearbeiteteWaegung = daten.gewichte.find((g) => g.id === id) ?? null;
       zeichneAlles();
+      if (ersetzen && hatteFoto) {
+        // Wie im Profil: das bisherige Foto wieder einstellen, sonst ginge es mit „Entfernen“ verloren.
+        gewichtFoto = null;
+        fotoEntfernt = false;
+        zeigeGewichtFoto();
+        return "Das neue Foto passt nicht mehr in den Speicher. Es ist wieder das bisherige Foto eingestellt. Speichere noch einmal, dann bleiben die übrigen Angaben erhalten.";
+      }
       return ersetzen
         ? "Das Foto passt nicht mehr in den Speicher. Entferne das Foto und speichere die Änderung ohne Foto."
         : "Der Speicher ist voll, die Änderung wurde nicht gespeichert. Bitte speichere zuerst eine Sicherung.";
@@ -1659,11 +1708,15 @@ beimSpeichern("form-besonders", "besonders-fehler", (werte) => {
 // Foto einer Wägung groß ansehen und einzeln entfernen (die Wägung bleibt).
 let angesehen = null;
 let tauschLauf = 0; // wie fotoLauf: nur die zuletzt gewählte Datei im selben geöffneten Dialog zählt
+let fotoAusVerlauf = false; // geöffnet über die Karte „Vorher / Nachher“ (0.43.0): Fokus danach dorthin, nicht in die Gewichtsliste
 
-function oeffneFoto(waegung) {
+function oeffneFoto(waegung, ausVerlauf = false) {
   if (!waegung || !fotoGueltig(waegung.foto)) return;
   angesehen = waegung;
-  $("foto-titel").textContent = `Foto vom ${datumText(waegung.datum)}`;
+  fotoAusVerlauf = ausVerlauf;
+  const { vorher } = vorherNachher(daten.gewichte, tier.id);
+  const art = ausVerlauf ? (vorher === waegung ? "Vorher-Foto" : "Nachher-Foto") : "Foto";
+  $("foto-titel").textContent = `${art} vom ${datumText(waegung.datum)}`;
   $("foto-gross").src = waegung.foto;
   $("foto-gross").alt = `${tier.name} am ${datumText(waegung.datum)}, ${zahl(waegung.kg, 2)} kg`;
   zeigeFehler("foto-fehler", "");
@@ -1696,19 +1749,25 @@ $("foto-tauschen-datei").addEventListener("change", async (ereignis) => {
 function fotoEntfernen() {
   const waegung = angesehen;
   if (!waegung) return;
-  if (!confirm("Dieses Foto entfernen? Das Gewicht bleibt gespeichert. Das Foto lässt sich nicht zurückholen, außer aus einer Sicherung.")) return;
+  // Ist das Foto in Vorher/Nachher zu sehen, sagt die Rückfrage, was dort danach steht (0.43.0).
+  const zusatz = nachEntfernen(daten.gewichte, tier.id, waegung);
+  if (!confirm(`Dieses Foto entfernen? Das Gewicht bleibt gespeichert. Das Foto lässt sich nicht zurückholen, außer aus einer Sicherung.${zusatz ? "\n\n" + zusatz : ""}`)) return;
+  const ausVerlauf = fotoAusVerlauf;
   delete waegung.foto;
   $("dialog-foto").close();
   if (sichern()) zeigeToast("✓ Foto entfernt");
-  // Der Knopf mit dem Vorschaubild ist weg: Fokus auf die Wägungsliste statt ins Leere.
-  const liste = $("gewicht-monate");
-  liste.tabIndex = -1;
-  liste.addEventListener("blur", () => liste.removeAttribute("tabindex"), { once: true });
-  liste.focus({ preventScroll: true });
+  // Der Knopf mit dem Bild ist weg: Fokus auf die Karte „Vorher / Nachher“ bzw. die Wägungsliste statt ins Leere.
+  const ziel = ausVerlauf ? document.querySelector("#verlauf-inhalt .vorher-nachher") : $("gewicht-monate");
+  if (!ziel) return;
+  ziel.tabIndex = -1;
+  ziel.addEventListener("blur", () => ziel.removeAttribute("tabindex"), { once: true });
+  ziel.focus({ preventScroll: true });
 }
 
 $("dialog-foto").addEventListener("close", () => {
+  if ($("dialog-foto").open) return; // verspätetes close: ein inzwischen neu geöffnetes Fenster nicht zurücksetzen
   angesehen = null;
+  fotoAusVerlauf = false;
   tauschLauf += 1;
   $("foto-gross").removeAttribute("src");
 });
@@ -2766,7 +2825,7 @@ document.addEventListener("click", (ereignis) => {
       return waegung ? oeffneGewicht(waegung) : undefined;
     }
     case "waegung-foto-ansehen":
-      return oeffneFoto(daten.gewichte.find((g) => g.id === id));
+      return oeffneFoto(daten.gewichte.find((g) => g.id === id), Boolean(ziel.closest(".vorher-nachher")));
     case "waegung-foto-entfernen":
       return fotoEntfernen();
     case "waegung-foto-tauschen":
@@ -2895,7 +2954,9 @@ document.addEventListener("click", (ereignis) => {
     case "gewicht-foto-nachholen":
       return fotoNachholen();
     case "gewicht-foto-entfernen": {
+      // Entfernt, was die Vorschau zeigt: ein neu gewähltes Foto und beim Ändern auch das vorhandene (gilt erst beim Speichern).
       gewichtFoto = null;
+      if (fotoGueltig(bearbeiteteWaegung?.foto)) fotoEntfernt = true;
       zeigeGewichtFoto();
       // Der Knopf verschwindet: Fokus auf das nächste sichtbare Bedienelement, nicht ins Leere.
       const ziel = !$("gewicht-foto-bereich").hidden

@@ -3,6 +3,7 @@
 // Verpasst: bis zum nächsten Foto-Tag nachholbar, es zählt dann noch zum alten Zeitraum. Ohne Wiegetag: Kalendermonat.
 // Reine Funktionen ohne Browser, damit sie testbar sind. Rechnung in UTC, damit die Zeitumstellung nicht stört.
 import { fotoGueltig } from "./daten.js";
+import { datumText } from "./mehr.js";
 
 const DATUM = /^\d{4}-\d{2}-\d{2}$/;
 const gueltigerTag = (tag) => Number.isInteger(tag) && tag >= 0 && tag <= 6;
@@ -58,19 +59,40 @@ export function vorherNachher(gewichte, tierId) {
 
 // Was der Gewicht-Dialog zum Foto zeigt (0.41.0, reine Funktion für die Tests):
 // bereich = Foto-Feld offen, link = ruhiger Link, tipp = Hinweis auf den Wiegetag.
-// Beim Ändern einer Wägung mit Foto nichts (das Foto ändert man über das kleine Bild in der Liste);
-// ohne Foto an jedem Tag der Link „Foto nachtragen“. Ein schon gewähltes Foto bleibt sichtbar, damit man es entfernen kann.
-export function fotoFeld({ angebot, gewaehlt, nachgeholt, aendern, hatFoto, wiegetag }) {
+// Seit 0.43.0 (Funde 06.11., „Fotos überall änderbar“):
+// - Ändern einer Wägung mit Foto: Bereich offen mit dem Foto, „Anderes Foto“ und „Entfernen“ (label „Foto“);
+//   speichertipp = Hinweis, dass beides erst beim Speichern gilt (ersetzt den Monatsfoto-Tipp).
+// - Neue Wägung, der Zeitraum hat schon ein Monatsfoto (vorhandenDatum = Datum dieser Wägung): ruhige Zeile
+//   (hinweis) und Link „Durch neues Foto ersetzen“; antippen öffnet den Bereich wie „Monatsfoto nachholen“.
+// Ohne Foto beim Ändern an jedem Tag der Link „Foto nachtragen“. Ein schon gewähltes Foto bleibt sichtbar, damit man es entfernen kann.
+export function fotoFeld({ angebot, gewaehlt, nachgeholt, aendern, hatFoto, wiegetag, vorhandenDatum }) {
+  const zusatz = { label: "Monatsfoto (freiwillig)", speichertipp: false, hinweis: null };
   if (aendern) {
-    if (hatFoto) return { bereich: false, link: false, linkText: "Foto nachtragen (freiwillig)", tipp: false };
+    if (hatFoto) return { bereich: true, link: false, linkText: "Foto nachtragen (freiwillig)", tipp: false, label: "Foto", speichertipp: true, hinweis: null };
     const bereich = Boolean(gewaehlt || nachgeholt);
-    return { bereich, link: !bereich, linkText: "Foto nachtragen (freiwillig)", tipp: false };
+    return { bereich, link: !bereich, linkText: "Foto nachtragen (freiwillig)", tipp: false, ...zusatz };
   }
-  const bereich = angebot === "fototag" || Boolean(gewaehlt) || (angebot === "nachholen" && Boolean(nachgeholt));
+  const ersetzbar = angebot === "keins" && typeof vorhandenDatum === "string" && DATUM.test(vorhandenDatum);
+  const bereich = angebot === "fototag" || Boolean(gewaehlt) || ((angebot === "nachholen" || ersetzbar) && Boolean(nachgeholt));
   return {
     bereich,
-    link: !bereich && angebot === "nachholen",
-    linkText: "Monatsfoto nachholen (freiwillig)",
+    link: !bereich && (angebot === "nachholen" || ersetzbar),
+    linkText: ersetzbar ? "Durch neues Foto ersetzen (freiwillig)" : "Monatsfoto nachholen (freiwillig)",
     tipp: !Number.isInteger(wiegetag) && angebot !== "keins",
+    ...zusatz,
+    hinweis: ersetzbar && !gewaehlt ? `Das Monatsfoto ist schon da (vom ${datumText(vorhandenDatum)}).` : null,
   };
+}
+
+// Satz für die Rückfrage beim Entfernen im Foto-Fenster (0.43.0): Was zeigt Vorher/Nachher danach?
+// "" = das Foto ist dort nicht zu sehen. Gezählt wird wie in vorherNachher, nur ohne dieses Foto.
+export function nachEntfernen(gewichte, tierId, waegung) {
+  if (!waegung) return "";
+  const jetzt = vorherNachher(gewichte, tierId);
+  const seite = jetzt.vorher === waegung ? "vorher" : jetzt.nachher === waegung ? "nachher" : null;
+  if (!seite) return "";
+  const danach = vorherNachher(gewichte.filter((g) => g !== waegung), tierId);
+  if (!danach.vorher) return "Vorher/Nachher zeigt dann kein Foto mehr.";
+  if (!danach.nachher) return "Vorher/Nachher zeigt dann kein Nachher-Foto mehr.";
+  return `Vorher/Nachher zeigt dann das Foto vom ${datumText(danach[seite].datum)}.`;
 }
