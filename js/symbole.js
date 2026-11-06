@@ -13,6 +13,8 @@ export const SYMBOL = {
   // Futterarten
   nass: ico('<ellipse cx="12" cy="7" rx="7" ry="2.5"/><path d="M5 7v10c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V7M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/>'),
   trocken: ico('<path d="M4 12h16a8 8 0 0 1-16 0z"/><circle cx="9" cy="9.5" r="1.2"/><circle cx="12.5" cy="8.5" r="1.2"/><circle cx="15.5" cy="10" r="1.2"/>'),
+  // Frischfleisch / BARF (0.72.0): Fleischstück mit Knochen
+  frischfleisch: ico('<path d="M5 13.5C5 8.6 8.6 5 13 5c3.6 0 6 2.2 6 5.2 0 2.3-1.4 3.5-3.3 4.2-1.9.7-2.5 1.9-3.3 3.4-.8 1.4-2.1 2.2-3.9 2.2C6.6 20 5 17.4 5 13.5z"/><circle cx="13.5" cy="10.5" r="2"/>'),
   leckerli: ico('<path d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0-8 0M8 12l-4-3v6zM16 12l4-3v6z"/>'),
   unbekannt: ico('<circle cx="12" cy="12" r="8"/><path d="M9.8 9.5a2.3 2.3 0 1 1 3 2.2c-.6.2-.8.7-.8 1.3M12 16.2v.1"/>'),
   // Sonstiges

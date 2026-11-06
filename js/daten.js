@@ -5,7 +5,7 @@
 //                 tierarzt?: { praxis?, telefon?, adresse? }, wiegetag? }
 //               foto: optional, "data:image/jpeg;base64,…" (256 × 256 px, in der App zugeschnitten)
 //               übrige Profilfelder: siehe js/profil.js (dort auch die Prüfung beim Einlesen)
-//   futter:     { id, name, typ: "nass" | "trocken" | "leckerli", kcalPro100g, kcalQuelle, notiz, listeId? }
+//   futter:     { id, name, typ: "nass" | "trocken" | "frischfleisch" | "leckerli", kcalPro100g, kcalQuelle, notiz, listeId? }
 //               listeId: Kennung in der Kilossos-Futterliste (js/futterliste.js), wenn die Sorte von dort stammt
 //               analyse: optional, { protein, fett, asche, faser, feuchte } in % von der Packung, feuchte null = nicht
 //                        angegeben; aus dem Rechner im Fenster „Eigene Sorte“ (seit 0.32.0). Ältere Sorten haben das Feld

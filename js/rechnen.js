@@ -30,14 +30,17 @@ export const FEUCHTE_TROCKEN_ANNAHME = 8;
 // ---------- kJ-Schutz im Fenster „Eigene Sorte“ (seit 0.32.0, Plan .planning/kcal-rechner-kj.md) ----------
 // Höchstwerte der Kilossos-Futterliste: Nass 126, Trocken 396, Leckerli 438. Kleinster kJ-Wert bei Nassfutter 254,
 // kleinster kcal-pro-kg-Wert 607: beide liegen über 150. Ein Wert genau auf der Grenze ist in Ordnung.
-export const KCAL_GRENZEN = { min: 20, max: 700, nass: 150, trocken: 450, leckerli: 450 };
+// Frischfleisch (0.72.0, .planning/barf.md): 300. Rohes Rinderhack mit 20 % Fett hat 254 kcal (USDA FoodData Central,
+// FDC 174036); mageres Fleisch in kJ (120 kcal = 502 kJ) liegt sicher darüber. Sehr fettes Fleisch kann wirklich über
+// 300 liegen, deshalb heißt es im Kasten „ungewöhnlich viel“ und „Die … stimmen“ bleibt möglich.
+export const KCAL_GRENZEN = { min: 20, max: 700, nass: 150, trocken: 450, frischfleisch: 300, leckerli: 450 };
 export const KJ_PRO_KCAL = 4.184; // thermochemische Kilokalorie
 
 const NBSP = " ";
 const komma = (zahl) => String(zahl).replace(".", ",");
 const eineStelle = (zahl) => Math.round(zahl * 10) / 10;
 const passend = (kcal) => kcal >= KCAL_GRENZEN.min && kcal <= KCAL_GRENZEN.max;
-const ART_NAME = { nass: "Nassfutter", trocken: "Trockenfutter", leckerli: "Leckerli" };
+const ART_NAME = { nass: "Nassfutter", trocken: "Trockenfutter", frischfleisch: "Frischfleisch", leckerli: "Leckerli" };
 
 // Passt der kcal-Wert pro 100 g zur Art? Ohne Art wird nicht nach der Einheit gefragt (beim Speichern kommt vorher
 // „Bitte die Art wählen.“). kj und proKg: der umgerechnete Wert, wenn dort kJ bzw. kcal pro kg stünde; null, wenn er
@@ -75,6 +78,18 @@ export function kcalKasten(kcal, typ, spanne) {
     };
   }
   antworten.push({ aktion: "kcal-stimmt", titel: `Dort steht kcal pro 100${NBSP}g`, klein: `Die ${wert} stimmen, so speichern` });
+  // Frischfleisch steht nicht in der Futterliste (keine Spanne); Vergleichswert aus USDA FDC 174036, Wortlaut Stefan 06.11.
+  if (typ === "frischfleisch") {
+    return {
+      stufe: "rueckfrage",
+      ueberschrift: `${wert}${NBSP}kcal pro 100${NBSP}g sind für ${art} ungewöhnlich viel.`,
+      saetze: [
+        `Rohes Rinderhack mit 20${NBSP}% Fett hat etwa 254${NBSP}kcal pro 100${NBSP}g (USDA). ` +
+          `Was steht auf der Packung hinter der ${wert}?`,
+      ],
+      antworten,
+    };
+  }
   const saetze = [
     `${art} ${typ === "leckerli" ? "haben" : "hat"} in der Kilossos-Futterliste ${spanne[0]} bis ${spanne[1]}${NBSP}kcal. ` +
       `Was steht auf der Packung hinter der ${wert}?`,
@@ -115,7 +130,8 @@ export function rechnerPruefen(eingaben, typ) {
   const leer = PFLICHT_FELDER.filter((f) => zahl[f.name] === null).map((f) => f.text);
   if (leer.length) return { art: "leer", leer };
   const angenommen = zahl.feuchte === null;
-  if (angenommen && typ === "nass") return { art: "feuchteFehlt" };
+  // Nassfutter und Frischfleisch: Mit 8 % angenommener Feuchte wäre die Rechnung weit daneben.
+  if (angenommen && (typ === "nass" || typ === "frischfleisch")) return { art: "feuchteFehlt" };
   // Auf 0,01 gerundet: 10,3 + 5,9 + 2,1 + 0,3 + 81,4 ergibt sonst 100,00000000000001.
   const hundertstel = (felder) => Math.round(felder.reduce((s, f) => s + (zahl[f.name] ?? 0), 0) * 100);
   const ohneFeuchte = hundertstel(PFLICHT_FELDER);
@@ -135,7 +151,7 @@ export function rechnerPruefen(eingaben, typ) {
     analyse: zahl,
     angenommen,
     ...(angenommen ? { feuchteAnnahme } : {}),
-    viel: kcal > (typ === "nass" ? KCAL_GRENZEN.nass : KCAL_GRENZEN.trocken),
+    viel: kcal > (Object.hasOwn(ART_NAME, typ) ? KCAL_GRENZEN[typ] : KCAL_GRENZEN.trocken),
     uebernehmbar: passend(kcal),
   };
 }

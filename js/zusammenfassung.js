@@ -157,7 +157,7 @@ export function ringWerte(kcal, freigabe) {
 }
 
 // Feste Reihenfolge der Futterarten in der Legende von „Gefüttert“.
-const ARTEN = ["nass", "trocken", "leckerli"];
+const ARTEN = ["nass", "trocken", "frischfleisch", "leckerli"];
 
 // Werte für die Karte „Gefüttert“ (ab 0.38.0): Stücke im Balken, Legende je Art, Marke, Überdeckung und erste Kachel.
 // mahlzeiten: die des Tages, nach Uhrzeit sortiert (wie mahlzeitenAm). Mahlzeiten ohne Sorte (gelöscht) ergeben kein

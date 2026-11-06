@@ -184,7 +184,7 @@ const datum = (iso) => new Date(ms(iso)).toLocaleDateString("de-DE", { day: "2-d
 const vorzeichen = (wert, stellen = 0) => (wert > 0 ? "+" : wert < 0 ? "−" : "±") + zahl(Math.abs(wert), stellen);
 
 const QUELLE = { packung: "Packung", hersteller: "Hersteller", geschaetzt: "geschätzt", ungefaehr: "ungefähr" };
-const TYP = { nass: "nass", trocken: "trocken", leckerli: "Leckerli" };
+const TYP = { nass: "nass", trocken: "trocken", frischfleisch: "frisch", leckerli: "Leckerli" };
 const AUFFAELLIG = {
   "wenig-gefressen": "Weniger als die Hälfte der Tagesmenge erfasst",
   "unter-freigabe": "Unter 90 % der freigegebenen Menge",

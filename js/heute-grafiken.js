@@ -20,7 +20,7 @@ export const zahl = (wert, stellen = 0) =>
 export const sicher = (text) =>
   String(text).replace(/[&<>"']/g, (z) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[z]);
 
-const ART_NAMEN = { nass: "Nass", trocken: "Trocken", leckerli: "Leckerli" };
+const ART_NAMEN = { nass: "Nass", trocken: "Trocken", frischfleisch: "Frisch", leckerli: "Leckerli" };
 
 // „Gefüttert“ (Mischung kompakt): Balken mit einem Stück je Mahlzeit, Legende je Art, zwei Kacheln.
 // Ohne Freigabe nur Legende, Satz und Knopf „Warum kein Ziel?“ (kein Balken, kein Ziel, keine Bewertung).
@@ -71,7 +71,7 @@ export function gefuettertHtml(werte) {
 
 // ---------- „Mehr zur Fütterung“ (ab 0.44.0, Funde 06.11. Paket B) ----------
 
-const ART_ZEILE = { nass: "Nassfutter", trocken: "Trockenfutter", leckerli: "Leckerli" };
+const ART_ZEILE = { nass: "Nassfutter", trocken: "Trockenfutter", frischfleisch: "Frischfleisch", leckerli: "Leckerli" };
 
 // „A“, „A und B“, „A, B und C“
 const mitUnd = (namen) => (namen.length < 2 ? namen.join("") : `${namen.slice(0, -1).join(", ")} und ${namen.at(-1)}`);

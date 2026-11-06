@@ -106,8 +106,8 @@ const sicher = (text) =>
   String(text).replace(/[&<>"']/g, (z) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[z]);
 const ohneBewegung = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const TYP_NAMEN = { nass: "Nassfutter", trocken: "Trockenfutter", leckerli: "Leckerli" };
-const TYP_SYMBOL = { nass: SYMBOL.nass, trocken: SYMBOL.trocken, leckerli: SYMBOL.leckerli };
+const TYP_NAMEN = { nass: "Nassfutter", trocken: "Trockenfutter", frischfleisch: "Frischfleisch / BARF", leckerli: "Leckerli" };
+const TYP_SYMBOL = { nass: SYMBOL.nass, trocken: SYMBOL.trocken, frischfleisch: SYMBOL.frischfleisch, leckerli: SYMBOL.leckerli };
 const QUELLE_NAMEN = { packung: "Packung", hersteller: "Hersteller", ungefaehr: "ungefähr", geschaetzt: "geschätzt" };
 
 // Kurztitel für Hinweise (Art "hinweis"): zugeklappt steht nur diese Zeile, der volle Text klappt auf.
@@ -682,7 +682,7 @@ function sortenZeile(f) {
 function zeichneFutter() {
   const offen = daten.futter.length <= 5;
   $("futter-gruppen").innerHTML =
-    ["nass", "trocken", "leckerli"]
+    ["nass", "trocken", "frischfleisch", "leckerli"]
       .map((typ) => {
         const sorten = daten.futter.filter((f) => f.typ === typ);
         if (sorten.length === 0) return "";
@@ -2151,6 +2151,7 @@ let bearbeitetesFutter = null;
 const TYP_OPTIONEN = [
   { wert: "nass", text: "Nassfutter" },
   { wert: "trocken", text: "Trockenfutter" },
+  { wert: "frischfleisch", text: "Frischfleisch / BARF" },
   { wert: "leckerli", text: "Leckerli / Snack" },
 ];
 const QUELLE_OPTIONEN = [
@@ -2273,7 +2274,7 @@ function rechnerHtml(analyse) {
   });
 }
 
-const ART_DATIV = { nass: "Nassfutter", trocken: "Trockenfutter", leckerli: "Leckerli" };
+const ART_DATIV = { nass: "Nassfutter", trocken: "Trockenfutter", frischfleisch: "Frischfleisch", leckerli: "Leckerli" };
 const roterHinweis = (zeile, rest) =>
   `<div class="warnung warnung-sofort"><p>${zeile}</p><p class="w-text">${rest}</p></div>`;
 
@@ -2294,10 +2295,16 @@ function zeichneRechnerAusgabe() {
     nichts: "",
     keineZahl: p("Bitte nur die Zahl eintragen."),
     leer: r.art === "leer" ? p(`Noch leer: ${r.leer.join(", ")}.`) : "",
-    feuchteFehlt: roterHinweis(
-      "Bei Nassfutter steht die Feuchte immer auf der Packung.",
-      "Bitte trag sie ein, ohne sie stimmt die Rechnung nicht.",
-    ),
+    feuchteFehlt:
+      typ === "frischfleisch"
+        ? roterHinweis(
+            "Ohne Feuchte stimmt die Rechnung bei Frischfleisch nicht.",
+            "Steht sie nicht auf der Packung, nimm den kcal-Wert aus der Nährwerttabelle (Brennwert).",
+          )
+        : roterHinweis(
+            "Bei Nassfutter steht die Feuchte immer auf der Packung.",
+            "Bitte trag sie ein, ohne sie stimmt die Rechnung nicht.",
+          ),
     zuViel: roterHinweis(
       `Zusammen sind das ${mitKomma(r.summe)}&nbsp;%, mehr als 100&nbsp;% geht nicht.`,
       "Steht bei einem Wert das Komma an der falschen Stelle? Vergleiche die Zahlen bitte mit der Packung.",

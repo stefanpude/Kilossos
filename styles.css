@@ -575,6 +575,9 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .gef-st:last-of-type { border-top-right-radius: 7px; border-bottom-right-radius: 7px; }
 .gef-chip.nass, .gef-st.nass { background: var(--akzent); }
 .gef-chip.trocken, .gef-st.trocken { background: color-mix(in srgb, var(--akzent) 50%, var(--flaeche)); }
+/* Frischfleisch (0.72.0): Akzent mit Punkten in der Flächenfarbe. Eine Mischfarbe mit --text war im hellen Modus
+   kaum von Nass zu unterscheiden (beide dunkelgrün); das Muster trennt in hell und dunkel. */
+.gef-chip.frischfleisch, .gef-st.frischfleisch { background: radial-gradient(circle, var(--flaeche) 0 1px, transparent 1.4px) 0 0 / 4px 4px, var(--akzent); }
 .gef-chip.leckerli, .gef-st.leckerli { background: repeating-linear-gradient(135deg, var(--akzent) 0 2px, var(--flaeche) 2px 4px); }
 .gef-st.rest { background: var(--flaeche-2); }
 /* Über der Tagesmenge: rechts der Marke überdeckt, bis zum Spielraum grau schraffiert, darüber Bernstein */

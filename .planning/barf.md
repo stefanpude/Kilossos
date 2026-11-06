@@ -1,5 +1,9 @@
 # Futterart „Frischfleisch / BARF“ (geplant 06.11.2026, Stefans Wunsch „beides umsetzen“)
 
+**Gebaut in 0.72.0 (06.11.2026).** Texte der Rückfrage mit Stefans Ja: „… sind für Frischfleisch ungewöhnlich viel.“
+(nicht „viel zu viel“, fettes Fleisch kann über 300 liegen), Rechner verlangt die Feuchte. Balken: Punktmuster statt
+Mischfarbe (Mischung mit --text war hell kaum von Nass zu unterscheiden). Tests `tests/frischfleisch.test.js`.
+
 ## Ziel
 Wer Tatar, rohes Fleisch oder BARF-Mischungen füttert, kann es als eigene Sorte mit der richtigen Art eintragen,
 statt es als „Nassfutter“ oder „Leckerli“ falsch einzusortieren. Die App rechnet wie immer nur Gramm × kcal/100 g.

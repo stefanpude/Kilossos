@@ -45,7 +45,7 @@ export const BEGRIFFE = [
     text:
       "BARF steht für „biologisch artgerechtes rohes Futter“: rohes Fleisch, Innereien und oft Knochen, meist mit " +
       "Zusätzen. Die kcal hängen vor allem vom Fett im Fleisch ab, deshalb legst du BARF in Kilossos als eigene Sorte " +
-      "mit dem kcal-Wert von der Packung oder aus dem Rationsplan an. Plane eine BARF-Ernährung mit dem Tierarzt, weil " +
+      "mit der Art „Frischfleisch / BARF“ und dem kcal-Wert von der Packung oder aus dem Rationsplan an. Plane eine BARF-Ernährung mit dem Tierarzt, weil " +
       "selbst gemischte Rationen Nährstofflücken haben können und rohes Fleisch Keime enthalten kann.",
     quelle: "WSAVA Global Nutrition Committee, Raw Meat Based Diets for Pets (2021); NRC 2006",
   },

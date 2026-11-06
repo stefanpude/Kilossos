@@ -11,8 +11,8 @@ const ohneUmbruch = (text) => assert.doesNotMatch(text, /\d (kcal|kJ|g\b|%)/, te
 
 // ---------- Prüfung des kcal-Werts ----------
 
-test("Grenzen: Nass 150, Trocken und Leckerli 450, 20 bis 700", () => {
-  assert.deepEqual(KCAL_GRENZEN, { min: 20, max: 700, nass: 150, trocken: 450, leckerli: 450 });
+test("Grenzen: Nass 150, Trocken und Leckerli 450, Frischfleisch 300 (0.72.0), 20 bis 700", () => {
+  assert.deepEqual(KCAL_GRENZEN, { min: 20, max: 700, nass: 150, trocken: 450, frischfleisch: 300, leckerli: 450 });
 });
 
 test("Nass 307 (Bozita, kJ auf der Packung) → Rückfrage mit 73,4 und 30,7", () => {

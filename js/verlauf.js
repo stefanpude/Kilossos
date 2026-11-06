@@ -407,7 +407,7 @@ export function kcalDiagramm(mahlzeiten, futterNachId, freigaben) {
 
 // ---------- Verlauf-Ansicht „Wiegeprotokoll“ (ab 0.23.0, vorher weiche Kurve seit 0.7.0) ----------
 
-const TYP_SYMBOL = { nass: SYMBOL.nass, trocken: SYMBOL.trocken, leckerli: SYMBOL.leckerli };
+const TYP_SYMBOL = { nass: SYMBOL.nass, trocken: SYMBOL.trocken, frischfleisch: SYMBOL.frischfleisch, leckerli: SYMBOL.leckerli };
 const ZEITRAEUME = [
   ["1m", "1 Monat"],
   ["3m", "3 Monate"],
