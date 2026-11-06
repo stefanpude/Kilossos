@@ -344,7 +344,7 @@
           <span data-symbol="katzenkopf"></span><span class="text">Demo ansehen<small>Beispieldaten von Kito und Zuki über ein Jahr. Deine Einträge bleiben, wie sie sind.</small></span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.61.2</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.62.0</span>
         </div>
       </div>
     </section>
@@ -936,12 +936,58 @@
     </form>
   </dialog>
 
+  <!-- Erklärseite „Warum ist meine Katze zu schwer geworden?“ (0.62.0, Ideen-Tafel h1b2wfe9s8hy5ksjrkhm, Text mit
+       Stefans Ja; Plan und Quellen: .planning/ursachen-seite.md). Was es schon gibt, steht nur als Verweis da.
+       Keine Zahlen, keine Mengen, keine Diagnose. Der rote Kasten ist wörtlich „Bitte nicht selbst kürzen“. -->
+  <dialog id="dialog-ursachen">
+    <form method="dialog">
+      <h2 tabindex="-1" autofocus>Warum ist meine Katze zu schwer geworden?</h2>
+      <p>Übergewicht entsteht, wenn eine Katze auf Dauer mehr Energie aufnimmt, als sie verbraucht. Oft kommen mehrere
+        Gründe zusammen. Wer sie kennt, kann gezielt gegensteuern. Besprich mit dem Tierarzt, was bei deiner Katze
+        zutrifft: Jeder Abnehmplan gehört in seine Hand.</p>
+      <p class="notfall-hinweis">Weniger Futter auf eigene Faust kann eine Fettleber auslösen. Nimmt deine Katze trotz allem
+        nicht ab, sprich mit dem Tierarzt, denn nur er ändert die Tagesmenge.</p>
+      <h3>Futter steht den ganzen Tag bereit</h3>
+      <p>Steht immer ein voller Napf da, meist mit Trockenfutter, frisst eine Katze oft mehr, als sie braucht. Das gilt als
+        einer der Hauptgründe für Übergewicht bei Katzen. Mehrere kleine, abgewogene Mahlzeiten über den Tag machen die
+        Menge sichtbar.</p>
+      <h3>Nach der Kastration</h3>
+      <p>Nach der Kastration braucht eine Katze deutlich weniger Energie, frisst aber oft mehr. Bleibt die Menge gleich oder
+        steht Futter frei bereit, nimmt sie leicht zu. Das gilt für Kater und Katzen.</p>
+      <h3>Wenig Bewegung</h3>
+      <p>Katzen, die sich wenig bewegen, sind häufiger übergewichtig. In der Wohnung fehlen oft Jagen, Klettern und die
+        Suche nach Futter. Ideen für mehr Bewegung:</p>
+      <p><button type="button" class="knopf-text" data-aktion="alltag-erklaerung">Was hilft einer schweren Katze im Alltag?</button></p>
+      <h3>Langeweile und Stress</h3>
+      <p>Hat eine Katze wenig zu tun, kann Fressen selbst zur Beschäftigung werden. Auch Stress spielt mit, zum Beispiel
+        wenn sie neben einer Katze fressen muss, der sie sonst aus dem Weg geht. Spielen, Futterspielzeug und getrennte
+        Futterplätze helfen.</p>
+      <h3>Mehr im Napf, als man denkt</h3>
+      <p>Leckerlis und Reste, eine zweite Katze, die mitfrisst, die Menge laut Packung oder ungenaues Abmessen: Dazu steht
+        mehr hier:</p>
+      <p><button type="button" class="knopf-text" data-aktion="warum-nicht-ab">Warum nimmt meine Katze nicht ab?</button></p>
+      <h3>Krankheiten und Medikamente</h3>
+      <p>Manche Hormonstörungen und manche Medikamente, zum Beispiel Kortison oder bestimmte Mittel gegen Epilepsie, können
+        zu Übergewicht beitragen. Ob das bei deiner Katze eine Rolle spielt, klärt der Tierarzt. Setz ein Medikament nie
+        selbst ab.</p>
+      <p class="leise">Quellen: Cornell Feline Health Center, Obesity; Larsen 2017 (Kastration); AAFP/ISFM-Konsens zur
+        Fütterung von Katzen 2018; Öhlund et al. 2018 (Studie aus Schweden); Merck Veterinary Manual, Obesity (2023).</p>
+      <div class="knoepfe">
+        <button value="abbrechen" class="knopf-haupt">Verstanden</button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Blatt „Tipps fürs Abnehmen“ (0.57.0, Ideen-Tafel, Stefan: „vor allem Finden“). Nur Wegweiser zu den beiden
        Erklärseiten, kein eigener Ratschlag: So gibt es jeden Tipp nur einmal, mit seiner Quelle auf der Seite. -->
   <dialog id="dialog-tipps">
     <form method="dialog">
       <h2 tabindex="-1" autofocus>Tipps fürs Abnehmen</h2>
-      <p>Die Tipps stehen auf zwei Seiten, jeweils mit Quellen. Tippe auf eine Seite, um sie zu öffnen.</p>
+      <p>Die Tipps stehen auf drei Seiten, jeweils mit Quellen. Tippe auf eine Seite, um sie zu öffnen.</p>
+      <h3>Bevor es losgeht</h3>
+      <p><button type="button" class="knopf-text" data-aktion="ursachen-erklaerung">Warum ist meine Katze zu schwer geworden?</button></p>
+      <p class="tipp">Futter steht den ganzen Tag bereit, nach der Kastration, wenig Bewegung, Langeweile und Stress,
+        Krankheiten und Medikamente.</p>
       <h3>Wenn die Waage stehen bleibt</h3>
       <p><button type="button" class="knopf-text" data-aktion="warum-nicht-ab">Warum nimmt meine Katze nicht ab?</button></p>
       <p class="tipp">Getrennt füttern, alle im Haushalt machen mit, Leckerlis und Reste zählen mit, wenn sie bettelt,
