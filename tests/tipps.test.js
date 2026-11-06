@@ -38,6 +38,17 @@ test("Jedes genannte Stichwort steht wirklich auf der verlinkten Seite", () => {
   }
 });
 
+// 0.61.1 (Stefan 06.11.: „Futtermatten mit aufnehmen“): Futterspielzeug stand schon auf „Alltag“ (Quelle Dantas 2016),
+// fehlte aber in den Stichworten. Nur das Stichwort kommt dazu, kein eigener Text.
+test("0.61.1: Stichwort „Futterspielzeug“ bei „Für den Alltag“, steht auf der Alltag-Seite", () => {
+  const html = lies("index.html");
+  const seite = blatt(html, "dialog-tipps");
+  const stichworte = nurText(seite.slice(seite.indexOf("<h3>Für den Alltag</h3>")));
+  assert.match(stichworte, /Bewegung in kleinen Portionen, Futterspielzeug, Stufen an die Lieblingsplätze/);
+  assert.ok(nurText(blatt(html, "dialog-alltag")).includes("Futterspielzeug"));
+  assert.ok(nurText(blatt(html, "dialog-alltag")).includes("Dantas et al. 2016 (Futterspielzeug)"));
+});
+
 test("Keine eigenen Ratschläge: keine Mengen, keine Prozente, keine Gedankenstriche", () => {
   const text = nurText(blatt(lies("index.html"), "dialog-tipps"));
   assert.doesNotMatch(text, /\d/);
