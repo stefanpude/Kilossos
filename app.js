@@ -2814,10 +2814,14 @@ $("anzeige-feld").innerHTML = auswahlFeld({
 });
 // Der Wiegetag gehört zum aktiven Tier; beim Wechsel wird das Feld neu gezeichnet.
 function zeichneWiegetag() {
-  $("label-wiegetag").textContent = daten.tiere.length > 1 ? `Wiegetag von ${tier.name}` : "Wiegetag";
+  // Tiername klein unter dem Titel wie bei „Darstellung“ (0.63.0), sonst rutscht das Menü in die nächste Zeile.
+  const mehrere = daten.tiere.length > 1;
+  const klein = $("wiegetag-tier");
+  klein.hidden = !mehrere;
+  klein.textContent = mehrere ? `Für ${tier.name}.` : "";
   $("wiegetag-feld").innerHTML = auswahlFeld({
     name: "wiegetag",
-    beschriftung: "label-wiegetag",
+    beschriftung: "label-wiegetag wiegetag-tier",
     // Montag zuerst, wie im deutschen Kalender
     optionen: [{ wert: "", text: "Kein fester Tag" }, ...[1, 2, 3, 4, 5, 6, 0].map((t) => ({ wert: String(t), text: WOCHENTAGE[t] }))],
     wert: Number.isInteger(tier.wiegetag) ? String(tier.wiegetag) : "",

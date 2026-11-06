@@ -9,11 +9,11 @@ const lies = (datei) => readFileSync(new URL(`../${datei}`, import.meta.url), "u
 const blatt = (html, id) => html.match(new RegExp(`<dialog id="${id}">([\\s\\S]*?)</dialog>`))?.[1] ?? "";
 const nurText = (html) => html.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ");
 
-test("Eintrag unter „Wissen“ direkt nach „Tipps fürs Abnehmen“, öffnet die Seite", () => {
+test("Eintrag unter „Wissen“ ganz unten, nach „Begriffe kurz erklärt“ (seit 0.63.0), öffnet die Seite", () => {
   const html = lies("index.html");
   const wissen = html.slice(html.indexOf('<h3 class="gruppe-titel">Wissen</h3>'), html.indexOf('<h3 class="gruppe-titel">Einstellungen</h3>'));
   const aktionen = [...wissen.matchAll(/data-aktion="([^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(aktionen.slice(0, 3), ["anleitung-erklaerung", "tipps-erklaerung", "fragen-erklaerung"]);
+  assert.deepEqual(aktionen.slice(-2), ["begriffe-erklaerung", "fragen-erklaerung"]);
   assert.ok(wissen.includes('<span class="text">Häufige Fragen</span>'));
   assert.ok(lies("app.js").includes('case "fragen-erklaerung":\n      return $("dialog-fragen").showModal();'));
 });

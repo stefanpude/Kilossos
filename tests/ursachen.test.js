@@ -1,6 +1,6 @@
 // 0.62.0: Erklärseite „Warum ist meine Katze zu schwer geworden?“ (Ideen-Tafel h1b2wfe9s8hy5ksjrkhm, Stefan 06.11.2026:
 // „setzen wir jetzt schon um“, Text mit Stefans Ja; Plan und Quellen in .planning/ursachen-seite.md).
-// Erreichbar über „Tipps fürs Abnehmen“ → „Bevor es losgeht“. Was es schon gibt, steht nur als Verweis da.
+// Seit 0.63.0 erreichbar über „Mehr“ → „Wissen“, ganz oben (vorher „Tipps“ → „Bevor es losgeht“).
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -27,15 +27,16 @@ test("Blatt: Überschrift mit Fokus, sechs Abschnitte, Knopf „Verstanden“, �
   assert.match(lies("app.js"), /case "ursachen-erklaerung":\s*return \$\("dialog-ursachen"\)\.showModal\(\);/);
 });
 
-test("„Tipps“: erster Abschnitt „Bevor es losgeht“ mit Verweis, Stichworte = Überschriften der Seite", () => {
-  const tipps = blatt(lies("index.html"), "dialog-tipps");
-  const aktionen = [...tipps.matchAll(/data-aktion="([^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(aktionen, ["ursachen-erklaerung", "warum-nicht-ab", "alltag-erklaerung"]);
-  assert.ok(tipps.indexOf("<h3>Bevor es losgeht</h3>") < tipps.indexOf("<h3>Wenn die Waage stehen bleibt</h3>"));
-  assert.ok(tipps.includes('<button type="button" class="knopf-text" data-aktion="ursachen-erklaerung">Warum ist meine Katze zu schwer geworden?</button>'));
-  assert.ok(nurText(tipps).includes("Die Tipps stehen auf drei Seiten"));
-  const stichworte = nurText(tipps.slice(tipps.indexOf("<h3>Bevor es losgeht</h3>"), tipps.indexOf("<h3>Wenn die Waage stehen bleibt</h3>")));
-  assert.ok(stichworte.includes("Futter steht den ganzen Tag bereit, nach der Kastration, wenig Bewegung, Langeweile und Stress, Krankheiten und Medikamente."));
+// 0.63.0 (Stefan 06.11.): Die Seite steht unter „Wissen“ ganz oben, „Tipps“ hat nur noch zwei Abschnitte.
+test("0.63.0: Eintrag ganz oben unter „Wissen“, „Tipps“ ohne „Bevor es losgeht“", () => {
+  const html = lies("index.html");
+  const wissen = html.slice(html.indexOf('<h3 class="gruppe-titel">Wissen</h3>'), html.indexOf('<h3 class="gruppe-titel">Einstellungen</h3>'));
+  const aktionen = [...wissen.matchAll(/data-aktion="([^"]+)"/g)].map((m) => m[1]);
+  assert.equal(aktionen[0], "ursachen-erklaerung");
+  const tipps = blatt(html, "dialog-tipps");
+  assert.deepEqual([...tipps.matchAll(/data-aktion="([^"]+)"/g)].map((m) => m[1]), ["warum-nicht-ab", "alltag-erklaerung"]);
+  assert.ok(!tipps.includes("Bevor es losgeht"));
+  assert.ok(nurText(tipps).includes("Die Tipps stehen auf zwei Seiten"));
 });
 
 test("Sicherheit: roter Kasten wörtlich wie „Bitte nicht selbst kürzen“ auf „Warum nimmt meine Katze nicht ab?“", () => {
@@ -50,7 +51,8 @@ test("Sicherheit: roter Kasten wörtlich wie „Bitte nicht selbst kürzen“ au
 // 0.62.1 (Stefan 06.11.2026): Alltag und „Nicht ab“ stehen auf „Tipps“ direkt unter „Bevor es losgeht“ als eigene
 // Punkte. Die Seite öffnet nur über „Tipps“, nach „Verstanden“ ist man dort zurück. Darum keine Links mehr auf der
 // Seite, nur ein Schlusssatz, der die Abschnitte auf „Tipps“ beim Namen nennt.
-test("0.62.1: keine Links auf der Seite, Schlusssatz nennt die nächsten Abschnitte auf „Tipps“", () => {
+// 0.63.0: Die Seite öffnet jetzt über „Wissen“, der Schlusssatz nennt deshalb den Eintrag „Tipps fürs Abnehmen“.
+test("0.62.1/0.63.0: keine Links auf der Seite, Schlusssatz nennt „Tipps fürs Abnehmen“", () => {
   const html = lies("index.html");
   const seite = blatt(html, "dialog-ursachen");
   assert.doesNotMatch(seite, /data-aktion=/);
@@ -58,14 +60,15 @@ test("0.62.1: keine Links auf der Seite, Schlusssatz nennt die nächsten Abschni
   const text = nurText(seite);
   assert.ok(!text.includes("Ideen für mehr Bewegung"));
   assert.ok(text.includes("ungenaues Abmessen: So kommt leicht mehr zusammen, als man denkt."));
-  const schluss = "Wie es weitergeht, steht auf „Tipps“ unter „Wenn die Waage stehen bleibt“ und „Für den Alltag“.";
+  const schluss = "Wie es weitergeht, steht unter „Tipps fürs Abnehmen“.";
   assert.ok(text.includes(schluss));
   assert.ok(text.indexOf(schluss) < text.indexOf("Quellen:"));
-  const tipps = blatt(html, "dialog-tipps");
-  for (const h of ["Wenn die Waage stehen bleibt", "Für den Alltag"]) assert.ok(tipps.includes(`<h3>${h}</h3>`), h);
+  assert.ok(!text.includes("auf „Tipps“ unter"));
+  const wissen = html.slice(html.indexOf('<h3 class="gruppe-titel">Wissen</h3>'), html.indexOf('<h3 class="gruppe-titel">Einstellungen</h3>'));
+  assert.ok(wissen.includes('<span class="text">Tipps fürs Abnehmen</span>'));
   assert.ok(lies("app.js").includes('case "ursachen-erklaerung":'));
   const aufrufer = [...html.matchAll(/data-aktion="ursachen-erklaerung"/g)].length;
-  assert.equal(aufrufer, 1); // nur über „Tipps“ erreichbar, sonst stimmt der Schlusssatz nicht
+  assert.equal(aufrufer, 1); // nur über „Wissen“ erreichbar, sonst stimmt der Schlusssatz nicht
 });
 
 test("Quellen genannt, keine Mengen, keine Diagnose, keine Gedankenstriche", () => {

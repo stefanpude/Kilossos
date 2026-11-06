@@ -8,7 +8,7 @@ const lies = (datei) => readFileSync(new URL(`../${datei}`, import.meta.url), "u
 const blatt = (html, id) => html.match(new RegExp(`<dialog id="${id}">([\\s\\S]*?)</dialog>`))?.[1] ?? "";
 const nurText = (html) => html.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ");
 
-test("Eintrag ganz oben unter „Wissen“, öffnet die Seite", () => {
+test("Eintrag unter „Wissen“ vor „Tipps“ (seit 0.63.0 an zweiter Stelle), öffnet die Seite", () => {
   const html = lies("index.html");
   const wissen = html.slice(html.indexOf('<h3 class="gruppe-titel">Wissen</h3>'), html.indexOf('<h3 class="gruppe-titel">Einstellungen</h3>'));
   const erster = wissen.indexOf('data-aktion="anleitung-erklaerung"');

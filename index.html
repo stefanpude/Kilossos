@@ -261,24 +261,27 @@
 
       <h3 class="gruppe-titel">Wissen</h3>
       <div class="liste">
+        <button type="button" class="eintrag" data-aktion="ursachen-erklaerung">
+          <span data-symbol="futter"></span><span class="text">Woher kommt das Übergewicht?</span><span class="weiter" data-symbol="weiter"></span>
+        </button>
         <button type="button" class="eintrag" data-aktion="anleitung-erklaerung">
           <span data-symbol="info"></span><span class="text">So nutzt du Kilossos</span><span class="weiter" data-symbol="weiter"></span>
         </button>
         <button type="button" class="eintrag" data-aktion="tipps-erklaerung">
           <span data-symbol="katzenkopf"></span><span class="text">Tipps fürs Abnehmen</span><span class="weiter" data-symbol="weiter"></span>
         </button>
-        <button type="button" class="eintrag" data-aktion="fragen-erklaerung">
-          <span data-symbol="frage"></span><span class="text">Häufige Fragen</span><span class="weiter" data-symbol="weiter"></span>
-        </button>
         <button type="button" class="eintrag" data-aktion="begriffe-erklaerung">
           <span data-symbol="buch"></span><span class="text">Begriffe kurz erklärt</span><span class="weiter" data-symbol="weiter"></span>
+        </button>
+        <button type="button" class="eintrag" data-aktion="fragen-erklaerung">
+          <span data-symbol="frage"></span><span class="text">Häufige Fragen</span><span class="weiter" data-symbol="weiter"></span>
         </button>
       </div>
 
       <h3 class="gruppe-titel">Einstellungen</h3>
       <div class="liste">
         <div class="eintrag eintrag-auswahl">
-          <span data-symbol="waage"></span><span class="text" id="label-wiegetag">Wiegetag</span>
+          <span data-symbol="waage"></span><span class="text"><span id="label-wiegetag">Wiegetag</span><small id="wiegetag-tier" hidden></small></span>
           <div id="wiegetag-feld"></div>
         </div>
         <div class="eintrag eintrag-auswahl">
@@ -344,7 +347,7 @@
           <span data-symbol="katzenkopf"></span><span class="text">Demo ansehen<small>Beispieldaten von Kito und Zuki über ein Jahr. Deine Einträge bleiben, wie sie sind.</small></span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.62.1</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.63.0</span>
         </div>
       </div>
     </section>
@@ -938,7 +941,7 @@
 
   <!-- Erklärseite „Warum ist meine Katze zu schwer geworden?“ (0.62.0, Ideen-Tafel h1b2wfe9s8hy5ksjrkhm, Text mit
        Stefans Ja; Plan und Quellen: .planning/ursachen-seite.md). Seit 0.62.1 ohne Links (Stefan: Alltag und „Nicht ab“ stehen auf
-       „Tipps“ direkt darunter als eigene Punkte), nur ein Schlusssatz nennt sie.
+       „Tipps“ als eigene Punkte), seit 0.63.0 unter „Wissen“ ganz oben statt auf „Tipps“; der Schlusssatz nennt „Tipps“.
        Keine Zahlen, keine Mengen, keine Diagnose. Der rote Kasten ist wörtlich „Bitte nicht selbst kürzen“. -->
   <dialog id="dialog-ursachen">
     <form method="dialog">
@@ -969,7 +972,7 @@
       <p>Manche Hormonstörungen und manche Medikamente, zum Beispiel Kortison oder bestimmte Mittel gegen Epilepsie, können
         zu Übergewicht beitragen. Ob das bei deiner Katze eine Rolle spielt, klärt der Tierarzt. Setz ein Medikament nie
         selbst ab.</p>
-      <p>Wie es weitergeht, steht auf „Tipps“ unter „Wenn die Waage stehen bleibt“ und „Für den Alltag“.</p>
+      <p>Wie es weitergeht, steht unter „Tipps fürs Abnehmen“.</p>
       <p class="leise">Quellen: Cornell Feline Health Center, Obesity; Larsen 2017 (Kastration); AAFP/ISFM-Konsens zur
         Fütterung von Katzen 2018; Öhlund et al. 2018 (Studie aus Schweden); Merck Veterinary Manual, Obesity (2023).</p>
       <div class="knoepfe">
@@ -983,11 +986,7 @@
   <dialog id="dialog-tipps">
     <form method="dialog">
       <h2 tabindex="-1" autofocus>Tipps fürs Abnehmen</h2>
-      <p>Die Tipps stehen auf drei Seiten, jeweils mit Quellen. Tippe auf eine Seite, um sie zu öffnen.</p>
-      <h3>Bevor es losgeht</h3>
-      <p><button type="button" class="knopf-text" data-aktion="ursachen-erklaerung">Warum ist meine Katze zu schwer geworden?</button></p>
-      <p class="tipp">Futter steht den ganzen Tag bereit, nach der Kastration, wenig Bewegung, Langeweile und Stress,
-        Krankheiten und Medikamente.</p>
+      <p>Die Tipps stehen auf zwei Seiten, jeweils mit Quellen. Tippe auf eine Seite, um sie zu öffnen.</p>
       <h3>Wenn die Waage stehen bleibt</h3>
       <p><button type="button" class="knopf-text" data-aktion="warum-nicht-ab">Warum nimmt meine Katze nicht ab?</button></p>
       <p class="tipp">Getrennt füttern, alle im Haushalt machen mit, Leckerlis und Reste zählen mit, wenn sie bettelt,

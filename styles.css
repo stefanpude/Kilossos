@@ -398,7 +398,8 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 /* Eintrag mit Auswahlmenü rechts (Wiegetag, Darstellung, Zeitraum) */
 .eintrag-auswahl { flex-wrap: wrap; row-gap: 0; }
 /* Titel bricht nur zwischen Wörtern; reicht der Platz nicht, rutscht das Menü in die nächste Zeile (große Schrift). */
-.eintrag-auswahl .text { flex: 1 1 7.5rem; overflow-wrap: normal; }
+/* 6.5rem seit 0.63.0: mit 7.5rem fehlte dem Wiegetag („Kein fester Tag“) bei 375 px genau 1 px, das Menü brach um. */
+.eintrag-auswahl .text { flex: 1 1 6.5rem; overflow-wrap: normal; }
 .eintrag-auswahl > .auswahl, .eintrag-auswahl > div > .auswahl { flex: 0 1 auto; min-width: 0; }
 .eintrag-auswahl > div:last-child { margin-left: auto; min-width: 0; }
 .eintrag-auswahl .auswahl-knopf { border-color: transparent; background: none; padding: 8px 4px 8px 10px; color: var(--text-leise); width: auto; }

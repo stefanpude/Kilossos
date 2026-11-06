@@ -13,7 +13,7 @@ test("Eintrag unter „Wissen“ direkt nach „So nutzt du Kilossos“, öffnet
   const html = lies("index.html");
   const wissen = html.slice(html.indexOf('<h3 class="gruppe-titel">Wissen</h3>'), html.indexOf('<h3 class="gruppe-titel">Einstellungen</h3>'));
   const aktionen = [...wissen.matchAll(/data-aktion="([^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(aktionen.slice(0, 2), ["anleitung-erklaerung", "tipps-erklaerung"]);
+  assert.equal(aktionen[aktionen.indexOf("anleitung-erklaerung") + 1], "tipps-erklaerung");
   assert.ok(wissen.includes('<span class="text">Tipps fürs Abnehmen</span>'));
   assert.ok(lies("app.js").includes('case "tipps-erklaerung":\n      return $("dialog-tipps").showModal();'));
 });
