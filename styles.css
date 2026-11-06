@@ -1024,6 +1024,16 @@ dialog .wert-eingabe input:not([type="hidden"]) { padding-right: calc(12px + 1.4
   .knoepfe:has(> .knopf-gefahr:not([hidden]))::before { content: ""; order: 1; flex-basis: 100%; height: 0; }
   .knoepfe > .knopf-gefahr { order: 2; }
 }
+/* Eigene Rückfrage (0.52.0): Absätze aus 
+
+, Knöpfe teilen sich die Breite. Der rote Ja-Knopf bleibt neben
+   „Abbrechen“ (die Umbruch-Regel oben gilt nur für Formulare mit Löschen-Knopf). Mit drittem Weg (Monatsfoto)
+   stehen alle drei untereinander, der Ja-Knopf oben. */
+.rueckfrage-text { white-space: pre-line; margin: 0; font-size: 1rem; color: var(--text); }
+.rueckfrage-knoepfe > button { flex: 1 1 auto; }
+.rueckfrage-knoepfe > .knopf-gefahr { margin-right: 0; order: 0; }
+.rueckfrage-knoepfe::before { display: none; }
+#dialog-rueckfrage:has(#rueckfrage-dritte:not([hidden])) .rueckfrage-knoepfe { flex-direction: column-reverse; }
 .fuss { margin: 0; text-align: center; color: var(--text-leise); font-size: 0.8125rem; }
 
 /* ---------- Bestätigung unten ---------- */

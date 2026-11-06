@@ -962,6 +962,19 @@
     </form>
   </dialog>
 
+  <!-- Eigene Rückfrage (0.52.0) statt Browser-confirm(). Gefüllt von js/rueckfrage.js. Keine eigene Überschrift:
+       Die Frage selbst ist der Name des Blatts. -->
+  <dialog id="dialog-rueckfrage" role="alertdialog" aria-labelledby="rueckfrage-text">
+    <form method="dialog">
+      <p id="rueckfrage-text" class="rueckfrage-text"></p>
+      <div class="knoepfe rueckfrage-knoepfe">
+        <button value="nein" class="knopf-zweit" id="rueckfrage-nein" autofocus>Abbrechen</button>
+        <button value="dritte" class="knopf-zweit" id="rueckfrage-dritte" hidden></button>
+        <button value="ja" class="knopf-haupt" id="rueckfrage-ja"></button>
+      </div>
+    </form>
+  </dialog>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script type="module" src="app.js"></script>
