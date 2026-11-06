@@ -187,10 +187,38 @@ test("Version 0.42.7: Cache v88 mit js/heute-grafiken.js, Versionszeile unter �
 test("0.42.7: Transportbox-Tipp steht im Arm-Bereich nach dem Satz zur Tier- oder Babywaage", () => {
   const html = lies("index.html");
   const arm = html.slice(html.indexOf('<details class="arm"'), html.indexOf("</details>", html.indexOf('<details class="arm"')));
-  assert.match(arm, /Ohne Tierwaage geht es genauer mit der Transportbox:/);
-  assert.match(arm, /drück „Tara“, bis die Anzeige 0 zeigt\./);
-  assert.match(arm, /viele Küchenwaagen schaffen nur 5&nbsp;kg\./);
+  assert.match(arm, /Ohne Tierwaage geht es genauer mit der Transportbox: leere Box auf eine Küchen- oder Paketwaage, „Tara“ drücken, Katze hinein\. Die Waage zeigt dann ihr Gewicht\. Auf die Höchstlast achten\./);
+  assert.doesNotMatch(arm, /bis die Anzeige 0 zeigt|schaffen nur 5/);
   assert.ok(arm.indexOf("Babywaage") < arm.indexOf("Transportbox"), "Tipp steht nach dem Satz zur Babywaage");
+});
+
+// Zwei Absätze: „Warum ungenau“ (mit den Zahlen je Tier) und „So geht es genauer“. Kein Satz des Sicherheitstexts fällt weg.
+test("0.42.7: Hinweis im Arm-Bereich in zwei Absätze geteilt, alle Sätze bleiben", () => {
+  const html = lies("index.html");
+  const arm = html.slice(html.indexOf('<details class="arm"'), html.indexOf("</details>", html.indexOf('<details class="arm"')));
+  const absaetze = [...arm.matchAll(/<p class="tipp">([^]*?)<\/p>/g)].map((m) => m[1].replace(/\s+/g, " ").trim());
+  const [, warum, genauer] = absaetze;
+  assert.equal(absaetze.length, 3, "Tipp oben + zwei Absätze unten");
+  assert.match(warum, /^Personenwaagen zeigen meist nur 100-g-Schritte[^]*leicht 100 g oder mehr danebenliegen\. <span id="arm-zahlen"><\/span>$/);
+  assert.match(genauer, /^Für den Wiegetag ist eine Tier- oder Babywaage \(10-g-Schritte\) deutlich genauer\. Ohne Tierwaage/);
+  assert.match(genauer, /Auf die Höchstlast achten\. Immer dieselbe Waage nehmen\. Bei einer Warnung zum Tempo erst mit einer genauen Waage oder beim Tierarzt nachwiegen\.$/);
+});
+
+// Zahl und Einheit im Text je Tier nie über zwei Zeilen („1 / % des Gewichts“, „0,5–2 / % pro Woche“).
+test("0.42.7: Zahlen im Arm-Text mit geschütztem Leerzeichen vor der Einheit", () => {
+  const app = lies("app.js");
+  const block = app.slice(app.indexOf('$("arm-zahlen").textContent'), app.indexOf("Schon 100 g sind bei einer Katze oft"));
+  const nb = String.fromCharCode(160);
+  for (const stelle of [
+    `sind 1${nb}% des Gewichts`,
+    `prozentInGramm(letzte.kg, 1)}${nb}g.`,
+    `Schon 100${nb}g sind`,
+    `1)}${nb}kg bei einem Menschen mit 75${nb}kg.`,
+    `GRENZEN.abnahmeMax}${nb}% pro Woche`,
+    `GRENZEN.abnahmeMax)}${nb}g.`,
+  ]) {
+    assert.ok(block.includes(stelle), stelle);
+  }
 });
 
 test("0.41.0: Foto im Profil-Fenster (auch beim Anlegen), gilt erst beim Speichern", () => {
