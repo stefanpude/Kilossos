@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { frage, bestaetigt } from "../js/rueckfrage.js";
+import { frage, bestaetigt, KLICKSPERRE_MS } from "../js/rueckfrage.js";
 
 const lies = (datei) => readFileSync(new URL(`../${datei}`, import.meta.url), "utf8");
 
@@ -338,4 +338,23 @@ test("Sicherung einlesen: Knopf „Einlesen“, rot, wenn Daten ersetzt werden",
 // Browser-Fund 0.52.0: .knopf-zweit setzt display: inline-flex und überschreibt damit hidden (leeres Kästchen).
 test("styles.css: versteckter dritter Knopf bleibt wirklich unsichtbar", () => {
   assert.match(lies("styles.css"), /\.rueckfrage-knoepfe > \[hidden\] \{ display: none; \}/);
+});
+
+// Prüfer-Fund 0.52.0: Der zweite Tipp eines Doppeltipps auf „Speichern“ traf den Ja-Knopf an derselben Stelle.
+// Ja und der dritte Weg sind deshalb kurz nach dem Öffnen gesperrt; Nein (Fokus) geht sofort.
+test("frage: Ja und dritter Weg kurz nach dem Öffnen gesperrt, Nein nie", async () => {
+  const d = attrappe();
+  const p = frage({ text: "A?", ja: "Ja, so festgelegt", dritte: "Ohne neues Foto speichern" }, d);
+  assert.equal(d.teile["#rueckfrage-ja"].disabled, true);
+  assert.equal(d.teile["#rueckfrage-dritte"].disabled, true);
+  assert.notEqual(d.teile["#rueckfrage-nein"].disabled, true);
+  await new Promise((r) => setTimeout(r, KLICKSPERRE_MS + 50));
+  assert.equal(d.teile["#rueckfrage-ja"].disabled, false);
+  assert.equal(d.teile["#rueckfrage-dritte"].disabled, false);
+  d.close("ja");
+  assert.equal(await p, "ja");
+});
+
+test("frage: Klicksperre zwischen 300 und 600 ms", () => {
+  assert.ok(KLICKSPERRE_MS >= 300 && KLICKSPERRE_MS <= 600, String(KLICKSPERRE_MS));
 });
