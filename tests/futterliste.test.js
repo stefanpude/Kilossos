@@ -10,6 +10,8 @@ import {
   eanAusEingabe,
   findeNachEan,
   eanBereinigen,
+  listenGruppen,
+  LISTEN_GRUPPEN,
 } from "../js/futterliste.js";
 
 test("normalesFutterKcal zählt Handelsfutter und eigene Sorten, aber kein Diätfutter und keine Leckerlis", () => {
@@ -254,4 +256,31 @@ test("0.37.0: liegt ein gemessener Energiewert unter dem Packungswert, steht er 
   assert.match(hinweis("virbac-hpm-weight-loss-control-w2-trocken"), /325 kcal/);
   assert.match(hinweis("virbac-hpm-weight-loss-diabetes-w1-trocken"), /306 kcal/);
   assert.match(hinweis("purina-om-trocken"), /322 kcal/);
+});
+
+test("0.69.0: listenGruppen teilt die Futterliste in Diätfutter, Nassfutter, Trockenfutter und Leckerlis", () => {
+  const gruppen = listenGruppen(FUTTERLISTE);
+  assert.deepEqual(
+    gruppen.map((g) => g.id),
+    ["liste-diaet", "liste-nass", "liste-trocken", "liste-leckerli"]
+  );
+  assert.deepEqual(
+    gruppen.map((g) => g.titel),
+    ["Diätfutter vom Tierarzt – nur nach Rücksprache", "Nassfutter", "Trockenfutter", "Leckerlis"]
+  );
+  // Jede Sorte steht genau einmal, Diätfutter nur in der Diät-Gruppe.
+  assert.equal(gruppen.reduce((summe, g) => summe + g.eintraege.length, 0), FUTTERLISTE.length);
+  assert.ok(gruppen[0].eintraege.every((e) => e.diaet));
+  for (const g of gruppen.slice(1)) assert.ok(g.eintraege.every((e) => !e.diaet && g.id === `liste-${e.typ}`));
+  assert.ok(gruppen[3].eintraege.some((e) => e.id === "dreamies-huhn"));
+});
+
+test("0.69.0: listenGruppen lässt leere Gruppen weg (z. B. bei einer Suche)", () => {
+  const gruppen = listenGruppen(sucheFutter("dreamies"));
+  assert.deepEqual(gruppen.map((g) => g.id), ["liste-leckerli"]);
+  assert.deepEqual(listenGruppen([]), []);
+});
+
+test("0.69.0: LISTEN_GRUPPEN nennt alle Gruppen (Auf/Zu vor einer Suche merken)", () => {
+  assert.deepEqual(LISTEN_GRUPPEN, ["liste-diaet", "liste-nass", "liste-trocken", "liste-leckerli"]);
 });

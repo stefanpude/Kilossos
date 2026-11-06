@@ -56,6 +56,8 @@ import {
   normalesFutterKcal,
   eanAusEingabe,
   findeNachEan,
+  listenGruppen,
+  LISTEN_GRUPPEN,
 } from "./js/futterliste.js";
 import { kameraScanMoeglich, starteScanner } from "./js/scanner.js";
 import { leckerliKachel, monatsGruppen, tempoRueckmeldung, gefuettertWerte, gefuettertMehr, messungWerte } from "./js/zusammenfassung.js";
@@ -2463,7 +2465,6 @@ $("form-futter").addEventListener("submit", async (ereignis) => {
 
 // Auf/Zu der Listen-Gruppen vor Beginn einer Suche; nach dem Leeren des Suchfelds wird er wiederhergestellt.
 let vorSuche = null;
-const LISTEN_GRUPPEN = ["liste-diaet", "liste-weitere"];
 
 function zeichneListe() {
   const vorhanden = new Set(daten.futter.map((f) => f.listeId).filter(Boolean));
@@ -2496,8 +2497,9 @@ function zeichneListe() {
     });
   };
   $("liste-treffer").innerHTML =
-    gruppe("liste-diaet", "Diätfutter vom Tierarzt – nur nach Rücksprache", treffer.filter((e) => e.diaet)) +
-      gruppe("liste-weitere", "Weitere Sorten", treffer.filter((e) => !e.diaet)) ||
+    listenGruppen(treffer)
+      .map((g) => gruppe(g.id, g.titel, g.eintraege))
+      .join("") ||
     '<p class="leise">Keine Sorte gefunden. Du kannst sie unter „Eigene Sorte anlegen“ selbst eintragen.</p>';
 }
 

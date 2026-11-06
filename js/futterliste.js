@@ -961,6 +961,22 @@ export function sucheFutter(text, liste = FUTTERLISTE) {
   return liste.filter((eintrag) => woerter.every((wort) => eintrag.name.toLowerCase().includes(wort)));
 }
 
+// Gruppen im Blatt „Aus der Liste wählen“ (seit 0.69.0, Stefan 06.11.: Leckerlis gingen zwischen 48 Sorten unter):
+// Diätfutter bleibt wegen „nur nach Rücksprache“ eine eigene Gruppe, der Rest nach Art. Leere Gruppen fallen weg.
+const GRUPPEN = [
+  { id: "liste-diaet", titel: "Diätfutter vom Tierarzt – nur nach Rücksprache", passt: (e) => e.diaet },
+  { id: "liste-nass", titel: "Nassfutter", passt: (e) => !e.diaet && e.typ === "nass" },
+  { id: "liste-trocken", titel: "Trockenfutter", passt: (e) => !e.diaet && e.typ === "trocken" },
+  { id: "liste-leckerli", titel: "Leckerlis", passt: (e) => !e.diaet && e.typ === "leckerli" },
+];
+export const LISTEN_GRUPPEN = GRUPPEN.map((g) => g.id);
+
+export function listenGruppen(treffer) {
+  return GRUPPEN.map(({ id, titel, passt }) => ({ id, titel, eintraege: treffer.filter(passt) })).filter(
+    (g) => g.eintraege.length > 0
+  );
+}
+
 // kcal aus Futter, das kein Diätfutter der Liste ist (Leckerlis zählen getrennt). Eigene Sorten gelten als normales
 // Futter, weil die App bei ihnen nicht weiß, ob es ein Diätfutter ist.
 export function normalesFutterKcal(mahlzeiten, futterNachId, liste = FUTTERLISTE) {
