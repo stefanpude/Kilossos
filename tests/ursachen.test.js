@@ -47,12 +47,25 @@ test("Sicherheit: roter Kasten wörtlich wie „Bitte nicht selbst kürzen“ au
   assert.ok(nurText(blatt(html, "dialog-ursachen")).includes("Setz ein Medikament nie selbst ab."));
 });
 
-test("Verweise statt doppelter Texte: Alltag und „Nicht ab“, beide mit Klick-Fall", () => {
-  const seite = blatt(lies("index.html"), "dialog-ursachen");
-  const js = lies("app.js");
-  const verweise = [...seite.matchAll(/data-aktion="([^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(verweise, ["alltag-erklaerung", "warum-nicht-ab"]);
-  for (const a of verweise) assert.match(js, new RegExp(`case "${a}":`));
+// 0.62.1 (Stefan 06.11.2026): Alltag und „Nicht ab“ stehen auf „Tipps“ direkt unter „Bevor es losgeht“ als eigene
+// Punkte. Die Seite öffnet nur über „Tipps“, nach „Verstanden“ ist man dort zurück. Darum keine Links mehr auf der
+// Seite, nur ein Schlusssatz, der die Abschnitte auf „Tipps“ beim Namen nennt.
+test("0.62.1: keine Links auf der Seite, Schlusssatz nennt die nächsten Abschnitte auf „Tipps“", () => {
+  const html = lies("index.html");
+  const seite = blatt(html, "dialog-ursachen");
+  assert.doesNotMatch(seite, /data-aktion=/);
+  assert.doesNotMatch(seite, /<a /);
+  const text = nurText(seite);
+  assert.ok(!text.includes("Ideen für mehr Bewegung"));
+  assert.ok(text.includes("ungenaues Abmessen: So kommt leicht mehr zusammen, als man denkt."));
+  const schluss = "Wie es weitergeht, steht auf „Tipps“ unter „Wenn die Waage stehen bleibt“ und „Für den Alltag“.";
+  assert.ok(text.includes(schluss));
+  assert.ok(text.indexOf(schluss) < text.indexOf("Quellen:"));
+  const tipps = blatt(html, "dialog-tipps");
+  for (const h of ["Wenn die Waage stehen bleibt", "Für den Alltag"]) assert.ok(tipps.includes(`<h3>${h}</h3>`), h);
+  assert.ok(lies("app.js").includes('case "ursachen-erklaerung":'));
+  const aufrufer = [...html.matchAll(/data-aktion="ursachen-erklaerung"/g)].length;
+  assert.equal(aufrufer, 1); // nur über „Tipps“ erreichbar, sonst stimmt der Schlusssatz nicht
 });
 
 test("Quellen genannt, keine Mengen, keine Diagnose, keine Gedankenstriche", () => {
