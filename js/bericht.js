@@ -32,6 +32,28 @@ function tageVon(von, bis) {
   return tage;
 }
 
+// Mahlzeiten eines Tages zählen (seit 0.53.0, Plan .planning/mahlzeiten-pro-tag.md). In der App ist jede Sorte ein
+// eigener Eintrag; nass und trocken zur selben Fütterung liegen oft 1–2 Minuten auseinander. Deshalb gehört Futter, das
+// weniger als 30 Minuten nach dem ERSTEN Eintrag der laufenden Mahlzeit kommt, noch dazu (kein Ketten-Effekt).
+// Leckerlis zählen nicht; eine gelöschte Sorte (Typ unbekannt) zählt als Futter. Die 30 Minuten sind eine Zählregel,
+// keine medizinische Grenze. Nur Anzeige für den Tierarzt, keine Zielzahl.
+const MAHLZEIT_FENSTER_MS = 30 * 60000;
+export function mahlzeitenZaehlen(mahlzeitenDesTages, futterNachId) {
+  const zeiten = mahlzeitenDesTages
+    .filter((m) => futterNachId.get(m.futterId)?.typ !== "leckerli")
+    .map((m) => new Date(m.zeitpunkt).getTime())
+    .sort((a, b) => a - b);
+  let anzahl = 0;
+  let beginn = -Infinity;
+  for (const t of zeiten) {
+    if (t - beginn >= MAHLZEIT_FENSTER_MS) {
+      anzahl += 1;
+      beginn = t;
+    }
+  }
+  return anzahl;
+}
+
 // tier, gewichte, mahlzeiten, freigaben, besondereTage (alle eines Tieres), futter (alle Sorten), von/bis/heute: "JJJJ-MM-TT".
 export function berichtDaten({ tier, gewichte, mahlzeiten, freigaben, besondereTage = [], futter, von, bis, heute }) {
   const futterMap = new Map(futter.map((f) => [f.id, f]));
@@ -87,6 +109,12 @@ export function berichtDaten({ tier, gewichte, mahlzeiten, freigaben, besondereT
     const tageMitEintrag = new Set(imZeitraum.map((m) => tagSchluessel(new Date(m.zeitpunkt)))).size;
     const teiler = tageMitEintrag || 1;
     const kcalGesamt = tagesSumme(imZeitraum, futterMap).kcal;
+    // Mahlzeiten pro Tag über dieselben Tage wie kcal/Tag (Tage mit Eintrag); ein Tag nur mit Leckerli zählt als 0.
+    const proTagListe = tage
+      .map((t) => mahlzeitenAm(imZeitraum, t))
+      .filter((liste) => liste.length)
+      .map((liste) => mahlzeitenZaehlen(liste, futterMap));
+    const mahlzeitenSumme = proTagListe.reduce((a, b) => a + b, 0);
     fuetterung = {
       von: fVon,
       bis: fBis,
@@ -95,6 +123,14 @@ export function berichtDaten({ tier, gewichte, mahlzeiten, freigaben, besondereT
       kcalProTag: kcalGesamt / teiler,
       leckerliAnteil: kcalGesamt ? leckerliKcal(imZeitraum, futterMap) / kcalGesamt : 0,
       unsicher: tagesSumme(imZeitraum, futterMap).unsicher,
+      mahlzeiten: mahlzeitenSumme
+        ? {
+            proTag: mahlzeitenSumme / teiler,
+            min: Math.min(...proTagListe),
+            max: Math.max(...proTagListe),
+            tageNurLeckerli: proTagListe.filter((n) => n === 0).length,
+          }
+        : null,
       sorten: [...proSorte.values()]
         .map((s) => ({ name: s.name, typ: s.typ, quelle: s.quelle, grammProTag: s.gramm / teiler, kcalProTag: s.kcal / teiler }))
         .sort((a, b) => b.kcalProTag - a.kcalProTag),
@@ -370,6 +406,18 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
     teile.push(`<p>Durchschnitt pro Tag über ${f.tageMitEintrag} von ${f.tage} abgeschlossenen Tagen mit Einträgen
       (${datum(f.von)} bis ${datum(f.bis)}): <strong>${f.unsicher ? "ca. " : ""}${zahl(f.kcalProTag)} kcal/Tag</strong>,
       davon Leckerlis ${zahl(f.leckerliAnteil * 100, 1)} %.</p>
+      ${
+        f.mahlzeiten
+          ? `<p>Im Schnitt ${zahl(f.mahlzeiten.proTag, 1)} Mahlzeiten pro Tag (${
+              f.mahlzeiten.min === f.mahlzeiten.max ? `jeden Tag ${f.mahlzeiten.min}` : `${f.mahlzeiten.min} bis ${f.mahlzeiten.max}`
+            }${
+              // Eine 0 heißt: an dem Tag nur Leckerli eingetragen, nicht „nichts bekommen“ (Prüfer-Fund 0.53.0).
+              f.mahlzeiten.tageNurLeckerli
+                ? `; an ${f.mahlzeiten.tageNurLeckerli === 1 ? "1 Tag" : `${f.mahlzeiten.tageNurLeckerli} Tagen`} nur Leckerli eingetragen`
+                : ""
+            }).<br><span class="bericht-klein">Gezählt nach der eingetragenen Uhrzeit: Futter-Einträge innerhalb von 30 Minuten gelten als eine Mahlzeit, Leckerlis zählen nicht mit.</span></p>`
+          : ""
+      }
       <table><thead><tr><th>Sorte</th><th>Art</th><th>g/Tag</th><th>kcal/Tag</th><th>kcal-Wert laut</th></tr></thead><tbody>
       ${f.sorten
         .map(

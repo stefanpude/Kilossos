@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
-import { berichtDaten, berichtHtml, waegungsMonate, WAEGUNGEN_PRO_ZEILE } from "../js/bericht.js";
+import { berichtDaten, berichtHtml, waegungsMonate, WAEGUNGEN_PRO_ZEILE, mahlzeitenZaehlen } from "../js/bericht.js";
 
 const futter = [
   { id: "sheba", name: "Sheba", typ: "nass", kcalPro100g: 77, kcalQuelle: "packung" },
@@ -486,4 +486,74 @@ test("0.49.0: Profilzeile ohne leere Praxisangabe, wenn nur eine Adresse eingetr
   const mitPraxis = berichtHtml(b, optionen({ name: "Kito", tierarzt: { praxis: "Tierarztpraxis Muster", telefon: "0441 000000", adresse: "Musterstraße 1" } }));
   assert.ok(mitPraxis.includes("Praxis: Tierarztpraxis Muster, 0441 000000"));
   assert.ok(!mitPraxis.includes("Musterstraße"));
+});
+
+// 0.53.0: Mahlzeiten pro Tag (Plan .planning/mahlzeiten-pro-tag.md). Nur Anzeige, keine Zielzahl.
+const futterMapTest = new Map(futter.map((f) => [f.id, f]));
+const umMin = (tag, stunde, minute) => {
+  const [j, m, t] = tag.split("-").map(Number);
+  return new Date(j, m - 1, t, stunde, minute).toISOString();
+};
+
+test("0.53.0 mahlzeitenZaehlen: Futter innerhalb von 30 Minuten ab dem ersten Eintrag ist eine Mahlzeit", () => {
+  const tag = "2026-11-02";
+  const z = (...zeiten) =>
+    mahlzeitenZaehlen(zeiten.map(([s, min, id = "sheba"]) => ({ futterId: id, gramm: 10, zeitpunkt: umMin(tag, s, min) })), futterMapTest);
+  assert.equal(z([8, 0], [8, 1, "purina"]), 1);
+  assert.equal(z([8, 0], [8, 29]), 1);
+  assert.equal(z([8, 0], [8, 30]), 2);
+  assert.equal(z([8, 0], [8, 20], [8, 40]), 2); // kein Ketten-Effekt
+  assert.equal(z([8, 20], [8, 0], [12, 0], [19, 0]), 3); // Reihenfolge egal
+  assert.equal(z([8, 0, "snack"], [15, 0, "snack"]), 0); // Leckerlis zählen nicht
+  assert.equal(z([8, 0, "geloescht"]), 1); // gelöschte Sorte zählt als Futter
+  assert.equal(z(), 0);
+});
+
+test("0.53.0 berichtDaten: Mahlzeiten pro Tag über dieselben Tage wie kcal/Tag, Leckerli zählt nicht", () => {
+  const b = berichtDaten(eingabe);
+  assert.deepEqual(b.fuetterung.mahlzeiten, { proTag: 2, min: 2, max: 2, tageNurLeckerli: 0 });
+  const mehr = [
+    ...mahlzeiten,
+    { futterId: "purina", gramm: 10, zeitpunkt: umMin("2026-11-03", 8, 2) }, // gehört zur Mahlzeit um 8 Uhr
+    { futterId: "sheba", gramm: 50, zeitpunkt: umMin("2026-11-03", 13, 0) },
+  ];
+  assert.deepEqual(berichtDaten({ ...eingabe, mahlzeiten: mehr }).fuetterung.mahlzeiten, { proTag: 2.5, min: 2, max: 3, tageNurLeckerli: 0 });
+});
+
+test("0.53.0 berichtDaten: ein Tag nur mit Leckerli zählt als 0 und wird eigens gezählt", () => {
+  const mz = [
+    { futterId: "snack", gramm: 4, zeitpunkt: um("2026-11-02", 15) },
+    { futterId: "sheba", gramm: 100, zeitpunkt: um("2026-11-03", 8) },
+    { futterId: "purina", gramm: 45, zeitpunkt: um("2026-11-03", 20) },
+  ];
+  assert.deepEqual(berichtDaten({ ...eingabe, mahlzeiten: mz }).fuetterung.mahlzeiten, { proTag: 1, min: 0, max: 2, tageNurLeckerli: 1 });
+});
+
+test("0.53.0 berichtDaten: nur Leckerlis im Zeitraum ergibt keine Mahlzeiten-Zahl", () => {
+  const nurSnack = [{ futterId: "snack", gramm: 4, zeitpunkt: um("2026-11-02", 15) }];
+  const b = berichtDaten({ ...eingabe, mahlzeiten: nurSnack });
+  assert.ok(b.fuetterung);
+  assert.equal(b.fuetterung.mahlzeiten, null);
+});
+
+test("0.53.0 berichtHtml: Satz „Im Schnitt … Mahlzeiten pro Tag“ mit Spanne und Zählregel, ohne Ziel", () => {
+  const html = (mz) =>
+    berichtHtml(berichtDaten({ ...eingabe, mahlzeiten: mz }), {
+      tier: { name: "Kito" }, gewichte, mahlzeiten: mz, freigaben: [freigabe], futterNachId: futterMapTest, erstellt: "2026-11-04", demo: false,
+    });
+  const gleich = html(mahlzeiten);
+  assert.ok(gleich.includes("Im Schnitt 2,0 Mahlzeiten pro Tag (jeden Tag 2)."));
+  assert.ok(gleich.includes("Gezählt nach der eingetragenen Uhrzeit: Futter-Einträge innerhalb von 30 Minuten gelten als eine Mahlzeit, Leckerlis zählen nicht mit."));
+  assert.ok(!gleich.includes("nur Leckerli eingetragen"));
+  const mitLeckerliTag = [
+    { futterId: "snack", gramm: 4, zeitpunkt: um("2026-11-02", 15) },
+    { futterId: "sheba", gramm: 100, zeitpunkt: um("2026-11-03", 8) },
+  ];
+  assert.ok(html(mitLeckerliTag).includes("Im Schnitt 0,5 Mahlzeiten pro Tag (0 bis 1; an 1 Tag nur Leckerli eingetragen)."));
+  const satz = gleich.slice(gleich.indexOf("Im Schnitt"), gleich.indexOf("zählen nicht mit."));
+  assert.ok(!/Ziel|empfohlen|sollte|zu wenig|zu viel/i.test(satz));
+  const mehr = [...mahlzeiten, { futterId: "sheba", gramm: 50, zeitpunkt: umMin("2026-11-03", 13, 0) }];
+  assert.ok(html(mehr).includes("Im Schnitt 2,5 Mahlzeiten pro Tag (2 bis 3)."));
+  const nurSnack = [{ futterId: "snack", gramm: 4, zeitpunkt: um("2026-11-02", 15) }];
+  assert.ok(!html(nurSnack).includes("Mahlzeiten pro Tag"));
 });
