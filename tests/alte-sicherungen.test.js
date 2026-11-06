@@ -235,7 +235,9 @@ test("0.47.0: Zuki nimmt 0,5–2 % pro Woche ab (Mittel über 2 Wochen wie die A
   const gewichte = demo.gewichte.filter((g) => g.tierId === "zuki").sort((a, b) => a.datum.localeCompare(b.datum));
   assert.ok(gewichte.length >= 19);
   for (let i = 1; i < gewichte.length; i++) {
-    assert.equal(tageZwischen(gewichte[i - 1].datum, gewichte[i].datum), 7, "einmal pro Woche gewogen");
+    // Seit 0.76.0 (Alltag) mal einen Tag früher oder später gewogen.
+    const abstand = tageZwischen(gewichte[i - 1].datum, gewichte[i].datum);
+    assert.ok(abstand >= 6 && abstand <= 8, `ungefähr einmal pro Woche gewogen (${abstand} Tage)`);
     assert.ok(gewichte[i].kg < gewichte[i - 1].kg, `nimmt in Woche ${i} nicht zu`);
   }
   for (let i = 2; i < gewichte.length; i++) {

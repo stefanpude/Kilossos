@@ -5,9 +5,13 @@
 // Nie über "Sicherung einlesen" laden – das würde die echten Einträge ersetzen.
 // Aufruf: node werkzeuge/erzeuge-testdaten.js  →  demo/kito-simulation.json (Name bleibt, enthält Kito und Zuki)
 // Jeder simulierte Tag wird je Tier mit den Warnregeln der App geprüft; bei einer Warnung bricht das Skript ab.
+// Seit 0.76.0 „wie aus dem Alltag“ (Stefan 06.11.2026): Zeiten schwanken, am Wochenende später, mal 1 oder 3 Beutel
+// Sheba, Trockenfutter in runden Grammzahlen, verschiedene Leckerlis aus der Futterliste, Wiegetag mal einen Tag
+// früher oder später. Kito bekommt an 5 von 7 Tagen ca. 20 g Tatar (Stefans Alltag), Zuki nie.
 
 import { writeFileSync } from "node:fs";
 import { VERSION } from "../js/daten.js";
+import { FUTTERLISTE, ausListe } from "../js/futterliste.js";
 import {
   tagSchluessel,
   tagesSumme,
@@ -38,15 +42,36 @@ const heuteSchluessel = tagSchluessel(heute);
 const futter = [
   { id: "sheba", name: "Sheba Fresh n Fine in Sauce mit Geflügel", typ: "nass", kcalPro100g: 77, kcalQuelle: "geschaetzt", notiz: "Rezeptur Huhn, Geflügel & Truthahn (Werte vom Umkarton)" },
   { id: "purina", name: "Purina One Light", typ: "trocken", kcalPro100g: 327.5, kcalQuelle: "hersteller", notiz: "" },
-  { id: "snack", name: "Leckerli (Simulation)", typ: "leckerli", kcalPro100g: 350, kcalQuelle: "packung", notiz: "" },
+  {
+    id: "tatar",
+    name: "Rindertatar, roh, ungewürzt",
+    typ: "frischfleisch",
+    kcalPro100g: 137,
+    kcalQuelle: "ungefaehr",
+    notiz:
+      "Wert aus USDA FoodData Central 171790 (Rinderhack 95 % mager / 5 % Fett, roh). Tatar hat in Deutschland " +
+      "höchstens etwa 6 % Fett. Steht auf der Packung ein Wert, gilt die Packung.",
+  },
+  // Leckerlis als Kopien aus der Kilossos-Futterliste, wie beim Antippen von „Aus der Futterliste wählen“.
+  ...[
+    ["dreamies", "dreamies-huhn"],
+    ["crispies", "felix-crispies"],
+    ["knuspertaschen", "whiskas-knuspertaschen-huhn-kaese"],
+  ].map(([id, listeId]) => ausListe(FUTTERLISTE.find((e) => e.id === listeId), id)),
 ];
 const futterMap = new Map(futter.map((f) => [f.id, f]));
+const LECKERLIS = futter.filter((f) => f.typ === "leckerli");
+const BEUTEL_G = 50;
+const kcal = (id, gramm) => (gramm * futterMap.get(id).kcalPro100g) / 100;
 
-const zeit = (tag, stunde, minute) => {
+// Zeitpunkt aus Tag und Minuten nach Mitternacht (über 59 Minuten rechnet Date selbst in Stunden um).
+const zeit = (tag, minuten) => {
   const d = new Date(tag);
-  d.setHours(stunde, minute, 0, 0);
+  d.setHours(0, Math.round(minuten), 0, 0);
   return d.toISOString();
 };
+const uhr = ([stunde, minute]) => stunde * 60 + minute;
+const auf5 = (gramm) => Math.round(gramm / 5) * 5;
 
 // Simuliert ein Tier. Gewogen wird alle 7 Tage ab dem Start; das letzte Wiegen liegt "versatz" Tage vor heute,
 // Mahlzeiten gibt es bis heute. Kennungen bekommen "praefix", damit sie über alle Tiere eindeutig sind.
@@ -73,7 +98,12 @@ function simuliere(p) {
   const faktor = p.zielGenau ? Math.log(p.zielKg / p.startKg) / roh.reduce((s, r) => s + Math.log(1 - r / 100), 0) : 1;
   let wahr = p.startKg;
   const gewichte = [];
+  // Wiegetag (seit 0.76.0): ab und zu einen Tag früher oder später, nie zwei Wochen nacheinander (Abstand bleibt 6–8
+  // Tage). Erstes Wiegen (Tierarzt, Tag der ersten Freigabe) und letztes (Verschiebung auf heute) bleiben fest.
+  let verschoben = 0;
   for (let w = 0; w <= p.wochen; w++) {
+    const wuerfel = zufall();
+    verschoben = w === 0 || w === p.wochen || verschoben !== 0 || wuerfel >= 0.2 ? 0 : wuerfel < 0.1 ? -1 : 1;
     if (w > 0) wahr *= Math.exp(faktor * Math.log(1 - roh[w - 1] / 100));
     // Waage auf 10 g genau, dazu eine kleine Messschwankung; der Start (Tierarzt) exakt, bei "zielGenau" auch das Ende.
     const exakt = w === 0 ? p.startKg : p.zielGenau && w === p.wochen ? p.zielKg : null;
@@ -82,36 +112,60 @@ function simuliere(p) {
       id: `${p.praefix}gewicht-${w}`,
       tierId: p.tier.id,
       kg: gemessen,
-      datum: tagSchluessel(tagNr(w * 7)),
+      datum: tagSchluessel(tagNr(w * 7 + verschoben)),
       notiz: w === 0 ? "Tierarzt (Simulation)" : "",
     });
   }
 
-  // Mahlzeiten: morgens und abends je ein 50-g-Beutel Sheba (zusammen 77 kcal), dazu Trockenfutter in zwei Portionen,
-  // an manchen Tagen ein kleines Leckerli. Die Tagesmenge schwankt um ±4 % um die Freigabe.
+  // Mahlzeiten wie im Alltag (seit 0.76.0): meist morgens und abends je ein 50-g-Beutel Sheba, an manchen Tagen nur
+  // einer oder ein dritter mittags. Kito bekommt an 5 von 7 Tagen mittags ca. 20 g Tatar, ab und zu gibt es ein
+  // Leckerli. Trockenfutter füllt den Rest bis zur Freigabe (±2,5 %), auf 5 g gerundet in zwei Portionen; ist zu wenig
+  // herausgekommen, landen schon mal 1–2 g mehr im Napf. Am Wochenende gibt es Frühstück 1 bis 1,5 Stunden später.
   const mahlzeiten = [];
   const z = p.zeiten;
+  let tatarTage = new Set();
   for (let n = 0; n <= letzterTag; n++) {
     const tag = tagNr(n);
+    if (n % 7 === 0) {
+      // Je Woche (ab dem Starttag) genau „p.tatar.tage“ Tatar-Tage, zufällig verteilt.
+      const reihe = [0, 1, 2, 3, 4, 5, 6].map((t) => [zufall(), t]).sort((a, b) => a[0] - b[0]);
+      tatarTage = new Set(p.tatar ? reihe.slice(0, p.tatar.tage).map(([, t]) => n + t) : []);
+    }
+    const wochenende = [0, 6].includes(tag.getDay());
+    const spaeter = wochenende ? zwischen(60, 90) : 0;
     const freigabe = aktuelleFreigabe(freigaben, tagSchluessel(tag));
-    const ziel = freigabe.kcalProTag * zwischen(0.96, 1.04);
+    const ziel = freigabe.kcalProTag * zwischen(0.975, 1.025);
+
+    const wurf = zufall();
+    const beutel = wurf < 0.06 ? 1 : wurf < 0.12 ? 3 : 2;
+    const tatar = tatarTage.has(n) ? Math.round(zwischen(p.tatar.von, p.tatar.bis)) : 0;
+    const leckerliSorte = LECKERLIS[Math.floor(zufall() * LECKERLIS.length)].id;
     const leckerli = zufall() < p.leckerli.anteil ? Math.round(zwischen(p.leckerli.von, p.leckerli.bis)) : 0;
-    const trocken = Math.round((ziel - 77 - leckerli * 3.5) / 3.275);
-    const morgens = Math.round(trocken * 0.55);
-    const neu = (futterId, gramm, [stunde, minute]) =>
+
+    const rest = ziel - kcal("sheba", beutel * BEUTEL_G) - kcal("tatar", tatar) - kcal(leckerliSorte, leckerli);
+    const genau = rest / (futterMap.get("purina").kcalPro100g / 100);
+    const trocken = auf5(genau);
+    const morgens = auf5(trocken * 0.55);
+    // Abgerundet: Abends rutscht noch etwas nach (1–2 g), wie beim Einfüllen ohne genaues Nachwiegen.
+    const nachgerutscht = trocken < genau - 0.5 && zufall() < 0.5 ? Math.round(zwischen(1, 2)) : 0;
+
+    const neu = (futterId, gramm, minuten) =>
       gramm > 0 &&
       mahlzeiten.push({
         id: `${p.praefix}m-${mahlzeiten.length}`,
         tierId: p.tier.id,
         futterId,
         gramm,
-        zeitpunkt: zeit(tag, stunde, minute),
+        zeitpunkt: zeit(tag, minuten),
       });
-    neu("sheba", 50, [z.nassMorgens[0], z.nassMorgens[1] + Math.floor(zwischen(0, 20))]);
-    neu("purina", morgens, z.trockenMorgens);
-    neu("snack", leckerli, z.leckerli);
-    neu("sheba", 50, [z.nassAbends[0], z.nassAbends[1] + Math.floor(zwischen(0, 20))]);
-    neu("purina", trocken - morgens, z.trockenAbends);
+    const fruehstueck = uhr(z.nassMorgens) + spaeter + zwischen(-15, 25);
+    neu("sheba", BEUTEL_G, fruehstueck);
+    neu("purina", morgens, fruehstueck + zwischen(15, 35));
+    if (beutel === 3) neu("sheba", BEUTEL_G, uhr([13, 0]) + zwischen(-40, 40));
+    neu("tatar", tatar, uhr(z.tatar ?? [12, 30]) + zwischen(-45, 45));
+    neu(leckerliSorte, leckerli, zwischen(uhr([14, 0]), uhr([20, 0])));
+    if (beutel >= 2) neu("sheba", BEUTEL_G, uhr(z.nassAbends) + zwischen(-20, 35) + spaeter / 3);
+    neu("purina", trocken - morgens + nachgerutscht, uhr(z.trockenAbends) + zwischen(-30, 40));
   }
 
   // Prüfung mit den Regeln der App, nur mit den Einträgen dieses Tiers (wie in der App):
@@ -169,7 +223,9 @@ const kito = simuliere({
     { woche: 48, kcalProTag: 270, bcs: 5, mcs: "normal", notiz: "Simulation: Ziel fast erreicht, danach Gewicht halten besprechen" },
   ],
   leckerli: { anteil: 3 / 7, von: 2, bis: 5 },
-  zeiten: { nassMorgens: [7, 10], trockenMorgens: [7, 35], leckerli: [15, 0], nassAbends: [18, 5], trockenAbends: [21, 30] },
+  // Tatar (seit 0.76.0): an 5 von 7 Tagen 18–23 g, 137 kcal/100 g (USDA FDC 171790), zählt in die Tageskalorien.
+  tatar: { tage: 5, von: 18, bis: 23 },
+  zeiten: { nassMorgens: [7, 10], tatar: [12, 30], nassAbends: [18, 5], trockenAbends: [21, 30] },
   // Kein „Futter verweigert“, sonst stünde in der Demo der rote Notfall-Kasten. Eine laufende Phase zeigt auf
   // „Heute“ den Knopf „Beendet“.
   besondereTage: (letzterTag) => [
@@ -209,7 +265,8 @@ const zuki = simuliere({
     { woche: 48, kcalProTag: 200, bcs: 5, mcs: "normal", notiz: "Simulation: Ziel fast erreicht, danach Gewicht halten besprechen" },
   ],
   leckerli: { anteil: 2 / 7, von: 1, bis: 3 },
-  zeiten: { nassMorgens: [6, 45], trockenMorgens: [7, 20], leckerli: [16, 30], nassAbends: [17, 50], trockenAbends: [21, 15] },
+  tatar: null, // Zuki bekommt kein Tatar
+  zeiten: { nassMorgens: [6, 45], nassAbends: [17, 50], trockenAbends: [21, 15] },
   besondereTage: () => [
     { art: "genascht", von: 48, bis: 48, notiz: "Simulation: Feiertage, Sahne vom Tisch geschleckt" },
     { art: "mehr-bewegung", von: 9 * 7 + 3, bis: 9 * 7 + 3, notiz: "Simulation: lange mit der Federangel gespielt" },
