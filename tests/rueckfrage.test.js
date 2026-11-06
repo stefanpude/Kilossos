@@ -241,3 +241,37 @@ test("Lösch-Formulare verhindern das Schließen immer und schließen nach dem J
   assert.match(tier, /preventDefault\(\);[\s\S]*await bestaetigt/);
   assert.match(tier, /\$\("dialog-profil"\)\.close\("entfernen"\)/);
 });
+
+// ---------- Aufgabe 3: Freigabe ----------
+const SICHERHEIT = "Das empfehlen die Leitlinien nur mit einem Fachtierarzt für Ernährung. Hat der Tierarzt das genau so festgelegt?";
+
+test("Sicherheitsfrage unter 60 % RER: Wortlaut gleich, Knöpfe „Ja, so festgelegt“ und „Nein“, Rückgabetext gleich", () => {
+  const quelle = app();
+  assert.equal(quelle.split(SICHERHEIT).length - 1, 1, "genau einmal");
+  const block = abschnitt(quelle, "const grenze = Math.round(harteUntergrenze(ziel));", 'return "Bitte die Tagesmenge mit dem Tierarzt klären.";');
+  assert.ok(block.includes(SICHERHEIT));
+  assert.match(block, /ja: "Ja, so festgelegt",\s*nein: "Nein",?/);
+  assert.match(block, /await bestaetigt\(/);
+  assert.ok(quelle.includes('return "Bitte die Tagesmenge mit dem Tierarzt klären.";'));
+  assert.ok(quelle.includes('`${zahl(kcal)} kcal liegen unter ${grenze} kcal (60 % des Ruhebedarfs beim Zielgewicht). `'));
+});
+
+test("Freigabe speichern: Reihenfolge Datum, Ziel, 60 %, welche gilt, ersetzen bleibt", () => {
+  const quelle = app();
+  const stellen = [
+    'if (plan.datumFrage && !(await bestaetigt({ text: plan.datumFrage, ja: "Ja, Datum stimmt", nein: "Nein, ändern" })))',
+    'if (plan.zielFrage && !(await bestaetigt({ text: plan.zielFrage, ja: "Ja, Ziel stimmt", nein: "Nein, ändern" })))',
+    SICHERHEIT,
+    'if (plan.frage && !(await bestaetigt({ text: plan.frage, ja: "Ja, Datum stimmt", nein: "Nein, ändern" }))) return TEXT_DATUM_PRUEFEN;',
+    'if (plan.ersetzen && !(await bestaetigt({ text: ersetzenFrage(plan.ueberschrieben), ja: "Ersetzen" })))',
+  ].map((t) => quelle.indexOf(t));
+  assert.ok(stellen.every((i) => i > 0), JSON.stringify(stellen));
+  assert.deepEqual([...stellen].sort((a, b) => a - b), stellen);
+  assert.match(quelle, /beimSpeichern\("form-freigabe", "freigabe-fehler", async \(werte\) =>/);
+});
+
+test("Freigabe löschen: eigenes Blatt mit rotem Knopf, schließt nach dem Ja selbst", () => {
+  const block = abschnitt(app(), "// Löschen nur im Fenster „Freigabe ändern“", "\n});\n");
+  assert.match(block, /preventDefault\(\);[\s\S]*await bestaetigt\(\{ text: loeschFrage\(eigeneFreigaben\(\), weg, tier\.name, tagSchluessel\(new Date\(\)\)\), ja: "Freigabe löschen", gefahr: true \}\)/);
+  assert.match(block, /\$\("dialog-freigabe"\)\.close\("loeschen"\)/);
+});

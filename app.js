@@ -1979,7 +1979,7 @@ function oeffneFreigabe(freigabe = null) {
 // Reihenfolge wie im Entwurf: Werte, Datum (gleicher Tag), „Stimmt das Datum?“ beim Korrigieren (0.36.5),
 // „Stimmt das Ziel?“ (0.36.6), 60-%-Rückfrage, „welche Freigabe gilt“, Ersetzen am selben Tag. Geändert wird erst nach allen Rückfragen,
 // ein Abbruch lässt also nichts halb geändert zurück.
-beimSpeichern("form-freigabe", "freigabe-fehler", (werte) => {
+beimSpeichern("form-freigabe", "freigabe-fehler", async (werte) => {
   const ziel = leseZahl(werte.get("ziel"));
   const kcal = leseZahl(werte.get("kcal"));
   const tierarzt = werte.get("tierarzt").trim();
@@ -2001,12 +2001,12 @@ beimSpeichern("form-freigabe", "freigabe-fehler", (werte) => {
   });
   if (plan.fehler) return plan.fehler;
   // Vor der 60-%-Rückfrage: Ist das Korrigieren hier falsch (neuer Plan), wäre die andere Frage umsonst (seit 0.36.5).
-  if (plan.datumFrage && !confirm(plan.datumFrage)) {
+  if (plan.datumFrage && !(await bestaetigt({ text: plan.datumFrage, ja: "Ja, Datum stimmt", nein: "Nein, ändern" }))) {
     $("form-freigabe").datum.focus();
     return TEXT_DATUM_KORRIGIEREN;
   }
   // Zahlendreher beim Ziel (seit 0.36.6), vor der 60-%-Rückfrage: Die rechnet mit dem Ziel.
-  if (plan.zielFrage && !confirm(plan.zielFrage)) {
+  if (plan.zielFrage && !(await bestaetigt({ text: plan.zielFrage, ja: "Ja, Ziel stimmt", nein: "Nein, ändern" }))) {
     $("form-freigabe").ziel.focus();
     return TEXT_ZIEL_PRUEFEN;
   }
@@ -2015,10 +2015,13 @@ beimSpeichern("form-freigabe", "freigabe-fehler", (werte) => {
   if (
     wertGeaendert &&
     kcal < grenze &&
-    !confirm(
-      `${zahl(kcal)} kcal liegen unter ${grenze} kcal (60 % des Ruhebedarfs beim Zielgewicht). ` +
-        "Das empfehlen die Leitlinien nur mit einem Fachtierarzt für Ernährung. Hat der Tierarzt das genau so festgelegt?"
-    )
+    !(await bestaetigt({
+      text:
+        `${zahl(kcal)} kcal liegen unter ${grenze} kcal (60 % des Ruhebedarfs beim Zielgewicht). ` +
+        "Das empfehlen die Leitlinien nur mit einem Fachtierarzt für Ernährung. Hat der Tierarzt das genau so festgelegt?",
+      ja: "Ja, so festgelegt",
+      nein: "Nein",
+    }))
   )
     return "Bitte die Tagesmenge mit dem Tierarzt klären.";
   const neu = {
@@ -2031,8 +2034,9 @@ beimSpeichern("form-freigabe", "freigabe-fehler", (werte) => {
     bcs: werte.get("bcs") ? Number(werte.get("bcs")) : undefined,
     mcs: werte.get("mcs") || undefined,
   };
-  if (plan.frage && !confirm(plan.frage)) return TEXT_DATUM_PRUEFEN;
-  if (plan.ersetzen && !confirm(ersetzenFrage(plan.ueberschrieben))) return TEXT_GLEICHER_TAG_NICHT_GESPEICHERT;
+  if (plan.frage && !(await bestaetigt({ text: plan.frage, ja: "Ja, Datum stimmt", nein: "Nein, ändern" }))) return TEXT_DATUM_PRUEFEN;
+  if (plan.ersetzen && !(await bestaetigt({ text: ersetzenFrage(plan.ueberschrieben), ja: "Ersetzen" })))
+    return TEXT_GLEICHER_TAG_NICHT_GESPEICHERT;
   let gespeichert = plan.ueberschrieben;
   if (gespeichert) {
     freigabeAendern(gespeichert, neu);
@@ -2048,16 +2052,16 @@ beimSpeichern("form-freigabe", "freigabe-fehler", (werte) => {
 });
 
 // Löschen nur im Fenster „Freigabe ändern“, mit Rückfrage, die sagt, welche Freigabe danach gilt.
-$("form-freigabe").addEventListener("submit", (ereignis) => {
+$("form-freigabe").addEventListener("submit", async (ereignis) => {
   if (ereignis.submitter?.value !== "loeschen" || !bearbeiteteFreigabe) return;
+  ereignis.preventDefault(); // geschlossen wird erst nach dem Ja (eigene Rückfrage, 0.52.0)
   const weg = bearbeiteteFreigabe;
-  if (!confirm(loeschFrage(eigeneFreigaben(), weg, tier.name, tagSchluessel(new Date())))) {
-    ereignis.preventDefault();
-    return;
-  }
+  if (!(await bestaetigt({ text: loeschFrage(eigeneFreigaben(), weg, tier.name, tagSchluessel(new Date())), ja: "Freigabe löschen", gefahr: true }))) return;
+  if (bearbeiteteFreigabe !== weg) return; // Fenster inzwischen zu
   daten.freigaben = daten.freigaben.filter((f) => f !== weg);
   // Der Knopf der gelöschten Freigabe ist weg: Fokus auf die Tafel, ohne Freigabe auf „Freigabe eintragen“.
   oeffner = eigeneFreigaben().length ? { aktion: "freigabe-bearbeiten" } : { aktion: "freigabe-neu" };
+  $("dialog-freigabe").close("loeschen");
   if (sichern()) zeigeToast("✓ Freigabe gelöscht");
 });
 

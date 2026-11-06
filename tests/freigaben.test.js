@@ -312,7 +312,7 @@ test("TEXT_DATUM_KORRIGIEREN nennt den Weg für einen neuen Plan", () => {
 test("app.js fragt nach dem Datum nach den Fehlern und vor der 60-%-Rückfrage, Abbrechen setzt den Fokus ins Datum", () => {
   const app = readFileSync(new URL("../app.js", import.meta.url), "utf8");
   const fehler = app.indexOf("if (plan.fehler) return plan.fehler;");
-  const datum = app.indexOf("if (plan.datumFrage && !confirm(plan.datumFrage))");
+  const datum = app.indexOf('if (plan.datumFrage && !(await bestaetigt({ text: plan.datumFrage, ja: "Ja, Datum stimmt", nein: "Nein, ändern" })))');
   const sechzig = app.indexOf("60 % des Ruhebedarfs beim Zielgewicht");
   assert.ok(fehler > 0 && datum > fehler && sechzig > datum, `Reihenfolge: ${fehler} < ${datum} < ${sechzig}`);
   const block = app.slice(datum, sechzig);
@@ -389,8 +389,8 @@ test("TEXT_ZIEL_PRUEFEN", () => {
 
 test("app.js fragt nach dem Ziel nach der Datumsfrage und vor der 60-%-Rückfrage, Abbrechen setzt den Fokus ins Ziel", () => {
   const app = readFileSync(new URL("../app.js", import.meta.url), "utf8");
-  const datum = app.indexOf("if (plan.datumFrage && !confirm(plan.datumFrage))");
-  const ziel = app.indexOf("if (plan.zielFrage && !confirm(plan.zielFrage))");
+  const datum = app.indexOf('if (plan.datumFrage && !(await bestaetigt({ text: plan.datumFrage, ja: "Ja, Datum stimmt", nein: "Nein, ändern" })))');
+  const ziel = app.indexOf('if (plan.zielFrage && !(await bestaetigt({ text: plan.zielFrage, ja: "Ja, Ziel stimmt", nein: "Nein, ändern" })))');
   const sechzig = app.indexOf("60 % des Ruhebedarfs beim Zielgewicht");
   assert.ok(datum > 0 && ziel > datum && sechzig > ziel, `Reihenfolge: ${datum} < ${ziel} < ${sechzig}`);
   const block = app.slice(ziel, sechzig);
