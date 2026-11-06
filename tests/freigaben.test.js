@@ -398,3 +398,12 @@ test("app.js fragt nach dem Ziel nach der Datumsfrage und vor der 60-%-Rückfrag
   assert.match(block, /return TEXT_ZIEL_PRUEFEN;/);
   assert.match(app, /speicherPlan\(\{[^}]*gewichte: daten\.gewichte,/);
 });
+
+// 0.73.1 (Stefan 06.11.2026): Die Karte zeigt die geltende Freigabe, darunter „Frühere Freigaben“.
+// „Aktuelle“ statt „Letzte“, weil „letzte“ wie „keine mehr“ klingt. Das Eingabefenster heißt weiter allgemein.
+test("0.73.1: Karte unter „Tierarzt“ heißt „Aktuelle Freigabe vom Tierarzt“, das Eingabefenster bleibt „Freigabe vom Tierarzt“", () => {
+  const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+  const karte = html.slice(html.indexOf('id="titel-tierarzt"'), html.indexOf('id="freigabe-tafel"'));
+  assert.match(karte, /<h4 class="label">Aktuelle Freigabe vom Tierarzt<\/h4>/);
+  assert.match(html, /<h2 id="freigabe-titel">Freigabe vom Tierarzt<\/h2>/);
+});
