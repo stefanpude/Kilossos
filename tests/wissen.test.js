@@ -173,14 +173,24 @@ test("Willkommensseite verspricht nichts, was die App nicht halten kann (Stefan,
   assert.doesNotMatch(html, /ohne Fettleber-Risiko|für jede Sorte/);
 });
 
-test("Version 0.42.6: Cache v87 mit js/heute-grafiken.js, Versionszeile unter „Mehr“", () => {
+test("Version 0.42.7: Cache v88 mit js/heute-grafiken.js, Versionszeile unter „Mehr“", () => {
   const sw = lies("sw.js");
-  assert.match(sw, /const CACHE_NAME = "kilossos-v87";/);
+  assert.match(sw, /const CACHE_NAME = "kilossos-v88";/);
   assert.match(sw, /"js\/wissen\.js",/);
   assert.match(sw, /"js\/besondere-tage\.js",/);
   assert.match(sw, /"js\/freigaben\.js",/);
   assert.match(sw, /"js\/heute-grafiken\.js",/);
-  assert.match(lies("index.html"), /id="version">Version 0\.42\.6</);
+  assert.match(lies("index.html"), /id="version">Version 0\.42\.7</);
+});
+
+// 0.42.7: Wiege-Tipp Transportbox im Bereich „Auf dem Arm gewogen?“ (Ideen-Tafel, Halter 06.11.2026).
+test("0.42.7: Transportbox-Tipp steht im Arm-Bereich nach dem Satz zur Tier- oder Babywaage", () => {
+  const html = lies("index.html");
+  const arm = html.slice(html.indexOf('<details class="arm"'), html.indexOf("</details>", html.indexOf('<details class="arm"')));
+  assert.match(arm, /Ohne Tierwaage geht es genauer mit der Transportbox:/);
+  assert.match(arm, /drück „Tara“, bis die Anzeige 0 zeigt\./);
+  assert.match(arm, /viele Küchenwaagen schaffen nur 5&nbsp;kg\./);
+  assert.ok(arm.indexOf("Babywaage") < arm.indexOf("Transportbox"), "Tipp steht nach dem Satz zur Babywaage");
 });
 
 test("0.41.0: Foto im Profil-Fenster (auch beim Anlegen), gilt erst beim Speichern", () => {
