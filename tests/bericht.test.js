@@ -475,3 +475,15 @@ test("0.42.6: Freigaben-Tabelle im PDF zeigt das Ziel mit zwei Nachkommastellen"
   assert.ok(html.includes("<td>7,25 kg</td>"));
   assert.ok(!html.includes("7,3 kg"));
 });
+
+// 0.49.0 (Prüfer-Fund): Ein Tier mit nur einer Praxis-Adresse bekommt keine leere Zeile „Praxis: “.
+test("0.49.0: Profilzeile ohne leere Praxisangabe, wenn nur eine Adresse eingetragen ist", () => {
+  const optionen = (tier) => ({ tier, gewichte, mahlzeiten, freigaben: [freigabe], futterNachId: new Map(futter.map((f) => [f.id, f])), erstellt: "2026-11-04", demo: false });
+  const b = berichtDaten(eingabe);
+  const nurAdresse = berichtHtml(b, optionen({ name: "Kito", tierarzt: { adresse: "Musterstraße 1, 12345 Musterstadt" } }));
+  assert.ok(!nurAdresse.includes("Praxis:"));
+  assert.ok(!nurAdresse.includes("Musterstraße"));
+  const mitPraxis = berichtHtml(b, optionen({ name: "Kito", tierarzt: { praxis: "Tierarztpraxis Muster", telefon: "0441 000000", adresse: "Musterstraße 1" } }));
+  assert.ok(mitPraxis.includes("Praxis: Tierarztpraxis Muster, 0441 000000"));
+  assert.ok(!mitPraxis.includes("Musterstraße"));
+});

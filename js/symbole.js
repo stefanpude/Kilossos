@@ -39,5 +39,7 @@ export const SYMBOL = {
   waage: ico('<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8.5 11a3.5 3.5 0 0 1 7 0M12 11l1.6-2"/>'),
   // „Korrigieren oder löschen“ an der Freigabe-Tafel (ab 0.35.1)
   stift: ico('<path d="M4.5 19.5l1-4.2L15.8 5a2.1 2.1 0 0 1 3 3L8.5 18.5z"/><path d="M13.8 7l3 3"/>'),
+  // „Weg zur Praxis“ (ab 0.49.0)
+  ort: ico('<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>'),
 };
 SYMBOL.frage = SYMBOL.unbekannt;

@@ -138,13 +138,93 @@ test("0.48.1: Kein eigener BCS-Eintrag unter „Wissen“, die Seite bleibt übe
   assert.match(lies("app.js"), /case "bcs-erklaerung":/);
 });
 
-test("0.45.0: Unter „Tierarzt“ bleibt nur „Praxis anrufen“, die Liste ist ohne Telefon ganz versteckt", () => {
+// Seit 0.49.0 steht unter „Praxis anrufen“ noch „Weg zur Praxis“; die Liste ist nur ohne Telefon UND ohne Adresse versteckt.
+test("0.45.0: Unter „Tierarzt“ nur Praxis-Einträge, die Liste ist ohne Telefon und Adresse ganz versteckt", () => {
   const tierarzt = abschnitt(ansichtMehr(), /id="titel-tierarzt">Tierarzt<\/h3>/);
   assert.doesNotMatch(tierarzt, /warum-kein-ziel|bcs-erklaerung|grenzen-erklaerung/);
-  assert.match(tierarzt, /<div class="liste" id="tierarzt-liste" hidden>\s*<a class="eintrag" id="praxis-anrufen" hidden><\/a>\s*<\/div>/);
+  assert.match(
+    tierarzt,
+    /<div class="liste" id="tierarzt-liste" hidden>\s*<a class="eintrag" id="praxis-anrufen" hidden><\/a>\s*<a class="eintrag" id="praxis-weg" target="_blank" rel="noopener" hidden><\/a>\s*<\/div>/,
+  );
   // Kein leerer Kasten: die Liste hat eine eigene display-Regel, darum braucht [hidden] eine eigene Regel.
   assert.match(lies("styles.css"), /\.liste\[hidden\] \{ display: none; \}/);
-  assert.match(zeichneFreigabe(), /\$\("tierarzt-liste"\)\.hidden = !link;/);
+  assert.match(zeichneFreigabe(), /\$\("tierarzt-liste"\)\.hidden = !link && !karte;/);
+});
+
+// 0.49.0: „Weg zur Praxis“ (Plan .planning/praxis-im-profil.md). Öffnet Google Maps erst beim Antippen.
+test("0.49.0: „Weg zur Praxis“ nur mit Adresse, Link aus kartenLink, unter „Praxis anrufen“", () => {
+  const block = zeichneFreigabe();
+  assert.match(block, /const karte = kartenLink\(tier\.tierarzt\?\.praxis, tier\.tierarzt\?\.adresse\);/);
+  assert.match(block, /\$\("praxis-weg"\)\.hidden = !karte;/);
+  assert.match(block, /\$\("praxis-weg"\)\.href = karte;/);
+  assert.match(block, /<span data-symbol="ort">\$\{SYMBOL\.ort\}<\/span>/);
+  assert.match(block, /<span class="text">Weg zur Praxis<small>öffnet Google Maps<\/small><\/span>/);
+  assert.ok(block.indexOf('$("praxis-anrufen").href') < block.indexOf('$("praxis-weg").href'), "Anrufen steht vor dem Weg");
+  assert.match(lies("app.js"), /import \{[^}]*kartenLink[^}]*\} from "\.\/js\/profil\.js";/);
+});
+
+test("0.49.0: Ort-Symbol für „Weg zur Praxis“", () => {
+  assert.match(SYMBOL.ort, /^<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false">/);
+});
+
+test("0.49.0: Ist der letzte Eintrag einer Liste versteckt, bekommt der vorige die unteren Rundungen", () => {
+  assert.match(
+    lies("styles.css"),
+    /\.liste > \.eintrag:has\(\+ \.eintrag\[hidden\]:last-child\) \{ border-bottom-left-radius: var\(--rund\); border-bottom-right-radius: var\(--rund\); \}/,
+  );
+});
+
+const profilFenster = () => {
+  const html = lies("index.html");
+  const start = html.indexOf('<form method="dialog" id="form-profil">');
+  return html.slice(start, html.indexOf("</form>", start));
+};
+
+test("0.49.0: Profil hat „Adresse der Praxis (optional)“ unter dem Telefon, danach der Übernahme-Hinweis", () => {
+  const fenster = profilFenster();
+  const telefon = fenster.indexOf('name="telefon"');
+  const adresse = fenster.search(
+    /<label>Adresse der Praxis \(optional\)\s*<input name="adresse" autocomplete="off" maxlength="80" placeholder="z\. B\. Musterstraße 1, 12345 Musterstadt">\s*<\/label>/,
+  );
+  const hinweis = fenster.indexOf('<p class="tipp" id="profil-praxis-hinweis" hidden></p>');
+  assert.ok(telefon >= 0 && adresse > telefon, "Adresse steht unter dem Telefon");
+  assert.ok(hinweis > adresse, "Hinweis steht unter der Adresse");
+  assert.doesNotMatch(fenster, /E-Mail der Praxis|name="email"/);
+});
+
+const oeffneProfilBlock = () => {
+  const js = lies("app.js");
+  const start = js.indexOf("function oeffneProfil(einTier)");
+  return js.slice(start, js.indexOf("beimSpeichern(\"form-profil\"", start));
+};
+
+test("0.49.0: Neues Tier übernimmt die Praxis des gewählten Tiers mit Hinweis, Bearbeiten nicht", () => {
+  const block = oeffneProfilBlock();
+  assert.match(block, /const vorschlag = einTier \? null : praxisVorschlag\(tier\);/);
+  assert.match(block, /const praxisDaten = einTier \? p\.tierarzt : vorschlag;/);
+  assert.match(block, /form\.praxis\.value = praxisDaten\?\.praxis \?\? "";/);
+  assert.match(block, /form\.telefon\.value = praxisDaten\?\.telefon \?\? "";/);
+  assert.match(block, /form\.adresse\.value = praxisDaten\?\.adresse \?\? "";/);
+  assert.match(block, /\$\("profil-praxis-hinweis"\)\.hidden = !vorschlag;/);
+  assert.match(block, /`Von \$\{tier\.name\} übernommen\. Bei einem anderen Tierarzt einfach ändern\.`/);
+  // textContent, nicht innerHTML: der Name kommt vom Halter.
+  assert.match(block, /\$\("profil-praxis-hinweis"\)\.textContent = /);
+});
+
+test("0.49.0: Speichern übernimmt die Adresse in tierarzt, leer wird weggelassen", () => {
+  const app = lies("app.js");
+  assert.match(app, /const adresse = werte\.get\("adresse"\)\.trim\(\);/);
+  assert.match(app, /const tierarzt = \{ \.\.\.\(praxis && \{ praxis \}\), \.\.\.\(telefon && \{ telefon \}\), \.\.\.\(adresse && \{ adresse \}\) \};/);
+});
+
+test("0.49.0: Datenschutzerklärung nennt Adresse und „Weg zur Praxis“", () => {
+  const ds = lies("datenschutz.html");
+  assert.match(ds, /Profilbild, Tierarztpraxis mit Telefonnummer und Adresse, Wiegetag/);
+  const links = ds.slice(ds.indexOf("<h3>6. Links und Anrufe</h3>"), ds.indexOf("<h3>7."));
+  assert.match(
+    links,
+    /Der Knopf „Weg zur Praxis“\s+öffnet Google Maps mit der eingetragenen Adresse der Praxis\. Erst wenn du darauf tippst, gehen Name und Adresse\s+der Praxis an Google; ab dann gelten die Datenschutzbestimmungen von Google\./,
+  );
 });
 
 test("0.45.0: „Fotos mitnehmen“ steht nicht mehr unter „Mehr“, der Zeitraum bleibt dort", () => {

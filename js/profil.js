@@ -1,13 +1,17 @@
 // Profil eines Tiers und tierbezogene Einstellungen (alles optional außer Name):
 //   geburtsdatum "JJJJ-MM-TT", koerperbau (Freitext), haltung "wohnung" | "freigang" | "beides",
 //   schlankKg (Gewicht aus der schlanken Zeit, nur als Information für den Tierarzt),
-//   tierarzt { praxis?, telefon? }, wiegetag 0–6 (0 = Sonntag, wie Date.getDay()).
+//   tierarzt { praxis?, telefon?, adresse? }, wiegetag 0–6 (0 = Sonntag, wie Date.getDay()).
+//   adresse seit 0.49.0 (freiwillig, Datenformat bleibt Version 1). Eine ältere App-Version entfernt sie still
+//   beim Einlesen einer Sicherung und beim Speichern des Profils (harmlos, nur eine Komfort-Angabe).
 // Zielgewicht und Tagesmenge gehören NICHT hierher: die legt nur der Tierarzt fest (Freigabe).
 
 export const WOCHENTAGE = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
 export const HALTUNG = { wohnung: "Wohnungskatze", freigang: "Freigänger", beides: "Wohnung und Freigang" };
 export const TEXT_MAX = 80;
 export const NAME_MAX = 40;
+
+const TIERARZT_FELDER = ["praxis", "telefon", "adresse"];
 
 // Telefon: nur Ziffern, Leerzeichen, + ( ) / - – so kann über den Anruf-Link kein Code in die Seite gelangen.
 const TELEFON_MUSTER = /^[0-9+ ()/-]{3,25}$/;
@@ -60,10 +64,11 @@ export function profilBereinigen(daten, heute) {
         weg(tier, "tierarzt");
       } else {
         for (const feld of Object.keys(ta)) {
-          if (!["praxis", "telefon"].includes(feld)) weg(ta, feld);
+          if (!TIERARZT_FELDER.includes(feld)) weg(ta, feld);
         }
         if ("praxis" in ta && !textGueltig(ta.praxis)) weg(ta, "praxis");
         if ("telefon" in ta && !telefonGueltig(ta.telefon)) weg(ta, "telefon");
+        if ("adresse" in ta && !textGueltig(ta.adresse)) weg(ta, "adresse");
         if (Object.keys(ta).length === 0) delete tier.tierarzt;
       }
     }
@@ -91,6 +96,27 @@ export function telefonLink(telefon) {
   if (!telefonGueltig(telefon)) return null;
   const nummer = telefon.trim().replace(/(?!^\+)[^0-9]/g, "");
   return nummer.replace(/\D/g, "").length >= 3 ? `tel:${nummer}` : null;
+}
+
+// „Weg zur Praxis“ (0.49.0): Suche bei Google Maps in der dokumentierten Form („Maps URLs“), auf Android, iPhone
+// und PC gleich. Ohne Adresse null. Ohne Praxisname wird nur die Adresse gesucht.
+export function kartenLink(praxis, adresse) {
+  if (typeof adresse !== "string" || !adresse.trim()) return null;
+  const name = typeof praxis === "string" ? praxis.trim() : "";
+  const suche = name ? `${name}, ${adresse.trim()}` : adresse.trim();
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(suche)}`;
+}
+
+// Vorschlag für ein neues Tier (0.49.0): Praxis, Telefon und Adresse des gerade gewählten Tiers als Kopie.
+// Ohne Angaben null.
+export function praxisVorschlag(tier) {
+  const ta = tier?.tierarzt;
+  if (!ta || typeof ta !== "object") return null;
+  const vorschlag = {};
+  for (const feld of TIERARZT_FELDER) {
+    if (typeof ta[feld] === "string" && ta[feld].trim()) vorschlag[feld] = ta[feld];
+  }
+  return Object.keys(vorschlag).length ? vorschlag : null;
 }
 
 export function istWiegetag(tier, tag) {

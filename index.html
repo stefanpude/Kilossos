@@ -238,9 +238,11 @@
         <p class="tipp">Zielgewicht und Tagesmenge legt nur der Tierarzt fest. Ohne Freigabe zeichnet Kilossos nur auf und warnt, schlägt aber keine Mengen vor.</p>
         <button class="knopf-haupt" data-aktion="freigabe-neu">Freigabe eintragen</button>
       </div>
-      <!-- Unter „Tierarzt“ nur, womit man etwas tut (0.45.0). Ohne Telefonnummer ist die ganze Liste versteckt, kein leerer Kasten. -->
+      <!-- Unter „Tierarzt“ nur, womit man etwas tut (0.45.0). Ohne Telefonnummer und ohne Adresse ist die ganze Liste
+           versteckt, kein leerer Kasten. „Weg zur Praxis“ öffnet Google Maps erst beim Antippen (0.49.0). -->
       <div class="liste" id="tierarzt-liste" hidden>
         <a class="eintrag" id="praxis-anrufen" hidden></a>
+        <a class="eintrag" id="praxis-weg" target="_blank" rel="noopener" hidden></a>
       </div>
 
       <h3 class="gruppe-titel">Übersicht für den Tierarzt</h3>
@@ -342,7 +344,7 @@
           <span data-symbol="dokument"></span><span class="text">Nutzungsbedingungen</span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.48.1</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.49.0</span>
         </div>
       </div>
     </section>
@@ -658,6 +660,10 @@
       <label>Telefon der Praxis (optional)
         <input name="telefon" type="tel" inputmode="tel" autocomplete="off" maxlength="25" placeholder="z. B. 0441 123456">
       </label>
+      <label>Adresse der Praxis (optional)
+        <input name="adresse" autocomplete="off" maxlength="80" placeholder="z. B. Musterstraße 1, 12345 Musterstadt">
+      </label>
+      <p class="tipp" id="profil-praxis-hinweis" hidden></p>
       <p class="fehler" id="profil-fehler" hidden></p>
       <div class="knoepfe">
         <button value="entfernen" formnovalidate class="knopf-gefahr" id="profil-entfernen" hidden>Entfernen</button>

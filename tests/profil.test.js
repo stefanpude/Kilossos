@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { profilBereinigen, alterText, telefonLink, istWiegetag, WOCHENTAGE } from "../js/profil.js";
+import { profilBereinigen, alterText, telefonLink, istWiegetag, WOCHENTAGE, kartenLink, praxisVorschlag } from "../js/profil.js";
 
 const kito = () => ({ id: "kito", name: "Kito", art: "katze", geschlecht: "kater", kastriert: true });
 
@@ -55,6 +55,93 @@ test("profilBereinigen entfernt einen leeren Tierarzt-Eintrag ganz", () => {
   const daten = { tiere: [{ ...kito(), tierarzt: { praxis: 5, telefon: "" } }] };
   profilBereinigen(daten, "2026-11-02");
   assert.equal("tierarzt" in daten.tiere[0], false);
+});
+
+// 0.49.0: Adresse der Praxis (neues freiwilliges Feld, Datenformat bleibt Version 1).
+test("0.49.0: profilBereinigen lässt eine gültige Adresse der Praxis stehen", () => {
+  const tierarzt = { praxis: "Tierarztpraxis Muster", telefon: "0441 123456", adresse: "Musterstraße 1, 12345 Musterstadt" };
+  const daten = { tiere: [{ ...kito(), tierarzt: { ...tierarzt } }] };
+  assert.equal(profilBereinigen(daten, "2026-11-06"), 0);
+  assert.deepEqual(daten.tiere[0].tierarzt, tierarzt);
+});
+
+test("0.49.0: profilBereinigen entfernt eine Adresse, die kein Text oder zu lang ist", () => {
+  for (const adresse of [5, "", "   ", null, ["Musterstraße 1"], "x".repeat(81)]) {
+    const daten = { tiere: [{ ...kito(), tierarzt: { praxis: "Tierarztpraxis Muster", adresse } }] };
+    assert.equal(profilBereinigen(daten, "2026-11-06"), 1);
+    assert.deepEqual(daten.tiere[0].tierarzt, { praxis: "Tierarztpraxis Muster" });
+  }
+  // Genau 80 Zeichen sind erlaubt (wie maxlength im Formular).
+  const daten = { tiere: [{ ...kito(), tierarzt: { adresse: "x".repeat(80) } }] };
+  assert.equal(profilBereinigen(daten, "2026-11-06"), 0);
+});
+
+test("0.49.0: profilBereinigen entfernt weiter unbekannte Felder beim Tierarzt", () => {
+  const daten = { tiere: [{ ...kito(), tierarzt: { adresse: "Musterstraße 1", email: "praxis@example.org", x: 1 } }] };
+  assert.equal(profilBereinigen(daten, "2026-11-06"), 2);
+  assert.deepEqual(daten.tiere[0].tierarzt, { adresse: "Musterstraße 1" });
+});
+
+test("0.49.0: profilBereinigen entfernt den Tierarzt ganz, wenn nur eine ungültige Adresse da war", () => {
+  const daten = { tiere: [{ ...kito(), tierarzt: { adresse: 42 } }] };
+  profilBereinigen(daten, "2026-11-06");
+  assert.equal("tierarzt" in daten.tiere[0], false);
+});
+
+const KARTE = "https://www.google.com/maps/search/?api=1&query=";
+
+test("0.49.0: kartenLink ohne Adresse ist null", () => {
+  assert.equal(kartenLink("Tierarztpraxis Muster", undefined), null);
+  assert.equal(kartenLink("Tierarztpraxis Muster", ""), null);
+  assert.equal(kartenLink("Tierarztpraxis Muster", "   "), null);
+  assert.equal(kartenLink(undefined, 7), null);
+});
+
+test("0.49.0: kartenLink sucht Praxis und Adresse bei Google Maps", () => {
+  assert.equal(
+    kartenLink("Tierarztpraxis Muster", "Musterstraße 1, 12345 Musterstadt"),
+    KARTE + encodeURIComponent("Tierarztpraxis Muster, Musterstraße 1, 12345 Musterstadt"),
+  );
+});
+
+test("0.49.0: kartenLink ohne Praxisnamen sucht nur die Adresse", () => {
+  assert.equal(kartenLink(undefined, "Musterstraße 1"), KARTE + encodeURIComponent("Musterstraße 1"));
+  assert.equal(kartenLink("  ", "Musterstraße 1"), KARTE + encodeURIComponent("Musterstraße 1"));
+});
+
+test("0.49.0: kartenLink kodiert Umlaute, &, # und Leerzeichen", () => {
+  const link = kartenLink("Praxis Müller & Söhne", "Hauptstraße 3 #2");
+  assert.ok(link.startsWith(KARTE), "Anfang genau wie in der Google-Dokumentation");
+  const suche = link.slice(KARTE.length);
+  assert.doesNotMatch(suche, /[ &#äöüß]/);
+  assert.match(suche, /%26/);
+  assert.match(suche, /%23/);
+  assert.match(suche, /%C3%BC/);
+  assert.equal(decodeURIComponent(suche), "Praxis Müller & Söhne, Hauptstraße 3 #2");
+});
+
+test("0.49.0: praxisVorschlag kopiert nur Praxis, Telefon und Adresse", () => {
+  const tier = {
+    ...kito(),
+    tierarzt: { praxis: "Tierarztpraxis Muster", telefon: "0441 123456", adresse: "Musterstraße 1, 12345 Musterstadt", fremd: "x" },
+  };
+  const vorschlag = praxisVorschlag(tier);
+  assert.deepEqual(vorschlag, { praxis: "Tierarztpraxis Muster", telefon: "0441 123456", adresse: "Musterstraße 1, 12345 Musterstadt" });
+  // Eine Kopie: Ändern des Vorschlags ändert das andere Tier nicht.
+  vorschlag.praxis = "Andere Praxis";
+  assert.equal(tier.tierarzt.praxis, "Tierarztpraxis Muster");
+});
+
+test("0.49.0: praxisVorschlag übernimmt auch nur einen Teil", () => {
+  assert.deepEqual(praxisVorschlag({ ...kito(), tierarzt: { telefon: "0441 123456" } }), { telefon: "0441 123456" });
+});
+
+test("0.49.0: praxisVorschlag ohne Angaben ist null", () => {
+  assert.equal(praxisVorschlag(null), null);
+  assert.equal(praxisVorschlag(undefined), null);
+  assert.equal(praxisVorschlag(kito()), null);
+  assert.equal(praxisVorschlag({ ...kito(), tierarzt: {} }), null);
+  assert.equal(praxisVorschlag({ ...kito(), tierarzt: { praxis: "", fremd: "x" } }), null);
 });
 
 test("alterText rechnet in Jahren und Monaten", () => {

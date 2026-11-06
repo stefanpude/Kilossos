@@ -373,6 +373,7 @@ button.eintrag:active, a.eintrag:active, label.eintrag:active { background: var(
 .eintrag[hidden] { display: none; }
 .liste[hidden] { display: none; }
 .liste > .eintrag[hidden]:first-child + .eintrag { border-top: 0; border-top-left-radius: var(--rund); border-top-right-radius: var(--rund); }
+.liste > .eintrag:has(+ .eintrag[hidden]:last-child) { border-bottom-left-radius: var(--rund); border-bottom-right-radius: var(--rund); }
 /* Nur optisch versteckt: bleibt für Tastatur und Vorlesefunktion erreichbar (Sicherung einlesen). */
 .nur-vorlesen { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outline-offset: -3px; }

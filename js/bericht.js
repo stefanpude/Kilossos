@@ -170,12 +170,14 @@ function tierText(tier) {
 // Angaben aus dem Profil (alle freiwillig); ohne Angaben keine Zeile.
 function profilZeile(tier, heute) {
   const alter = alterText(tier.geburtsdatum, heute);
+  // Nur Praxisname und Telefon; eine Adresse allein (seit 0.49.0 möglich) ergibt keine leere Zeile „Praxis: “.
+  const praxis = [tier.tierarzt?.praxis, tier.tierarzt?.telefon].filter(Boolean).join(", ");
   const teile = [
     alter && `Alter ${alter} (geb. ${datum(tier.geburtsdatum)})`,
     tier.koerperbau && `Körperbau: ${tier.koerperbau}`,
     HALTUNG[tier.haltung],
     tier.schlankKg && `Gewicht in der schlanken Zeit laut Halter: ${tier.schlankKg.toLocaleString("de-DE")} kg`,
-    tier.tierarzt && `Praxis: ${[tier.tierarzt.praxis, tier.tierarzt.telefon].filter(Boolean).join(", ")}`,
+    praxis && `Praxis: ${praxis}`,
   ].filter(Boolean);
   return teile.length ? `<p>${teile.map(sicher).join(" · ")}</p>` : "";
 }

@@ -2,7 +2,7 @@
 // Seit 0.27.0 wird erst gespeichert, wenn der Halter beim ersten Start seine Katze angelegt hat (ohne Startfutter).
 // Aufbau (Version 1):
 //   tiere:      { id, name, art, geschlecht, kastriert, foto?, geburtsdatum?, koerperbau?, haltung?, schlankKg?,
-//                 tierarzt?: { praxis?, telefon? }, wiegetag? }
+//                 tierarzt?: { praxis?, telefon?, adresse? }, wiegetag? }
 //               foto: optional, "data:image/jpeg;base64,…" (256 × 256 px, in der App zugeschnitten)
 //               übrige Profilfelder: siehe js/profil.js (dort auch die Prüfung beim Einlesen)
 //   futter:     { id, name, typ: "nass" | "trocken" | "leckerli", kcalPro100g, kcalQuelle, notiz, listeId? }

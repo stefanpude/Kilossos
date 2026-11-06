@@ -63,7 +63,7 @@ import { leseAnzeige, merkeAnzeige, aufgeloest } from "./js/anzeige.js";
 import { aufklappKarte, merkeZustand, zustandVon, zustandVergessen, aufklappenAnmelden } from "./js/aufklappen.js";
 import { begriffeHtml, hinweisKnopf, kcalSpanne } from "./js/wissen.js";
 import { auswahlFeld, auswahlAnmelden } from "./js/auswahl.js";
-import { alterText, telefonLink, telefonGueltig, istWiegetag, WOCHENTAGE, HALTUNG } from "./js/profil.js";
+import { alterText, telefonLink, telefonGueltig, istWiegetag, WOCHENTAGE, HALTUNG, kartenLink, praxisVorschlag } from "./js/profil.js";
 import { aktivesTier, leseAktivesTier, merkeAktivesTier, neuesTier, eintraegeVon, tierEntfernen } from "./js/tiere.js";
 import { wischenAnmelden } from "./js/wischen.js";
 import { datumText, freigabeTafel } from "./js/mehr.js";
@@ -705,13 +705,23 @@ function zeichneFreigabe() {
       })
     : "";
   const link = telefonLink(tier.tierarzt?.telefon);
+  const karte = kartenLink(tier.tierarzt?.praxis, tier.tierarzt?.adresse);
   $("praxis-anrufen").hidden = !link;
-  // Die Liste unter „Tierarzt“ enthält nur „Praxis anrufen“: ohne Telefon kein leerer Kasten (0.45.0).
-  $("tierarzt-liste").hidden = !link;
+  $("praxis-weg").hidden = !karte;
+  // Die Liste unter „Tierarzt“ enthält nur „Praxis anrufen“ und „Weg zur Praxis“: ohne beides kein leerer Kasten
+  // (0.45.0, seit 0.49.0 auch mit Adresse allein sichtbar).
+  $("tierarzt-liste").hidden = !link && !karte;
   if (link) {
     $("praxis-anrufen").href = link;
     $("praxis-anrufen").innerHTML = `<span data-symbol="telefon">${SYMBOL.telefon}</span>` +
       `<span class="text">${sicher(tier.tierarzt.praxis ?? "Praxis")} anrufen</span>` +
+      `<span class="weiter" data-symbol="weiter">${SYMBOL.weiter}</span>`;
+  }
+  // „Weg zur Praxis“ (0.49.0): öffnet Google Maps in einem neuen Tab, erst beim Antippen gehen Name und Adresse an Google.
+  if (karte) {
+    $("praxis-weg").href = karte;
+    $("praxis-weg").innerHTML = `<span data-symbol="ort">${SYMBOL.ort}</span>` +
+      `<span class="text">Weg zur Praxis<small>öffnet Google Maps</small></span>` +
       `<span class="weiter" data-symbol="weiter">${SYMBOL.weiter}</span>`;
   }
 }
@@ -844,8 +854,15 @@ function oeffneProfil(einTier) {
   form.geburtsdatum.max = tagSchluessel(new Date());
   form.koerperbau.value = p.koerperbau ?? "";
   form.schlank.value = p.schlankKg ? String(p.schlankKg).replace(".", ",") : "";
-  form.praxis.value = p.tierarzt?.praxis ?? "";
-  form.telefon.value = p.tierarzt?.telefon ?? "";
+  // Neues Tier (0.49.0): Praxis, Telefon und Adresse vom gerade gewählten Tier vorschlagen, frei änderbar.
+  // Beim Bearbeiten eines vorhandenen Tiers wird nichts übernommen.
+  const vorschlag = einTier ? null : praxisVorschlag(tier);
+  const praxisDaten = einTier ? p.tierarzt : vorschlag;
+  form.praxis.value = praxisDaten?.praxis ?? "";
+  form.telefon.value = praxisDaten?.telefon ?? "";
+  form.adresse.value = praxisDaten?.adresse ?? "";
+  $("profil-praxis-hinweis").hidden = !vorschlag;
+  $("profil-praxis-hinweis").textContent = vorschlag ? `Von ${tier.name} übernommen. Bei einem anderen Tierarzt einfach ändern.` : "";
   zeigeProfilFoto();
   $("dialog-profil").showModal();
 }
@@ -857,6 +874,7 @@ beimSpeichern("form-profil", "profil-fehler", (werte) => {
   const schlank = schlankText ? leseZahl(schlankText) : null;
   const praxis = werte.get("praxis").trim();
   const telefon = werte.get("telefon").trim();
+  const adresse = werte.get("adresse").trim();
   if (!name) return "Bitte einen Namen eingeben.";
   if (geburtsdatum && geburtsdatum > tagSchluessel(new Date())) return "Das Geburtsdatum liegt in der Zukunft.";
   if (schlankText && (!schlank || schlank < 0.5 || schlank > 20)) return "Bitte ein Gewicht zwischen 0,5 und 20 kg eingeben, z. B. 7,5.";
@@ -875,7 +893,7 @@ beimSpeichern("form-profil", "profil-fehler", (werte) => {
   setze("koerperbau", werte.get("koerperbau").trim());
   setze("haltung", werte.get("haltung"));
   setze("schlankKg", schlank);
-  const tierarzt = { ...(praxis && { praxis }), ...(telefon && { telefon }) };
+  const tierarzt = { ...(praxis && { praxis }), ...(telefon && { telefon }), ...(adresse && { adresse }) };
   setze("tierarzt", Object.keys(tierarzt).length ? tierarzt : null);
   const fotoNeu = bearbeitetesTier ? profilFoto !== (fotoGueltig(bearbeitetesTier.foto) ? bearbeitetesTier.foto : null) : Boolean(profilFoto);
   setze("foto", profilFoto);
