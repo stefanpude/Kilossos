@@ -1031,6 +1031,7 @@ dialog .wert-eingabe input:not([type="hidden"]) { padding-right: calc(12px + 1.4
    stehen alle drei untereinander, der Ja-Knopf oben. */
 .rueckfrage-text { white-space: pre-line; margin: 0; font-size: 1rem; color: var(--text); }
 .rueckfrage-knoepfe > button { flex: 1 1 auto; }
+.rueckfrage-knoepfe > [hidden] { display: none; }
 .rueckfrage-knoepfe > .knopf-gefahr { margin-right: 0; order: 0; }
 .rueckfrage-knoepfe::before { display: none; }
 #dialog-rueckfrage:has(#rueckfrage-dritte:not([hidden])) .rueckfrage-knoepfe { flex-direction: column-reverse; }

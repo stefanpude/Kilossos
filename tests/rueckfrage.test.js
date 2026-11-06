@@ -334,3 +334,8 @@ test("Sicherung einlesen: Knopf „Einlesen“, rot, wenn Daten ersetzt werden",
   assert.ok(quelle.includes('await bestaetigt({ text: einleseFrage(neu, pruefung, ersetzen), ja: "Einlesen", gefahr: !einrichtungLaeuft })'));
   assert.ok(quelle.includes('await bestaetigt({ text: einleseFrage(neu, pruefung, " Die unlesbaren Daten auf diesem Gerät werden dadurch ersetzt."), ja: "Einlesen", gefahr: true })'));
 });
+
+// Browser-Fund 0.52.0: .knopf-zweit setzt display: inline-flex und überschreibt damit hidden (leeres Kästchen).
+test("styles.css: versteckter dritter Knopf bleibt wirklich unsichtbar", () => {
+  assert.match(lies("styles.css"), /\.rueckfrage-knoepfe > \[hidden\] \{ display: none; \}/);
+});
