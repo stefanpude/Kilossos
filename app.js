@@ -85,6 +85,7 @@ import {
 import { fotoImZeitraum, fotoAngebot, fotoFeld, istFotoTag, vorherNachher, nachEntfernen } from "./js/fotos.js";
 import { belegteZeichen, speicherAnzeige } from "./js/speicher.js";
 import { sicherungPruefen, einleseFrage } from "./js/sicherung.js";
+import { frage, bestaetigt } from "./js/rueckfrage.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
 if ("serviceWorker" in navigator) {
@@ -952,8 +953,10 @@ beimSpeichern("form-profil", "profil-fehler", (werte) => {
 });
 
 // Entfernen mit Rückfrage: löscht das Tier mit allen Mahlzeiten, Gewichten, Freigaben und besonderen Tagen. Das letzte Tier bleibt.
-$("form-profil").addEventListener("submit", (ereignis) => {
+$("form-profil").addEventListener("submit", async (ereignis) => {
   if (ereignis.submitter?.value !== "entfernen" || !bearbeitetesTier) return;
+  ereignis.preventDefault(); // geschlossen wird erst nach dem Ja (eigene Rückfrage, 0.52.0)
+  const entfernt = bearbeitetesTier;
   const anzahl = eintraegeVon(daten, bearbeitetesTier.id);
   const teile = [
     [anzahl.mahlzeiten, "Mahlzeit", "Mahlzeiten"],
@@ -969,15 +972,13 @@ $("form-profil").addEventListener("submit", (ereignis) => {
     ? ` Dabei ${verb} auch ${teile.length > 1 ? `${teile.slice(0, -1).join(", ")} und ${teile.at(-1)}` : teile[0]} von ${bearbeitetesTier.name} gelöscht. Das lässt sich nicht rückgängig machen.`
     : "";
   const frage = `${bearbeitetesTier.name} wirklich entfernen?${eintraege} Die Futtersorten bleiben.`;
-  if (!confirm(frage)) {
-    ereignis.preventDefault();
-    return;
-  }
-  const name = bearbeitetesTier.name;
-  if (!tierEntfernen(daten, bearbeitetesTier.id)) {
-    ereignis.preventDefault();
+  if (!(await bestaetigt({ text: frage, ja: "Entfernen", gefahr: true }))) return;
+  if (bearbeitetesTier !== entfernt) return; // Fenster inzwischen zu oder anderes Tier
+  const name = entfernt.name;
+  if (!tierEntfernen(daten, entfernt.id)) {
     return zeigeFehler("profil-fehler", "Das letzte Tier kann nicht entfernt werden.");
   }
+  $("dialog-profil").close("entfernen");
   speichern(daten);
   wechsleTier(tier.id); // war es das angezeigte Tier, springt die Anzeige auf das erste
   zeigeToast(`${name} entfernt`);
@@ -1152,7 +1153,8 @@ auswahlAnmelden(document);
 // (z. B. nach dem Speichern einer Mahlzeit), ist der alte Knopf weg: dann den neuen mit gleicher Aktion und Kennung
 // suchen. Sonst stünde der Fokus am Seitenanfang und die Vorlesefunktion finge oben wieder an.
 let oeffner = null;
-for (const dialog of document.querySelectorAll("dialog")) {
+// Das Rückfrage-Blatt liegt über einem anderen Blatt oder der Liste und gibt den Fokus selbst zurück (js/rueckfrage.js).
+for (const dialog of document.querySelectorAll("dialog:not(#dialog-rueckfrage)")) {
   dialog.addEventListener("close", () => {
     const merk = oeffner;
     requestAnimationFrame(() => {
@@ -1256,17 +1258,25 @@ function zeigeFehler(id, text) {
 }
 
 // Speichert nur, wenn "pruefen" keinen Fehlertext liefert; sonst bleibt das Formular offen.
+// Seit 0.52.0 darf "pruefen" auf eine Rückfrage warten (async). Deshalb verhindert der Handler das Schließen immer
+// und schließt das Blatt nach dem Speichern selbst. "laeuft": zweimal schnell getippt speichert nur einmal.
 function beimSpeichern(formId, fehlerId, pruefenUndSpeichern) {
-  $(formId).addEventListener("submit", (ereignis) => {
+  let laeuft = false;
+  $(formId).addEventListener("submit", async (ereignis) => {
     if (ereignis.submitter?.value !== "speichern") return;
-    speicherFehler = false;
-    // Rückgabe: Fehlertext (Dialog bleibt offen) oder { toast } für eine eigene Erfolgsmeldung.
-    const ergebnis = pruefenUndSpeichern(new FormData($(formId)));
-    if (typeof ergebnis === "string") {
-      ereignis.preventDefault();
-      zeigeFehler(fehlerId, ergebnis);
-    } else if (!speicherFehler) {
-      zeigeToast(ergebnis?.toast ?? "✓ Gespeichert");
+    ereignis.preventDefault();
+    if (laeuft) return;
+    laeuft = true;
+    try {
+      speicherFehler = false;
+      const werte = new FormData($(formId)); // vor dem Warten, wie beim Absenden
+      // Rückgabe: Fehlertext (Dialog bleibt offen, "" ohne Meldung) oder { toast } für eine eigene Erfolgsmeldung.
+      const ergebnis = await pruefenUndSpeichern(werte);
+      if (typeof ergebnis === "string") return zeigeFehler(fehlerId, ergebnis);
+      $(formId).closest("dialog").close("speichern");
+      if (!speicherFehler) zeigeToast(ergebnis?.toast ?? "✓ Gespeichert");
+    } finally {
+      laeuft = false;
     }
   });
 }
@@ -1890,12 +1900,17 @@ $("foto-tauschen-datei").addEventListener("change", async (ereignis) => {
   zeigeToast("✓ Foto ausgetauscht");
 });
 
-function fotoEntfernen() {
+async function fotoEntfernen() {
   const waegung = angesehen;
   if (!waegung) return;
   // Ist das Foto in Vorher/Nachher zu sehen, sagt die Rückfrage, was dort danach steht (0.43.0).
   const zusatz = nachEntfernen(daten.gewichte, tier.id, waegung);
-  if (!confirm(`Dieses Foto entfernen? Das Gewicht bleibt gespeichert. Das Foto lässt sich nicht zurückholen, außer aus einer Sicherung.${zusatz ? "\n\n" + zusatz : ""}`)) return;
+  const ja = await bestaetigt({
+    text: `Dieses Foto entfernen? Das Gewicht bleibt gespeichert. Das Foto lässt sich nicht zurückholen, außer aus einer Sicherung.${zusatz ? "\n\n" + zusatz : ""}`,
+    ja: "Foto entfernen",
+    gefahr: true,
+  });
+  if (!ja || angesehen !== waegung || !$("dialog-foto").open) return; // inzwischen anderes Foto oder Fenster zu
   const ausVerlauf = fotoAusVerlauf;
   delete waegung.foto;
   $("dialog-foto").close();
@@ -2363,19 +2378,19 @@ beimSpeichern("form-futter", "futter-fehler", (werte) => {
   sichern();
 });
 
-$("form-futter").addEventListener("submit", (ereignis) => {
+$("form-futter").addEventListener("submit", async (ereignis) => {
   if (ereignis.submitter?.value !== "loeschen" || !bearbeitetesFutter) return;
-  const benutzt = daten.mahlzeiten.some((m) => m.futterId === bearbeitetesFutter.id);
+  ereignis.preventDefault(); // geschlossen wird erst nach dem Ja (eigene Rückfrage, 0.52.0)
+  const futter = bearbeitetesFutter;
+  const benutzt = daten.mahlzeiten.some((m) => m.futterId === futter.id);
   if (benutzt) {
-    ereignis.preventDefault();
     zeigeFehler("futter-fehler", "Diese Sorte steckt in eingetragenen Mahlzeiten und kann nicht gelöscht werden.");
     return;
   }
-  if (!confirm(`„${bearbeitetesFutter.name}“ wirklich löschen?`)) {
-    ereignis.preventDefault();
-    return;
-  }
-  daten.futter = daten.futter.filter((f) => f !== bearbeitetesFutter);
+  if (!(await bestaetigt({ text: `„${futter.name}“ wirklich löschen?`, ja: "Sorte löschen", gefahr: true }))) return;
+  if (bearbeitetesFutter !== futter) return; // Fenster inzwischen zu oder andere Sorte
+  daten.futter = daten.futter.filter((f) => f !== futter);
+  $("dialog-futter").close("loeschen");
   sichern();
 });
 
@@ -2961,11 +2976,11 @@ document.addEventListener("click", (ereignis) => {
     case "kg-plus":
       return kgSchritt(0.01);
     case "mahlzeit-loeschen":
-      if (confirm("Diese Mahlzeit löschen?")) {
+      return (async () => {
+        if (!(await bestaetigt({ text: "Diese Mahlzeit löschen?", ja: "Löschen", gefahr: true }))) return;
         daten.mahlzeiten = daten.mahlzeiten.filter((m) => m.id !== id);
         sichern();
-      }
-      return;
+      })();
     case "gewicht-neu":
       return oeffneGewicht();
     case "gewicht-bearbeiten": {
@@ -2979,11 +2994,11 @@ document.addEventListener("click", (ereignis) => {
     case "waegung-foto-tauschen":
       return $("foto-tauschen-datei").click();
     case "gewicht-loeschen":
-      if (confirm("Diesen Gewichtseintrag löschen?")) {
+      return (async () => {
+        if (!(await bestaetigt({ text: "Diesen Gewichtseintrag löschen?", ja: "Löschen", gefahr: true }))) return;
         daten.gewichte = daten.gewichte.filter((g) => g.id !== id);
         sichern();
-      }
-      return;
+      })();
     case "besonders-neu":
       return oeffneBesonders();
     case "besonders-bearbeiten": {
@@ -2991,11 +3006,11 @@ document.addEventListener("click", (ereignis) => {
       return eintrag ? oeffneBesonders(eintrag) : undefined;
     }
     case "besonders-loeschen":
-      if (confirm("Diesen Eintrag löschen?")) {
+      return (async () => {
+        if (!(await bestaetigt({ text: "Diesen Eintrag löschen?", ja: "Löschen", gefahr: true }))) return;
         daten.besondereTage = daten.besondereTage.filter((b) => b.id !== id);
         sichern();
-      }
-      return;
+      })();
     case "besonders-beenden": {
       const eintrag = daten.besondereTage.find((b) => b.id === id);
       if (!eintrag) return;

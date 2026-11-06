@@ -188,3 +188,56 @@ test("js/rueckfrage.js braucht nichts aus app.js und setzt Text nie per innerHTM
   assert.doesNotMatch(quelle, /from\s+["']\.\.\/app\.js["']/);
   assert.doesNotMatch(quelle, /innerHTML/);
 });
+
+// ---------- Aufgabe 2: Speichern wartet auf die Antwort, einfache Lösch-Stellen ----------
+const app = () => lies("app.js");
+// Text von "anfang" bis zum ersten "ende" danach (ohne "ende").
+const abschnitt = (quelle, anfang, ende) => {
+  const a = quelle.indexOf(anfang);
+  assert.ok(a >= 0, `nicht gefunden: ${anfang}`);
+  const e = quelle.indexOf(ende, a + anfang.length);
+  return quelle.slice(a, e < 0 ? undefined : e);
+};
+const fall = (name) => abschnitt(app(), `case "${name}":`, "\n    case ");
+
+test("beimSpeichern verhindert das Schließen immer, wartet auf die Prüfung und schließt das Blatt selbst", () => {
+  const rumpf = abschnitt(app(), "function beimSpeichern(", "\n}\n");
+  const verhindern = rumpf.indexOf("ereignis.preventDefault()");
+  const warten = rumpf.indexOf("await pruefenUndSpeichern(");
+  assert.ok(verhindern > 0 && warten > verhindern, "preventDefault vor dem await");
+  assert.match(rumpf, /if \(laeuft\) return/);
+  assert.match(rumpf, /\.close\("speichern"\)/);
+  assert.match(rumpf, /finally/);
+});
+
+test("Fokus-Rückgabe nach dem Schließen lässt das Rückfrage-Blatt aus (es gibt den Fokus selbst zurück)", () => {
+  const schleife = abschnitt(app(), "let oeffner = null;", "requestAnimationFrame");
+  assert.match(schleife, /dialog-rueckfrage/);
+});
+
+test("Mahlzeit, Gewicht und besonderen Tag löschen fragt mit eigenem Blatt", () => {
+  for (const [name, text] of [
+    ["mahlzeit-loeschen", "Diese Mahlzeit löschen?"],
+    ["gewicht-loeschen", "Diesen Gewichtseintrag löschen?"],
+    ["besonders-loeschen", "Diesen Eintrag löschen?"],
+  ]) {
+    assert.ok(fall(name).includes(`await bestaetigt({ text: "${text}", ja: "Löschen", gefahr: true })`), name);
+  }
+});
+
+test("Sorte, Foto und Tier fragen mit eigenem Blatt und rotem Knopf", () => {
+  const quelle = app();
+  assert.match(abschnitt(quelle, '$("form-futter").addEventListener("submit"', "\n});\n"), /await bestaetigt\(\{ text: `„\$\{futter\.name\}“ wirklich löschen\?`, ja: "Sorte löschen", gefahr: true \}\)/);
+  assert.match(abschnitt(quelle, "async function fotoEntfernen()", "\n}\n"), /await bestaetigt\(\{[\s\S]*ja: "Foto entfernen",\s*gefahr: true,?\s*\}\)/);
+  assert.match(abschnitt(quelle, '$("form-profil").addEventListener("submit", async', "\n});\n"), /await bestaetigt\(\{ text: frage, ja: "Entfernen", gefahr: true \}\)/);
+});
+
+test("Lösch-Formulare verhindern das Schließen immer und schließen nach dem Ja selbst", () => {
+  const quelle = app();
+  const futter = abschnitt(quelle, '$("form-futter").addEventListener("submit", async', "\n});\n");
+  assert.match(futter, /preventDefault\(\);[\s\S]*await bestaetigt/);
+  assert.match(futter, /\$\("dialog-futter"\)\.close\("loeschen"\)/);
+  const tier = abschnitt(quelle, '$("form-profil").addEventListener("submit", async', "\n});\n");
+  assert.match(tier, /preventDefault\(\);[\s\S]*await bestaetigt/);
+  assert.match(tier, /\$\("dialog-profil"\)\.close\("entfernen"\)/);
+});
