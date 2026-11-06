@@ -75,6 +75,8 @@ Die Liste für Zuki: [tierarzt-fragen-zuki.md](tierarzt-fragen-zuki.md).
       siehe `docs/sicherheitsgrenzen.md`)
 - [ ] In der PDF-Übersicht steht je Monat eine Bilanz in % pro Woche. Soll ein Monat mit mehr als 2 % pro Woche
       dort **markiert** sein? (Zu schnelle Phasen stehen bisher unter „Auffälligkeiten im Zeitraum“.)
+- [ ] Was halten Sie von **veganem oder vegetarischem Katzenfutter**, besonders beim Abnehmen?
+      (Für einen neutralen Eintrag unter „Begriffe kurz erklärt“ in der App, so wie bei BARF. Wir füttern es nicht.)
 
 ## Antworten
 | Frage | Antwort |
@@ -93,3 +95,4 @@ Die Liste für Zuki: [tierarzt-fragen-zuki.md](tierarzt-fragen-zuki.md).
 | Waage für zu Hause | |
 | Fotos: hilfreich, welche Ansicht | |
 | Ausnahmen für die App | |
+| Veganes/vegetarisches Futter | |
