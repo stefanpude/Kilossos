@@ -573,6 +573,18 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .gef-kachel strong { font-family: var(--serif); font-weight: 500; font-size: 1.25rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .gef-kachel.warn { background: var(--warnung-hell); border-color: var(--warnung); }
 .gef-kachel.warn strong { color: var(--warnung); }
+/* „Mehr zur Fütterung“ (0.44.0): aufklappbar unten in der Karte, Zahl und Einheit brechen nie um. */
+.gef-mehr { margin-top: 10px; border-top: 1px solid var(--rand); }
+.gef-mehr > .aufklapp-kopf { font-weight: 600; font-size: 0.9375rem; }
+.gef-mehr .aufklapp-inhalt > div > :last-child { margin-bottom: 8px; }
+.gef-satz { margin: 2px 0 8px; font-size: 0.9375rem; }
+.gef-satz b { font-family: var(--serif); font-weight: 600; white-space: nowrap; }
+.gef-zeilen { display: grid; grid-template-columns: 1fr auto auto; gap: 4px 16px; margin: 0 0 10px; font-size: 0.9375rem; }
+.gef-zeilen span, .gef-zeilen b { white-space: nowrap; font-variant-numeric: tabular-nums; text-align: right; }
+.gef-zeilen span:nth-child(3n + 1) { white-space: normal; text-align: left; min-width: 0; }
+.gef-zeilen span:nth-child(3n + 2) { color: var(--text-leise); }
+.gef-zeilen b { font-weight: 600; }
+.gef-klein { margin: 0 0 4px; color: var(--text-leise); font-size: 0.875rem; }
 .kcal-rest { margin: 0; font-size: 0.9375rem; }
 .kcal-rest b { font-family: var(--serif); font-weight: 600; }
 .ca-hinweis { margin: 0; color: var(--text-leise); font-size: 0.8125rem; }

@@ -55,8 +55,8 @@ import {
   findeNachEan,
 } from "./js/futterliste.js";
 import { kameraScanMoeglich, starteScanner } from "./js/scanner.js";
-import { leckerliKachel, monatsGruppen, tempoRueckmeldung, gefuettertWerte, messungWerte } from "./js/zusammenfassung.js";
-import { gefuettertHtml, messungHtml } from "./js/heute-grafiken.js";
+import { leckerliKachel, monatsGruppen, tempoRueckmeldung, gefuettertWerte, gefuettertMehr, messungWerte } from "./js/zusammenfassung.js";
+import { gefuettertHtml, gefuettertMehrHtml, messungHtml } from "./js/heute-grafiken.js";
 import { SYMBOL } from "./js/symbole.js";
 import { leseAnzeige, merkeAnzeige, aufgeloest } from "./js/anzeige.js";
 import { aufklappKarte, merkeZustand, zustandVon, zustandVergessen, aufklappenAnmelden } from "./js/aufklappen.js";
@@ -490,7 +490,10 @@ function zeichneHeute(vonNull = false) {
   $("kcal-von").textContent = gefuettert.ziel
     ? `${ca}von ${zahl(gefuettert.ziel.soll)} kcal vom Tierarzt`
     : `${ca}kcal · ${zahl(gefuettert.gramm)} g Futter`;
-  $("kcal-text").innerHTML = gefuettertHtml(gefuettert);
+  // Darunter „Mehr zur Fütterung“ (0.44.0): aufklappbar, nur mit mindestens einer Mahlzeit; die ca.-Zeile bleibt darunter.
+  $("kcal-text").innerHTML =
+    gefuettertHtml(gefuettert) +
+    gefuettertMehrHtml(gefuettertMehr({ mahlzeiten, futterNachId: futter, freigabe, tag, heute }));
   $("summe-hinweis").hidden = !gefuettert.unsicher;
 
   // Mahlzeiten als Protokoll: Uhrzeit, Futter, Gramm und kcal. Antippen ändert, Kreuz löscht.

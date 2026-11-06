@@ -141,7 +141,7 @@ export function rechnerPruefen(eingaben, typ) {
 }
 
 // Quellen, deren kcal-Wert als genau gilt. Alles andere macht eine Summe zu "ca.".
-const GENAUE_QUELLEN = ["packung", "hersteller"];
+export const GENAUE_QUELLEN = ["packung", "hersteller"];
 
 // Summe eines Tages. "unsicher" ist wahr, sobald ein Futter keinen genauen kcal-Wert hat.
 export function tagesSumme(mahlzeiten, futterNachId) {

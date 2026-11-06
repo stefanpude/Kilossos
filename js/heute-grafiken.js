@@ -4,6 +4,8 @@
 
 import { GRENZEN } from "./rechnen.js";
 import { tempoZahl } from "./zusammenfassung.js";
+import { aufklappKarte } from "./aufklappen.js";
+import { datumText } from "./mehr.js";
 
 // Geschütztes Leerzeichen zwischen Zahl und Einheit („9 kcal“ bricht nie um).
 const NB = " ";
@@ -65,6 +67,65 @@ export function gefuettertHtml(werte) {
     kachelHtml("Futter", `${sicher(zahl(werte.gramm))}${NB}g`, false) +
     `</div>`;
   return balken + legende + kacheln;
+}
+
+// ---------- „Mehr zur Fütterung“ (ab 0.44.0, Funde 06.11. Paket B) ----------
+
+const ART_ZEILE = { nass: "Nassfutter", trocken: "Trockenfutter", leckerli: "Leckerli" };
+
+// „A“, „A und B“, „A, B und C“
+const mitUnd = (namen) => (namen.length < 2 ? namen.join("") : `${namen.slice(0, -1).join(", ")} und ${namen.at(-1)}`);
+
+// Aufklappbare Zeile unten in der Karte „Gefüttert“ (standardmäßig zu, Zustand nur im Speicher wie überall).
+// mehr aus gefuettertMehr (js/zusammenfassung.js); null ergibt nichts. Zahl und Einheit immer mit NB.
+export function gefuettertMehrHtml(mehr) {
+  if (!mehr) return "";
+  const kcal = (k, stellen = 0) => `${sicher(k.toLocaleString("de-DE", { maximumFractionDigits: stellen }))}${NB}kcal`;
+  const teile = [];
+  if (mehr.ziel) {
+    const { art, kcal: k, soll, datum } = mehr.ziel;
+    const klammer = `(${kcal(soll)}, Freigabe vom ${sicher(datumText(datum))})`;
+    const b = `<b>${sicher(zahl(k))}${NB}kcal</b>`;
+    const satz = {
+      noch: `Noch ${b} bis zur Tagesmenge vom Tierarzt ${klammer}.`,
+      ueber: `${b} über der Tagesmenge vom Tierarzt ${klammer}.`,
+      unter: `${b} unter der Tagesmenge vom Tierarzt ${klammer}.`,
+      erreicht: `Tagesmenge vom Tierarzt erreicht ${klammer}.`,
+    }[art];
+    teile.push(`<p class="gef-satz">${satz}</p>`);
+  }
+  if (mehr.arten.length)
+    teile.push(
+      `<div class="gef-zeilen">${mehr.arten
+        .map(
+          (a) =>
+            `<span>${ART_ZEILE[a.typ]}</span><span>${sicher(zahl(a.gramm))}${NB}g</span><b>${sicher(zahl(a.kcal))}${NB}kcal</b>`
+        )
+        .join("")}</div>`
+    );
+  if (mehr.leckerli) {
+    const { kcal: k, max, prozent } = mehr.leckerli;
+    // Grenze mit höchstens einer Nachkommastelle (23,5 statt gerundet 24), damit „höchstens“ stimmt.
+    teile.push(
+      `<p class="gef-klein">Leckerlis: ${sicher(zahl(k))} von höchstens ${kcal(max, 1)} ` +
+        `(${sicher(zahl(prozent))}${NB}% der Tagesmenge).</p>`
+    );
+  }
+  const namen = mehr.geschaetzt.map(sicher);
+  const geschaetzt = namen.length
+    ? namen.length === 1
+      ? `der kcal-Wert von ${namen[0]} nur geschätzt ist`
+      : `die kcal-Werte von ${mitUnd(namen)} nur geschätzt sind`
+    : "";
+  const geloescht = mehr.geloescht ? "eine gelöschte Sorte keinen kcal-Wert mehr hat" : "";
+  const grund = [geschaetzt, geloescht].filter(Boolean).join(" und ");
+  if (grund) teile.push(`<p class="gef-klein">„ca.“, weil ${grund}.</p>`);
+  return aufklappKarte({
+    id: "gef-mehr",
+    klasse: "gef-mehr",
+    kopf: `<span class="zusammen">Mehr zur Fütterung ${mehr.heute ? "heute" : "an diesem Tag"}</span>`,
+    inhalt: teile.join(""),
+  });
 }
 
 // ---------- „Letzte Messung“ (ab 0.39.0, Mischung flach ohne Korridor) ----------

@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { gefuettertHtml, zahl, sicher, URTEIL_KURZ, skalaPunkt, messungHtml } from "../js/heute-grafiken.js";
-import { gefuettertWerte, messungWerte } from "../js/zusammenfassung.js";
+import { gefuettertHtml, gefuettertMehrHtml, zahl, sicher, URTEIL_KURZ, skalaPunkt, messungHtml } from "../js/heute-grafiken.js";
+import { gefuettertWerte, gefuettertMehr, messungWerte } from "../js/zusammenfassung.js";
 import { GRENZEN } from "../js/rechnen.js";
 
 // Beispiel-Katze mit Freigabe 220 kcal und drei Sorten (nur Testdaten).
@@ -356,4 +356,140 @@ test("0.42.2: Marke rechnet die 2-px-Lücken zwischen den Stücken mit ein", () 
   assert.match(h, /class="gef-drueber stark" style="left:calc\(88\.0% \+ 0\.2px\)"/);
   // Unter dem Ziel steht die Marke am Ende des Reststücks, ohne Korrektur.
   assert.match(html(DREI), /class="gef-marke" style="left:100\.0%"/);
+});
+
+// ---------- 0.44.0 (Funde 06.11., Paket B): „Mehr zur Fütterung“ in der Karte „Gefüttert“ ----------
+
+const NBSP = String.fromCharCode(160);
+// Kitos Beispiel: Sheba 77 kcal/100 g (geschätzt) 2 × 50 g, Purina One Light 327,5 kcal/100 g (Hersteller) 20 g + 21 g.
+const KITO_SORTEN = new Map([
+  ["s", { id: "s", name: "Sheba Fresh n Fine in Sauce mit Geflügel", typ: "nass", kcalPro100g: 77, kcalQuelle: "geschaetzt", notiz: "" }],
+  ["p", { id: "p", name: "Purina One Light", typ: "trocken", kcalPro100g: 327.5, kcalQuelle: "hersteller", notiz: "" }],
+  ["l", { id: "l", name: "Knabberstange", typ: "leckerli", kcalPro100g: 300, kcalQuelle: "ungefaehr", notiz: "" }],
+]);
+const KITO_FREIGABE = { ...freigabe, datum: "2026-10-01", kcalProTag: 220 };
+const KITO_TAG = [MZ("s", 50, "07:00"), MZ("p", 20, "09:00"), MZ("s", 50, "13:00"), MZ("p", 21, "18:00")];
+const mehr = (mahlzeiten, { mitFreigabe = true, tag = "2026-11-05", sorten = KITO_SORTEN } = {}) =>
+  gefuettertMehr({ mahlzeiten, futterNachId: sorten, freigabe: mitFreigabe ? KITO_FREIGABE : null, tag, heute: "2026-11-05" });
+
+test("0.44.0: gefuettertMehr mit Kitos Tag: Noch 9 kcal, Nass 100 g/77, Trocken 41 g/134, Leckerli 0 von 22", () => {
+  const w = mehr(KITO_TAG);
+  assert.equal(w.heute, true);
+  assert.deepEqual(w.ziel, { art: "noch", kcal: 9, soll: 220, datum: "2026-10-01" });
+  assert.deepEqual(
+    w.arten.map((a) => [a.typ, a.gramm, a.kcal]),
+    [["nass", 100, 77], ["trocken", 41, 134]]
+  );
+  assert.equal(w.leckerli.kcal, 0);
+  assert.equal(Math.round(w.leckerli.max * 10) / 10, 22);
+  assert.equal(w.leckerli.prozent, GRENZEN.leckerliMax * 100);
+  assert.deepEqual(w.geschaetzt, ["Sheba Fresh n Fine in Sauce mit Geflügel"]);
+  assert.equal(w.geloescht, false);
+});
+
+test("0.44.0: gefuettertMehr ohne Mahlzeit: nichts (keine aufklappbare Zeile)", () => {
+  assert.equal(mehr([]), null);
+  assert.equal(mehr([], { mitFreigabe: false }), null);
+  assert.equal(gefuettertMehrHtml(null), "");
+});
+
+test("0.44.0: gefuettertMehr Satz zum Tierarzt: darüber, vergangener Tag darunter, genau erreicht (gleiche Rundung wie die Kachel)", () => {
+  // 220 + 12: 12 kcal Leckerli mehr (4 g × 300 kcal/100 g)
+  const ueber = mehr([...KITO_TAG, MZ("p", 2.75, "19:00"), MZ("l", 4, "20:00")]);
+  assert.equal(ueber.ziel.art, "ueber");
+  assert.equal(ueber.ziel.kcal, Math.round(ueber.kcal - 220));
+  const gestern = mehr(KITO_TAG, { tag: "2026-11-04" });
+  assert.equal(gestern.heute, false);
+  assert.deepEqual(gestern.ziel, { art: "unter", kcal: 9, soll: 220, datum: "2026-10-01" });
+  // 211,3 + 8,6 = 219,9 → gerundet 0 Abstand: „erreicht“, nicht „Noch 0 kcal“ und kein „-0“.
+  const genau = mehr([...KITO_TAG, MZ("p", 2.63, "19:00")]);
+  assert.equal(genau.ziel.art, "erreicht");
+  assert.equal(genau.ziel.kcal, 0);
+  // Kachel und Satz rechnen gleich.
+  const kachel = gefuettertWerte({ mahlzeiten: KITO_TAG, futterNachId: KITO_SORTEN, freigabe: KITO_FREIGABE, tag: "2026-11-05", heute: "2026-11-05" }).ziel.kachel;
+  assert.equal(kachel.kcal, mehr(KITO_TAG).ziel.kcal);
+});
+
+test("0.44.0: gefuettertMehr ohne Freigabe: nur Arten und ca.-Sorten, kein Tierarzt-Satz, keine Leckerli-Grenze", () => {
+  const w = mehr(KITO_TAG, { mitFreigabe: false });
+  assert.equal(w.ziel, null);
+  assert.equal(w.leckerli, null);
+  assert.equal(w.arten.length, 2);
+  assert.deepEqual(w.geschaetzt, ["Sheba Fresh n Fine in Sauce mit Geflügel"]);
+});
+
+test("0.44.0: gefuettertMehr: ca.-Sorten nur einmal und nur ohne genaue Quelle; gelöschte Sorte gemerkt", () => {
+  const w = mehr([...KITO_TAG, MZ("l", 2, "20:00"), MZ("l", 1, "21:00"), MZ("weg", 30, "22:00")]);
+  assert.deepEqual(w.geschaetzt, ["Sheba Fresh n Fine in Sauce mit Geflügel", "Knabberstange"]);
+  assert.equal(w.geloescht, true);
+  assert.deepEqual(w.arten.map((a) => a.typ), ["nass", "trocken", "leckerli"]);
+  // Die gelöschte Sorte hat keine Art; ihre Gramm stehen in keiner Zeile.
+  assert.equal(w.arten.reduce((s, a) => s + a.gramm, 0), 144);
+  // Nur genaue Sorten: kein ca.-Satz.
+  assert.deepEqual(mehr([MZ("p", 20, "09:00")]).geschaetzt, []);
+});
+
+test("0.44.0: gefuettertMehrHtml mit Kitos Tag: zugeklappt, Kopf, Satz, Zeilen, Leckerlis, ca.-Satz", () => {
+  const h = gefuettertMehrHtml(mehr(KITO_TAG));
+  assert.match(h, /data-aufklapp="gef-mehr"/);
+  assert.match(h, /class="aufklapp gef-mehr"/);
+  assert.match(h, /aria-expanded="false"/);
+  assert.match(h, />Mehr zur Fütterung heute</);
+  assert.ok(h.includes(`Noch <b>9${NBSP}kcal</b> bis zur Tagesmenge vom Tierarzt (220${NBSP}kcal, Freigabe vom 1. Okt. 2026).`));
+  assert.ok(h.includes(`<span>Nassfutter</span><span>100${NBSP}g</span><b>77${NBSP}kcal</b>`));
+  assert.ok(h.includes(`<span>Trockenfutter</span><span>41${NBSP}g</span><b>134${NBSP}kcal</b>`));
+  assert.ok(h.includes(`Leckerlis: 0 von höchstens 22${NBSP}kcal (10${NBSP}% der Tagesmenge).`));
+  assert.ok(h.includes("„ca.“, weil der kcal-Wert von Sheba Fresh n Fine in Sauce mit Geflügel nur geschätzt ist."));
+  // Zahl und Einheit nie mit normalem Leerzeichen (Umbruch „9 / kcal“).
+  assert.doesNotMatch(h, /\d (kcal|g|%)/);
+});
+
+test("0.44.0: gefuettertMehrHtml: andere Tage, darüber, darunter, erreicht", () => {
+  const gestern = gefuettertMehrHtml(mehr(KITO_TAG, { tag: "2026-11-04" }));
+  assert.match(gestern, />Mehr zur Fütterung an diesem Tag</);
+  assert.ok(gestern.includes(`<b>9${NBSP}kcal</b> unter der Tagesmenge vom Tierarzt (220${NBSP}kcal, Freigabe vom 1. Okt. 2026).`));
+  const ueber = gefuettertMehrHtml(mehr([...KITO_TAG, MZ("p", 6.4, "19:00")]));
+  assert.ok(ueber.includes(`<b>12${NBSP}kcal</b> über der Tagesmenge vom Tierarzt (`));
+  const genau = gefuettertMehrHtml(mehr([...KITO_TAG, MZ("p", 2.63, "19:00")]));
+  assert.ok(genau.includes("Tagesmenge vom Tierarzt erreicht (220"));
+  assert.doesNotMatch(genau, /Noch|-0/);
+});
+
+test("0.44.0: gefuettertMehrHtml ohne Freigabe: nur Zeilen und ca.-Satz", () => {
+  const h = gefuettertMehrHtml(mehr(KITO_TAG, { mitFreigabe: false }));
+  assert.match(h, /Nassfutter/);
+  assert.match(h, /„ca.“/);
+  assert.doesNotMatch(h, /Tierarzt|Leckerlis:|höchstens|Noch/);
+});
+
+test("0.44.0: gefuettertMehrHtml: mehrere ca.-Sorten mit „und“, gelöschte Sorte, Namen maskiert", () => {
+  const sorten = new Map(KITO_SORTEN);
+  sorten.set("x", { id: "x", name: "Bio <Huhn>", typ: "nass", kcalPro100g: 80, kcalQuelle: "geschaetzt", notiz: "" });
+  const drei = gefuettertMehrHtml(mehr([...KITO_TAG, MZ("l", 2, "20:00"), MZ("x", 10, "21:00")], { sorten }));
+  assert.ok(drei.includes("„ca.“, weil die kcal-Werte von Sheba Fresh n Fine in Sauce mit Geflügel, Knabberstange und Bio &lt;Huhn&gt; nur geschätzt sind."));
+  assert.ok(drei.includes(`<span>Leckerli</span><span>2${NBSP}g</span><b>6${NBSP}kcal</b>`));
+  const weg = gefuettertMehrHtml(mehr([MZ("p", 20, "09:00"), MZ("weg", 30, "10:00")]));
+  assert.ok(weg.includes("„ca.“, weil eine gelöschte Sorte keinen kcal-Wert mehr hat."));
+  const beides = gefuettertMehrHtml(mehr([MZ("s", 50, "09:00"), MZ("weg", 30, "10:00")]));
+  assert.ok(beides.includes("nur geschätzt ist und eine gelöschte Sorte keinen kcal-Wert mehr hat."));
+});
+
+test("0.44.0: „Mehr zur Fütterung“ nennt nie eine Futtermenge", () => {
+  const faelle = [
+    gefuettertMehrHtml(mehr(KITO_TAG)),
+    gefuettertMehrHtml(mehr(KITO_TAG, { mitFreigabe: false })),
+    gefuettertMehrHtml(mehr([...KITO_TAG, MZ("p", 6.4, "19:00")])),
+  ];
+  for (const h of faelle) {
+    assert.doesNotMatch(h, /füttern|noch \d+.?g|entspricht|Wägung/i);
+    assert.doesNotMatch(h, /NaN|undefined|Infinity/);
+  }
+});
+
+test("0.44.0: app.js hängt „Mehr zur Fütterung“ an die Karte, vor der ca.-Zeile", () => {
+  const app = readFileSync(new URL("../app.js", import.meta.url), "utf8");
+  assert.match(app, /gefuettertHtml\(gefuettert\) \+\s*gefuettertMehrHtml\(\s*gefuettertMehr\(\{ mahlzeiten, futterNachId: futter, freigabe, tag, heute \}\)\s*\)/);
+  const css = readFileSync(new URL("../styles.css", import.meta.url), "utf8");
+  assert.match(css, /\.gef-zeilen \{[^}]*grid-template-columns/);
+  assert.match(css, /\.gef-zeilen [^{]*\{[^}]*white-space: nowrap/);
 });
