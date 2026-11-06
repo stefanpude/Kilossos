@@ -127,7 +127,7 @@ handyDunkel.addEventListener("change", () => {
 });
 wendeAnzeigeAn(leseAnzeige());
 
-// Demo-Modus (Link mit "?demo"): lädt bei jedem Öffnen frisch die Simulation aus werkzeuge/erzeuge-testdaten.js,
+// Demo-Modus (Link mit "?demo"): lädt bei jedem Öffnen frisch die Simulation von Kito und Zuki aus werkzeuge/erzeuge-testdaten.js,
 // verschoben auf heute, in einen eigenen Speicherplatz. Die echten Einträge bleiben unberührt.
 const demo = new URLSearchParams(location.search).has("demo");
 
@@ -148,6 +148,9 @@ if (demo) {
     const heute = new Date();
     const tage = Math.round((new Date(heute.getFullYear(), heute.getMonth(), heute.getDate()) - new Date(j, m - 1, t)) / 86400000);
     speichern(verschiebeDaten(simulation, tage));
+    // Die Demo hat zwei Katzen (seit 0.47.0) und startet wie ihre Daten jedes Mal frisch: mit Kito (erstes Tier),
+    // auch wenn beim letzten Mal zu Zuki gewechselt wurde.
+    merkeAktivesTier(simulation.tiere[0].id, true);
   } catch (fehler) {
     console.error("Demo-Daten konnten nicht geladen werden:", fehler);
   }

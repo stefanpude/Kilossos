@@ -9,6 +9,7 @@ import { sicherungPruefen, einleseFrage } from "../js/sicherung.js";
 import { berichtDaten, berichtHtml } from "../js/bericht.js";
 import { zeichneVerlauf } from "../js/verlauf.js";
 import { wochenRaten, futterTage, monatsGruppen, achtWochen } from "../js/zusammenfassung.js";
+import { rer, abnahmeProWoche, tagSchluessel, mahlzeitenAm, tagesSumme, leckerliKcal, aktuelleFreigabe } from "../js/rechnen.js";
 
 const ORDNER = new URL("./sicherungen/", import.meta.url);
 const HEUTE = "2026-11-04";
@@ -157,6 +158,137 @@ test("Demo-Simulation hat besondere Tage: abgeschlossene Phase „Krank“, mehr
 test("Eine Sicherung aus der Demo hat dasselbe Format und wird ohne Korrekturen angenommen", () => {
   const demo = JSON.parse(fs.readFileSync(new URL("../demo/kito-simulation.json", import.meta.url), "utf8"));
   assert.deepEqual(sicherungPruefen(demo, HEUTE), { kaputt: 0, fotos: 0, angaben: 0 });
+});
+
+// 0.47.0: Die Demo zeigt zwei simulierte Katzen, damit Tester das Wechseln oben auf „Heute“ sehen (Ideen-Tafel).
+const demoDaten = () => JSON.parse(fs.readFileSync(new URL("../demo/kito-simulation.json", import.meta.url), "utf8"));
+const tageZwischen = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
+
+test("0.47.0: Demo hat Kito und Zuki, Kito steht vorn (ist beim Öffnen aktiv)", () => {
+  const demo = demoDaten();
+  assert.deepEqual(
+    demo.tiere.map((t) => t.id),
+    ["kito", "zuki"],
+  );
+  const zuki = demo.tiere[1];
+  assert.equal(zuki.name, "Zuki");
+  assert.equal(zuki.art, "katze");
+  assert.equal(zuki.geschlecht, "katze");
+  assert.equal(zuki.kastriert, true);
+  assert.ok(!("foto" in zuki));
+});
+
+test("0.47.0: Jeder Eintrag der Demo gehört zu einem vorhandenen Tier, Kennungen sind eindeutig", () => {
+  const demo = demoDaten();
+  const tiere = new Set(demo.tiere.map((t) => t.id));
+  const futter = new Set(demo.futter.map((f) => f.id));
+  for (const feld of ["mahlzeiten", "gewichte", "freigaben", "besondereTage"]) {
+    assert.ok(demo[feld].every((e) => tiere.has(e.tierId)), feld);
+    assert.ok(demo[feld].some((e) => e.tierId === "zuki"), `${feld} ohne Zuki`);
+    assert.equal(new Set(demo[feld].map((e) => e.id)).size, demo[feld].length, `${feld}: doppelte Kennung`);
+  }
+  assert.ok(demo.mahlzeiten.every((m) => futter.has(m.futterId)));
+  assert.ok(demo.gewichte.every((g) => !("foto" in g)), "keine Fotos in der Demo-Datei");
+});
+
+test("0.47.0: Kitos Demo-Daten bleiben wie bisher (Gewichte, Mahlzeiten, Freigaben, besondere Tage)", () => {
+  const demo = demoDaten();
+  const von = (feld) => demo[feld].filter((e) => e.tierId === "kito");
+  assert.equal(
+    von("gewichte").map((g) => g.kg).join(","),
+    "9.32,9.23,9.15,9.08,8.99,8.91,8.85,8.76,8.68,8.6,8.53,8.47,8.4,8.32,8.25,8.21,8.15,8.1,8.02,7.97,7.9,7.85,7.79,7.73,7.68,7.63,7.58,7.52,7.47,7.43,7.38,7.35,7.3,7.25,7.2",
+  );
+  assert.equal(von("mahlzeiten").length, 1059);
+  assert.equal(von("mahlzeiten").reduce((s, m) => s + m.gramm, 0), 34950);
+  assert.equal(von("freigaben").length, 3);
+  assert.equal(von("besondereTage").length, 8);
+});
+
+test("0.47.0: Zuki in der Demo: 5,4 → Ziel 4,3 kg, Freigabe 0,8 × RER(Ziel), Ziel noch nicht erreicht", () => {
+  const demo = demoDaten();
+  const gewichte = demo.gewichte.filter((g) => g.tierId === "zuki").sort((a, b) => a.datum.localeCompare(b.datum));
+  const freigaben = demo.freigaben.filter((f) => f.tierId === "zuki").sort((a, b) => a.datum.localeCompare(b.datum));
+  assert.equal(gewichte[0].kg, 5.4);
+  assert.ok(gewichte.at(-1).kg > 4.3, "Ziel noch nicht erreicht");
+  assert.equal(freigaben[0].datum, gewichte[0].datum);
+  assert.equal(freigaben[0].zielgewichtKg, 4.3);
+  assert.equal(freigaben[0].kcalProTag, Math.round((0.8 * rer(4.3)) / 5) * 5);
+  assert.equal(freigaben[0].bcs, 8);
+  assert.equal(freigaben[0].mcs, "normal");
+  assert.ok(freigaben.every((f) => f.tierarzt === "Testpraxis (Simulation)" && f.notiz.startsWith("Simulation:")));
+  // Spätestens alle 3 Monate eine Kontrolle, sonst stünde „Freigabe älter als 3 Monate“ da.
+  const letzte = gewichte.at(-1).datum;
+  assert.ok(tageZwischen(freigaben.at(-1).datum, letzte) <= 90);
+  // Zuki startet später als Kito: rund 20 Wochen.
+  const wochen = tageZwischen(gewichte[0].datum, letzte) / 7;
+  assert.ok(wochen >= 18 && wochen <= 22, `${wochen} Wochen`);
+});
+
+test("0.47.0: Zuki nimmt 0,5–2 % pro Woche ab (Mittel über 2 Wochen wie die App, und insgesamt)", () => {
+  const demo = demoDaten();
+  const gewichte = demo.gewichte.filter((g) => g.tierId === "zuki").sort((a, b) => a.datum.localeCompare(b.datum));
+  assert.ok(gewichte.length >= 19);
+  for (let i = 1; i < gewichte.length; i++) {
+    assert.equal(tageZwischen(gewichte[i - 1].datum, gewichte[i].datum), 7, "einmal pro Woche gewogen");
+    assert.ok(gewichte[i].kg < gewichte[i - 1].kg, `nimmt in Woche ${i} nicht zu`);
+  }
+  for (let i = 2; i < gewichte.length; i++) {
+    const r = abnahmeProWoche(gewichte.slice(0, i + 1), 14).prozent;
+    assert.ok(r >= 0.5 && r <= 2, `2 Wochen bis ${gewichte[i].datum}: ${r.toFixed(2)} %`);
+  }
+  const gesamt = abnahmeProWoche(gewichte, 7 * (gewichte.length - 1)).prozent;
+  assert.ok(gesamt >= 0.5 && gesamt <= 2, `${gesamt}`);
+});
+
+test("0.47.0: Zukis Tage in der Demo: Freigabe eingehalten, Leckerli unter 10 %, getrennt von Kito gefüttert", () => {
+  const demo = demoDaten();
+  const futter = futterNachId(demo);
+  const mahlzeiten = demo.mahlzeiten.filter((m) => m.tierId === "zuki");
+  const freigaben = demo.freigaben.filter((f) => f.tierId === "zuki");
+  const tage = [...new Set(mahlzeiten.map((m) => tagSchluessel(new Date(m.zeitpunkt))))];
+  assert.ok(tage.length >= 18 * 7);
+  let mitLeckerli = 0;
+  for (const tag of tage) {
+    const amTag = mahlzeitenAm(mahlzeiten, tag);
+    const soll = aktuelleFreigabe(freigaben, tag).kcalProTag;
+    const kcal = tagesSumme(amTag, futter).kcal;
+    assert.ok(kcal >= 0.9 * soll && kcal <= 1.1 * soll, `${tag}: ${kcal} kcal bei ${soll}`);
+    const leckerli = leckerliKcal(amTag, futter);
+    assert.ok(leckerli < 0.1 * kcal, `${tag}: Leckerli ${leckerli} kcal`);
+    if (leckerli > 0) mitLeckerli += 1;
+  }
+  assert.ok(mitLeckerli > 0 && mitLeckerli < tage.length / 2, "ab und zu ein Leckerli");
+  // Getrennt gefüttert: keine Mahlzeit gehört beiden, Kito und Zuki haben eigene Kennungen.
+  assert.ok(mahlzeiten.every((m) => m.id.startsWith("zuki-")));
+});
+
+test("0.47.0: Neuestes Gewicht der Demo ist Kitos (Verschiebung auf heute), Zuki höchstens eine Woche davor", () => {
+  const demo = demoDaten();
+  const neuestes = (tierId) =>
+    demo.gewichte
+      .filter((g) => g.tierId === tierId)
+      .map((g) => g.datum)
+      .sort()
+      .at(-1);
+  const alle = demo.gewichte.map((g) => g.datum).sort().at(-1);
+  assert.equal(neuestes("kito"), alle);
+  const abstand = tageZwischen(neuestes("zuki"), alle);
+  assert.ok(abstand >= 0 && abstand < 7, `${abstand} Tage`);
+  // Zukis Mahlzeiten reichen bis zum selben letzten Tag wie Kitos.
+  const letzterTag = (tierId) =>
+    tagSchluessel(new Date(demo.mahlzeiten.filter((m) => m.tierId === tierId).map((m) => m.zeitpunkt).sort().at(-1)));
+  assert.equal(letzterTag("zuki"), letzterTag("kito"));
+  // Zukis besondere Tage sind abgeschlossen; die eine laufende Phase bleibt Kitos.
+  const zukiTage = demo.besondereTage.filter((b) => b.tierId === "zuki");
+  assert.ok(zukiTage.length >= 1 && zukiTage.length <= 2);
+  assert.ok(zukiTage.every((b) => b.bis !== null && b.notiz.startsWith("Simulation:")));
+});
+
+test("0.47.0: app.js setzt in der Demo beim Öffnen das erste Tier der Simulation (Kito) als aktiv", () => {
+  const app = fs.readFileSync(new URL("../app.js", import.meta.url), "utf8");
+  const block = app.slice(app.indexOf("if (demo) {\n  demoModus(true);"), app.indexOf("} else {", app.indexOf("demoModus(true);")));
+  assert.match(block, /merkeAktivesTier\(simulation\.tiere\[0\]\.id, true\);/);
+  assert.ok(app.indexOf("merkeAktivesTier(simulation.tiere[0].id, true)") < app.indexOf("let tier = aktivesTier(daten, leseAktivesTier(demo));"));
 });
 
 test("Neuere Stände (ab 0.19) behalten alle Futterwerte unverändert", () => {
