@@ -7,16 +7,29 @@ export const RAND_PX = 24;
 const MIN_WEG_PX = 60;
 const MAX_DAUER_MS = 800;
 
+const ACHSE_PX = 10;
+
+// Richtung der ersten Millimeter (0.59.0, wie bei Bildergalerien): null = noch zu wenig bewegt.
+// Bei Gleichstand gewinnt „senkrecht“: lieber scrollen als aus Versehen den Bereich wechseln.
+export function wischAchse(dx, dy) {
+  if (!Number.isFinite(dx) || !Number.isFinite(dy) || Math.hypot(dx, dy) < ACHSE_PX) return null;
+  return Math.abs(dx) > Math.abs(dy) ? "waagrecht" : "senkrecht";
+}
+
 // 1 = zum nächsten Bereich (nach links gewischt), -1 = zum vorherigen, 0 = kein Wischen.
-export function wischRichtung({ startX, startY, endX, endY, dauerMs, breite } = {}) {
+// achse (aus wischAchse): „senkrecht“ begonnen = Scrollen, nie Wechsel; „waagrecht“ begonnen = ein Daumen-Bogen
+// zählt bis knapp 45 Grad. Ohne achse (kein touchmove gemeldet) gilt die strenge Regel: doppelt so weit waagrecht.
+export function wischRichtung({ startX, startY, endX, endY, dauerMs, breite, achse = null } = {}) {
   const zahlen = [startX, startY, endX, endY, dauerMs, breite];
   if (!zahlen.every(Number.isFinite)) return 0;
+  if (achse === "senkrecht") return 0;
   if (startX < RAND_PX || startX > breite - RAND_PX) return 0;
   if (dauerMs > MAX_DAUER_MS) return 0;
   const dx = endX - startX;
   const dy = endY - startY;
   if (Math.abs(dx) < Math.max(MIN_WEG_PX, breite * 0.16)) return 0;
-  if (Math.abs(dx) < 2 * Math.abs(dy)) return 0;
+  const faktor = achse === "waagrecht" ? 1 : 2;
+  if (Math.abs(dx) < faktor * Math.abs(dy)) return 0;
   return dx < 0 ? 1 : -1;
 }
 
@@ -50,7 +63,17 @@ export function wischenAnmelden(bereich, { leiste, aktuell, wechseln, gesperrt =
       const ziel = ereignis.target;
       if (ziel.closest?.(NICHT_WISCHEN) || scrolltWaagrecht(ziel, bereich)) return;
       const t = ereignis.touches[0];
-      start = { x: t.clientX, y: t.clientY, zeit: performance.now() };
+      start = { x: t.clientX, y: t.clientY, zeit: performance.now(), achse: null };
+    },
+    { passive: true },
+  );
+  // Die erste klare Richtung merken; danach ändert sie sich bis zum Loslassen nicht mehr.
+  bereich.addEventListener(
+    "touchmove",
+    (ereignis) => {
+      if (!start || start.achse || ereignis.touches.length !== 1) return;
+      const t = ereignis.touches[0];
+      start.achse = wischAchse(t.clientX - start.x, t.clientY - start.y);
     },
     { passive: true },
   );
@@ -62,7 +85,7 @@ export function wischenAnmelden(bereich, { leiste, aktuell, wechseln, gesperrt =
       const t = ereignis.changedTouches[0];
       const richtung = wischRichtung({
         startX: start.x, startY: start.y, endX: t.clientX, endY: t.clientY,
-        dauerMs: performance.now() - start.zeit, breite: window.innerWidth,
+        dauerMs: performance.now() - start.zeit, breite: window.innerWidth, achse: start.achse,
       });
       start = null;
       if (!richtung || String(window.getSelection?.() ?? "")) return;

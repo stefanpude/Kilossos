@@ -1002,6 +1002,11 @@ function verlaufKopf() {
 // Tippfläche ist das ganze Bild.
 function vorherNachherKarte() {
   const { vorher, nachher } = vorherNachher(daten.gewichte, tier.id);
+  // Ohne jedes Foto nur eine kurze Zeile statt zwei großer Platzhalter (0.59.0, Stefan 06.11.: in der Demo „ganz groß“).
+  if (!vorher) return `<section class="karte vorher-nachher vn-leer" aria-label="Vorher und Nachher">
+    <span class="label">Vorher / Nachher</span>
+    <p class="tipp">Noch keine Fotos. Füge beim Wiegen ab und zu ein Foto hinzu, am besten immer aus der gleichen Richtung.</p>
+  </section>`;
   const seite = (titel, w, leer) =>
     `<figure class="vn-seite">
       ${w ? `<button type="button" class="vn-bild" data-aktion="waegung-foto-ansehen" data-id="${sicher(w.id)}" aria-label="${titel}-Foto ändern oder entfernen"><img src="${sicher(w.foto)}" alt=""><span class="vn-plakette" aria-hidden="true">${SYMBOL.stift}Ändern</span></button>` : `<div class="vn-platzhalter" role="img" aria-label="${titel}: noch kein Foto">${SYMBOL.katzenkopf}<span>Noch kein Foto</span></div>`}

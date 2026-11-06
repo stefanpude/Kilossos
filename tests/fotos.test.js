@@ -237,3 +237,15 @@ test("0.43.0: Entfernen im Foto-Fenster nennt, was Vorher/Nachher danach zeigt",
   const entfernen = app.slice(app.indexOf("function fotoEntfernen"), app.indexOf('$("dialog-foto").addEventListener("close"'));
   assert.match(entfernen, /nachEntfernen\(daten\.gewichte, tier\.id, waegung\)/);
 });
+
+test("0.59.0: ohne jedes Foto ist die Vorher/Nachher-Karte klein (keine zwei großen Platzhalter)", () => {
+  const app = lies("app.js");
+  const karte = app.slice(app.indexOf("function vorherNachherKarte"), app.indexOf("function zeichneVerlaufAnsicht"));
+  const leer = karte.indexOf("if (!vorher) return");
+  assert.ok(leer > 0, "Kurzfassung ohne Fotos fehlt");
+  assert.ok(leer < karte.indexOf('class="vn-paar"'), "Kurzfassung kommt vor dem Bilderpaar");
+  const kurz = karte.slice(leer, karte.indexOf("</section>", leer));
+  assert.ok(kurz.includes('class="karte vorher-nachher vn-leer"'));
+  assert.ok(kurz.includes("Noch keine Fotos."));
+  assert.ok(!kurz.includes("vn-platzhalter"));
+});
