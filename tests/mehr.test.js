@@ -115,16 +115,13 @@ const abschnitt = (mehr, titel) => {
   return mehr.slice(start, ende < 0 ? undefined : ende);
 };
 
-test("0.45.0: Erklärungen stehen unter „Wissen“ nach „Begriffe kurz erklärt“, vor „Warum nimmt meine Katze nicht ab?“", () => {
-  const wissen = abschnitt(ansichtMehr(), /<h3 class="gruppe-titel">Wissen<\/h3>/);
-  const reihe = ["begriffe-erklaerung", "warum-kein-ziel", "grenzen-erklaerung", "warum-nicht-ab"].map((aktion) => {
-    const i = wissen.indexOf(`data-aktion="${aktion}"`);
-    assert.ok(i >= 0, `fehlt unter Wissen: ${aktion}`);
-    return i;
-  });
-  assert.deepEqual([...reihe].sort((a, b) => a - b), reihe);
-  assert.match(wissen, /<span class="text">Warum keine Futtermenge\?<\/span>/);
-  assert.match(wissen, /<span class="text">Welche Grenzen gelten\?<\/span>/);
+// 0.45.0 stellte die Erklärungen direkt unter „Wissen“; seit 0.60.0 erreicht man sie über „Häufige Fragen“
+// (Tests „0.60.0“ am Ende dieser Datei). Die Seiten selbst bleiben:
+test("0.45.0: „Warum keine Futtermenge?“ und „Welche Grenzen gelten?“ stehen als Verweis in „Häufige Fragen“", () => {
+  const html = lies("index.html");
+  const fragen = html.slice(html.indexOf('<dialog id="dialog-fragen">'), html.indexOf("</dialog>", html.indexOf('<dialog id="dialog-fragen">')));
+  assert.match(fragen, /data-aktion="warum-kein-ziel">Warum keine Futtermenge\?</);
+  assert.match(fragen, /data-aktion="grenzen-erklaerung">Welche Grenzen gelten\?</);
 });
 
 // 0.48.1: „Was ist der BCS?“ stand unter „Wissen“ doppelt neben „Begriffe kurz erklärt“ (Halter 06.11.2026).
@@ -278,4 +275,21 @@ test("0.45.0: erster Absatz „Über Kilossos“ mit neuem ersten Satz, Rest wö
     ueber,
     /<p class="leise"><strong>Ist deine Katze krank<\/strong> \(zum Beispiel Diabetes, Nieren-, Schilddrüsen- oder Lebererkrankung\) oder frisst sie\s+plötzlich schlecht, besprich jede Änderung am Futter vorher mit deinem Tierarzt\.\s+<strong>Frisst eine Katze einen Tag oder länger gar nicht, gehört sie sofort zum Tierarzt\.<\/strong><\/p>/,
   );
+});
+
+// 0.60.0 (Stefan 06.11.: „in Wissen stehen Sachen, die in Unterrubriken bereits vorkommen“):
+// Unter „Wissen“ nur noch die drei Einstiege; die Erklärseiten erreicht man über „Tipps“ und „Häufige Fragen“.
+test("0.60.0: „Wissen“ zeigt nur Anleitung, Tipps und Häufige Fragen, keine Seite doppelt", () => {
+  const wissen = abschnitt(ansichtMehr(), /<h3 class="gruppe-titel">Wissen<\/h3>/);
+  const aktionen = [...wissen.matchAll(/data-aktion="([a-z-]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(aktionen, ["anleitung-erklaerung", "tipps-erklaerung", "fragen-erklaerung"]);
+});
+
+test("0.60.0: jede Erklärseite bleibt über „Tipps“ oder „Häufige Fragen“ erreichbar", () => {
+  const html = lies("index.html");
+  const blatt = (id) => html.slice(html.indexOf(`<dialog id="${id}">`), html.indexOf("</dialog>", html.indexOf(`<dialog id="${id}">`)));
+  const verweise = blatt("dialog-tipps") + blatt("dialog-fragen");
+  for (const aktion of ["begriffe-erklaerung", "warum-kein-ziel", "grenzen-erklaerung", "warum-nicht-ab", "alltag-erklaerung"]) {
+    assert.ok(verweise.includes(`data-aktion="${aktion}"`), `nicht mehr erreichbar: ${aktion}`);
+  }
 });

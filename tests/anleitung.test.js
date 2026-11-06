@@ -13,7 +13,7 @@ test("Eintrag ganz oben unter „Wissen“, öffnet die Seite", () => {
   const wissen = html.slice(html.indexOf('<h3 class="gruppe-titel">Wissen</h3>'), html.indexOf('<h3 class="gruppe-titel">Einstellungen</h3>'));
   const erster = wissen.indexOf('data-aktion="anleitung-erklaerung"');
   assert.ok(erster >= 0);
-  assert.ok(erster < wissen.indexOf('data-aktion="begriffe-erklaerung"'));
+  assert.ok(erster < wissen.indexOf('data-aktion="tipps-erklaerung"'));
   assert.ok(wissen.includes('<span class="text">So nutzt du Kilossos</span>'));
   assert.ok(lies("app.js").includes('case "anleitung-erklaerung":\n      return $("dialog-anleitung").showModal();'));
 });

@@ -8,11 +8,12 @@ const lies = (datei) => readFileSync(new URL(`../${datei}`, import.meta.url), "u
 const blatt = (html, id) => html.match(new RegExp(`<dialog id="${id}">([\\s\\S]*?)</dialog>`))?.[1] ?? "";
 const nurText = (html) => html.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ");
 
-test("Eintrag unter „Wissen“ ganz am Ende, öffnet die Seite", () => {
+// Seit 0.60.0 nicht mehr direkt unter „Wissen“, sondern über „Tipps fürs Abnehmen“ erreichbar.
+test("Verweis in „Tipps fürs Abnehmen“ nach „Warum nimmt meine Katze nicht ab?“, öffnet die Seite", () => {
   const html = lies("index.html");
-  const wissen = html.slice(html.indexOf('<h3 class="gruppe-titel">Wissen</h3>'), html.indexOf('<h3 class="gruppe-titel">Einstellungen</h3>'));
-  assert.ok(wissen.indexOf('data-aktion="warum-nicht-ab"') < wissen.indexOf('data-aktion="alltag-erklaerung"'));
-  assert.ok(wissen.includes('<span class="text">Was hilft einer schweren Katze im Alltag?</span>'));
+  const tipps = blatt(html, "dialog-tipps");
+  assert.ok(tipps.indexOf('data-aktion="warum-nicht-ab"') < tipps.indexOf('data-aktion="alltag-erklaerung"'));
+  assert.ok(tipps.includes('data-aktion="alltag-erklaerung">Was hilft einer schweren Katze im Alltag?</button>'));
   assert.ok(lies("app.js").includes('case "alltag-erklaerung":\n      return $("dialog-alltag").showModal();'));
 });
 
