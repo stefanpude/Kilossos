@@ -43,6 +43,8 @@ Die Liste für Zuki: [tierarzt-fragen-zuki.md](tierarzt-fragen-zuki.md).
       Und wie viele Tage hintereinander unter der Menge sind noch in Ordnung?
 - [ ] Ab wann ist **Erbrechen** ein Grund, sofort anzurufen? In der App trage ich es als „Auffälligkeit beim Fressen“
       ein. Einen roten Notfall-Hinweis zeigt sie bisher nur bei „Futter verweigert“.
+- [ ] Wenn Kito **öfter etwas übrig lässt**: Ab wann ist das ein Warnzeichen, und wann soll ich mich melden?
+      (Ich wiege den Rest zurück und trage nur ein, was er wirklich gefressen hat.)
 - [ ] Wie wichtig ist Kitos **Wasseraufnahme** beim Abnehmen? Katzen nehmen einen großen Teil ihres Wassers
       über Nassfutter auf; weniger Futter heißt auch weniger Wasser. Sollen wir etwas beachten
       (z. B. Wasser ins Nassfutter, Trinkbrunnen), und sollen die Nierenwerte vorher bestimmt werden?
@@ -77,6 +79,7 @@ Die Liste für Zuki: [tierarzt-fragen-zuki.md](tierarzt-fragen-zuki.md).
 | „Zu schnell“: nach 1 oder 2 Wochen warnen, ab wie viel | |
 | Zu wenig gefressen: ab wann anrufen | |
 | Erbrechen: ab wann anrufen | |
+| Übrig gelassenes Futter: ab wann melden | |
 | Diätfutter? | |
 | Nächster Termin | |
 | Abstand der Kontrollen | |

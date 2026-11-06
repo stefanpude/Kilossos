@@ -38,6 +38,8 @@ Die Liste für Kito: [tierarzt-fragen-kito.md](tierarzt-fragen-kito.md). Fragen 
 - [ ] Woran erkenne ich früh eine **Fettleber** (hepatische Lipidose)? Was tue ich, wenn Zuki nicht frisst?
 - [ ] Wie lange darf Zuki höchstens ohne Futter sein, bevor ich anrufen muss?
       (Die App rät bisher: einen Tag oder länger gar nichts gefressen → sofort zum Tierarzt. Passt diese Grenze?)
+- [ ] Wenn Zuki **öfter etwas übrig lässt**: Ab wann ist das ein Warnzeichen, und wann soll ich mich melden?
+      (Ich wiege den Rest zurück und trage nur ein, was sie wirklich gefressen hat.)
 - [ ] Wie wichtig ist Zukis **Wasseraufnahme** beim Abnehmen? Katzen nehmen einen großen Teil ihres Wassers
       über Nassfutter auf; weniger Futter heißt auch weniger Wasser. Sollen wir etwas beachten
       (z. B. Wasser ins Nassfutter, Trinkbrunnen), und sollen die Nierenwerte vorher bestimmt werden?
@@ -63,6 +65,7 @@ Die Liste für Kito: [tierarzt-fragen-kito.md](tierarzt-fragen-kito.md). Fragen 
 | Zielgewicht | |
 | kcal pro Tag | |
 | Diätfutter? | |
+| Übrig gelassenes Futter: ab wann melden | |
 | Nächster Termin | |
 | Abstand der Kontrollen | |
 | Ausnahmen für die App | |
