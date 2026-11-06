@@ -34,9 +34,10 @@ test("0.63.0: Eintrag ganz oben unter „Wissen“, „Tipps“ ohne „Bevor es
   const aktionen = [...wissen.matchAll(/data-aktion="([^"]+)"/g)].map((m) => m[1]);
   assert.equal(aktionen[0], "ursachen-erklaerung");
   const tipps = blatt(html, "dialog-tipps");
-  assert.deepEqual([...tipps.matchAll(/data-aktion="([^"]+)"/g)].map((m) => m[1]), ["warum-nicht-ab", "alltag-erklaerung"]);
+  // 0.73.0: dritter Abschnitt „Richtig wiegen“ (tests/wiegen.test.js)
+  assert.deepEqual([...tipps.matchAll(/data-aktion="([^"]+)"/g)].map((m) => m[1]), ["warum-nicht-ab", "alltag-erklaerung", "wiegen-erklaerung"]);
   assert.ok(!tipps.includes("Bevor es losgeht"));
-  assert.ok(nurText(tipps).includes("Die Tipps stehen auf zwei Seiten"));
+  assert.ok(nurText(tipps).includes("Die Tipps stehen auf drei Seiten"));
 });
 
 test("Sicherheit: roter Kasten wörtlich wie „Bitte nicht selbst kürzen“ auf „Warum nimmt meine Katze nicht ab?“", () => {

@@ -172,6 +172,11 @@ body.willkommen-offen { overflow: hidden; }
 #dialog-tipps h3, #dialog-fragen h3, #dialog-ursachen h3 { margin: 4px 0 0; font-size: 1.0625rem; }
 #dialog-fragen .notfall-hinweis, #dialog-ursachen .notfall-hinweis { margin: 0 0 12px; }
 #dialog-tipps h2:focus, #dialog-fragen h2:focus, #dialog-ursachen h2:focus { outline: none; }
+/* „Wie wiege ich meine Katze genau?“ (0.73.0) */
+#dialog-wiegen p, #dialog-wiegen li { margin: 0 0 10px; }
+#dialog-wiegen h3 { margin: 4px 0 0; font-size: 1.0625rem; }
+#dialog-wiegen h2:focus { outline: none; }
+.wiegen-link { margin: 0; } /* im Gewicht-Fenster nur der Abstand des Formulars (gap), wie bei den Feldern */
 a.knopf-text { display: inline-block; }
 #begriffe-liste { margin: 0 0 12px; border-top: 1px solid var(--rand); }
 .begriff { border-bottom: 1px solid var(--rand); }

@@ -351,7 +351,7 @@
           <span data-symbol="katzenkopf"></span><span class="text">Demo ansehen<small>Beispieldaten von Kito und Zuki über ein Jahr. Deine Einträge bleiben, wie sie sind.</small></span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.72.0</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.73.0</span>
         </div>
       </div>
     </section>
@@ -450,6 +450,7 @@
             Immer dieselbe Waage nehmen. Bei einer Warnung zum Tempo erst mit einer genauen Waage oder beim Tierarzt nachwiegen.</p>
         </div>
       </details>
+      <p class="wiegen-link"><button type="button" class="knopf-text" data-aktion="wiegen-erklaerung">Wie wiege ich meine Katze genau?</button></p>
       <label>Datum
         <input name="datum" type="date" required>
       </label>
@@ -998,7 +999,7 @@
   <dialog id="dialog-tipps">
     <form method="dialog">
       <h2 tabindex="-1" autofocus>Tipps fürs Abnehmen</h2>
-      <p>Die Tipps stehen auf zwei Seiten, jeweils mit Quellen. Tippe auf eine Seite, um sie zu öffnen.</p>
+      <p>Die Tipps stehen auf drei Seiten, jeweils mit Quellen. Tippe auf eine Seite, um sie zu öffnen.</p>
       <h3>Wenn die Waage stehen bleibt</h3>
       <p><button type="button" class="knopf-text" data-aktion="warum-nicht-ab">Warum nimmt meine Katze nicht ab?</button></p>
       <p class="tipp">Getrennt füttern, alle im Haushalt machen mit, Leckerlis und Reste zählen mit, wenn sie bettelt,
@@ -1007,6 +1008,43 @@
       <p><button type="button" class="knopf-text" data-aktion="alltag-erklaerung">Was hilft einer schweren Katze im Alltag?</button></p>
       <p class="tipp">Bewegung in kleinen Portionen, Futterspielzeug, genug Wasser, Stufen an die Lieblingsplätze, eine bequeme Toilette, Hilfe bei der
         Fellpflege, richtig hochheben.</p>
+      <h3>Richtig wiegen</h3>
+      <p><button type="button" class="knopf-text" data-aktion="wiegen-erklaerung">Wie wiege ich meine Katze genau?</button></p>
+      <p class="tipp">Welche Waage, immer gleich wiegen, wenn ein Wert nicht passt.</p>
+      <div class="knoepfe">
+        <button value="abbrechen" class="knopf-haupt">Verstanden</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Erklärseite „Wie wiege ich meine Katze genau?“ (0.73.0, Ideen-Tafel „Info zu Wiege Methoden und Genauigkeiten“,
+       Plan .planning/wiegen-erklaerseite.md, Text mit Stefans Ja 06.11.2026). Erreichbar über „Tipps“ (Richtig wiegen)
+       und den Link im Fenster „Gewicht eintragen“. Wiege-Tipps nach APOP (petobesityprevention.org/weight-check, gelesen
+       06.11.2026), Tempo aus GRENZEN (AAHA 2014, Flanagan 2018). Nach dem 13.11. ggf. die Waagen-Empfehlung des Tierarztes. -->
+  <dialog id="dialog-wiegen">
+    <form method="dialog">
+      <h2 tabindex="-1" autofocus>Wie wiege ich meine Katze genau?</h2>
+      <p>Beim Abnehmen geht es um kleine Schritte. Die Leitlinien nennen 0,5 bis 2&nbsp;% des Körpergewichts pro Woche.
+        Bei einer 5-kg-Katze sind das nur 25 bis 100&nbsp;g. Damit du so kleine Änderungen siehst, kommt es auf die Waage an.</p>
+      <h3>Welche Waage?</h3>
+      <ul>
+        <li><strong>Tier- oder Babywaage:</strong> zeigt meist 10-g-Schritte. Für Katzen ist sie zu Hause die beste Wahl.</li>
+        <li><strong>Transportbox auf der Küchen- oder Paketwaage:</strong> leere Box auf die Waage, „Tara“ drücken, Katze
+          hinein. Die Waage zeigt dann ihr Gewicht. Auf die Höchstlast achten.</li>
+        <li><strong>Personenwaage mit Katze auf dem Arm:</strong> am gröbsten. Personenwaagen zeigen meist nur
+          100-g-Schritte, und weil zweimal abgelesen wird, kann das Ergebnis leicht 100&nbsp;g oder mehr danebenliegen,
+          so viel wie eine ganze Woche Abnahme. Kilossos rechnet die Differenz im Fenster „Gewicht eintragen“ unter
+          „Auf dem Arm gewogen?“ aus.</li>
+      </ul>
+      <h3>Immer gleich wiegen</h3>
+      <p>Nimm immer dieselbe Waage, am gleichen Wochentag („Wiegetag“ unter „Mehr“) und etwa zur gleichen Uhrzeit, wenn
+        möglich vor dem Füttern. Halsband oder Geschirr vorher ab. Eine andere Waage, eine frische Mahlzeit oder ein
+        Halsband können eine kleine Änderung größer aussehen lassen, als sie ist.</p>
+      <h3>Wenn ein Wert nicht passt</h3>
+      <p>Zeigt Kilossos eine Warnung zum Tempo oder passt ein Wert nicht zum Verlauf, wiege erst nach: mit einer genauen
+        Waage oder in der Tierarztpraxis. Ändere die Futtermenge nur mit deinem Tierarzt.</p>
+      <p class="leise">Quellen: Association for Pet Obesity Prevention, Ratgeber zum Wiegen zu Hause; AAHA 2014 und
+        Flanagan et al. 2018 (0,5 bis 2&nbsp;% pro Woche).</p>
       <div class="knoepfe">
         <button value="abbrechen" class="knopf-haupt">Verstanden</button>
       </div>
