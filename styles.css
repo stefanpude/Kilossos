@@ -286,7 +286,7 @@ html[data-start] .ansicht[data-ansicht="heute"] { display: none; }
 .tag-titel-knopf .ico { width: 18px; height: 18px; color: var(--text-leise); }
 .tag-titel-knopf:active { background: var(--flaeche); }
 .tag-kalender {
-  position: absolute; left: 50%; bottom: 0; width: 1px; height: 1px; padding: 0; border: 0;
+  position: absolute; left: 0; bottom: 0; width: 1px; height: 1px; padding: 0; border: 0;
   opacity: 0; pointer-events: none;
 }
 
