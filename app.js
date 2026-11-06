@@ -135,6 +135,9 @@ wendeAnzeigeAn(leseAnzeige());
 // Demo-Modus (Link mit "?demo"): lädt bei jedem Öffnen frisch die Simulation von Kito und Zuki aus werkzeuge/erzeuge-testdaten.js,
 // verschoben auf heute, in einen eigenen Speicherplatz. Die echten Einträge bleiben unberührt.
 const demo = new URLSearchParams(location.search).has("demo");
+// „Demo ansehen“ unter „Mehr“ (seit 0.56.0): öffnet die Demo aus der installierten App, weil ein Startbildschirm-Symbol
+// immer die start_url aus manifest.webmanifest nimmt und "?demo" verliert. In der Demo selbst ist der Eintrag unnötig.
+$("demo-oeffnen").hidden = demo;
 
 // Erster Start (noch nichts gespeichert): Willkommen und Einrichtung, siehe unten. Bis dahin darf nichts gespeichert
 // werden, sonst stünde der Platzhalter „Deine Katze“ im Speicher. Alle Schreibwege laufen über speichern().
