@@ -43,6 +43,29 @@ test("0.74.1: Tagespfeile auf „Heute“ (.knopf-rund) sind Quadrate mit 21 % E
   assert.doesNotMatch(r, /50%/);
 });
 
+// 0.74.2 (Stefan 06.11.2026, „Gruppe A und B“): A = runde ±-Tasten wie die Tagespfeile (21 %),
+// B = Pillen-Knöpfe und -Schilder mit den kleinen Ecken der normalen Knöpfe (--rund-klein).
+// Rund bleiben bewusst: Info-„i“, Zeichen nach dem Wiegen, PDF-Nummern, Legendenpunkt der kcal-Grafik.
+test("0.74.2: ±10 g beim Gewicht und − / + bei der Menge sind Quadrate mit 21 % Ecken", () => {
+  for (const auswahl of [".stufe", ".gramm button"]) {
+    const r = regel(auswahl);
+    assert.match(r, /border-radius: 21%;/, auswahl);
+    assert.doesNotMatch(r, /50%/, auswahl);
+  }
+});
+
+test("0.74.2: „Korrigieren oder löschen“, „Ändern“-Plakette und Schilder haben die Ecken der Knöpfe, keine Pille mehr", () => {
+  for (const auswahl of [".freigabe-hinweis", ".marke", ".vn-plakette"]) {
+    assert.match(regel(auswahl), /border-radius: var\(--rund-klein\);/, auswahl);
+  }
+  assert.doesNotMatch(css, /border-radius: 999px/);
+});
+
+test("0.74.2: Info-Zeichen und Zeichen nach dem Wiegen bleiben rund", () => {
+  assert.match(regel(".hinweis .punkt"), /border-radius: 50%;/);
+  assert.match(regel(".rueckmeldung .zeichen"), /border-radius: 50%;/);
+});
+
 test("0.74.0: Foto in der Übersicht für den Tierarzt (PDF) hat dieselbe Form", () => {
   const r = regel(".bericht-foto");
   assert.match(r, /border-radius: 21%;/);

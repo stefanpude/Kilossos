@@ -351,7 +351,7 @@ html[data-start] .ansicht[data-ansicht="heute"] { display: none; }
 /* Marken: Text immer in --text, die Farbe nur als Fläche */
 .marke {
   flex: none; display: inline-block; font-size: 0.8125rem; font-weight: 700; padding: 2px 9px;
-  border-radius: 999px; background: var(--flaeche-2); color: var(--text); white-space: nowrap;
+  border-radius: var(--rund-klein); background: var(--flaeche-2); color: var(--text); white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 .marke-gut, .marke-packung, .marke-hersteller { background: var(--gut-hell); }
@@ -441,7 +441,7 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .freigabe-hinweis {
   display: inline-flex; align-items: center; gap: 6px; justify-self: start;
   margin-top: 2px; padding: 6px 12px 6px 10px;
-  border: 1px solid var(--akzent); border-radius: 999px;
+  border: 1px solid var(--akzent); border-radius: var(--rund-klein); /* wie die Knöpfe, keine Pille (0.74.2) */
   color: var(--akzent-stark); font-weight: 700; font-size: 0.875rem; line-height: 1.2;
 }
 .freigabe-hinweis .ico { width: 1rem; height: 1rem; flex: none; }
@@ -477,7 +477,7 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .vn-bild:active img { filter: brightness(0.92); }
 .vn-plakette {
   position: absolute; top: 8px; right: 8px; display: inline-flex; align-items: center; gap: 4px;
-  padding: 4px 10px 4px 8px; border-radius: 999px; background: rgba(0, 0, 0, 0.62); color: #fff;
+  padding: 4px 10px 4px 8px; border-radius: var(--rund-klein); background: rgba(0, 0, 0, 0.62); color: #fff;
   font-size: 0.8125rem; font-weight: 600; line-height: 1.2; pointer-events: none; white-space: nowrap;
 }
 .vn-plakette .ico { width: 16px; height: 16px; stroke-width: 2; }
@@ -906,7 +906,7 @@ dialog .haken-zeile input[type="checkbox"] {
 /* Gewicht eintragen: große Zahl mit ±10 g */
 .waage { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .stufe {
-  width: 56px; height: 56px; border-radius: 50%; border: 1px solid var(--rand-stark); background: var(--hintergrund);
+  width: 56px; height: 56px; border-radius: 21%; border: 1px solid var(--rand-stark); background: var(--hintergrund); /* eckig wie die Tagespfeile (0.74.2) */
   color: var(--text); font-weight: 700; cursor: pointer; flex: none; padding: 0;
   font-variant-numeric: tabular-nums; transition: transform 0.1s;
   /* Große Handy-Schrift: „−10 g“ bleibt einzeilig im Kreis, die große Zahl daneben behält ihren Platz (0.41.0). */
@@ -955,7 +955,7 @@ dialog .waage-anzeige input.waage-zahl:focus-visible { outline: none; border-bot
 /* Menge mit − / + */
 .gramm { display: flex; align-items: center; gap: 10px; }
 .gramm button {
-  width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--rand-stark); background: var(--hintergrund);
+  width: 48px; height: 48px; border-radius: 21%; border: 1px solid var(--rand-stark); background: var(--hintergrund); /* eckig wie die Tagespfeile (0.74.2) */
   color: var(--text); cursor: pointer; flex: none; display: grid; place-items: center; padding: 0; transition: transform 0.1s;
 }
 .gramm button:active { transform: scale(0.92); }
