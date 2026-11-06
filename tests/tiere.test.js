@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { aktivesTier, leseAktivesTier, merkeAktivesTier, neuesTier, eintraegeVon, tierEntfernen } from "../js/tiere.js";
+import { aktivesTier, leseAktivesTier, merkeAktivesTier, vergissDemoTier, neuesTier, eintraegeVon, tierEntfernen } from "../js/tiere.js";
 
 const speicher = () => {
   const werte = new Map();
@@ -85,4 +85,20 @@ test("ein unbekanntes Tier entfernt nichts", () => {
   const daten = beispiel();
   assert.equal(tierEntfernen(daten, "gibts-nicht"), false);
   assert.equal(daten.tiere.length, 2);
+});
+
+// 0.56.1: Nach „Demo beenden“ blieb die Demo-Wahl im Speicher liegen. Die echte Wahl bleibt unberührt.
+test("vergissDemoTier löscht nur die Demo-Wahl", () => {
+  const s = speicher();
+  s.removeItem = (k) => s.werte.delete(k);
+  merkeAktivesTier("zuki", false, s);
+  merkeAktivesTier("demo-zuki", true, s);
+  vergissDemoTier(s);
+  assert.equal(leseAktivesTier(true, s), null);
+  assert.equal(leseAktivesTier(false, s), "zuki");
+});
+
+test("vergissDemoTier wirft nicht bei gesperrtem Speicher", () => {
+  const gesperrt = { removeItem: () => { throw new Error("gesperrt"); } };
+  assert.doesNotThrow(() => vergissDemoTier(gesperrt));
 });

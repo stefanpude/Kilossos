@@ -1,19 +1,21 @@
 # Fragen für den Tierarzttermin: Zuki
 
-Zum Ausdrucken oder am Handy mitnehmen. Dazu die Futterpackungen oder Fotos davon. Ist Zuki in der App angelegt,
-auch die Tierarzt-Übersicht als PDF („Mehr“ → „Übersicht für den Tierarzt“ → „Übersicht öffnen“).
+Zum Ausdrucken oder am Handy mitnehmen. Dazu die Futterpackungen oder Fotos davon. Außerdem die Tierarzt-Übersicht als PDF:
+in der App oben auf Zuki wechseln, dann „Mehr“ → „Übersicht für den Tierarzt“ → „Übersicht öffnen“.
 Die Liste für Kito: [tierarzt-fragen-kito.md](tierarzt-fragen-kito.md). Fragen zur App selbst stehen dort.
 
 ## Ausgangslage
 - Zuki, zierlich gebaut, im Verhältnis aber noch dicker als Kito
 - Geschlecht und kastriert: bitte ergänzen
 - Alter oder Geburtsdatum: bitte ergänzen
-- Gewicht: noch nicht gewogen, bitte in der Praxis wiegen lassen
-- Futter: bitte ergänzen
+- Gewicht: 7,33 kg (zu Hause gewogen am 06.11.2026; mit einer Personenwaage kann das 100–200 g danebenliegen),
+  bitte in der Praxis nachwiegen
+- Futter: dasselbe wie Kito: Sheba Fresh & Fine in Sauce (nass, 50-g-Beutel, ca. 77 kcal/100 g) und
+  Purina One Light (trocken, ca. 327,5 kcal/100 g)
 - Wird getrennt von Kito gefüttert
 
 ## 1. Befund
-- [ ] Wie viel wiegt Zuki? (Startgewicht für die App)
+- [ ] Wie viel wiegt Zuki auf der Praxiswaage? (Zu Hause: 7,33 kg)
 - [ ] Wie ist Zukis **Body Condition Score (BCS)**? (Skala 1–9)
 - [ ] Wie ist Zukis **Muskelzustand (MCS)**?
 - [ ] Sind vorher Blutwerte nötig (z. B. Schilddrüse, Zucker, Leber, Nieren)?
@@ -48,7 +50,7 @@ Die Liste für Kito: [tierarzt-fragen-kito.md](tierarzt-fragen-kito.md). Fragen 
 - [ ] Wie oft soll ich Zuki zum Wiegen in die Praxis bringen? (Zu Hause wiege ich 1× pro Woche,
       gleicher Tag, gleiche Uhrzeit, gleiche Waage.)
 - [ ] Welche **Waage** empfehlen Sie für zu Hause, und wie genau muss sie sein? Zuki ist zierlich, bei 0,5–2 % pro
-      Woche geht es um noch weniger Gramm als bei Kito (bei 5 kg etwa 25–100 g). Eine Personenwaage
+      Woche geht es um noch weniger Gramm als bei Kito (bei 7,33 kg etwa 35–150 g). Eine Personenwaage
       (100-g-Schritte, Katze auf dem Arm) kann leicht 100 g danebenliegen. Genauer wären eine Tier- oder Babywaage
       (10-g-Schritte) oder die Transportbox auf einer Küchen- oder Paketwaage.
 - [ ] Helfen Ihnen **Fotos** von Zuki bei der Kontrolle, zum Beispiel einmal im Monat **von oben und von der Seite**?

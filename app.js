@@ -66,7 +66,7 @@ import { aufklappKarte, merkeZustand, zustandVon, zustandVergessen, aufklappenAn
 import { begriffeHtml, hinweisKnopf, kcalSpanne } from "./js/wissen.js";
 import { auswahlFeld, auswahlAnmelden } from "./js/auswahl.js";
 import { alterText, telefonLink, telefonGueltig, istWiegetag, WOCHENTAGE, HALTUNG, kartenLink, praxisVorschlag } from "./js/profil.js";
-import { aktivesTier, leseAktivesTier, merkeAktivesTier, neuesTier, eintraegeVon, tierEntfernen } from "./js/tiere.js";
+import { aktivesTier, leseAktivesTier, merkeAktivesTier, vergissDemoTier, neuesTier, eintraegeVon, tierEntfernen } from "./js/tiere.js";
 import { wischenAnmelden } from "./js/wischen.js";
 import { datumText, freigabeTafel } from "./js/mehr.js";
 import {
@@ -169,6 +169,7 @@ if (demo) {
   } catch {
     // Speicher gesperrt: nichts zu tun.
   }
+  vergissDemoTier();
 }
 
 let daten;

@@ -27,6 +27,15 @@ export function merkeAktivesTier(id, demo, speicher = localStorage) {
   }
 }
 
+// Außerhalb der Demo aufgerufen: Die Demo-Wahl würde sonst nach „Demo beenden“ liegen bleiben.
+export function vergissDemoTier(speicher = localStorage) {
+  try {
+    speicher.removeItem(DEMO_SCHLUESSEL);
+  } catch {
+    // nichts zu tun
+  }
+}
+
 export function neuesTier(id, name) {
   return { id, name, art: "katze" };
 }
