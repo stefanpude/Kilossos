@@ -236,14 +236,15 @@ html[data-start] .ansicht[data-ansicht="heute"] { display: none; }
 .tier-kopf .datum { font-size: 0.8125rem; color: var(--text-leise); text-align: right; }
 .profil-feld { position: relative; }
 .profil {
-  width: 56px; height: 56px; border-radius: 50%; padding: 0; border: 0; flex: none;
+  width: 56px; height: 56px; border-radius: 21%; padding: 0; border: 0; flex: none;
+  box-shadow: 0 0 0 1px var(--rand-stark); /* wie das Bild auf der Willkommensseite (0.74.0), vorher Kreis */
   background: var(--akzent-hell); position: relative; cursor: pointer;
   display: grid; place-items: center;
   transition: transform 0.15s;
 }
 .profil:active { transform: scale(0.95); }
 .profil img, .avatar img {
-  width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;
+  width: 100%; height: 100%; border-radius: inherit; object-fit: cover; display: block;
   animation: foto-rein 0.35s ease-out;
 }
 @keyframes foto-rein { from { opacity: 0; } to { opacity: 1; } }
@@ -258,7 +259,7 @@ html[data-start] .ansicht[data-ansicht="heute"] { display: none; }
 }
 .profil .kamera .ico { width: 14px; height: 14px; stroke-width: 2; }
 .avatar {
-  width: 40px; height: 40px; border-radius: 50%; background: var(--akzent-hell);
+  width: 40px; height: 40px; border-radius: 21%; box-shadow: 0 0 0 1px var(--rand-stark); background: var(--akzent-hell);
   display: grid; place-items: center; overflow: hidden; flex: none;
 }
 .avatar .initiale { font-size: 1.125rem; }
@@ -1121,7 +1122,7 @@ dialog .wert-eingabe input:not([type="hidden"]) { padding-right: calc(12px + 1.4
 .bericht-vn-seite { margin: 0; display: grid; gap: 4px; break-inside: avoid; }
 .bericht-vn-bild { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; }
 .bericht-vn figcaption { font-size: 0.8125rem; }
-.bericht-foto { float: right; width: 2cm; height: 2cm; border-radius: 50%; object-fit: cover; margin: 0 0 6px 12px; }
+.bericht-foto { float: right; width: 2cm; height: 2cm; border-radius: 21%; object-fit: cover; margin: 0 0 6px 12px; }
 .bericht-klein { font-size: 0.75rem; color: var(--text-leise); }
 .bericht-demo { font-weight: 700; color: var(--gefahr); }
 .bericht table { width: 100%; border-collapse: collapse; margin-top: 6px; font-variant-numeric: tabular-nums; }

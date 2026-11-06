@@ -398,7 +398,7 @@ function tagTitel(datum) {
   return datum.toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "long" });
 }
 
-// Rundes Profilbild: "gross" füllt den Knopf auf „Heute“, "klein" steht im Kopf von „Verlauf“.
+// Profilbild (seit 0.74.0 Quadrat mit runden Ecken wie auf der Willkommensseite): "gross" füllt den Knopf auf „Heute“, "klein" steht im Kopf von „Verlauf“.
 // Ohne eigenes Foto: ruhige Initiale auf Salbei (seit 0.23.0, vorher Zeichentrick-Katze).
 function profilHtml(einTier, groesse) {
   const initiale = sicher((einTier.name?.trim()[0] ?? "?").toLocaleUpperCase("de-DE"));
