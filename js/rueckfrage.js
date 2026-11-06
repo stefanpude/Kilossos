@@ -7,6 +7,9 @@
 export const KLICKSPERRE_MS = 400;
 
 export function frage({ text, ja, nein = "Abbrechen", dritte = null, gefahr = false }, dialog = document.getElementById("dialog-rueckfrage")) {
+  // Kein Blatt da (gemischter Cache nach einem Update: index.html alt, Skripte neu): sicher als Nein werten, nichts
+  // wird gelöscht oder ungefragt gespeichert. Nach dem nächsten Neuladen ist das Blatt da (Prüfer-Fund 0.52.0).
+  if (!dialog) return Promise.resolve("nein");
   // Schon eine Frage offen (z. B. doppelt getippt): die erste bleibt, die zweite gilt als Nein.
   if (dialog.open) return Promise.resolve("nein");
   const teil = (name) => dialog.querySelector(`#rueckfrage-${name}`);

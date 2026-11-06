@@ -973,14 +973,16 @@ $("form-profil").addEventListener("submit", async (ereignis) => {
     : "";
   const frage = `${bearbeitetesTier.name} wirklich entfernen?${eintraege} Die Futtersorten bleiben.`;
   if (!(await bestaetigt({ text: frage, ja: "Entfernen", gefahr: true }))) return;
-  if (bearbeitetesTier !== entfernt) return; // Fenster inzwischen zu oder anderes Tier
+  // Fenster inzwischen zu oder anderes Tier. Der Merker wird beim Schließen nicht geleert, daher auch „open“ prüfen.
+  if (!$("dialog-profil").open || bearbeitetesTier !== entfernt) return;
   const name = entfernt.name;
   if (!tierEntfernen(daten, entfernt.id)) {
     return zeigeFehler("profil-fehler", "Das letzte Tier kann nicht entfernt werden.");
   }
   $("dialog-profil").close("entfernen");
-  speichern(daten);
-  wechsleTier(tier.id); // war es das angezeigte Tier, springt die Anzeige auf das erste
+  tier = aktivesTier(daten, tier.id); // war es das angezeigte Tier, springt die Anzeige auf das erste
+  if (!sichern()) return; // Speicher voll: sichern() lädt den alten Stand und meldet es
+  wechsleTier(tier.id);
   zeigeToast(`${name} entfernt`);
 });
 
@@ -2078,7 +2080,7 @@ $("form-freigabe").addEventListener("submit", async (ereignis) => {
   const weg = bearbeiteteFreigabe;
   if (!(await bestaetigt({ text: loeschFrage(eigeneFreigaben(), weg, tier.name, tagSchluessel(new Date())), ja: "Freigabe löschen", gefahr: true }))) return;
   if (bearbeiteteFreigabe !== weg) return; // Fenster inzwischen zu
-  daten.freigaben = daten.freigaben.filter((f) => f !== weg);
+  daten.freigaben = daten.freigaben.filter((f) => f.id !== weg.id); // per id wie bei den Sorten
   // Der Knopf der gelöschten Freigabe ist weg: Fokus auf die Tafel, ohne Freigabe auf „Freigabe eintragen“.
   oeffner = eigeneFreigaben().length ? { aktion: "freigabe-bearbeiten" } : { aktion: "freigabe-neu" };
   $("dialog-freigabe").close("loeschen");
@@ -2412,8 +2414,8 @@ $("form-futter").addEventListener("submit", async (ereignis) => {
     return;
   }
   if (!(await bestaetigt({ text: `„${futter.name}“ wirklich löschen?`, ja: "Sorte löschen", gefahr: true }))) return;
-  if (bearbeitetesFutter !== futter) return; // Fenster inzwischen zu oder andere Sorte
-  daten.futter = daten.futter.filter((f) => f !== futter);
+  if (!$("dialog-futter").open || bearbeitetesFutter !== futter) return; // Fenster inzwischen zu oder andere Sorte
+  daten.futter = daten.futter.filter((f) => f.id !== futter.id); // per id: daten kann während der Frage neu geladen sein
   $("dialog-futter").close("loeschen");
   sichern();
 });

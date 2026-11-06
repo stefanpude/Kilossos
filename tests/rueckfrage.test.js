@@ -232,6 +232,30 @@ test("Sorte, Foto und Tier fragen mit eigenem Blatt und rotem Knopf", () => {
   assert.match(abschnitt(quelle, '$("form-profil").addEventListener("submit", async', "\n});\n"), /await bestaetigt\(\{ text: frage, ja: "Entfernen", gefahr: true \}\)/);
 });
 
+// 0.53.1: kleine Prüfer-Funde aus 0.52.0.
+test("0.53.1 frage: ohne Rückfrage-Blatt (gemischter Cache nach Update) sicher \"nein\" statt Fehler", async () => {
+  assert.equal(await frage({ text: "A?", ja: "Löschen" }, null), "nein");
+  assert.equal(await bestaetigt({ text: "A?", ja: "Löschen" }, null), false);
+});
+
+test("0.53.1 Tier und Sorte: nach dem Ja nur löschen, wenn das Fenster noch offen ist, Sorte und Freigabe per id", () => {
+  const quelle = app();
+  const tier = abschnitt(quelle, '$("form-profil").addEventListener("submit", async', "\n});\n");
+  assert.match(tier, /if \(!\$\("dialog-profil"\)\.open \|\| bearbeitetesTier !== entfernt\) return;/);
+  const futter = abschnitt(quelle, '$("form-futter").addEventListener("submit", async', "\n});\n");
+  assert.match(futter, /if \(!\$\("dialog-futter"\)\.open \|\| bearbeitetesFutter !== futter\) return;/);
+  assert.match(futter, /daten\.futter\.filter\(\(f\) => f\.id !== futter\.id\)/);
+  const freigabe = abschnitt(quelle, "// Löschen nur im Fenster „Freigabe ändern“", "\n});\n");
+  assert.match(freigabe, /daten\.freigaben\.filter\(\(f\) => f\.id !== weg\.id\)/);
+});
+
+test("0.53.1 Tier entfernen speichert über sichern() (Speicher voll → Meldung statt Absturz)", () => {
+  const tier = abschnitt(app(), '$("form-profil").addEventListener("submit", async', "\n});\n");
+  assert.doesNotMatch(tier, /\bspeichern\(daten\)/);
+  assert.match(tier, /if \(!sichern\(\)\) return;/);
+  assert.ok(tier.indexOf("if (!sichern()) return;") < tier.indexOf("zeigeToast(`${name} entfernt`)"));
+});
+
 test("Lösch-Formulare verhindern das Schließen immer und schließen nach dem Ja selbst", () => {
   const quelle = app();
   const futter = abschnitt(quelle, '$("form-futter").addEventListener("submit", async', "\n});\n");
