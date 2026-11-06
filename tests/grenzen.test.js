@@ -195,7 +195,15 @@ test("gesternWenigGefressen: auf „Heute“ steht, wenn gestern kaum etwas eing
   assert.equal(w.art, "sofort");
   assert.equal(w.id, "wenig-gefressen-gestern");
   assert.match(w.text, /^Gestern sind nur 39 kcal eingetragen\. Hat Kito normal gefressen\? .*am selben Tag den Tierarzt anrufen/);
-  assert.match(gesternWenigGefressen({ ...gestern, kcal: 0 }).text, /^Für gestern ist keine Mahlzeit eingetragen\. Hat Kito/);
+  // Seit 0.50.1 (Stefans Ja zum Wortlaut, .planning/erinnerung-abends.md Teil 2): erst „nur vergessen?“, dann
+  // unverändert deutlich die Gefahr. Bleibt „sofort“ (rot), Tierarzt und Fettleber stehen vollständig drin.
+  const leer = gesternWenigGefressen({ ...gestern, kcal: 0 });
+  assert.equal(leer.art, "sofort");
+  assert.equal(
+    leer.text,
+    "Für gestern ist keine Mahlzeit eingetragen. Nur vergessen? Dann bitte nachtragen. Hat Kito wirklich nichts " +
+      "oder kaum etwas gefressen: am selben Tag den Tierarzt anrufen, Gefahr einer Fettleber."
+  );
   assert.equal(gesternWenigGefressen({ ...gestern, kcal: 200 }), null); // nur unter der Freigabe: steht beim Zurückblättern
   assert.equal(gesternWenigGefressen({ ...gestern, kcal: 0, fruehereMahlzeiten: false }), null); // erster Tag der Nutzung
 });
@@ -208,4 +216,16 @@ test("warnungen: genau 2,0 % pro Woche ist noch erlaubt, knapp darüber steht mi
   assert.match(knapp[0].text, /zu schnell ab: 2,04 % pro Woche \(erlaubt bis 2 %\)/);
   const deutlich = nurSchnell([{ kg: 9.32, datum: "2026-10-27" }, { kg: 8.8, datum: "2026-11-10" }]); // 2,79 %
   assert.match(deutlich[0].text, /zu schnell ab: 2,8 % pro Woche/);
+});
+
+test("warnungen: Ein vergangener Tag ohne Mahlzeit fragt zuerst nach dem Nachtragen, die Gefahr bleibt vollständig", () => {
+  const [w] = warnungen({ ...basis, kcal: 0 });
+  assert.equal(w.art, "sofort");
+  assert.match(w.text, /^Für diesen Tag ist keine Mahlzeit eingetragen\. Nur vergessen\? Dann bitte nachtragen\. /);
+  assert.match(w.text, /Hat Kito wirklich nichts oder kaum etwas gefressen: am selben Tag den Tierarzt anrufen, Gefahr einer Fettleber\.$/);
+});
+
+test("warnungen: Bei wenigen kcal bleibt der bisherige Text (dort ist ja etwas eingetragen)", () => {
+  const [w] = warnungen({ ...basis, kcal: 100 });
+  assert.match(w.text, /^An diesem Tag sind nur 100 kcal eingetragen\. Hat Kito normal gefressen\? .*Tierarzt anrufen – Gefahr einer Fettleber\.$/);
 });

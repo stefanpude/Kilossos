@@ -308,10 +308,15 @@ export function gewichteBis(gewichte, stichtag) {
 
 function wenigGefressenText(kcal, name, gestern) {
   const k = Math.round(kcal);
-  const anfang =
-    kcal === 0
-      ? gestern ? "Für gestern ist keine Mahlzeit eingetragen." : "Für diesen Tag ist keine Mahlzeit eingetragen."
-      : gestern ? `Gestern sind nur ${k} kcal eingetragen.` : `An diesem Tag sind nur ${k} kcal eingetragen.`;
+  // Ganz ohne Eintrag (seit 0.50.1, Wortlaut von Stefan freigegeben): Oft ist nur das Eintragen vergessen. Deshalb
+  // zuerst „nachtragen“, danach unverändert deutlich die Gefahr. Bleibt rot („sofort“), Grenzen unverändert.
+  if (kcal === 0)
+    return (
+      (gestern ? "Für gestern" : "Für diesen Tag") +
+      " ist keine Mahlzeit eingetragen. Nur vergessen? Dann bitte nachtragen. " +
+      `Hat ${name} wirklich nichts oder kaum etwas gefressen: am selben Tag den Tierarzt anrufen, Gefahr einer Fettleber.`
+    );
+  const anfang = gestern ? `Gestern sind nur ${k} kcal eingetragen.` : `An diesem Tag sind nur ${k} kcal eingetragen.`;
   return (
     anfang +
     ` Hat ${name} normal gefressen? Wenn eine Katze 24 Stunden lang nichts oder kaum etwas frisst: ` +

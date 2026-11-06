@@ -36,6 +36,11 @@ Notfall-Kasten zeigt. Teil 2 (roter Morgentext) ist unverändert und braucht vor
 
 ## Teil 2: roter Hinweis am Morgen nennt beide Fälle
 
+**✅ Gebaut in 0.50.1 (06.11.2026, Wortlaut vom Halter freigegeben):** Gilt für den Fall „keine Mahlzeit eingetragen“,
+auf „Heute“ für gestern und beim Zurückblättern („Für diesen Tag …“). Der Fall „nur wenige kcal eingetragen“ behält
+den bisherigen Text (dort ist etwas eingetragen). Kein Knopf „Gestern nachtragen“ (Zurückblättern mit dem Pfeil reicht).
+Bleibt rot, Grenzen unverändert; Tests in `tests/grenzen.test.js`.
+
 - Heute fragt der Hinweis nur „Hat … normal gefressen?“. Neu soll er zuerst an das vergessene Eintragen erinnern und
   dann, unverändert deutlich, an die Gefahr. Entwurf für den Fall „keine Mahlzeit eingetragen“:
   „Für gestern ist keine Mahlzeit eingetragen. Nur vergessen? Dann bitte nachtragen. Hat … wirklich nichts oder kaum
