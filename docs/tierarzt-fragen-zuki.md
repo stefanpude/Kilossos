@@ -47,6 +47,13 @@ Die Liste für Kito: [tierarzt-fragen-kito.md](tierarzt-fragen-kito.md). Fragen 
 ## 5. Kontrolle
 - [ ] Wie oft soll ich Zuki zum Wiegen in die Praxis bringen? (Zu Hause wiege ich 1× pro Woche,
       gleicher Tag, gleiche Uhrzeit, gleiche Waage.)
+- [ ] Welche **Waage** empfehlen Sie für zu Hause, und wie genau muss sie sein? Zuki ist zierlich, bei 0,5–2 % pro
+      Woche geht es um noch weniger Gramm als bei Kito (bei 5 kg etwa 25–100 g). Eine Personenwaage
+      (100-g-Schritte, Katze auf dem Arm) kann leicht 100 g danebenliegen. Genauer wären eine Tier- oder Babywaage
+      (10-g-Schritte) oder die Transportbox auf einer Küchen- oder Paketwaage.
+- [ ] Helfen Ihnen **Fotos** von Zuki bei der Kontrolle, zum Beispiel einmal im Monat **von oben und von der Seite**?
+      Die Übersicht kann das erste und das letzte Foto im Zeitraum zum Vergleich mit ausdrucken.
+      Worauf soll ich beim Fotografieren achten?
 - [ ] Wann ist der nächste Kontrolltermin, und in welchem **Abstand** sollen wir danach zur Kontrolle kommen?
       (Die App könnte dann daran erinnern.)
 - [ ] Welche **Ausnahmen** soll ich in der App festhalten, damit Sie sie bei der Kontrolle sehen? Dafür gibt es den
@@ -68,4 +75,6 @@ Die Liste für Kito: [tierarzt-fragen-kito.md](tierarzt-fragen-kito.md). Fragen 
 | Übrig gelassenes Futter: ab wann melden | |
 | Nächster Termin | |
 | Abstand der Kontrollen | |
+| Waage für zu Hause | |
+| Fotos: hilfreich, welche Ansicht | |
 | Ausnahmen für die App | |
