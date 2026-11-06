@@ -253,7 +253,7 @@ html[data-start] .ansicht[data-ansicht="heute"] { display: none; }
   font-family: var(--serif); font-weight: 500; font-size: 1.5rem; line-height: 1; color: var(--text);
 }
 .profil .kamera {
-  position: absolute; right: -3px; bottom: -3px; width: 24px; height: 24px; border-radius: 50%;
+  position: absolute; right: -3px; bottom: -3px; width: 24px; height: 24px; border-radius: 21%; /* wie das Profilbild (0.74.1) */
   background: var(--flaeche); color: var(--text); display: grid; place-items: center;
   border: 1px solid var(--rand-stark);
 }
@@ -297,7 +297,7 @@ html[data-start] .ansicht[data-ansicht="heute"] { display: none; }
 }
 
 .knopf-rund {
-  width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--rand-stark); background: var(--flaeche);
+  width: 48px; height: 48px; border-radius: 21%; border: 1px solid var(--rand-stark); background: var(--flaeche); /* Name bleibt, seit 0.74.1 eckig wie die Profilbilder */
   color: var(--text); cursor: pointer; display: grid; place-items: center; padding: 0;
   transition: transform 0.12s;
 }

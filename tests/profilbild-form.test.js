@@ -29,8 +29,18 @@ test("0.74.0: das Foto im Profilbild übernimmt die Ecken, kein Kreis mehr", () 
   assert.doesNotMatch(r, /50%/);
 });
 
-test("0.74.0: Kamera-Knopf am Profilbild bleibt rund", () => {
-  assert.match(regel(".profil .kamera"), /border-radius: 50%;/);
+// 0.74.1 (Stefan 06.11.2026, Bilder): Kamera-Knopf und die Tagespfeile auf „Heute“ in derselben Form wie die Profilbilder.
+test("0.74.1: Kamera-Knopf am Profilbild ist ein Quadrat mit 21 % Ecken", () => {
+  const r = regel(".profil .kamera");
+  assert.match(r, /border-radius: 21%;/);
+  assert.doesNotMatch(r, /50%/);
+});
+
+test("0.74.1: Tagespfeile auf „Heute“ (.knopf-rund) sind Quadrate mit 21 % Ecken, Tippfläche bleibt 48 px", () => {
+  const r = regel(".knopf-rund");
+  assert.match(r, /border-radius: 21%;/);
+  assert.match(r, /width: 48px; height: 48px;/);
+  assert.doesNotMatch(r, /50%/);
 });
 
 test("0.74.0: Foto in der Übersicht für den Tierarzt (PDF) hat dieselbe Form", () => {
