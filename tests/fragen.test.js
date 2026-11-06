@@ -22,7 +22,10 @@ test("Seite: Überschrift mit Fokus, jede Frage als h3, Knopf „Verstanden“",
   const seite = blatt(lies("index.html"), "dialog-fragen");
   assert.ok(seite.includes('<h2 tabindex="-1" autofocus>Häufige Fragen</h2>'));
   const fragen = [...seite.matchAll(/<h3>([^<]+)<\/h3>/g)].map((m) => m[1]);
-  assert.ok(fragen.length >= 8, `nur ${fragen.length} Fragen`);
+  assert.ok(fragen.length >= 7, `nur ${fragen.length} Fragen`);
+  // 0.61.0: Was „Tipps“ oder „Wissen“ schon zeigt, steht hier nicht noch einmal.
+  assert.ok(!fragen.includes("Meine Katze nimmt nicht ab. Was nun?"));
+  assert.ok(!fragen.includes("Was heißen BCS, RER und die anderen Begriffe?"));
   for (const f of fragen) assert.ok(f.endsWith("?"), f);
   assert.ok(seite.includes('<button value="abbrechen" class="knopf-haupt">Verstanden</button>'));
 });
@@ -32,7 +35,7 @@ test("Jeder Verweis führt zu einer Seite, die es gibt", () => {
   const js = lies("app.js");
   const seite = blatt(html, "dialog-fragen");
   const verweise = [...seite.matchAll(/data-aktion="([^"]+)"/g)].map((m) => m[1]);
-  assert.ok(verweise.length >= 5);
+  assert.ok(verweise.length >= 2);
   for (const aktion of verweise) {
     const fall = js.match(new RegExp(`case "${aktion}":\\s*return \\$\\("([^"]+)"\\)\\.showModal\\(\\);`));
     assert.ok(fall, `kein Klick-Fall für ${aktion}`);

@@ -270,6 +270,9 @@
         <button type="button" class="eintrag" data-aktion="fragen-erklaerung">
           <span data-symbol="frage"></span><span class="text">Häufige Fragen</span><span class="weiter" data-symbol="weiter"></span>
         </button>
+        <button type="button" class="eintrag" data-aktion="begriffe-erklaerung">
+          <span data-symbol="buch"></span><span class="text">Begriffe kurz erklärt</span><span class="weiter" data-symbol="weiter"></span>
+        </button>
       </div>
 
       <h3 class="gruppe-titel">Einstellungen</h3>
@@ -341,7 +344,7 @@
           <span data-symbol="katzenkopf"></span><span class="text">Demo ansehen<small>Beispieldaten von Kito und Zuki über ein Jahr. Deine Einträge bleiben, wie sie sind.</small></span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.60.1</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.61.0</span>
         </div>
       </div>
     </section>
@@ -954,7 +957,8 @@
   </dialog>
 
   <!-- Blatt „Häufige Fragen“ (0.58.0, Ideen-Tafel „Tipps & Tricks, FAQ“, Stefan: Weg B). Kurze Antworten zur App.
-       Fachliches (Grenzen, Tipps, Begriffe) nur als Verweis auf die Erklärseiten, keine Zahlen hier.
+       Fachliches (Futtermenge, Grenzen) nur als Verweis auf die Erklärseiten, keine Zahlen hier. Seit 0.61.0 kein
+       Verweis, den „Wissen“ oder „Tipps“ schon zeigt (Stefan: nichts doppelt).
        Der Notfallsatz steht wörtlich wie in der Anleitung. -->
   <dialog id="dialog-fragen">
     <form method="dialog">
@@ -976,16 +980,10 @@
       <h3>Wie schnell darf meine Katze abnehmen?</h3>
       <p>Das entscheidet dein Tierarzt. Ab wann Kilossos warnt und woher die Grenzen stammen, steht hier:</p>
       <p><button type="button" class="knopf-text" data-aktion="grenzen-erklaerung">Welche Grenzen gelten?</button></p>
-      <h3>Meine Katze nimmt nicht ab. Was nun?</h3>
-      <p>Oft steckt eine von wenigen Ursachen dahinter, zum Beispiel Leckerlis oder eine andere Katze, die mitfrisst.</p>
-      <p><button type="button" class="knopf-text" data-aktion="warum-nicht-ab">Warum nimmt meine Katze nicht ab?</button></p>
       <h3>Was tue ich, wenn meine Katze nicht frisst?</h3>
       <p class="notfall-hinweis"><strong>Frisst deine Katze einen Tag oder länger gar nicht, gehört sie sofort zum Tierarzt.</strong></p>
       <h3>Ich habe mehrere Katzen. Geht das?</h3>
       <p>Ja. Weitere Katzen legst du unter „Mehr“ mit „Tier hinzufügen“ an. Jede Katze braucht ihre eigene Freigabe.</p>
-      <p><button type="button" class="knopf-text" data-aktion="anleitung-erklaerung">So nutzt du Kilossos</button></p>
-      <h3>Was heißen BCS, RER und die anderen Begriffe?</h3>
-      <p><button type="button" class="knopf-text" data-aktion="begriffe-erklaerung">Begriffe kurz erklärt</button></p>
       <div class="knoepfe">
         <button value="abbrechen" class="knopf-haupt">Verstanden</button>
       </div>

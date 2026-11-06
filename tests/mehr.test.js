@@ -279,17 +279,31 @@ test("0.45.0: erster Absatz „Über Kilossos“ mit neuem ersten Satz, Rest wö
 
 // 0.60.0 (Stefan 06.11.: „in Wissen stehen Sachen, die in Unterrubriken bereits vorkommen“):
 // Unter „Wissen“ nur noch die drei Einstiege; die Erklärseiten erreicht man über „Tipps“ und „Häufige Fragen“.
-test("0.60.0: „Wissen“ zeigt nur Anleitung, Tipps und Häufige Fragen, keine Seite doppelt", () => {
-  const wissen = abschnitt(ansichtMehr(), /<h3 class="gruppe-titel">Wissen<\/h3>/);
-  const aktionen = [...wissen.matchAll(/data-aktion="([a-z-]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(aktionen, ["anleitung-erklaerung", "tipps-erklaerung", "fragen-erklaerung"]);
-});
-
-test("0.60.0: jede Erklärseite bleibt über „Tipps“ oder „Häufige Fragen“ erreichbar", () => {
+test("0.60.0: jede Erklärseite bleibt über „Wissen“, „Tipps“ oder „Häufige Fragen“ erreichbar", () => {
   const html = lies("index.html");
   const blatt = (id) => html.slice(html.indexOf(`<dialog id="${id}">`), html.indexOf("</dialog>", html.indexOf(`<dialog id="${id}">`)));
-  const verweise = blatt("dialog-tipps") + blatt("dialog-fragen");
+  const wissen = abschnitt(ansichtMehr(), /<h3 class="gruppe-titel">Wissen<\/h3>/);
+  const verweise = wissen + blatt("dialog-tipps") + blatt("dialog-fragen");
   for (const aktion of ["begriffe-erklaerung", "warum-kein-ziel", "grenzen-erklaerung", "warum-nicht-ab", "alltag-erklaerung"]) {
     assert.ok(verweise.includes(`data-aktion="${aktion}"`), `nicht mehr erreichbar: ${aktion}`);
   }
+});
+
+// 0.61.0 (Stefan 06.11.: „Warum nimmt meine Katze nicht ab?“ stand in „Tipps“ und in „Häufige Fragen“,
+// „So nutzt du Kilossos“ und „Begriffe“ in „Wissen“ bzw. „Häufige Fragen“; Begriffe gehört auf die Hauptseite):
+test("0.61.0: „Wissen“ zeigt Anleitung, Tipps, Häufige Fragen und Begriffe", () => {
+  const wissen = abschnitt(ansichtMehr(), /<h3 class="gruppe-titel">Wissen<\/h3>/);
+  const aktionen = [...wissen.matchAll(/data-aktion="([a-z-]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(aktionen, ["anleitung-erklaerung", "tipps-erklaerung", "fragen-erklaerung", "begriffe-erklaerung"]);
+  assert.ok(wissen.includes('<span data-symbol="buch"></span><span class="text">Begriffe kurz erklärt</span>'));
+});
+
+test("0.61.0: keine Seite ist über „Wissen“, „Tipps“ und „Häufige Fragen“ zweimal verlinkt", () => {
+  const html = lies("index.html");
+  const blatt = (id) => html.slice(html.indexOf(`<dialog id="${id}">`), html.indexOf("</dialog>", html.indexOf(`<dialog id="${id}">`)));
+  const wissen = abschnitt(ansichtMehr(), /<h3 class="gruppe-titel">Wissen<\/h3>/);
+  const alle = [wissen, blatt("dialog-tipps"), blatt("dialog-fragen")]
+    .flatMap((teil) => [...teil.matchAll(/data-aktion="([a-z-]+)"/g)].map((m) => m[1]));
+  const doppelt = alle.filter((a, i) => alle.indexOf(a) !== i);
+  assert.deepEqual(doppelt, []);
 });

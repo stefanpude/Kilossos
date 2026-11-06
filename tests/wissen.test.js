@@ -120,8 +120,8 @@ test("hinweisKnopf: nur der Hinweis „Abnahme stockt“ führt zur Erklärseite
 test("index.html: Gruppe „Wissen“ mit beiden Einträgen und beiden Blättern", () => {
   const html = lies("index.html");
   assert.match(html, /<h3 class="gruppe-titel">Wissen<\/h3>/);
-  // Seit 0.60.0 nicht mehr direkt unter „Wissen“, sondern als Verweis in „Häufige Fragen“.
-  assert.match(html, /data-aktion="begriffe-erklaerung">Begriffe kurz erklärt</);
+  // 0.60.0 kurz nur in „Häufige Fragen“, seit 0.61.0 wieder direkt unter „Wissen“.
+  assert.match(html, /data-aktion="begriffe-erklaerung">\s*<span data-symbol="buch"><\/span><span class="text">Begriffe kurz erklärt</);
   assert.match(html, /data-aktion="warum-nicht-ab">Warum nimmt meine Katze nicht ab\?</);
   for (const id of ["dialog-begriffe", "dialog-nicht-ab"]) assert.match(blatt(html, id), /<h2 tabindex="-1" autofocus>/, id);
   assert.match(blatt(html, "dialog-begriffe"), /<div id="begriffe-liste"><\/div>/);
@@ -174,9 +174,9 @@ test("Willkommensseite verspricht nichts, was die App nicht halten kann (Stefan,
   assert.doesNotMatch(html, /ohne Fettleber-Risiko|für jede Sorte/);
 });
 
-test("Version 0.60.1: Cache v112 mit js/rueckfrage.js, js/nachtragen.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
+test("Version 0.61.0: Cache v113 mit js/rueckfrage.js, js/nachtragen.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
   const sw = lies("sw.js");
-  assert.match(sw, /const CACHE_NAME = "kilossos-v112";/);
+  assert.match(sw, /const CACHE_NAME = "kilossos-v113";/);
   assert.match(sw, /"js\/nachtragen\.js",/);
   assert.match(sw, /"js\/rueckfrage\.js",/);
   assert.match(sw, /"demo\/kito-simulation\.json",/);
@@ -184,7 +184,7 @@ test("Version 0.60.1: Cache v112 mit js/rueckfrage.js, js/nachtragen.js und der 
   assert.match(sw, /"js\/besondere-tage\.js",/);
   assert.match(sw, /"js\/freigaben\.js",/);
   assert.match(sw, /"js\/heute-grafiken\.js",/);
-  assert.match(lies("index.html"), /id="version">Version 0\.60\.1</);
+  assert.match(lies("index.html"), /id="version">Version 0\.61\.0</);
 });
 
 // 0.42.7: Wiege-Tipp Transportbox im Bereich „Auf dem Arm gewogen?“ (Ideen-Tafel, Halter 06.11.2026).
