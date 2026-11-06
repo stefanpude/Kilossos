@@ -117,15 +117,25 @@ const abschnitt = (mehr, titel) => {
 
 test("0.45.0: Erklärungen stehen unter „Wissen“ nach „Begriffe kurz erklärt“, vor „Warum nimmt meine Katze nicht ab?“", () => {
   const wissen = abschnitt(ansichtMehr(), /<h3 class="gruppe-titel">Wissen<\/h3>/);
-  const reihe = ["begriffe-erklaerung", "warum-kein-ziel", "bcs-erklaerung", "grenzen-erklaerung", "warum-nicht-ab"].map((aktion) => {
+  const reihe = ["begriffe-erklaerung", "warum-kein-ziel", "grenzen-erklaerung", "warum-nicht-ab"].map((aktion) => {
     const i = wissen.indexOf(`data-aktion="${aktion}"`);
     assert.ok(i >= 0, `fehlt unter Wissen: ${aktion}`);
     return i;
   });
   assert.deepEqual([...reihe].sort((a, b) => a - b), reihe);
   assert.match(wissen, /<span class="text">Warum keine Futtermenge\?<\/span>/);
-  assert.match(wissen, /<span class="text">Was ist der BCS\?<\/span>/);
   assert.match(wissen, /<span class="text">Welche Grenzen gelten\?<\/span>/);
+});
+
+// 0.48.1: „Was ist der BCS?“ stand unter „Wissen“ doppelt neben „Begriffe kurz erklärt“ (Halter 06.11.2026).
+test("0.48.1: Kein eigener BCS-Eintrag unter „Wissen“, die Seite bleibt über „Mehr zum BCS“ und die Freigabe erreichbar", () => {
+  const wissen = abschnitt(ansichtMehr(), /<h3 class="gruppe-titel">Wissen<\/h3>/);
+  assert.doesNotMatch(wissen, /bcs-erklaerung|Was ist der BCS\?/);
+  const html = lies("index.html");
+  assert.match(html, /<dialog id="dialog-bcs">/);
+  assert.match(html, /<button type="button" class="knopf-text" data-aktion="bcs-erklaerung">Was ist der BCS\?<\/button>/);
+  assert.match(lies("js/wissen.js"), /mehr: \{ aktion: "bcs-erklaerung", text: "Mehr zum BCS" \}/);
+  assert.match(lies("app.js"), /case "bcs-erklaerung":/);
 });
 
 test("0.45.0: Unter „Tierarzt“ bleibt nur „Praxis anrufen“, die Liste ist ohne Telefon ganz versteckt", () => {
