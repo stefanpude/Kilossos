@@ -1308,7 +1308,20 @@ function futterMenue(gewaehlt) {
 // Ohne Mahlzeit: neu eintragen. Mit Mahlzeit: Sorte, Uhrzeit und Menge nachträglich ändern (der Tag bleibt).
 let bearbeiteteMahlzeit = null;
 
+// Tageswechsel nachholen, bevor eine neue Mahlzeit eingetragen wird (Prüfer-Fund 0.54.0): Blieb der Tab über
+// Mitternacht sichtbar, stünde „Heute“ noch auf dem alten Tag, gespeichert würde dort, und das leere Uhrzeitfeld
+// sagte „nachtragen“. Gleiche Regel wie beim Zurückkehren in den Tab (visibilitychange).
+function tagwechselNachholen() {
+  const jetzt = tagSchluessel(new Date());
+  if (jetzt === tagBeimZeichnen) return;
+  if (tagSchluessel(gewaehlterTag) === tagBeimZeichnen) gewaehlterTag = new Date();
+  tagBeimZeichnen = jetzt;
+  abendBeimZeichnen = new Date().getHours() >= ABEND_STUNDE;
+  zeichneAlles();
+}
+
 function oeffneMahlzeit(mahlzeit = null) {
+  if (!mahlzeit) tagwechselNachholen();
   bearbeiteteMahlzeit = mahlzeit;
   const form = $("form-mahlzeit");
   form.reset();
@@ -1317,8 +1330,15 @@ function oeffneMahlzeit(mahlzeit = null) {
   // Neue Mahlzeit: keine Sorte vorgewählt, damit niemand aus Versehen die falsche einträgt (seit 0.36.4;
   // vorher stand die erste Sorte drin). Gibt es nur eine Sorte, bleibt sie vorgewählt.
   futterMenue(mahlzeit ? mahlzeit.futterId : daten.futter.length === 1 ? daten.futter[0].id : null);
+  // Nachtragen für einen anderen Tag (seit 0.54.0): Uhrzeit leer statt „jetzt“. Sonst lagen mehrere Fütterungen,
+  // auf einmal nachgetragen, Minuten auseinander und zählten im PDF als eine Mahlzeit (Prüfer-Fund 0.53.0).
+  const nachtragen = !mahlzeit && tagSchluessel(gewaehlterTag) !== tagSchluessel(new Date());
   const zeit = mahlzeit ? new Date(mahlzeit.zeitpunkt) : new Date();
-  form.uhrzeit.value = `${String(zeit.getHours()).padStart(2, "0")}:${String(zeit.getMinutes()).padStart(2, "0")}`;
+  form.uhrzeit.value = nachtragen ? "" : `${String(zeit.getHours()).padStart(2, "0")}:${String(zeit.getMinutes()).padStart(2, "0")}`;
+  $("uhrzeit-tipp").hidden = !nachtragen;
+  // Mit dem Fehlerfeld, damit die Vorlesefunktion „Bitte die Uhrzeit …“ nach dem Fokus mitliest (wie beim Rest-Feld).
+  if (nachtragen) form.uhrzeit.setAttribute("aria-describedby", "uhrzeit-tipp mahlzeit-fehler");
+  else form.uhrzeit.removeAttribute("aria-describedby");
   if (mahlzeit) form.gramm.value = String(mahlzeit.gramm).replace(".", ",");
   restZuruecksetzen(mahlzeit);
   zeigeMahlzeitVorschau();
@@ -1434,6 +1454,10 @@ $("form-mahlzeit").addEventListener("input", () => {
 
 beimSpeichern("form-mahlzeit", "mahlzeit-fehler", (werte) => {
   if (!werte.get("futter")) return "Bitte eine Futtersorte wählen.";
+  if (!werte.get("uhrzeit")) {
+    $("form-mahlzeit").uhrzeit.focus();
+    return "Bitte die Uhrzeit der Fütterung eintragen.";
+  }
   if (restUngeklaert()) {
     $("rest-bereich").open = true;
     restRechnen(true);
