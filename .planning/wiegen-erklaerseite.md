@@ -1,5 +1,10 @@
 # Erklärseite „Wie wiege ich meine Katze?“ (geplant 06.11.2026)
 
+**Gebaut in 0.73.0 (06.11.2026, Stefan „jetzt umsetzen“), vor dem Tierarzttermin.** Ort wie empfohlen (Abschnitt
+„Richtig wiegen“ auf „Tipps“ + Link im Gewicht-Fenster). Titel „Wie wiege ich meine Katze genau?“. Wiege-Tipps nach der
+Association for Pet Obesity Prevention (AAHA-Volltext war nicht abrufbar). Offen: Waagen-Empfehlung des Tierarztes
+nach dem 13.11. ergänzen.
+
 Herkunft: Ideen-Tafel, Karte „Info zu Wiege Methoden und Genauigkeiten“ (Status geplant).
 **Bauen erst nach dem Tierarzttermin am 13.11.2026**, damit die Antwort auf „Welche Waage empfehlen Sie für zu Hause?“
 (steht in beiden Fragenlisten, Abschnitt „Kontrolle“) hineinfließt. Text vor dem Einbau Stefan zeigen.
