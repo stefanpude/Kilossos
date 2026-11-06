@@ -95,6 +95,12 @@ export function eintragAusFormular({ art, von, mehrere, bis, notiz }, heute) {
   return { eintrag: { art, von, bis: ende, notiz: text } };
 }
 
+// Meldung nach dem Speichern (seit 0.71.0): nennt Art und Zeitraum, weil ein Eintrag für frühere Tage am gezeigten
+// Tag nicht zu sehen ist (Stefan 06.11.). Wiederfinden lässt er sich in der Zeitleiste im Verlauf.
+export function speicherMeldung(eintrag) {
+  return `✓ Gespeichert: ${artVon(eintrag.art).text}, ${zeitraumText(eintrag)}`;
+}
+
 // „Wieder gesund“ bzw. „Beendet“: Die Phase endet am gezeigten Tag.
 export function beenden(eintrag, tag) {
   eintrag.bis = tag < eintrag.von ? eintrag.von : tag;

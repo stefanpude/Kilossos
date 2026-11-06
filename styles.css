@@ -1075,7 +1075,7 @@ dialog .wert-eingabe input:not([type="hidden"]) { padding-right: calc(12px + 1.4
 /* ---------- Bestätigung unten ---------- */
 .toast {
   position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom)); z-index: 10;
-  transform: translate(-50%, 16px); max-width: calc(100% - 32px);
+  transform: translate(-50%, 16px); width: max-content; max-width: calc(100% - 32px); /* sonst schrumpft sie wegen left: 50% auf die halbe Breite */
   background: var(--text); color: var(--hintergrund); padding: 10px 16px; border-radius: var(--rund-klein);
   font-size: 0.875rem; opacity: 0; pointer-events: none;
   transition: opacity 0.25s, transform 0.25s ease-out;

@@ -2,6 +2,7 @@
 // Plan: .planning/besonderer-tag-umsetzung.md, Aufgabe 2.
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
   BESONDERE_ARTEN,
   NOTIZ_MAX,
@@ -13,6 +14,7 @@ import {
   eintragAusFormular,
   beenden,
   notfallJetzt,
+  speicherMeldung,
 } from "../js/besondere-tage.js";
 
 const HEUTE = "2026-11-05";
@@ -152,4 +154,22 @@ test("notfallJetzt: gestern über den Monatswechsel", () => {
   const v = B({ art: "futter-verweigert", von: "2026-10-31", bis: "2026-10-31" });
   assert.equal(notfallJetzt([v], "kito", "2026-11-01"), true);
   assert.equal(notfallJetzt([v], "kito", "2026-11-02"), false);
+});
+
+// 0.71.0 (Stefan 06.11.): Wer für frühere Tage einträgt, sieht den Eintrag am gezeigten Tag nicht. Die Meldung nach
+// dem Speichern nennt darum Art und Zeitraum.
+test("0.71.0: speicherMeldung nennt Art und Zeitraum", () => {
+  assert.equal(speicherMeldung(B({ von: "2026-11-03", bis: "2026-11-05" })), "✓ Gespeichert: Krank, 3. bis 5. Nov.");
+  assert.equal(speicherMeldung(B({ von: "2026-11-03", bis: "2026-11-03" })), "✓ Gespeichert: Krank, Di., 3. Nov.");
+  assert.equal(speicherMeldung(B({ von: "2026-11-03", bis: null })), "✓ Gespeichert: Krank, seit Di., 3. Nov.");
+  assert.equal(
+    speicherMeldung(B({ art: "genascht", von: "2026-10-30", bis: "2026-11-02" })),
+    "✓ Gespeichert: Außer der Reihe genascht, 30. Okt. bis 2. Nov."
+  );
+});
+
+test("0.71.0: app.js zeigt die Meldung nach dem Speichern eines besonderen Tags, länger als die kurze", () => {
+  const app = readFileSync(new URL("../app.js", import.meta.url), "utf8");
+  assert.match(app, /return \{ toast: speicherMeldung\(ergebnis\.eintrag\), dauer: 3500 \};/);
+  assert.match(app, /zeigeToast\(ergebnis\?\.toast \?\? "✓ Gespeichert", ergebnis\?\.dauer\)/);
 });

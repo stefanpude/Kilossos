@@ -47,7 +47,7 @@ import {
   FEUCHTE_TROCKEN_ANNAHME,
 } from "./js/rechnen.js";
 import { zeichneVerlauf, naechsterZeitleistenEintrag } from "./js/verlauf.js";
-import { BESONDERE_ARTEN, artVon, eintraegeAm, zeitraumText, eintragAusFormular, beenden, notfallJetzt } from "./js/besondere-tage.js";
+import { BESONDERE_ARTEN, artVon, eintraegeAm, zeitraumText, eintragAusFormular, beenden, notfallJetzt, speicherMeldung } from "./js/besondere-tage.js";
 import { berichtDaten, berichtHtml } from "./js/bericht.js";
 import {
   FUTTERLISTE,
@@ -1301,7 +1301,7 @@ function beimSpeichern(formId, fehlerId, pruefenUndSpeichern) {
       const ergebnis = await pruefenUndSpeichern(werte);
       if (typeof ergebnis === "string") return zeigeFehler(fehlerId, ergebnis);
       $(formId).closest("dialog").close("speichern");
-      if (!speicherFehler) zeigeToast(ergebnis?.toast ?? "✓ Gespeichert");
+      if (!speicherFehler) zeigeToast(ergebnis?.toast ?? "✓ Gespeichert", ergebnis?.dauer);
     } finally {
       laeuft = false;
     }
@@ -1929,6 +1929,8 @@ beimSpeichern("form-besonders", "besonders-fehler", (werte) => {
   if (artVon(ergebnis.eintrag.art).notfall && notfallJetzt(daten.besondereTage, tier.id, heute)) {
     requestAnimationFrame(() => $("notfall-kasten").scrollIntoView({ block: "center", behavior: ohneBewegung() ? "auto" : "smooth" }));
   }
+  // Art und Zeitraum nennen (0.71.0): länger sichtbar als das kurze „✓ Gespeichert“, weil mehr zu lesen ist.
+  return { toast: speicherMeldung(ergebnis.eintrag), dauer: 3500 };
 });
 
 // Foto einer Wägung groß ansehen und einzeln entfernen (die Wägung bleibt).
