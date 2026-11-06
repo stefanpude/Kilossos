@@ -264,6 +264,9 @@
         <button type="button" class="eintrag" data-aktion="anleitung-erklaerung">
           <span data-symbol="info"></span><span class="text">So nutzt du Kilossos</span><span class="weiter" data-symbol="weiter"></span>
         </button>
+        <button type="button" class="eintrag" data-aktion="tipps-erklaerung">
+          <span data-symbol="katzenkopf"></span><span class="text">Tipps fürs Abnehmen</span><span class="weiter" data-symbol="weiter"></span>
+        </button>
         <button type="button" class="eintrag" data-aktion="begriffe-erklaerung">
           <span data-symbol="buch"></span><span class="text">Begriffe kurz erklärt</span><span class="weiter" data-symbol="weiter"></span>
         </button>
@@ -350,7 +353,7 @@
           <span data-symbol="katzenkopf"></span><span class="text">Demo ansehen<small>Beispieldaten von Kito und Zuki über ein Jahr. Deine Einträge bleiben, wie sie sind.</small></span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.56.1</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.57.0</span>
         </div>
       </div>
     </section>
@@ -936,6 +939,26 @@
       <p class="leise">Quellen: International Cat Care, Ratgeber zu Wohnungsanpassung bei Gelenkschmerzen (2024),
         Arthrose, Übergewicht und Umgang mit Katzen; Cornell Feline Health Center; VCA Animal Hospitals; Scarlett und
         Donoghue 1998 (Studie mit 1.457 Katzen); Dantas et al. 2016 (Futterspielzeug).</p>
+      <div class="knoepfe">
+        <button value="abbrechen" class="knopf-haupt">Verstanden</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Blatt „Tipps fürs Abnehmen“ (0.57.0, Ideen-Tafel, Stefan: „vor allem Finden“). Nur Wegweiser zu den beiden
+       Erklärseiten, kein eigener Ratschlag: So gibt es jeden Tipp nur einmal, mit seiner Quelle auf der Seite. -->
+  <dialog id="dialog-tipps">
+    <form method="dialog">
+      <h2 tabindex="-1" autofocus>Tipps fürs Abnehmen</h2>
+      <p>Die Tipps stehen auf zwei Seiten, jeweils mit Quellen. Tippe auf eine Seite, um sie zu öffnen.</p>
+      <h3>Wenn die Waage stehen bleibt</h3>
+      <p><button type="button" class="knopf-text" data-aktion="warum-nicht-ab">Warum nimmt meine Katze nicht ab?</button></p>
+      <p class="tipp">Getrennt füttern, alle im Haushalt machen mit, Leckerlis und Reste zählen mit, wenn sie bettelt,
+        genau abmessen, Futter langsam umstellen.</p>
+      <h3>Für den Alltag</h3>
+      <p><button type="button" class="knopf-text" data-aktion="alltag-erklaerung">Was hilft einer schweren Katze im Alltag?</button></p>
+      <p class="tipp">Bewegung in kleinen Portionen, Stufen an die Lieblingsplätze, eine bequeme Toilette, Hilfe bei der
+        Fellpflege, richtig hochheben.</p>
       <div class="knoepfe">
         <button value="abbrechen" class="knopf-haupt">Verstanden</button>
       </div>
