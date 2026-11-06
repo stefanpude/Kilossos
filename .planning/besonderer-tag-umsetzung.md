@@ -324,7 +324,7 @@ mit `warnungen()`.
   Demo: Karte, laufende Phase mit „Beendet“, Zeitleiste im Verlauf (1 Monat, 3 Monate, alles), Infoblase per Tippen,
   Bericht mit Abschnitt und Zeitleiste. Echte Daten (leeres `localStorage` im Vorschau-Tab): sofort eintragen
   („Krank“, „bis“ leer), nachtragen (zurückblättern, Phase mit „bis“), „Wieder gesund“, ändern (Schalter aus/an, Art
-  wechseln), löschen (`window.confirm = () => true`), „Futter verweigert“ heute → roter Kasten oben, vor 5 Tagen → kein
+  wechseln), löschen (`window.confirm = () => true`; seit 0.52.0 stattdessen `#rueckfrage-ja` im eigenen Blatt), „Futter verweigert“ heute → roter Kasten oben, vor 5 Tagen → kein
   Kasten, „Sonstiges“ ohne Notiz → Fehler, zweites Tier: nichts sichtbar, Tier entfernen (Text), Sicherung speichern
   und wieder einlesen, alte Sicherung 0.28 einlesen. 375 px, hell, dunkel, 150 % Schrift, Tastatur (Tab durch Dialog,
   Enter speichert, Fokus kehrt zurück), keine Konsolenfehler.

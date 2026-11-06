@@ -23,7 +23,7 @@ zusammen lesen; bei Widerspruch gilt der Entwurf.
 - Keine echten Werte von Stefans Katzen in Tests (öffentliches Repo): Beispielkatze mit Ziel 5,5 kg / 210 kcal u. ä.
 - Tippflächen mindestens 48 px; Tafel als Knopf sieht aus wie vorher (Höhe vorher/nachher messen).
 - Werte aus Daten in HTML immer über `sicher()`; auch `data-id`.
-- `confirm()` im Browser-Pane mit `window.confirm = () => true` (bzw. `false`) testen.
+- `confirm()` im Browser-Pane mit `window.confirm = () => true` (bzw. `false`) testen. (Seit 0.52.0 gibt es kein `confirm()` mehr, sondern das eigene Blatt `#dialog-rueckfrage`: dort `#rueckfrage-ja` bzw. `#rueckfrage-nein` antippen, Ja erst nach 400 ms.)
 - Version 0.34.0, `CACHE_NAME` `kilossos-v61`, neue Datei `js/freigaben.js` in `DATEIEN`.
 
 ## Prüf-Schwerpunkte (von keinem Einzeltest ganz abgedeckt)
