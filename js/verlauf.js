@@ -665,7 +665,9 @@ function futterKarte(mahlzeiten, futterNachId, freigaben, von, heute) {
     `${z.durchschnitt === null ? "noch kein ganzer Tag" : `Ø ${zahl(z.durchschnitt)} kcal`} · ${z.anzahl} ${z.anzahl === 1 ? "Tag" : "Tage"}` +
     (mitFreigabe ? ` · ${z.ueber}× über der Freigabe` : "");
   const hoechster = Math.max(...tage.map((t) => t.kcal), 1);
-  const inhalt = wochenGruppen(tage, heute)
+  // Tage und Mahlzeiten erst beim Aufklappen bauen (0.60.1): bei „Alles“ über ein Jahr sonst tausende Elemente,
+  // die zugeklappt niemand sieht; am Handy fehlte dabei sekundenlang die Gewichtslinie.
+  const inhalt = () => wochenGruppen(tage, heute)
     .map(
       (gruppe) =>
         `<p class="gruppe-titel">${gruppe.titel}</p>` +
@@ -678,7 +680,7 @@ function futterKarte(mahlzeiten, futterNachId, freigaben, von, heute) {
               t.tag === heute
                 ? "Heute<small>läuft noch</small>"
                 : `${d.toLocaleDateString("de-DE", { weekday: "short" })}<small>${kurzDatum(t.tag)}</small>`;
-            const zeilen = t.mahlzeiten
+            const zeilen = () => t.mahlzeiten
               .map((m) => {
                 const f = futterNachId.get(m.futterId);
                 const uhr = new Date(m.zeitpunkt).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });

@@ -22,16 +22,38 @@ export function zustandVergessen(id) {
   else zustand.delete(id);
 }
 
+// Inhalte, die erst beim Aufklappen gebaut werden (0.60.1): id → Funktion, die das HTML liefert.
+const spaeter = new Map();
+
+// Liefert das HTML einer zugeklappt gezeichneten Karte mit Inhalt als Funktion, nur einmal; sonst null.
+export function spaeterInhalt(id) {
+  const bauen = spaeter.get(id);
+  if (!bauen) return null;
+  spaeter.delete(id);
+  return bauen();
+}
+
 // kopf und inhalt sind fertiges HTML – Text darin schützt der Aufrufer selbst.
+// inhalt darf eine Funktion sein (0.60.1): dann wird er zugeklappt nicht gebaut, sondern erst beim Aufklappen
+// (z. B. „Futter pro Tag“ über ein Jahr: tausende Zeilen, die zugeklappt niemand sieht).
 // festhalten: der Standard "offen" gilt nur beim ersten Zeichnen; danach bleibt die Karte, wie sie war
 // (sonst klappt z. B. die 6. Futtersorte alle Gruppen auf einmal zu).
 export function aufklappKarte({ id, kopf, inhalt, offen = false, klasse = "", festhalten = false }) {
   if (festhalten && !zustand.has(id)) zustand.set(id, offen);
   const auf = zustand.has(id) ? zustand.get(id) : offen;
   const i = sicher(id);
+  let html = inhalt;
+  spaeter.delete(id);
+  if (typeof inhalt === "function") {
+    if (auf) html = inhalt();
+    else {
+      html = "";
+      spaeter.set(id, inhalt);
+    }
+  }
   return `<div class="aufklapp${auf ? " offen" : ""}${klasse ? " " + klasse : ""}" data-aufklapp="${i}">
     <button type="button" class="aufklapp-kopf" aria-expanded="${auf}" aria-controls="ak-${i}">${kopf}<span class="pfeil" aria-hidden="true">${SYMBOL.runter}</span></button>
-    <div class="aufklapp-inhalt" id="ak-${i}"><div>${inhalt}</div></div>
+    <div class="aufklapp-inhalt" id="ak-${i}"><div>${html}</div></div>
   </div>`;
 }
 
@@ -43,6 +65,9 @@ export function aufklappenAnmelden(wurzel) {
     if (ereignis.target.closest("[data-aktion]") && ereignis.target.closest("[data-aktion]") !== kopf) return;
     const karte = kopf.closest(".aufklapp");
     const auf = !karte.classList.contains("offen");
+    // Zugeklappt gezeichneter Inhalt (Funktion) wird jetzt gebaut, vor dem Aufklappen, damit die Höhe stimmt.
+    const nachgebaut = auf ? spaeterInhalt(karte.dataset.aufklapp) : null;
+    if (nachgebaut !== null) karte.querySelector(":scope > .aufklapp-inhalt > div").innerHTML = nachgebaut;
     karte.classList.toggle("offen", auf);
     kopf.setAttribute("aria-expanded", String(auf));
     merkeZustand(karte.dataset.aufklapp, auf);

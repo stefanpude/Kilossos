@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { leseAnzeige, merkeAnzeige, aufgeloest } from "../js/anzeige.js";
-import { aufklappKarte, merkeZustand, zustandVergessen, zustandVon } from "../js/aufklappen.js";
+import { aufklappKarte, merkeZustand, zustandVergessen, zustandVon, spaeterInhalt } from "../js/aufklappen.js";
 import { auswahlFeld } from "../js/auswahl.js";
 
 function testSpeicher() {
@@ -82,4 +82,26 @@ test("aufklappKarte schützt die id in Attributen", () => {
 test("auswahlFeld: Beschriftung wird dem Knopf zugeordnet", () => {
   const feld = auswahlFeld({ name: "typ", beschriftung: "typ-label", optionen: [{ wert: "a", text: "A" }, { wert: "b", text: "B" }] });
   assert.match(feld, /<button[^>]*id="auswahl-typ"[^>]*aria-labelledby="typ-label auswahl-typ"/);
+});
+
+// 0.60.1 (Stefan 06.11.: bei „Alles“ fehlte die Gewichtslinie 3–4 Sekunden): „Futter pro Tag“ baute zugeklappt
+// jeden Tag mit jeder Mahlzeit (Demo-Jahr: 18.600 Elemente). Inhalt als Funktion = erst beim Aufklappen bauen.
+test("0.60.1: aufklappKarte mit Inhalt als Funktion baut ihn zugeklappt nicht, offen sofort", () => {
+  zustandVergessen();
+  let aufrufe = 0;
+  const inhalt = () => (aufrufe++, "<p>Tag</p>");
+  const zu = aufklappKarte({ id: "lazy", kopf: "K", inhalt });
+  assert.equal(aufrufe, 0);
+  assert.ok(!zu.includes("<p>Tag</p>"));
+  assert.equal(spaeterInhalt("lazy"), "<p>Tag</p>", "beim Aufklappen liefert spaeterInhalt den Inhalt");
+  assert.equal(spaeterInhalt("lazy"), null, "nur einmal");
+  merkeZustand("lazy", true);
+  assert.ok(aufklappKarte({ id: "lazy", kopf: "K", inhalt }).includes("<p>Tag</p>"));
+  assert.equal(spaeterInhalt("lazy"), null, "offen gezeichnet: nichts mehr nachzufüllen");
+});
+
+test("0.60.1: Text-Inhalt bleibt wie bisher sofort drin", () => {
+  zustandVergessen();
+  assert.ok(aufklappKarte({ id: "t", kopf: "K", inhalt: "<p>I</p>" }).includes("<p>I</p>"));
+  assert.equal(spaeterInhalt("t"), null);
 });

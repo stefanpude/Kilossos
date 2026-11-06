@@ -762,3 +762,20 @@ test("0.42.6: Befunde-Karte und PDF-Kurve zeigen das Ziel mit zwei Nachkommastel
   const gross = gewichtDiagramm([G("2026-10-01", 12.4), G("2026-10-15", 12.2)], [{ ...fg, zielgewichtKg: 10 }]);
   assert.ok(gross.includes('x="338" y="') && gross.includes('text-anchor="end">Ziel 10,00</text>'));
 });
+
+// 0.60.1: Ein Jahr mit 3 Mahlzeiten am Tag – zugeklappt steht keine einzige Mahlzeit-Zeile im HTML.
+import { zustandVergessen as vergiss } from "../js/aufklappen.js";
+test("0.60.1: „Futter pro Tag“ zugeklappt baut keine Tage und Mahlzeiten (schnell auch bei einem Jahr)", () => {
+  vergiss();
+  const futter = new Map([["s", { id: "s", name: "Sheba", typ: "nass", kcalProPackung: null, kcalPro100g: 77 }]]);
+  const mahlzeiten = [];
+  for (let t = 0; t < 365; t++) {
+    const tag = new Date(Date.UTC(2025, 9, 21) + t * 86400000).toISOString().slice(0, 10);
+    for (const h of ["07", "12", "18"]) mahlzeiten.push({ id: tag + h, tierId: "k", futterId: "s", gramm: 50, zeitpunkt: `${tag}T${h}:00:00` });
+  }
+  const html = zeichneVerlauf({ gewichte, mahlzeiten, freigaben: [], futterNachId: futter, zeitraum: "alles", heute: "2026-10-20", kopf: "" });
+  assert.ok(html.includes("Futter pro Tag"));
+  assert.ok(!html.includes('data-aufklapp="tag-'), "keine Tageskarten im zugeklappten Zustand");
+  assert.ok(!html.includes("Sheba"), "keine Mahlzeit-Zeilen im zugeklappten Zustand");
+  assert.ok(html.length < 60000, `HTML zu groß: ${html.length}`);
+});
