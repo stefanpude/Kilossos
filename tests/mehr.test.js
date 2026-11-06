@@ -307,3 +307,22 @@ test("0.61.0: keine Seite ist über „Wissen“, „Tipps“ und „Häufige Fr
   const doppelt = alle.filter((a, i) => alle.indexOf(a) !== i);
   assert.deepEqual(doppelt, []);
 });
+
+// 0.61.2 (Stefan 06.11.: im Profil stand „Entfernen“ schräg unter „Abbrechen | Speichern“): Auf schmalen Bildschirmen
+// teilen sich „Abbrechen“ und „Speichern“ die erste Zeile je zur Hälfte, der rote Knopf steht darunter über die volle
+// Breite. Drei nebeneinander passen nicht (gemessen 368 px bei 335 px Platz). Gilt für Profil, Futter und Freigabe,
+// nicht für die eigene Rückfrage (dort bleibt der rote Ja-Knopf neben „Abbrechen“).
+test("0.61.2: Knopfreihe mit rotem Knopf auf dem Handy bündig in zwei Zeilen", () => {
+  const css = lies("styles.css");
+  // Festes Raster statt Umbruch (Stefan: „zwingend“ kein Verschieben durch die Breite): zwei gleiche Spalten,
+  // der rote Knopf über beide; Text bricht im Knopf um (min-width: 0), der Knopf wechselt nie die Zeile.
+  assert.match(css, /\.knoepfe:not\(\.rueckfrage-knoepfe\):has\(> \.knopf-gefahr:not\(\[hidden\]\)\) \{ display: grid; grid-template-columns: 1fr 1fr; \}/);
+  assert.match(css, /\.knoepfe:not\(\.rueckfrage-knoepfe\):has\(> \.knopf-gefahr:not\(\[hidden\]\)\) > button \{ min-width: 0; padding-inline: 12px; text-align: center; \}/);
+  assert.match(css, /\.knoepfe:not\(\.rueckfrage-knoepfe\) > \.knopf-gefahr \{ grid-column: 1 \/ -1; order: 2; margin-right: 0; \}/);
+  // Der alte Umbruch per ::before ist weg (wäre im Raster eine leere Zelle).
+  assert.doesNotMatch(css, /\.knoepfe:has\(> \.knopf-gefahr:not\(\[hidden\]\)\)::before/);
+  const html = lies("index.html");
+  for (const id of ["profil-entfernen", "futter-loeschen", "freigabe-loeschen"]) {
+    assert.match(html, new RegExp(`<div class="knoepfe">\\s*<button value="[a-z]+" formnovalidate class="knopf-gefahr" id="${id}" hidden>`), id);
+  }
+});
