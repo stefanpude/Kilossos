@@ -1,7 +1,8 @@
 # Kilossos testen: Hinweise für Testerinnen und Tester
 
-_Vorlage, Stand 05.11.2026. Vor Beginn der Testphase prüfen: aktuelle Google-Regeln (Anzahl Tester, Dauer), Link zum
-Test, Kontaktadresse für Rückmeldungen._
+_Vorlage, Stand 06.11.2026, für den geschlossenen Test bei Google Play (Ablauf für den Entwickler:
+`.planning/testphase-google-play.md`). Vor Beginn der Testphase prüfen: aktuelle Google-Regeln (Anzahl Tester, Dauer),
+Link zum Test, Kontaktadresse für Rückmeldungen._
 
 Danke, dass du mitmachst! Kilossos ist eine kostenlose App, die Halter übergewichtiger Katzen beim sicheren Abnehmen
 begleitet, zusammen mit dem Tierarzt. Du musst dafür **keine** übergewichtige Katze haben. Am meisten hilft uns, wenn du
@@ -19,6 +20,28 @@ die App zwei Wochen lang wirklich benutzt und uns sagst, was dir auffällt.
 - **Deine Daten bleiben auf deinem Handy.** Es gibt kein Konto und keine Cloud. Wir sehen nichts von dem, was du
   einträgst, nur das, was du uns selbst schreibst.
 
+## So geht es los
+
+Du brauchst ein **Android-Handy** und ein **Google-Konto** (das, mit dem du im Play Store angemeldet bist).
+
+1. Öffne den Teilnahme-Link: _[Link zum Test eintragen]_
+2. Tippe auf „Tester werden“ (oder ähnlich). Damit bist du angemeldet.
+3. Tippe auf den Link zum Play Store und installiere Kilossos wie jede andere App.
+
+Updates kommen während des Tests automatisch über den Play Store.
+
+## Dein Plan für die 14 Tage
+
+| Tag | Was du tust |
+|---|---|
+| 1 | Kilossos installieren, Katze und Futter anlegen, einmal die Demo ansehen |
+| 2 bis 6 | an mindestens 3 Tagen die Mahlzeiten eintragen |
+| 7 | Katze wiegen und eintragen |
+| 8 bis 13 | weiter eintragen, wenn du magst; einmal eine Sicherung speichern |
+| 14 | Katze wiegen, dann die Fragen unten beantworten |
+
+Zwischendurch kommt eine kurze Erinnerung von uns. Bitte die App bis Tag 14 nicht löschen.
+
 ## Deine kleinen Aufgaben
 
 Du musst nicht alles machen. Jede Aufgabe hilft.
@@ -31,6 +54,7 @@ Du musst nicht alles machen. Jede Aufgabe hilft.
 4. **Demo ansehen (einmal, ca. 10 Minuten):** Die Demo zeigt einen kompletten Abnahme-Verlauf mit Freigabe. Sie ändert
    deine eigenen Daten nicht. Schau dir dort „Heute“, „Verlauf“ und unter „Mehr“ die „Übersicht für den Tierarzt“ an.
 5. **Sicherung (einmal):** Unter „Mehr“ eine Sicherung speichern und nachsehen, ob die Datei auf dem Handy liegt.
+   Die Datei bitte **nicht** an uns schicken, sie enthält deine Einträge. Ein Screenshot reicht.
 6. **Rückmeldung (am Ende):** die Fragen unten beantworten.
 
 ## Worauf du achten kannst
@@ -45,7 +69,7 @@ Am meisten hilft uns ein **Screenshot** mit ein, zwei Sätzen dazu, was du gerad
 
 ## Fragen zum Schluss
 
-1. Welches Handy und welchen Browser nutzt du?
+1. Welches Handy nutzt du (Marke und Modell)?
 2. Wie viele Tage hast du Kilossos ungefähr benutzt?
 3. Was war am einfachsten?
 4. Was war am schwierigsten oder am ärgerlichsten?
