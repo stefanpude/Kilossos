@@ -36,6 +36,26 @@ test("Sicherheit: Notfallsatz unverändert im roten Kasten, „ersetzt keinen Ti
   assert.doesNotMatch(text, /[—–]/);
 });
 
+// 0.66.0 (Ideen-Tafel achxdhkktk0axucplfmn, Einwand von Nadja, Stefan 06.11. „mach das“): Abschnitt „Genug Wasser“
+// direkt vor dem roten Kasten. Belegt: Nassfutter bringt mehr Wasser (Kosmal 2025), Katzen mit Fettleber kommen oft
+// ausgetrocknet (Webb 2018), Austrocknung senkt die Durchblutung der Nieren (Merck), bei kranken Nieren schlimmer (Kosmal).
+// Keine Trinkmenge, kein Trinkbrunnen-Rat ohne Beleg; den Weg zu mehr Wasser legt die Praxis fest.
+test("0.66.0: Abschnitt „Genug Wasser“ vor dem roten Kasten, mit Quellen, ohne Mengen", () => {
+  const seite = blatt(lies("index.html"), "dialog-alltag");
+  const wasser = seite.indexOf("<h3>Genug Wasser</h3>");
+  assert.ok(wasser > 0, "Abschnitt fehlt");
+  assert.ok(wasser < seite.indexOf('<p class="notfall-hinweis">'), "steht vor dem roten Kasten");
+  assert.ok(wasser > seite.indexOf("<h3>Bewegung in kleinen Portionen</h3>"));
+  const text = nurText(seite);
+  assert.ok(text.includes("Katzen mit Nassfutter nehmen insgesamt mehr Wasser auf als mit Trockenfutter"));
+  assert.ok(text.includes("Bekommt deine Katze zum Abnehmen weniger Futter, bekommt sie damit auch weniger Wasser."));
+  assert.ok(text.includes("belastet das neben der Leber auch die Nieren"));
+  assert.ok(text.includes("ob die Nierenwerte vorher bestimmt werden sollen"));
+  assert.ok(text.includes("wiege das Futter, bevor du das Wasser dazugibst"));
+  for (const q of ["Kosmal et al. 2025", "Webb 2018", "Merck Veterinary Manual"]) assert.ok(text.includes(q), q);
+  assert.doesNotMatch(text, /\d+\s*(ml|Milliliter|Liter)\b/);
+});
+
 test("Belegte Aussagen so wie im Faktencheck: 4,9-mal, Springen erleichtern statt verbieten, Napf nicht höher", () => {
   const text = nurText(blatt(lies("index.html"), "dialog-alltag"));
   assert.ok(text.includes("4,9-mal so oft eine Lahmheit, die tierärztlich behandelt werden musste"));

@@ -33,7 +33,7 @@ test("Jedes genannte Stichwort steht wirklich auf der verlinkten Seite", () => {
   for (const h of ["Eine andere Katze frisst mit", "Nicht alle machen mit", "Leckerlis und Reste zählen mit", "Sie bettelt", "Ungenau abgemessen"]) {
     assert.ok(nichtAb.includes(h), h);
   }
-  for (const h of ["Bewegung in kleinen Portionen", "Stufen an die Lieblingsplätze", "Eine bequeme Toilette", "Hilfe bei der Fellpflege", "Richtig hochheben"]) {
+  for (const h of ["Bewegung in kleinen Portionen", "Genug Wasser", "Stufen an die Lieblingsplätze", "Eine bequeme Toilette", "Hilfe bei der Fellpflege", "Richtig hochheben"]) {
     assert.ok(alltag.includes(h), h);
   }
 });
@@ -44,7 +44,7 @@ test("0.61.1: Stichwort „Futterspielzeug“ bei „Für den Alltag“, steht a
   const html = lies("index.html");
   const seite = blatt(html, "dialog-tipps");
   const stichworte = nurText(seite.slice(seite.indexOf("<h3>Für den Alltag</h3>")));
-  assert.match(stichworte, /Bewegung in kleinen Portionen, Futterspielzeug, Stufen an die Lieblingsplätze/);
+  assert.match(stichworte, /Bewegung in kleinen Portionen, Futterspielzeug, genug Wasser, Stufen an die Lieblingsplätze/);
   assert.ok(nurText(blatt(html, "dialog-alltag")).includes("Futterspielzeug"));
   assert.ok(nurText(blatt(html, "dialog-alltag")).includes("Dantas et al. 2016 (Futterspielzeug)"));
 });
