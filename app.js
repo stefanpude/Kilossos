@@ -2948,6 +2948,8 @@ document.addEventListener("click", (ereignis) => {
       return $("dialog-begriffe").showModal();
     case "warum-nicht-ab":
       return $("dialog-nicht-ab").showModal();
+    case "anleitung-erklaerung":
+      return $("dialog-anleitung").showModal();
     case "alltag-erklaerung":
       return $("dialog-alltag").showModal();
     case "gramm-minus":
