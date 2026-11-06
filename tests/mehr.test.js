@@ -224,12 +224,30 @@ test("0.49.0: Datenschutzerklärung nennt Adresse und „Weg zur Praxis“", () 
   );
 });
 
-test("0.45.0: „Fotos mitnehmen“ steht nicht mehr unter „Mehr“, der Zeitraum bleibt dort", () => {
+test("0.45.0/0.64.0: unter „Mehr“ weder Fotos noch Zeitraum, nur „Übersicht öffnen“", () => {
   const mehr = ansichtMehr();
   assert.doesNotMatch(mehr, /Fotos mitnehmen|id="bericht-fotos"/);
   const uebersicht = abschnitt(mehr, /<h3 class="gruppe-titel">Übersicht für den Tierarzt<\/h3>/);
-  assert.match(uebersicht, /id="bericht-zeitraum-feld"/);
+  assert.doesNotMatch(uebersicht, /bericht-zeitraum/);
   assert.match(uebersicht, /data-aktion="bericht-oeffnen"/);
+});
+
+// 0.64.0 (Stefan 06.11.: „Zeitraum steht unter Mehr, Fotos haben wir unter Übersicht öffnen eingebaut“):
+// Beide Einstellungen stehen jetzt in der geöffneten Übersicht, jede Änderung zeichnet sie sofort neu.
+test("0.64.0: Zeitraum in der geöffneten Übersicht direkt vor „Fotos zeigen“, Standard „alles“, zeichnet neu", () => {
+  const html = lies("index.html");
+  const start = html.indexOf('<div class="bericht-werkzeuge">');
+  const werkzeuge = html.slice(start, html.indexOf('<article class="bericht"', start));
+  assert.match(
+    werkzeuge,
+    /<div class="eintrag eintrag-auswahl bericht-zeitraum">\s*<span data-symbol="kalender"><\/span><span class="text" id="label-bericht-zeitraum">Zeitraum<\/span>\s*<div id="bericht-zeitraum-feld"><\/div>\s*<\/div>\s*(?:<!--[\s\S]*?-->\s*)?<label class="bericht-schalter">/,
+  );
+  assert.ok(werkzeuge.indexOf("Im Druckfenster als Drucker") < werkzeuge.indexOf('id="bericht-zeitraum-feld"'));
+  assert.equal([...html.matchAll(/id="bericht-zeitraum-feld"/g)].length, 1);
+  const app = lies("app.js");
+  assert.match(app, /name: "bericht-zeitraum",[\s\S]*?wert: "alles",/);
+  assert.match(app, /if \(ereignis\.target\.name === "bericht-zeitraum"\) zeichneBericht\(\);/);
+  assert.match(lies("styles.css"), /\.bericht-werkzeuge > \.bericht-zeitraum \{ padding: 0; min-height: 48px; gap: 12px; \}/);
 });
 
 test("0.45.0: Schalter „Fotos zeigen“ in der geöffneten Übersicht nach dem Druck-Tipp, standardmäßig aus", () => {

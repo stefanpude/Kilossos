@@ -67,6 +67,9 @@ test("Jede genannte Stelle gibt es in der App wirklich", () => {
     "„Besonderen Tag eintragen“": ">Besonderen Tag eintragen<",
     "„Sicherung speichern“": "Sicherung speichern<",
     "„Übersicht öffnen“": '<span class="text">Übersicht öffnen',
+    // 0.64.0: Zeitraum und Fotos stehen in der geöffneten Übersicht
+    "den Zeitraum": 'id="label-bericht-zeitraum">Zeitraum<',
+    "„Fotos zeigen“": "<span>Fotos zeigen<small>",
     "„Drucken / als PDF speichern“": ">Drucken / als PDF speichern<",
     "„Tier hinzufügen“": ">Tier hinzufügen<",
   };

@@ -201,6 +201,11 @@
         <button class="knopf-zweit" data-ziel="mehr"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.5 6l-6 6 6 6"/></svg>Zurück</button>
         <button class="knopf-haupt" data-aktion="bericht-drucken">Drucken / als PDF speichern</button>
         <p class="tipp">Im Druckfenster als Drucker „Als PDF speichern“ wählen.</p>
+        <!-- Zeitraum seit 0.64.0 hier statt unter „Mehr“ (Stefan: wie die Fotos). Ändern zeichnet die Übersicht neu. -->
+        <div class="eintrag eintrag-auswahl bericht-zeitraum">
+          <span data-symbol="kalender"></span><span class="text" id="label-bericht-zeitraum">Zeitraum</span>
+          <div id="bericht-zeitraum-feld"></div>
+        </div>
         <!-- Fotos nur auf Wunsch (0.45.0, vorher „Fotos mitnehmen“ unter „Mehr“). Umschalten zeichnet die Übersicht neu; im Druck unsichtbar. -->
         <label class="bericht-schalter">
           <input type="checkbox" id="bericht-fotos">
@@ -247,10 +252,6 @@
 
       <h3 class="gruppe-titel">Übersicht für den Tierarzt</h3>
       <div class="liste">
-        <div class="eintrag eintrag-auswahl">
-          <span data-symbol="kalender"></span><span class="text" id="label-bericht-zeitraum">Zeitraum</span>
-          <div id="bericht-zeitraum-feld"></div>
-        </div>
         <button type="button" class="eintrag" data-aktion="bericht-oeffnen">
           <span data-symbol="dokument"></span>
           <span class="text">Übersicht öffnen
@@ -347,7 +348,7 @@
           <span data-symbol="katzenkopf"></span><span class="text">Demo ansehen<small>Beispieldaten von Kito und Zuki über ein Jahr. Deine Einträge bleiben, wie sie sind.</small></span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.63.0</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.64.0</span>
         </div>
       </div>
     </section>
@@ -880,7 +881,8 @@
       <p>Deine Einträge liegen nur auf diesem Handy. Tippe unter „Mehr“ ab und zu auf „Sicherung speichern“ und leg die
         Datei woanders ab, zum Beispiel in deinem Cloud-Ordner oder per E-Mail an dich selbst. Kilossos erinnert dich daran.</p>
       <h3>8. Zum Termin die Übersicht mitnehmen</h3>
-      <p>Unter „Mehr“ wählst du einen Zeitraum und tippst auf „Übersicht öffnen“. Mit „Drucken / als PDF speichern“
+      <p>Unter „Mehr“ tippst du auf „Übersicht öffnen“. Dort wählst du oben den Zeitraum und mit „Fotos zeigen“, ob
+        Fotos dabei sein sollen. Mit „Drucken / als PDF speichern“
         nimmst du sie auf Papier oder als Datei mit. So sieht dein Tierarzt Gewicht, Futter und Hinweise auf einen Blick.</p>
       <h3>Mehrere Katzen</h3>
       <p>Weitere Katzen legst du unter „Mehr“ mit „Tier hinzufügen“ an. Zum Wechseln tippst du oben auf „Heute“ auf den

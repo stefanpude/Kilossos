@@ -1099,6 +1099,10 @@ function zeichneBericht() {
 }
 // Schalter „Fotos zeigen“ in der geöffneten Übersicht (0.45.0): zeichnet sofort neu, Standard aus.
 $("bericht-fotos").addEventListener("change", zeichneBericht);
+// Zeitraum steht seit 0.64.0 ebenfalls in der geöffneten Übersicht und zeichnet sofort neu.
+document.addEventListener("change", (ereignis) => {
+  if (ereignis.target.name === "bericht-zeitraum") zeichneBericht();
+});
 
 // Infoblase der Gewichtskurve: Antippen oder Ziehen zeigt den nächsten Punkt mit Datum und kg.
 function zeigeInfoblase(ereignis) {

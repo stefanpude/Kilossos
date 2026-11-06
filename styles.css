@@ -1069,6 +1069,8 @@ dialog .wert-eingabe input:not([type="hidden"]) { padding-right: calc(12px + 1.4
 /* ---------- Übersicht für den Tierarzt ---------- */
 .karte label { display: grid; gap: 6px; font-weight: 400; }
 .bericht-werkzeuge { display: grid; gap: 8px; }
+/* Zeitraum (0.64.0) als schlichte Zeile wie „Fotos zeigen“, ohne Karte */
+.bericht-werkzeuge > .bericht-zeitraum { padding: 0; min-height: 48px; gap: 12px; }
 /* Schalter „Fotos zeigen“ (0.45.0): ganze Zeile antippbar, mindestens 48 px hoch; im Druck mit den Werkzeugen ausgeblendet. */
 .bericht-schalter { display: flex; align-items: center; gap: 12px; min-height: 48px; color: var(--text); font-size: 1rem; font-weight: 600; cursor: pointer; }
 .bericht-schalter input[type="checkbox"] { width: 24px; height: 24px; margin: 0; flex: none; accent-color: var(--akzent); }
