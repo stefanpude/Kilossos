@@ -1,19 +1,19 @@
 # Fragen für den Tierarzttermin: Zuki
 
 Termin am 13.11.2026, zusammen mit Kito. Zum Ausdrucken oder am Handy mitnehmen.
-Dazu: die Tierarzt-Übersicht als PDF (in der App oben auf Zuki wechseln, dann „Mehr“ → „Übersicht öffnen“)
+Dazu: die Übersicht als PDF (in der App oben auf Zuki wechseln, dann „Mehr“ → „Übersicht öffnen“)
 und die Futterpackungen oder Fotos davon.
 
 Weitere Blätter: [Kito](tierarzt-fragen-kito.md) und [Fragen zur App](tierarzt-fragen-app.md)
 (nur zum Mitgeben, nicht für den Termin).
 
 ## Ausgangslage
-- Zuki, zierlich gebaut, im Verhältnis aber noch dicker als Kito
-- Geschlecht, kastriert: _______ (vorher selbst eintragen)
-- Alter oder Geburtsdatum: _______ (vorher selbst eintragen)
+- Zuki, Katze, kastriert, etwa 6 Jahre alt
+- Zierlich gebaut, im Verhältnis aber noch dicker als Kito
 - Gewicht: 7,33 kg (zu Hause gewogen am 06.11.2026; mit einer Personenwaage kann das 100–200 g danebenliegen)
 - Futter: dasselbe wie Kito: Sheba Fresh & Fine in Sauce (nass, 50-g-Beutel, ca. 77 kcal/100 g) und
-  Purina ONE Light (trocken, ca. 327 kcal/100 g)
+  Purina ONE Light (trocken, ca. 327 kcal/100 g), kein Tatar
+- Frisst am liebsten Trockenfutter
 - Wird getrennt von Kito gefüttert
 
 ## Fragen zur medizinischen Einschätzung
@@ -35,6 +35,8 @@ Weitere Blätter: [Kito](tierarzt-fragen-kito.md) und [Fragen zur App](tierarzt-
 ### Futter
 - [ ] Passt unser **Futter**, oder braucht Zuki ein **Diätfutter**? Bei wenig kcal bekommt sie mit normalem Futter
       womöglich zu wenig Eiweiß, Vitamine und Mineralstoffe.
+- [ ] Zuki frisst am liebsten **Trockenfutter**. Ist das beim Abnehmen ein Problem (viele kcal in wenig Futter, wenig
+      Wasser)? Soll ich sie mehr auf Nassfutter umstellen, und wenn ja, wie?
 
 ### Sicherheit
 - [ ] **Wann muss ich sofort anrufen?** Dass sie sofort zu Ihnen gehört, wenn sie einen Tag lang nichts oder kaum etwas
@@ -56,5 +58,6 @@ Weitere Blätter: [Kito](tierarzt-fragen-kito.md) und [Fragen zur App](tierarzt-
 | kcal pro Tag | |
 | Tempo, ab wann melden | |
 | Futter / Diätfutter | |
+| Trockenfutter umstellen? | |
 | Sofort anrufen bei | |
 | Nächster Termin, Abstand | |

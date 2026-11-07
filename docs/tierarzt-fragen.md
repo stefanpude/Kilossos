@@ -1,6 +1,7 @@
-# Fragen für den Tierarzt
+# Fragen für die Tierärztin
 
-Zum Ausdrucken oder am Handy mitnehmen:
+Zum Ausdrucken oder am Handy mitnehmen. Ablauf und was wann zu erledigen ist:
+[tierarzt-termin-checkliste.md](tierarzt-termin-checkliste.md).
 
 - Kito, medizinisch: [tierarzt-fragen-kito.md](tierarzt-fragen-kito.md)
 - Zuki, medizinisch: [tierarzt-fragen-zuki.md](tierarzt-fragen-zuki.md)

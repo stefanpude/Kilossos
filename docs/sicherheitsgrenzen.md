@@ -1,12 +1,12 @@
 # Kilossos – Sicherheitsgrenzen für die Gewichtsabnahme bei Katzen
 
-**Entwurf vom 01.11.2026, Quellen abgeglichen am 02.11.2026 – zur Prüfung durch den behandelnden Tierarzt**
+**Entwurf vom 01.11.2026, Quellen abgeglichen am 02.11.2026 – zur Prüfung durch die behandelnde Tierärztin**
 Tier: Kito, Kater, kastriert, Wohnungskatze · 9,32 kg (Praxis, Oktober 2026) · BCS noch nicht erhoben
 
 > **Wichtiger Hinweis.** Dieses Dokument hat eine KI (Claude, Anthropic) verfasst. Sie hat dafür veröffentlichte
-> Leitlinien und Fachliteratur ausgewertet und dabei aus der Sicht eines erfahrenen Katzentierarztes argumentiert.
-> **Sie ist aber kein Tierarzt und hat Kito nie untersucht.** Alle Zahlen sind Vorschläge. Sie gelten für Kito erst,
-> wenn sein Tierarzt sie geprüft und unten freigegeben hat. Bis dahin zeichnet die App nur auf und schlägt keine
+> Leitlinien und Fachliteratur ausgewertet und dabei aus tierärztlicher Sicht argumentiert.
+> **Sie ist aber keine Tierärztin und hat Kito nie untersucht.** Alle Zahlen sind Vorschläge. Sie gelten für Kito erst,
+> wenn seine Tierärztin sie geprüft und unten freigegeben hat. Bis dahin zeichnet die App nur auf und schlägt keine
 > Futtermengen vor.
 
 ---
@@ -21,24 +21,24 @@ braucht die App feste Grenzen.
 
 1. **Langsam abnehmen:** pro Woche 0,5 bis 2 % des Gewichts. Bei Kito sind das heute etwa **50 bis 190 g pro Woche**.
    Gut wäre etwa 1 %, also rund 90 g.
-2. **Nie hungern lassen:** Wenn Kito einen Tag lang nichts oder kaum etwas frisst, **am selben Tag den Tierarzt anrufen.**
+2. **Nie hungern lassen:** Wenn Kito einen Tag lang nichts oder kaum etwas frisst, **am selben Tag in der Praxis anrufen.**
    Keine Diät ist es wert, das abzuwarten.
-3. **Die Futtermenge legt der Tierarzt fest.** Die App rechnet nur nach und warnt, wenn etwas aus dem Rahmen fällt.
+3. **Die Futtermenge legt die Tierärztin fest.** Die App rechnet nur nach und warnt, wenn etwas aus dem Rahmen fällt.
 4. **Leckerlis zählen mit,** höchstens 10 % der Tageskalorien. Bei Kito wären das etwa 25 kcal am Tag.
 5. **Einmal pro Woche wiegen,** immer am gleichen Tag, zur gleichen Uhrzeit und mit der gleichen Waage. Die Waage
    sollte auf **10 oder 20 g genau** sein, denn eine normale Personenwaage ist für so kleine Schritte zu ungenau.
-6. **Geht es nicht voran oder zu schnell, nicht selbst die Menge ändern.** Die App sagt dann: „Bitte mit dem Tierarzt
-   besprechen.“
+6. **Geht es nicht voran oder zu schnell, nicht selbst die Menge ändern.** Die App bittet dann darum, das mit der
+   Praxis zu besprechen.
 
 **Das Wichtigste, das die Rechnung gezeigt hat:** Mit Kitos jetzigem Futter würde er bei einer Diätmenge
 wahrscheinlich **zu wenig Eiweiß** bekommen. Das Trockenfutter „Light“ ist ein normales Futter und kein Diätfutter
-vom Tierarzt. Bitte frag den Tierarzt danach (siehe Fragen am Ende).
+aus der Praxis. Bitte frag die Tierärztin danach (siehe Fragen am Ende).
 
-**Wie lange es dauert:** Je nach Ergebnis beim Tierarzt etwa **5 bis 10 Monate.** Das ist normal und gewollt.
+**Wie lange es dauert:** Je nach Befund etwa **5 bis 10 Monate.** Das ist normal und gewollt.
 
 ---
 
-## Teil B – Fachliche Fassung für den Tierarzt
+## Teil B – Fachliche Fassung für die Tierärztin
 
 ### B1. Zusammenfassung
 
@@ -105,7 +105,7 @@ was bei Kito etwa 12 % niedriger liegt. Die App sollte immer nur die **tierärzt
 verwenden. Die Formeln dienen der Plausibilitätsprüfung.
 
 **3. Untergrenze und hepatische Lipidose.** Für Patienten, die erst unter 60 % RER abnehmen, empfiehlt die AAHA
-einen Fachtierarzt für Ernährung. Ein Rechner der Association for Pet Obesity Prevention setzt die Grenze strenger
+eine Fachtierärztin oder einen Fachtierarzt für Ernährung. Ein Rechner der Association for Pet Obesity Prevention setzt die Grenze strenger
 bei 70 %. Die hepatische Lipidose ist die häufigste erworbene Lebererkrankung der Katze. Sie entsteht, wenn eine
 überkonditionierte Katze nicht oder zu wenig frisst [7]. Die Anorexiephase kann nur 2–7 Tage dauern. Eine
 „übereifrige Kalorienrestriktion zur Gewichtsreduktion“ wird ausdrücklich als Auslöser genannt [6].
@@ -142,7 +142,7 @@ Laflamme & Hannah 2013 schätzten an 24 kastrierten Katern, dass für den Erhalt
 Protein/kg KM/Tag nötig sind. Für die Stickstoffbilanz genügten bereits etwa 1,5 g/kg [10]. Die AAHA 2014 nennt
 als Faustregel ≥ 5 g Protein/kg Idealgewicht für Katzen [1] (im Volltext bestätigt). Die App soll die Proteinaufnahme
 trotzdem nur
-**anzeigen**, nicht bewerten, bis der Tierarzt einen Zielwert nennt.
+**anzeigen**, nicht bewerten, bis die Tierärztin einen Zielwert nennt.
 
 **7. Anpassungsregeln.** Die App ändert Mengen nie selbst. Sie zeigt die Regel aus den Leitlinien und bittet
 darum, die Änderung mit der Praxis abzustimmen:
@@ -160,7 +160,7 @@ BCS und Muscle Condition Score (WSAVA) erhoben [1], [5], [8]. Gefüttert wird na
 mehreren kleinen Mahlzeiten, gern mit Futterspielzeug [11]. Das ist für eine Wohnungskatze mit wenig Bewegung
 auch eine Form der Beschäftigung.
 
-**9. Wann die App ausdrücklich zum Tierarzt schickt.**
+**9. Wann die App ausdrücklich in die Praxis schickt.**
 
 *Sofort, am selben Tag:*
 - 24 h nichts oder kaum gefressen
@@ -248,7 +248,7 @@ Kalorienbedarf [14], die WSAVA-Leitlinienseite [15] und die Zusammenfassung von 
 - **Korrigiert:** Kontrollintervall (8b) jetzt wie im Original: alle 2 Wochen, bis die Rate stimmt, dann monatlich.
 - **Neu und für Kito wichtig:** Die AAHA 2021 (Tab. 8, Adipositas) hält eine Restriktion **unter RER mit
   Handelsfutter** für nicht empfehlenswert; ab ≤ RER werden angereicherte Diätfutter empfohlen. Kitos Sheba und
-  Purina ONE Light sind Handelsfutter. → stützt Frage 5 an den Tierarzt.
+  Purina ONE Light sind Handelsfutter. → stützt Frage 5 an die Tierärztin.
   **In der App seit Version 0.6.2:** Hinweis „Diätfutter mit dem Tierarzt besprechen“, wenn die Freigabe unter
   RER(Zielgewicht) liegt und an dem Tag Futter gegeben wurde, das kein Diätfutter der Futterliste ist (eigene
   Sorten zählen dabei als normales Futter). Auch im Tierarzt-Bericht gezählt.
@@ -259,7 +259,7 @@ Kalorienbedarf [14], die WSAVA-Leitlinienseite [15] und die Zusammenfassung von 
 
 ---
 
-## Fragen an den Tierarzt
+## Fragen an die Tierärztin
 
 1. Welchen **BCS** (9er-Skala) und welchen **Muscle Condition Score** hat Kito?
 2. Gibt es ein Gewicht aus jungen Jahren bei Idealfigur? Welches **Zielgewicht** halten Sie bei seinem großen
@@ -274,8 +274,8 @@ Kalorienbedarf [14], die WSAVA-Leitlinienseite [15] und die Zusammenfassung von 
 9. Darf die App bei Stillstand oder zu schneller Abnahme **±10 %** vorschlagen, oder soll jede Änderung über Sie
    laufen?
 10. In welchem **Abstand** möchten Sie Kito sehen?
-11. Fehlt in der Liste „sofort zum Tierarzt“ (B3, Punkt 9) etwas, oder ist etwas zu streng?
-12. Dürfen diese Grenzen mit dem Hinweis „von einem Tierarzt geprüft“ später in der veröffentlichten App
+11. Fehlt in der Liste „sofort in die Praxis“ (B3, Punkt 9) etwas, oder ist etwas zu streng?
+12. Dürfen diese Grenzen mit dem Hinweis „tierärztlich geprüft“ später in der veröffentlichten App
     stehen (ohne Ihren Namen, falls gewünscht)?
 
 ---
@@ -293,7 +293,7 @@ Kalorienbedarf [14], die WSAVA-Leitlinienseite [15] und die Zusammenfassung von 
 | Änderungen an den Grenzen oben | ________________________________________ |
 | | ________________________________________ |
 | Datum | ______________ |
-| Tierarzt / Praxis (Stempel) | ________________________________________ |
+| Tierärztin / Praxis (Stempel) | ________________________________________ |
 | Unterschrift | ________________________________________ |
 
 ---
