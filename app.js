@@ -1157,7 +1157,11 @@ function zeigeZeitleistenBlase(ereignis, leiste) {
   blase.style.left = `${Math.min(Math.max(links, blase.offsetWidth / 2), feld.width - blase.offsetWidth / 2)}px`;
   blase.style.top = `${flaeche.top - feld.top + (ey * flaeche.height) / hoehe}px`;
 }
-function versteckeInfoblase() {
+// Maus: Die Blase verschwindet, wenn der Zeiger die Fläche verlässt. Finger (0.79.1): Der Browser meldet nach dem
+// Loslassen ebenfalls „verlassen“, die Blase blieb also nur, solange der Finger exakt auf dem Punkt lag (Handy-Test
+// 07.11.). Sie bleibt daher stehen, bis man woanders hintippt.
+function versteckeInfoblase(ereignis) {
+  if (ereignis?.type === "pointerleave" && ereignis.pointerType !== "mouse") return;
   const blase = $("infoblase");
   if (blase) blase.hidden = true;
   document.querySelectorAll(".kurve .hilfslinie, .kurve .punkt.aktiv").forEach((el) => el.setAttribute("visibility", "hidden"));
@@ -1165,6 +1169,9 @@ function versteckeInfoblase() {
 $("verlauf-inhalt").addEventListener("pointerdown", zeigeInfoblase);
 $("verlauf-inhalt").addEventListener("pointermove", zeigeInfoblase);
 $("verlauf-inhalt").addEventListener("pointerleave", versteckeInfoblase);
+document.addEventListener("pointerdown", (ereignis) => {
+  if (!ereignis.target.closest?.("svg.kurve, svg.zeitleiste")) versteckeInfoblase();
+});
 
 // ---------- Formulare (als Blätter von unten) ----------
 
