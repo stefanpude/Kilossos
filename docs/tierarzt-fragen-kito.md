@@ -82,6 +82,10 @@ Die Liste für Zuki: [tierarzt-fragen-zuki.md](tierarzt-fragen-zuki.md).
 - [ ] Bitte den neuen Abschnitt **„Genug Wasser“** auf der Alltag-Seite gegenlesen (Nieren beim Nichtfressen, seit 0.66.0).
 - [ ] Nennen Sie die Tagesmenge lieber in **kcal oder in Gramm** einer Sorte? (Die App fragt bisher kcal.)
 - [ ] Würden Sie Kilossos anderen Haltern **empfehlen**? Was fehlt Ihnen in der PDF-Übersicht?
+- [ ] Darf ich in der Praxis einen kleinen **Aushang** machen? Ich suche 3–5 Halter, deren Katze abnehmen soll, für
+      einen Test der App über zwei Wochen (kostenlos, ohne Anmeldung, Daten nur auf dem Handy). Oder würden Sie den
+      Zettel Haltern mitgeben, denen Sie gerade zum Abnehmen raten? (Auf dem Zettel steht nicht, dass die Praxis die
+      App empfiehlt.)
 
 ## 7. Ergänzt nach der Prüfung (07.11.2026)
 - [ ] Hatte Kito je Probleme beim **Wasserlassen**? Ist eine **Urinuntersuchung** (Dichte, Kristalle, Zucker) vor der
@@ -119,3 +123,4 @@ Die Liste für Zuki: [tierarzt-fragen-zuki.md](tierarzt-fragen-zuki.md).
 | Veganes/vegetarisches Futter | |
 | Zucker/Getreide, getreidefrei | |
 | Abschnitt „Genug Wasser“ | |
+| Aushang/Zettel für Tester in der Praxis | |
