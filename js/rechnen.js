@@ -335,13 +335,13 @@ function wenigGefressenText(kcal, name, gestern) {
     return (
       (gestern ? "Für gestern" : "Für diesen Tag") +
       " ist keine Mahlzeit eingetragen. Nur vergessen? Dann bitte nachtragen. " +
-      `Hat ${name} wirklich nichts oder kaum etwas gefressen: am selben Tag den Tierarzt anrufen, Gefahr einer Fettleber.`
+      `Hat ${name} wirklich nichts oder kaum etwas gefressen: am selben Tag in der Tierarztpraxis anrufen, Gefahr einer Fettleber.`
     );
   const anfang = gestern ? `Gestern sind nur ${k} kcal eingetragen.` : `An diesem Tag sind nur ${k} kcal eingetragen.`;
   return (
     anfang +
     ` Hat ${name} normal gefressen? Wenn eine Katze 24 Stunden lang nichts oder kaum etwas frisst: ` +
-    "am selben Tag den Tierarzt anrufen – Gefahr einer Fettleber."
+    "am selben Tag in der Tierarztpraxis anrufen – Gefahr einer Fettleber."
   );
 }
 
@@ -404,7 +404,7 @@ export function warnungen({ name, tag, heute, kcal, leckerli, freigabe, gewichte
         id: "unter-untergrenze",
         text:
           `${k} kcal – weniger als ${Math.round(soll)} kcal. Das ist schon Diät-Menge, aber es gibt noch keinen Plan ` +
-          "vom Tierarzt. Bitte nicht auf eigene Faust kürzen.",
+          "aus der Tierarztpraxis. Bitte nicht auf eigene Faust kürzen.",
         quelle: QUELLEN.untergrenze,
       });
     }
@@ -437,9 +437,9 @@ export function warnungen({ name, tag, heute, kcal, leckerli, freigabe, gewichte
       id: "diaetfutter",
       text:
         `Die freigegebenen ${freigabe.kcalProTag} kcal liegen unter dem Ruhebedarf beim Zielgewicht ` +
-        `(${Math.round(ruhebedarf)} kcal). Dafür empfehlen die Leitlinien ein Diätfutter vom Tierarzt, weil normales ` +
+        `(${Math.round(ruhebedarf)} kcal). Dafür empfehlen die Leitlinien ein Diätfutter aus der Tierarztpraxis, weil normales ` +
         `Futter dann zu wenig Vitamine und Mineralstoffe liefert. An diesem Tag kamen ${Math.round(normalesFutterKcal)} ` +
-        "kcal aus normalem Futter. Bitte mit dem Tierarzt besprechen.",
+        "kcal aus normalem Futter. Bitte mit der Tierarztpraxis besprechen.",
       quelle: QUELLEN.diaetfutter,
     });
   }
@@ -455,7 +455,7 @@ export function warnungen({ name, tag, heute, kcal, leckerli, freigabe, gewichte
       id: "zu-schnell",
       text:
         `${name} nimmt zu schnell ab: ${anzeige} % pro Woche (erlaubt bis 2 %). ` +
-        "Bitte in den nächsten Tagen mit dem Tierarzt sprechen – nicht selbst die Menge ändern.",
+        "Bitte in den nächsten Tagen mit der Tierarztpraxis sprechen – nicht selbst die Menge ändern.",
       quelle: QUELLEN.abnahme,
     });
   }
@@ -467,7 +467,7 @@ export function warnungen({ name, tag, heute, kcal, leckerli, freigabe, gewichte
         art: "hinweis",
         id: "stillstand",
         text:
-          `Seit ${still.tage} Tagen weniger als 0,5 % Abnahme pro Woche. Beim nächsten Tierarzttermin den Plan ` +
+          `Seit ${still.tage} Tagen weniger als 0,5 % Abnahme pro Woche. Beim nächsten Termin in der Tierarztpraxis den Plan ` +
           "besprechen – nicht selbst kürzen.",
         quelle: QUELLEN.abnahme,
       });
@@ -476,7 +476,7 @@ export function warnungen({ name, tag, heute, kcal, leckerli, freigabe, gewichte
       liste.push({
         art: "hinweis",
         id: "ziel-erreicht",
-        text: `Zielgewicht erreicht! Jetzt mit dem Tierarzt die Menge zum Halten des Gewichts festlegen.`,
+        text: `Zielgewicht erreicht! Jetzt mit der Tierarztpraxis die Menge zum Halten des Gewichts festlegen.`,
         quelle: QUELLEN.kontrolle,
       });
     }
@@ -484,7 +484,7 @@ export function warnungen({ name, tag, heute, kcal, leckerli, freigabe, gewichte
       liste.push({
         art: "hinweis",
         id: "freigabe-alt",
-        text: "Die Freigabe ist älter als 3 Monate. Zeit für eine Kontrolle beim Tierarzt.",
+        text: "Die Freigabe ist älter als 3 Monate. Zeit für eine Kontrolle in der Tierarztpraxis.",
         quelle: QUELLEN.kontrolle,
       });
     }

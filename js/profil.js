@@ -4,7 +4,7 @@
 //   tierarzt { praxis?, telefon?, adresse? }, wiegetag 0–6 (0 = Sonntag, wie Date.getDay()).
 //   adresse seit 0.49.0 (freiwillig, Datenformat bleibt Version 1). Eine ältere App-Version entfernt sie still
 //   beim Einlesen einer Sicherung und beim Speichern des Profils (harmlos, nur eine Komfort-Angabe).
-// Zielgewicht und Tagesmenge gehören NICHT hierher: die legt nur der Tierarzt fest (Freigabe).
+// Zielgewicht und Tagesmenge gehören NICHT hierher: die legt nur die Tierarztpraxis fest (Freigabe).
 
 export const WOCHENTAGE = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
 export const HALTUNG = { wohnung: "Wohnungskatze", freigang: "Freigänger", beides: "Wohnung und Freigang" };

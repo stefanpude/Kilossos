@@ -24,7 +24,7 @@ const ART_NAMEN = { nass: "Nass", trocken: "Trocken", frischfleisch: "Frisch", l
 
 // „Gefüttert“ (Mischung kompakt): Balken mit einem Stück je Mahlzeit, Legende je Art, zwei Kacheln.
 // Ohne Freigabe nur Legende, Satz und Knopf „Warum kein Ziel?“ (kein Balken, kein Ziel, keine Bewertung).
-// Kopfzeile (große Zahl, „von … kcal vom Tierarzt“) und ca.-Hinweis stehen in index.html.
+// Kopfzeile (große Zahl, „von … kcal laut Freigabe“) und ca.-Hinweis stehen in index.html.
 export function gefuettertHtml(werte) {
   const legende = werte.arten.length
     ? `<div class="gef-legende">${werte.arten
@@ -34,7 +34,7 @@ export function gefuettertHtml(werte) {
   if (!werte.ziel)
     return (
       legende +
-      `<p class="kcal-rest">Ziel kommt mit der Freigabe vom Tierarzt.</p>` +
+      `<p class="kcal-rest">Ziel kommt mit der tierärztlichen Freigabe.</p>` +
       `<button type="button" class="knopf-text" data-aktion="warum-kein-ziel">Warum kein Ziel?</button>`
     );
 
@@ -109,10 +109,10 @@ export function gefuettertMehrHtml(mehr, lk = null) {
     const klammer = `(${kcal(soll)}, Freigabe vom ${sicher(datumText(datum))})`;
     const b = `<b>${sicher(zahl(k))}${NB}kcal</b>`;
     const satz = {
-      noch: `Noch ${b} bis zur Tagesmenge vom Tierarzt ${klammer}.`,
-      ueber: `${b} über der Tagesmenge vom Tierarzt ${klammer}.`,
-      unter: `${b} unter der Tagesmenge vom Tierarzt ${klammer}.`,
-      erreicht: `Tagesmenge vom Tierarzt erreicht ${klammer}.`,
+      noch: `Noch ${b} bis zur freigegebenen Tagesmenge ${klammer}.`,
+      ueber: `${b} über der freigegebenen Tagesmenge ${klammer}.`,
+      unter: `${b} unter der freigegebenen Tagesmenge ${klammer}.`,
+      erreicht: `Freigegebene Tagesmenge erreicht ${klammer}.`,
     }[art];
     teile.push(`<p class="gef-satz">${satz}</p>`);
   }

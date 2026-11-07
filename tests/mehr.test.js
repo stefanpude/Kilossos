@@ -92,10 +92,10 @@ test("0.42.5: Freigabe-Fenster trennt Plan und Befund", () => {
     assert.ok(i >= 0, `fehlt: ${muster}`);
     return i;
   };
-  const plan = stelle(/<h3 class="form-abschnitt">Plan vom Tierarzt<\/h3>/);
+  const plan = stelle(/<h3 class="form-abschnitt">Tierärztlicher Plan<\/h3>/);
   const befund = stelle(/<h3 class="form-abschnitt befund">Befund am Tag der Freigabe <small>\(freiwillig\)<\/small><\/h3>/);
   const reihe = [plan, stelle(/name="ziel"/), stelle(/name="kcal"/), stelle(/name="datum"/), stelle(/name="tierarzt"/), stelle(/name="notiz"/),
-    befund, stelle(/id="label-bcs">BCS vom Tierarzt</), stelle(/id="label-mcs">Muskelzustand \(MCS\) vom Tierarzt</), stelle(/data-aktion="bcs-erklaerung"/)];
+    befund, stelle(/id="label-bcs">BCS</), stelle(/id="label-mcs">Muskelzustand \(MCS\)</),stelle(/data-aktion="bcs-erklaerung"/)];
   assert.deepEqual([...reihe].sort((a, b) => a - b), reihe);
   assert.doesNotMatch(fenster, /\(optional\)<\/span>/);
   assert.match(lies("styles.css"), /\.form-abschnitt\s*\{/);
@@ -137,7 +137,7 @@ test("0.48.1: Kein eigener BCS-Eintrag unter „Wissen“, die Seite bleibt übe
 
 // Seit 0.49.0 steht unter „Praxis anrufen“ noch „Weg zur Praxis“; die Liste ist nur ohne Telefon UND ohne Adresse versteckt.
 test("0.45.0: Unter „Tierarzt“ nur Praxis-Einträge, die Liste ist ohne Telefon und Adresse ganz versteckt", () => {
-  const tierarzt = abschnitt(ansichtMehr(), /id="titel-tierarzt">Tierarzt<\/h3>/);
+  const tierarzt = abschnitt(ansichtMehr(), /id="titel-tierarzt">Tierarztpraxis<\/h3>/);
   assert.doesNotMatch(tierarzt, /warum-kein-ziel|bcs-erklaerung|grenzen-erklaerung/);
   assert.match(
     tierarzt,
@@ -203,7 +203,7 @@ test("0.49.0: Neues Tier übernimmt die Praxis des gewählten Tiers mit Hinweis,
   assert.match(block, /form\.telefon\.value = praxisDaten\?\.telefon \?\? "";/);
   assert.match(block, /form\.adresse\.value = praxisDaten\?\.adresse \?\? "";/);
   assert.match(block, /\$\("profil-praxis-hinweis"\)\.hidden = !vorschlag;/);
-  assert.match(block, /`Von \$\{tier\.name\} übernommen\. Bei einem anderen Tierarzt einfach ändern\.`/);
+  assert.match(block, /`Von \$\{tier\.name\} übernommen\. Bei einer anderen Praxis einfach ändern\.`/);
   // textContent, nicht innerHTML: der Name kommt vom Halter.
   assert.match(block, /\$\("profil-praxis-hinweis"\)\.textContent = /);
 });
@@ -227,7 +227,7 @@ test("0.49.0: Datenschutzerklärung nennt Adresse und „Weg zur Praxis“", () 
 test("0.45.0/0.64.0: unter „Mehr“ weder Fotos noch Zeitraum, nur „Übersicht öffnen“", () => {
   const mehr = ansichtMehr();
   assert.doesNotMatch(mehr, /Fotos mitnehmen|id="bericht-fotos"/);
-  const uebersicht = abschnitt(mehr, /<h3 class="gruppe-titel">Übersicht für den Tierarzt<\/h3>/);
+  const uebersicht = abschnitt(mehr, /<h3 class="gruppe-titel">Übersicht für die Praxis<\/h3>/);
   assert.doesNotMatch(uebersicht, /bericht-zeitraum/);
   assert.match(uebersicht, /data-aktion="bericht-oeffnen"/);
 });
@@ -286,12 +286,12 @@ test("0.45.0: erster Absatz „Über Kilossos“ mit neuem ersten Satz, Rest wö
   const ueber = abschnitt(ansichtMehr(), /<h3 class="gruppe-titel">Über Kilossos<\/h3>/);
   assert.match(
     ueber,
-    /<p class="leise">Kilossos begleitet deine Katze beim Abnehmen: Es zeichnet auf, rechnet nach und warnt, wenn etwas aus dem\s+sicheren Bereich läuft\.\s+<strong>Es ersetzt keinen Tierarzt<\/strong> und ist kein Medizinprodukt\. Zielgewicht und Tagesmenge legt immer der Tierarzt fest\.<\/p>/,
+    /<p class="leise">Kilossos begleitet deine Katze beim Abnehmen: Es zeichnet auf, rechnet nach und warnt, wenn etwas aus dem\s+sicheren Bereich läuft\.\s+<strong>Es ersetzt keine tierärztliche Untersuchung<\/strong> und ist kein Medizinprodukt\. Zielgewicht und Tagesmenge legt immer die Tierarztpraxis fest\.<\/p>/,
   );
   assert.doesNotMatch(lies("index.html"), /begleitet die Abnahme von Kito und anderen Katzen/);
   assert.match(
     ueber,
-    /<p class="leise"><strong>Ist deine Katze krank<\/strong> \(zum Beispiel Diabetes, Nieren-, Schilddrüsen- oder Lebererkrankung\) oder frisst sie\s+plötzlich schlecht, besprich jede Änderung am Futter vorher mit deinem Tierarzt\.\s+<strong>Frisst eine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort zum Tierarzt\.<\/strong><\/p>/, // seit 0.77.1
+    /<p class="leise"><strong>Ist deine Katze krank<\/strong> \(zum Beispiel Diabetes, Nieren-, Schilddrüsen- oder Lebererkrankung\) oder frisst sie\s+plötzlich schlecht, besprich jede Änderung am Futter vorher mit deiner Tierarztpraxis\.\s+<strong>Frisst eine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort in die Tierarztpraxis\.<\/strong><\/p>/, // seit 0.77.1
   );
 });
 

@@ -5,19 +5,19 @@ _Vorlage, Stand 07.11.2026, für den Web-Vortest vor dem Test bei Google Play (f
 nicht in dieser Datei, weil das Projekt öffentlich ist._
 
 Danke, dass du mitmachst! Kilossos ist eine kostenlose App, die Halter übergewichtiger Katzen beim sicheren Abnehmen
-begleitet, zusammen mit dem Tierarzt. Du musst dafür **keine** übergewichtige Katze haben. Am meisten hilft, wenn du
+begleitet, zusammen mit der Tierarztpraxis. Du musst dafür **keine** übergewichtige Katze haben. Am meisten hilft, wenn du
 die App zwei Wochen lang wirklich benutzt und sagst, was dir auffällt.
 
 **Zeitraum:** _[Startdatum]_ bis _[Enddatum]_
 
 ## Das Wichtigste vorweg
 
-- **Keine ausgedachte „Freigabe vom Tierarzt“ eintragen.** Die Freigabe (Zielgewicht und Tagesmenge) kommt nur vom
-  Tierarzt. Trägst du Fantasiewerte ein, rechnet die App mit Zahlen, die niemand geprüft hat. Diesen Teil der App
-  kannst du gefahrlos in der **Demo** ansehen (siehe unten). Hast du eine echte Freigabe von deinem Tierarzt, trag sie
+- **Keine ausgedachte „tierärztliche Freigabe“ eintragen.** Die Freigabe (Zielgewicht und Tagesmenge) kommt nur aus der
+  Tierarztpraxis. Trägst du Fantasiewerte ein, rechnet die App mit Zahlen, die niemand geprüft hat. Diesen Teil der App
+  kannst du gefahrlos in der **Demo** ansehen (siehe unten). Hast du eine echte Freigabe aus deiner Tierarztpraxis, trag sie
   gern ein.
-- **Kilossos ersetzt keinen Tierarzt.** Die App schlägt bewusst keine Futtermengen vor. Hast du Sorgen um deine Katze,
-  frag deinen Tierarzt. Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort zum Tierarzt.
+- **Kilossos ersetzt keine tierärztliche Untersuchung.** Die App schlägt bewusst keine Futtermengen vor. Hast du Sorgen um deine Katze,
+  frag in deiner Tierarztpraxis nach. Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort in die Tierarztpraxis.
 - **Deine Daten bleiben auf deinem Handy.** Es gibt kein Konto und keine Cloud. Niemand sieht, was du einträgst, nur
   das, was du selbst schreibst oder als Screenshot schickst.
 - **Es ist eine Testversion.** Es kann etwas hängen oder eine Zahl seltsam aussehen. Genau das wollen wir finden.
@@ -69,8 +69,8 @@ Du musst nicht alles machen. Jede Aufgabe hilft.
 3. **Gewicht (1× pro Woche):** Katze wiegen und unter „Gewicht“ mit „Gewicht eintragen“ eintragen, am besten am
    gleichen Tag zur gleichen Uhrzeit.
 4. **Demo ansehen (einmal, ca. 10 Minuten):** https://stefanpude.github.io/Kilossos/?demo (oder unter „Mehr“ →
-   „Demo ansehen“). Die Demo zeigt ein ganzes Jahr Abnehmen mit Freigabe vom Tierarzt und ändert deine eigenen Daten
-   nicht. Schau dir dort „Heute“, „Verlauf“ und unter „Mehr“ die „Übersicht für den Tierarzt“ an.
+   „Demo ansehen“). Die Demo zeigt ein ganzes Jahr Abnehmen mit tierärztlicher Freigabe und ändert deine eigenen Daten
+   nicht. Schau dir dort „Heute“, „Verlauf“ und unter „Mehr“ die „Übersicht für die Praxis“ an.
 5. **Sicherung (einmal):** Unter „Mehr“ auf „Sicherung speichern“ tippen und nachsehen, ob die Datei auf dem Handy
    liegt. Die Datei bitte **nicht** verschicken, sie enthält deine Einträge. Ein Screenshot reicht.
 6. **Rückmeldung (am Ende):** die Fragen unten beantworten.

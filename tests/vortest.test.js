@@ -11,7 +11,7 @@ test("0.78.1: Datenschutz Abschnitt 2 nennt Monatsfotos, Befunde und besondere T
   const ds = lies("datenschutz.html");
   const teil = ds.slice(ds.indexOf("<h3>2. Was auf deinem Gerät gespeichert wird</h3>"), ds.indexOf("<h3>3."));
   assert.match(teil, /Gewichte mit Monatsfoto, wenn du eins aufnimmst/);
-  assert.match(teil, /Freigaben vom Tierarzt mit Befunden \(BCS, Muskelzustand\)/);
+  assert.match(teil, /tierärztliche Freigaben mit Befunden \(BCS, Muskelzustand\)/);
   assert.match(teil, /besondere Tage \(zum Beispiel krank oder Futter verweigert\) mit Notiz/);
   assert.match(ds, /Stand: 7\. November 2026/);
 });
@@ -22,8 +22,8 @@ test("0.78.1: Tester-Blatt für den Web-Vortest: Link, Startbildschirm, iPhone-H
   assert.ok(blatt.includes("https://stefanpude.github.io/Kilossos/?demo"));
   assert.match(blatt, /Zum Startbildschirm hinzufügen/);
   assert.match(blatt, /Zum Home-Bildschirm/);
-  assert.match(blatt, /Keine ausgedachte „Freigabe vom Tierarzt“/);
-  assert.match(blatt, /Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort zum Tierarzt\./);
+  assert.match(blatt, /Keine ausgedachte „tierärztliche Freigabe“/);
+  assert.match(blatt, /Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort in die Tierarztpraxis\./);
   assert.match(blatt, /Sicherung speichern/);
   assert.match(blatt, /neue Adresse/);
   // Kein Play-Store-Ablauf und keine Kontaktdaten im öffentlichen Repo.

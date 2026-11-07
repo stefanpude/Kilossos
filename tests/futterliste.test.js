@@ -132,7 +132,7 @@ test("Übernehmen erzeugt eine eigene Sorte mit Quelle, Stand und Diät-Hinweis"
       notiz: undefined,
     }
   );
-  assert.match(futter.notiz, /^Diätfutter – nur nach Rücksprache mit dem Tierarzt\./);
+  assert.match(futter.notiz, /^Diätfutter – nur nach tierärztlicher Rücksprache\./);
   assert.match(futter.notiz, /Protein 48 %, Fett 8 %, Asche 8 %, Faser 7,5 %, Feuchte nicht angegeben/);
   assert.match(futter.notiz, /Stand 05\.11\.2026\. Bei Abweichung gilt die Packung\.$/);
 });
@@ -266,7 +266,7 @@ test("0.69.0: listenGruppen teilt die Futterliste in Diätfutter, Nassfutter, Tr
   );
   assert.deepEqual(
     gruppen.map((g) => g.titel),
-    ["Diätfutter vom Tierarzt – nur nach Rücksprache", "Nassfutter", "Trockenfutter", "Leckerlis"]
+    ["Diätfutter – nur nach tierärztlicher Rücksprache", "Nassfutter", "Trockenfutter", "Leckerlis"]
   );
   // Jede Sorte steht genau einmal, Diätfutter nur in der Diät-Gruppe.
   assert.equal(gruppen.reduce((summe, g) => summe + g.eintraege.length, 0), FUTTERLISTE.length);

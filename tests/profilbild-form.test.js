@@ -66,7 +66,7 @@ test("0.74.2: Info-Zeichen und Zeichen nach dem Wiegen bleiben rund", () => {
   assert.match(regel(".rueckmeldung .zeichen"), /border-radius: 50%;/);
 });
 
-test("0.74.0: Foto in der Übersicht für den Tierarzt (PDF) hat dieselbe Form", () => {
+test("0.74.0: Foto in der Übersicht für die Praxis (PDF) hat dieselbe Form", () => {
   const r = regel(".bericht-foto");
   assert.match(r, /border-radius: 21%;/);
   assert.doesNotMatch(r, /50%/);

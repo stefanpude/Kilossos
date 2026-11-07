@@ -17,7 +17,7 @@ const gruppe = (name) => {
 };
 
 test("0.78.0: Reihenfolge der Gruppen unter „Mehr“, keine Gruppe „Einstellungen“ mehr", () => {
-  assert.deepEqual(titel, ["Tiere", "Tierarzt", "Übersicht für den Tierarzt", "Wissen", "Wiegen", "Daten", "App", "Über Kilossos"]);
+  assert.deepEqual(titel, ["Tiere", "Tierarztpraxis", "Übersicht für die Praxis", "Wissen", "Wiegen", "Daten", "App", "Über Kilossos"]);
 });
 
 test("0.78.0: „Wiegen“ enthält nur den Wiegetag und den Wiege-Tipp", () => {

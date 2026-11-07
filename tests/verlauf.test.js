@@ -95,9 +95,9 @@ test("zeichneVerlauf: ohne Freigabe kein „im sicheren Bereich“", () => {
   assert.match(mit, /von 1 Wochen? im sicheren Bereich/);
 });
 
-test("zeichneVerlauf: Karte „Befunde vom Tierarzt“ nur mit Freigaben, mit BCS und MCS", () => {
+test("zeichneVerlauf: Karte „Tierärztliche Befunde“ nur mit Freigaben, mit BCS und MCS", () => {
   const ohne = zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [], futterNachId: new Map(), zeitraum: "alles", heute: "2026-10-20", kopf: "" });
-  assert.doesNotMatch(ohne, /Befunde vom Tierarzt/);
+  assert.doesNotMatch(ohne, /Tierärztliche Befunde/);
   const mit = zeichneVerlauf({
     gewichte,
     mahlzeiten: [],
@@ -107,7 +107,7 @@ test("zeichneVerlauf: Karte „Befunde vom Tierarzt“ nur mit Freigaben, mit BC
     heute: "2026-10-20",
     kopf: "",
   });
-  assert.match(mit, /Befunde vom Tierarzt/);
+  assert.match(mit, /Tierärztliche Befunde/);
   assert.match(mit, /BCS 8 von 9 · leichter Muskelabbau/);
   assert.match(mit, /ohne BCS/);
   // neueste Freigabe zuerst
@@ -126,7 +126,7 @@ test("zeichneVerlauf: Befunde-Karte zeigt bei gleichem Datum die zuletzt eingetr
     heute: "2026-10-20",
     kopf: "",
   });
-  const kopf = html.match(/Befunde vom Tierarzt<\/span><br>\s*([^<]*)/)[1].trim();
+  const kopf = html.match(/Tierärztliche Befunde<\/span><br>\s*([^<]*)/)[1].trim();
   assert.equal(kopf, "BCS 7 von 9");
   const liste = html.slice(html.indexOf('id="ak-befunde"'));
   assert.ok(liste.includes("BCS 8 von 9"));
@@ -136,7 +136,7 @@ test("zeichneVerlauf: Befunde-Karte zeigt bei gleichem Datum die zuletzt eingetr
 test("zeichneVerlauf: Vorher/Nachher-Karte steht ganz am Ende, hinter den Befunden (0.29.4)", () => {
   const html = zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [freigabe], futterNachId: new Map(), zeitraum: "3m", heute: "2026-10-20", kopf: "", fotos: "<section id=\"fotos-test\"></section>" });
   const tempo = html.indexOf("Tempo pro Woche");
-  const befunde = html.indexOf("Befunde vom Tierarzt");
+  const befunde = html.indexOf("Tierärztliche Befunde");
   const fotos = html.indexOf('id="fotos-test"');
   assert.ok(tempo >= 0 && befunde > tempo && fotos > befunde);
   assert.ok(html.trimEnd().endsWith('<section id="fotos-test"></section>'));
@@ -162,9 +162,9 @@ test("zeichneVerlauf: Legende nennt Ziel und sicheren Bereich nur, wenn die Kurv
     return text.slice(start, text.indexOf("</p>", start));
   };
   // Ziel 7,2 kg liegt weit unter der Kurve (9,0 bis 9,32 kg): keine Linie, also auch kein Eintrag.
-  assert.doesNotMatch(legende(verlauf([freigabe])), /Ziel vom Tierarzt/);
-  assert.match(legende(verlauf([{ ...freigabe, zielgewichtKg: 9.1 }])), /Ziel vom Tierarzt/);
-  // Freigabe am Tag der letzten Wägung (z. B. Wiegen beim Tierarzt): noch kein sicherer Bereich gezeichnet.
+  assert.doesNotMatch(legende(verlauf([freigabe])), /Ziel aus der Freigabe/);
+  assert.match(legende(verlauf([{ ...freigabe, zielgewichtKg: 9.1 }])), /Ziel aus der Freigabe/);
+  // Freigabe am Tag der letzten Wägung (z. B. Wiegen in der Tierarztpraxis): noch kein sicherer Bereich gezeichnet.
   const amEnde = { ...freigabe, datum: "2026-10-15" };
   assert.doesNotMatch(weicheKurve(gewichte, [amEnde]), /class="band"/);
   assert.doesNotMatch(legende(verlauf([amEnde])), /sicher:/);
@@ -596,7 +596,7 @@ test("Tempo pro Woche: Erklärsatz mit und ohne Freigabe, „Grau“ nur bei nic
   const ohne = tVerlauf({ freigaben: [] });
   assert.equal(
     tempoText(ohne),
-    `Jeder Punkt steht für ein Wiegen, verglichen mit der Messung mindestens 7 Tage davor und auf 7 Tage umgerechnet. Bewertet wird erst ab der Freigabe vom Tierarzt; schneller als 2${NB}% ist immer rot. Unter der Nulllinie: zugenommen.`
+    `Jeder Punkt steht für ein Wiegen, verglichen mit der Messung mindestens 7 Tage davor und auf 7 Tage umgerechnet. Bewertet wird erst ab der tierärztlichen Freigabe; schneller als 2${NB}% ist immer rot. Unter der Nulllinie: zugenommen.`
   );
   assert.ok(tempoPunkte(ohne).every((p) => p.klasse === "neutral" || p.klasse === "zu-schnell"));
 });

@@ -262,7 +262,7 @@ test("datumsFrage: Tagesmenge korrigiert, altes Datum vor heute stehen gelassen,
     df(a, "2026-11-04", 5.5, 250),
     "Du hast Ziel oder Tagesmenge geändert, das Datum ist aber noch der 4. Nov. 2026. " +
       "Die neuen Werte (Ziel 5,50 kg, 250 kcal) gelten dann rückwirkend ab diesem Tag, " +
-      "auch in der Übersicht für den Tierarzt. Stimmt das Datum?"
+      "auch in der Übersicht für die Praxis. Stimmt das Datum?"
   );
 });
 
@@ -305,7 +305,7 @@ test("speicherPlan: reicht die Datumsfrage durch, bei Fehler nicht", () => {
 test("TEXT_DATUM_KORRIGIEREN nennt den Weg für einen neuen Plan", () => {
   assert.equal(
     TEXT_DATUM_KORRIGIEREN,
-    "Nicht gespeichert: Bitte das Datum prüfen. Ein neuer Plan vom Tierarzt kommt über „Freigabe eintragen“ dazu."
+    "Nicht gespeichert: Bitte das Datum prüfen. Ein neuer tierärztlicher Plan kommt über „Freigabe eintragen“ dazu."
   );
 });
 
@@ -401,9 +401,9 @@ test("app.js fragt nach dem Ziel nach der Datumsfrage und vor der 60-%-Rückfrag
 
 // 0.73.1 (Stefan 06.11.2026): Die Karte zeigt die geltende Freigabe, darunter „Frühere Freigaben“.
 // „Aktuelle“ statt „Letzte“, weil „letzte“ wie „keine mehr“ klingt. Das Eingabefenster heißt weiter allgemein.
-test("0.73.1: Karte unter „Tierarzt“ heißt „Aktuelle Freigabe vom Tierarzt“, das Eingabefenster bleibt „Freigabe vom Tierarzt“", () => {
+test("0.73.1: Karte unter „Tierarztpraxis“ heißt „Aktuelle tierärztliche Freigabe“, das Eingabefenster bleibt „tierärztliche Freigabe“", () => {
   const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
   const karte = html.slice(html.indexOf('id="titel-tierarzt"'), html.indexOf('id="freigabe-tafel"'));
-  assert.match(karte, /<h4 class="label">Aktuelle Freigabe vom Tierarzt<\/h4>/);
-  assert.match(html, /<h2 id="freigabe-titel">Freigabe vom Tierarzt<\/h2>/);
+  assert.match(karte, /<h4 class="label">Aktuelle tierärztliche Freigabe<\/h4>/);
+  assert.match(html, /<h2 id="freigabe-titel">Tierärztliche Freigabe<\/h2>/);
 });

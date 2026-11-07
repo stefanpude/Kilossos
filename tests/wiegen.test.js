@@ -38,7 +38,7 @@ test("Wortlaut der Kernsätze (Stefans Ja)", () => {
     "kann das Ergebnis leicht 100 g oder mehr danebenliegen, so viel wie eine ganze Woche Abnahme.",
     "Nimm immer dieselbe Waage, am gleichen Wochentag („Wiegetag“ unter „Mehr“) und etwa zur gleichen Uhrzeit, wenn möglich vor dem Füttern.",
     "Halsband oder Geschirr vorher ab.",
-    "wiege erst nach: mit einer genauen Waage oder in der Tierarztpraxis. Ändere die Futtermenge nur mit deinem Tierarzt.",
+    "wiege erst nach: mit einer genauen Waage oder in der Tierarztpraxis. Ändere die Futtermenge nur mit deiner Tierarztpraxis.",
   ]) {
     assert.ok(text.includes(satz), satz);
   }

@@ -173,7 +173,7 @@ test("tempoRueckmeldung beim Ändern (0.31.0): nie mit der Wägung vergleichen, 
 test("tempoRueckmeldung: sicher/langsamer nur nach einer Freigabe (wie wochenRaten)", () => {
   assert.equal(tempoRueckmeldung({ gewichte: zwei, freigaben: [], kg: 9.18, datum: "2026-10-15" }).bewertung, "neutral");
   const ohne = tempoRueckmeldung({ gewichte: zwei, freigaben: [], kg: 9.18, datum: "2026-10-15" });
-  assert.match(ohne.text, /erst mit einer Freigabe vom Tierarzt/);
+  assert.match(ohne.text, /erst mit einer tierärztlichen Freigabe/);
   assert.doesNotMatch(ohne.text, /sicher/);
   // Freigabe erst nach der letzten Messung: diese Woche zählt noch nicht als bewertet
   const spaet = { ...freigabe, datum: "2026-10-10" };

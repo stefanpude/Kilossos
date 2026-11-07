@@ -9,17 +9,17 @@ import { GRENZEN } from "../js/rechnen.js";
 const lies = (datei) => readFileSync(new URL(`../${datei}`, import.meta.url), "utf8");
 const saetze = (text) => text.split(/(?<=[.!?])\s+/).filter(Boolean);
 const blatt = (html, id) => html.match(new RegExp(`<dialog id="${id}">([\\s\\S]*?)</dialog>`))?.[1] ?? "";
-// Mengen wie "50 g pro Tag" oder "200 kcal am Tag" darf kein Erklärtext nennen (die Menge legt nur der Tierarzt fest).
+// Mengen wie "50 g pro Tag" oder "200 kcal am Tag" darf kein Erklärtext nennen (die Menge legt nur die Tierarztpraxis fest).
 const MENGE_PRO_TAG = /\d[\d,.]*\s*(g|Gramm|kcal)\s*(pro|am|je|\/)\s*Tag/i;
 
 // 0.65.0: „Vegan und vegetarisch“ (Ideen-Tafel, Stefan 06.11.2026 „so umsetzen“): neutral, mit Quelle, ohne Mengen,
-// ohne Sorten; Umstellung nur mit dem Tierarzt. Beim Termin am 13.11. gegenlesen lassen.
+// ohne Sorten; Umstellung nur mit der Tierarztpraxis. Beim Termin am 13.11. gegenlesen lassen.
 test("0.65.0: Begriff „Vegan und vegetarisch“ neutral, mit Quellen beider Seiten und Verweis auf den Tierarzt", () => {
   const b = BEGRIFFE.find((x) => x.id === "vegan");
   assert.ok(b, "Begriff fehlt");
   assert.equal(b.begriff, "Vegan und vegetarisch");
   assert.match(b.text, /Taurin, Arachidonsäure und Vitamin A/);
-  assert.match(b.text, /besprich eine Umstellung vorher mit dem Tierarzt\.$/);
+  assert.match(b.text, /besprich eine Umstellung vorher mit der Tierarztpraxis\.$/);
   assert.match(b.text, /Fett und nicht Muskeln/);
   assert.doesNotMatch(b.text, /gefährlich|ungesund|gesünder|Tierquälerei/i);
   for (const quelle of ["NRC 2006", "Domínguez-Oliva et al. 2023", "Knight et al. 2023", "British Veterinary Association 2024", "AAHA 2014"]) {
@@ -33,9 +33,9 @@ test("Begriffe: die 13 Begriffe aus dem Plan, alphabetisch sortiert", () => {
     "Analytische Bestandteile",
     "BARF",
     "BCS und MCS",
-    "Diätfutter vom Tierarzt",
+    "Diätfutter aus der Tierarztpraxis",
     "Fettleber (hepatische Lipidose)",
-    "Freigabe vom Tierarzt",
+    "Freigabe (tierärztlich)",
     "kcal und ME",
     "Light und Sterilised",
     "Nassfutter und Trockenfutter",
@@ -146,11 +146,11 @@ test("index.html: Gruppe „Wissen“ mit beiden Einträgen und beiden Blättern
 test("„Warum nimmt meine Katze nicht ab?“: Fettleber-Kasten offen sichtbar, keine Futtermengen", () => {
   const text = blatt(lies("index.html"), "dialog-nicht-ab");
   assert.match(text, /<p class="notfall-hinweis"><strong>Bitte nie hungern lassen\.<\/strong>/);
-  assert.match(text, /sofort zum Tierarzt/);
+  assert.match(text, /sofort in die Tierarztpraxis/);
   assert.match(text, /<h3>Bitte nicht selbst kürzen<\/h3>/);
   assert.match(text, /<p class="leise">Quellen:/);
   assert.match(text, /Merck/);
-  assert.match(text, /Besprich dann den Plan mit dem Tierarzt/);
+  assert.match(text, /Besprich dann den Plan mit der Tierarztpraxis/);
   assert.match(text, /ein paar Stück von der Tagesmenge/);
   assert.match(text, /als Leckerli ein, damit Kilossos sie mitzählt/);
   assert.doesNotMatch(text, /aufklapp/);
@@ -185,14 +185,14 @@ test("app.js: öffnet beide Blätter, setzt die Begriffe ein, Knopf im Hinweis",
 
 test("Willkommensseite verspricht nichts, was die App nicht halten kann (Stefan, 04.11.2026)", () => {
   const html = lies("index.html");
-  assert.match(html, /<p class="willkommen-unter">Sicher abnehmen nach den Leitlinien der Tierärzte<\/p>/);
+  assert.match(html, /<p class="willkommen-unter">Sicher abnehmen nach tierärztlichen Leitlinien<\/p>/);
   assert.match(html, /<span>Du wiegst das Futter, Kilossos rechnet die Kalorien<\/span>/);
   assert.doesNotMatch(html, /ohne Fettleber-Risiko|für jede Sorte/);
 });
 
-test("Version 0.78.1: Cache v139 mit js/rueckfrage.js, js/nachtragen.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
+test("Version 0.79.0: Cache v140 mit js/rueckfrage.js, js/nachtragen.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
   const sw = lies("sw.js");
-  assert.match(sw, /const CACHE_NAME = "kilossos-v139";/);
+  assert.match(sw, /const CACHE_NAME = "kilossos-v140";/);
   assert.match(sw, /"js\/nachtragen\.js",/);
   assert.match(sw, /"js\/rueckfrage\.js",/);
   assert.match(sw, /"demo\/kito-simulation\.json",/);
@@ -200,7 +200,7 @@ test("Version 0.78.1: Cache v139 mit js/rueckfrage.js, js/nachtragen.js und der 
   assert.match(sw, /"js\/besondere-tage\.js",/);
   assert.match(sw, /"js\/freigaben\.js",/);
   assert.match(sw, /"js\/heute-grafiken\.js",/);
-  assert.match(lies("index.html"), /id="version">Version 0\.78\.1</);
+  assert.match(lies("index.html"), /id="version">Version 0\.79\.0</);
 });
 
 // 0.42.7: Wiege-Tipp Transportbox im Bereich „Auf dem Arm gewogen?“ (Ideen-Tafel, Halter 06.11.2026).
@@ -221,7 +221,7 @@ test("0.42.7: Hinweis im Arm-Bereich in zwei Absätze geteilt, alle Sätze bleib
   assert.equal(absaetze.length, 3, "Tipp oben + zwei Absätze unten");
   assert.match(warum, /^Personenwaagen zeigen meist nur 100-g-Schritte[^]*leicht 100 g oder mehr danebenliegen\. <span id="arm-zahlen"><\/span>$/);
   assert.match(genauer, /^Für den Wiegetag ist eine Tier- oder Babywaage \(10-g-Schritte\) deutlich genauer\. Ohne Tierwaage/);
-  assert.match(genauer, /Auf die Höchstlast achten\. Immer dieselbe Waage nehmen\. Bei einer Warnung zum Tempo erst mit einer genauen Waage oder beim Tierarzt nachwiegen\.$/);
+  assert.match(genauer, /Auf die Höchstlast achten\. Immer dieselbe Waage nehmen\. Bei einer Warnung zum Tempo erst mit einer genauen Waage oder in der Tierarztpraxis nachwiegen\.$/);
 });
 
 // Zahl und Einheit im Text je Tier nie über zwei Zeilen („1 / % des Gewichts“, „0,5–2 / % pro Woche“).

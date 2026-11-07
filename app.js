@@ -114,7 +114,7 @@ const QUELLE_NAMEN = { packung: "Packung", hersteller: "Hersteller", ungefaehr: 
 // Warnungen der Art "sofort" und "achtung" sind nie zugeklappt.
 const HINWEIS_TITEL = {
   "ueber-freigabe": "Mehr als freigegeben",
-  diaetfutter: "Diätfutter mit dem Tierarzt besprechen",
+  diaetfutter: "Diätfutter mit der Tierarztpraxis besprechen",
   stillstand: "Abnahme stockt",
   "ziel-erreicht": "Zielgewicht erreicht",
   "freigabe-alt": "Freigabe ist älter als 3 Monate",
@@ -528,7 +528,7 @@ function zeichneHeute(vonNull = false) {
   $("kcal-titel").textContent = tag === heute ? "Heute gefüttert" : "Gefüttert";
   zaehleKcal(Math.round(gefuettert.kcal), vonNull);
   $("kcal-von").textContent = gefuettert.ziel
-    ? `${ca}von ${zahl(gefuettert.ziel.soll)} kcal vom Tierarzt`
+    ? `${ca}von ${zahl(gefuettert.ziel.soll)} kcal laut Freigabe`
     : `${ca}kcal · ${zahl(gefuettert.gramm)} g Futter`;
   // Darunter „Mehr zur Fütterung“ (0.44.0): aufklappbar, nur mit mindestens einer Mahlzeit; die ca.-Zeile bleibt darunter.
   // Seit 0.78.0 stehen dort auch die Leckerlis (vorher eigene Karte unter „Letzte Messung“), gleiche Basis wie die
@@ -584,7 +584,7 @@ function zeichneBesondereTage(tag, heute) {
   const liste = eintraegeAm(daten.besondereTage, tier.id, tag);
   if (liste.length === 0) {
     $("heute-besonders").innerHTML =
-      '<p class="tipp">Draußen gewesen, genascht, krank? Hier festhalten, damit du und der Tierarzt später seht, warum sich das Gewicht so bewegt.</p>';
+      '<p class="tipp">Draußen gewesen, genascht, krank? Hier festhalten, damit du und die Tierarztpraxis später seht, warum sich das Gewicht so bewegt.</p>';
     return;
   }
   const zeilen = liste
@@ -709,7 +709,7 @@ function eigeneFreigaben() {
 // Darunter „Frühere Freigaben (n)“: jede Zeile ein Knopf mit kleinem Stift, auch ältere sollen korrigierbar sein.
 function zeichneFreigabe() {
   const freigabe = freigabeVonTier();
-  $("titel-tierarzt").textContent = daten.tiere.length > 1 ? `Tierarzt · ${tier.name}` : "Tierarzt";
+  $("titel-tierarzt").textContent = daten.tiere.length > 1 ? `Tierarztpraxis · ${tier.name}` : "Tierarztpraxis";
   const tafel = freigabeTafel(freigabe);
   $("freigabe-tafel").innerHTML = tafel
     ? `<button type="button" class="freigabe-knopf tippbar" data-aktion="freigabe-bearbeiten" data-id="${sicher(freigabe.id)}">
@@ -739,7 +739,7 @@ function zeichneFreigabe() {
   const karte = kartenLink(tier.tierarzt?.praxis, tier.tierarzt?.adresse);
   $("praxis-anrufen").hidden = !link;
   $("praxis-weg").hidden = !karte;
-  // Die Liste unter „Tierarzt“ enthält nur „Praxis anrufen“ und „Weg zur Praxis“: ohne beides kein leerer Kasten
+  // Die Liste unter „Tierarztpraxis“ enthält nur „Praxis anrufen“ und „Weg zur Praxis“: ohne beides kein leerer Kasten
   // (0.45.0, seit 0.49.0 auch mit Adresse allein sichtbar).
   $("tierarzt-liste").hidden = !link && !karte;
   if (link) {
@@ -780,7 +780,7 @@ function zeichneTiere() {
         ${profilHtml(t, "klein")}
         <span class="text"><b>${sicher(t.name)}</b>
           <small>${sicher(zusammen || "Profil")}</small>
-          ${fehlt ? "<small>Profil ergänzen: Alter, Körperbau, Tierarzt</small>" : ""}${aktiv}</span>
+          ${fehlt ? "<small>Profil ergänzen: Alter, Körperbau, Tierarztpraxis</small>" : ""}${aktiv}</span>
         <span class="weiter" aria-hidden="true">${SYMBOL.weiter}</span></button>`;
     })
     .join("");
@@ -893,7 +893,7 @@ function oeffneProfil(einTier) {
   form.telefon.value = praxisDaten?.telefon ?? "";
   form.adresse.value = praxisDaten?.adresse ?? "";
   $("profil-praxis-hinweis").hidden = !vorschlag;
-  $("profil-praxis-hinweis").textContent = vorschlag ? `Von ${tier.name} übernommen. Bei einem anderen Tierarzt einfach ändern.` : "";
+  $("profil-praxis-hinweis").textContent = vorschlag ? `Von ${tier.name} übernommen. Bei einer anderen Praxis einfach ändern.` : "";
   zeigeProfilFoto();
   $("dialog-profil").showModal();
 }
@@ -1677,7 +1677,7 @@ function armRechnen(fehlerZeigen) {
     form.kg.value = armKg;
     $("arm-ergebnis").textContent = `Differenz: ${armKg} kg, oben eingetragen.`;
     zeigeFehler("arm-fehler", "");
-    // Damit der Tierarzt im Bericht sieht, woher der Wert kommt (sichtbar und änderbar).
+    // Damit die Tierarztpraxis im Bericht sieht, woher der Wert kommt (sichtbar und änderbar).
     if (!form.notiz.value.trim()) {
       form.notiz.value = ARM_NOTIZ;
       armNotizGesetzt = true;
@@ -1687,7 +1687,7 @@ function armRechnen(fehlerZeigen) {
     // (leer beim Eintragen, das gespeicherte Gewicht beim Ändern). Eigene Eingaben bleiben.
     if (armKg && form.kg.value === armKg) form.kg.value = kgVorbelegt;
     armKg = "";
-    // Ebenso die vorgeschlagene Notiz, sonst stünde beim Tierarzt eine falsche Herkunft des Werts.
+    // Ebenso die vorgeschlagene Notiz, sonst stünde in der Tierarztpraxis eine falsche Herkunft des Werts.
     if (armNotizGesetzt && form.notiz.value === ARM_NOTIZ) form.notiz.value = "";
     armNotizGesetzt = false;
     $("arm-ergebnis").textContent = "";
@@ -2000,7 +2000,7 @@ $("dialog-foto").addEventListener("close", () => {
   $("foto-gross").removeAttribute("src");
 });
 
-// BCS 1–9 mit grober Einordnung als Hilfe beim Abschreiben – den Wert selbst legt nur der Tierarzt fest.
+// BCS 1–9 mit grober Einordnung als Hilfe beim Abschreiben – den Wert selbst legt nur die Tierarztpraxis fest.
 const BCS_GRUPPE = (bcs) => (bcs <= 3 ? "zu dünn" : bcs <= 5 ? "ideal" : bcs === 6 ? "etwas zu schwer" : "übergewichtig");
 const BCS_OPTIONEN = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((bcs) => ({ wert: String(bcs), text: String(bcs), zusatz: BCS_GRUPPE(bcs) }));
 
@@ -2054,7 +2054,7 @@ beimSpeichern("form-freigabe", "freigabe-fehler", async (werte) => {
   const tierarzt = werte.get("tierarzt").trim();
   if (!ziel || ziel < 1 || ziel > 15) return "Bitte ein Zielgewicht zwischen 1 und 15 kg eingeben.";
   if (!kcal || kcal < 50 || kcal > 600) return "Bitte eine Tagesmenge zwischen 50 und 600 kcal eingeben.";
-  if (!tierarzt) return "Bitte Tierarzt oder Praxis eintragen.";
+  if (!tierarzt) return "Bitte die Tierarztpraxis eintragen.";
   const datum = werte.get("datum");
   const alt = bearbeiteteFreigabe;
   // Was passiert, entscheidet speicherPlan (js/freigaben.js, mit Tests); hier nur noch fragen und ausführen.
@@ -2087,12 +2087,12 @@ beimSpeichern("form-freigabe", "freigabe-fehler", async (werte) => {
     !(await bestaetigt({
       text:
         `${zahl(kcal)} kcal liegen unter ${grenze} kcal (60 % des Ruhebedarfs beim Zielgewicht). ` +
-        "Das empfehlen die Leitlinien nur mit einem Fachtierarzt für Ernährung. Hat der Tierarzt das genau so festgelegt?",
+        "Das empfehlen die Leitlinien nur mit tierärztlichen Fachleuten für Ernährung. Wurde das in der Tierarztpraxis genau so festgelegt?",
       ja: "Ja, so festgelegt",
       nein: "Nein",
     }))
   )
-    return "Bitte die Tagesmenge mit dem Tierarzt klären.";
+    return "Bitte die Tagesmenge mit der Tierarztpraxis klären.";
   const neu = {
     datum,
     zielgewichtKg: ziel,
@@ -2622,7 +2622,7 @@ function zeigeScanErgebnis(ean) {
     inhalt = `<h3>${sicher(e.name)}</h3>
       <p class="leise">${TYP_NAMEN[e.typ]} · ${kcalText(e.kcalPro100g)}
         <span class="marke marke-${e.kcalQuelle}">${QUELLE_NAMEN[e.kcalQuelle]}</span></p>
-      ${e.diaet ? '<p class="leise"><strong>Diätfutter vom Tierarzt:</strong> nur nach Rücksprache.</p>' : ""}
+      ${e.diaet ? '<p class="leise"><strong>Diätfutter:</strong> nur nach tierärztlicher Rücksprache.</p>' : ""}
       <p class="tipp">${e.eanHinweis ? `${sicher(e.eanHinweis)} ` : ""}Aus der Kilossos-Futterliste. Bei Abweichung gilt die Packung.</p>
       <button type="button" class="knopf-haupt" data-aktion="liste-uebernehmen" data-id="${e.id}">Übernehmen</button>`;
   } else {

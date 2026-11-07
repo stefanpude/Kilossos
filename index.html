@@ -35,7 +35,7 @@
     <div class="willkommen-inhalt willkommen-schritt" id="willkommen-1">
       <img class="willkommen-logo" src="icons/icon-512.png" alt="" width="112" height="112">
       <h1 id="willkommen-titel" tabindex="-1">Kilossos</h1>
-      <p class="willkommen-unter">Sicher abnehmen nach den Leitlinien der Tierärzte</p>
+      <p class="willkommen-unter">Sicher abnehmen nach tierärztlichen Leitlinien</p>
       <ul class="willkommen-punkte">
         <li><span data-symbol="futter"></span><span>Du wiegst das Futter, Kilossos rechnet die Kalorien</span></li>
         <li><span data-symbol="waage"></span><span>Gewicht und Tempo im Blick, mit Warnung außerhalb der sicheren Grenzen</span></li>
@@ -49,15 +49,15 @@
     </div>
 
     <div class="willkommen-inhalt willkommen-schritt" id="willkommen-2" hidden>
-      <h1 id="willkommen-titel-2" tabindex="-1">Immer mit dem Tierarzt</h1>
+      <h1 id="willkommen-titel-2" tabindex="-1">Immer tierärztlich begleitet</h1>
       <div class="karte">
-        <p>Lass deine Katze untersuchen, bevor sie abnimmt. <strong>Zielgewicht und Tagesmenge legt der Tierarzt fest.</strong>
+        <p>Lass deine Katze untersuchen, bevor sie abnimmt. <strong>Zielgewicht und Tagesmenge legt die Tierarztpraxis fest.</strong>
           Kilossos vergleicht deine Fütterung mit diesen Werten, schlägt aber nie selbst Mengen vor.</p>
         <p class="leise">Warum? Bekommt eine übergewichtige Katze zu wenig Futter, kann sie lebensgefährlich krank werden (Fettleber).
           Eine Formel kennt deine Katze nicht.</p>
         <p class="leise">Ist deine Katze krank (zum Beispiel Diabetes, Nieren-, Schilddrüsen- oder Lebererkrankung),
-          besprich jede Änderung am Futter vorher mit dem Tierarzt.</p>
-        <p class="willkommen-notfall"><strong>Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort zum Tierarzt.</strong></p>
+          besprich jede Änderung am Futter vorher mit der Tierarztpraxis.</p>
+        <p class="willkommen-notfall"><strong>Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort in die Tierarztpraxis.</strong></p>
         <p class="leise">Kilossos ist kein Medizinprodukt und keine tierärztliche Beratung.</p>
       </div>
       <p class="willkommen-schritte">Schritt 2 von 3</p>
@@ -145,7 +145,7 @@
       <!-- Notfall bei „Futter verweigert“ heute, gestern oder noch laufend (0.33.0): groß und rot, nicht Teil von warnungen(). -->
       <div class="warnung warnung-sofort notfall-kasten" id="notfall-kasten" role="alert" hidden>
         <strong>Frisst deine Katze einen Tag lang nichts oder kaum etwas?</strong>
-        Dann sofort zum Tierarzt, auch mitten in der Abnahme. Katzen bekommen dabei schnell eine Fettleber.
+        Dann sofort in die Tierarztpraxis, auch mitten in der Abnahme. Katzen bekommen dabei schnell eine Fettleber.
       </div>
 
       <ul class="warnungen" id="warnungen-liste"></ul>
@@ -176,7 +176,7 @@
 
       <!-- Notfall-Hinweis: immer sichtbar, bewusst ruhig gestaltet (Ideen-Tafel, 0.14.0). -->
       <p class="notfall-hinweis"><strong>Frisst deine Katze einen Tag lang nichts oder kaum etwas?</strong>
-        Dann sofort zum Tierarzt, auch mitten in der Abnahme. Katzen bekommen dabei schnell eine Fettleber.</p>
+        Dann sofort in die Tierarztpraxis, auch mitten in der Abnahme. Katzen bekommen dabei schnell eine Fettleber.</p>
     </section>
 
     <!-- Gewicht -->
@@ -197,7 +197,7 @@
       <div id="verlauf-inhalt"></div>
     </section>
 
-    <!-- Übersicht für den Tierarzt (über "Mehr" erreichbar) -->
+    <!-- Übersicht für die Praxis (über "Mehr" erreichbar) -->
     <section class="ansicht" data-ansicht="bericht" hidden>
       <div class="bericht-werkzeuge">
         <button class="knopf-zweit" data-ziel="mehr"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.5 6l-6 6 6 6"/></svg>Zurück</button>
@@ -237,12 +237,12 @@
         </button>
       </div>
 
-      <h3 class="gruppe-titel" id="titel-tierarzt">Tierarzt</h3>
+      <h3 class="gruppe-titel" id="titel-tierarzt">Tierarztpraxis</h3>
       <div class="karte">
-        <h4 class="label">Aktuelle Freigabe vom Tierarzt</h4>
+        <h4 class="label">Aktuelle tierärztliche Freigabe</h4>
         <div class="freigabe-tafel" id="freigabe-tafel"></div>
         <div id="freigaben-frueher"></div>
-        <p class="tipp">Zielgewicht und Tagesmenge legt nur der Tierarzt fest. Ohne Freigabe zeichnet Kilossos nur auf und warnt, schlägt aber keine Mengen vor.</p>
+        <p class="tipp">Zielgewicht und Tagesmenge legt nur die Tierarztpraxis fest. Ohne Freigabe zeichnet Kilossos nur auf und warnt, schlägt aber keine Mengen vor.</p>
         <button class="knopf-haupt" data-aktion="freigabe-neu">Freigabe eintragen</button>
       </div>
       <!-- Unter „Tierarzt“ nur, womit man etwas tut (0.45.0). Ohne Telefonnummer und ohne Adresse ist die ganze Liste
@@ -252,7 +252,7 @@
         <a class="eintrag" id="praxis-weg" target="_blank" rel="noopener" hidden></a>
       </div>
 
-      <h3 class="gruppe-titel">Übersicht für den Tierarzt</h3>
+      <h3 class="gruppe-titel">Übersicht für die Praxis</h3>
       <div class="liste">
         <button type="button" class="eintrag" data-aktion="bericht-oeffnen">
           <span data-symbol="dokument"></span>
@@ -330,13 +330,13 @@
       <h3 class="gruppe-titel">Über Kilossos</h3>
       <div class="karte">
         <p class="leise">Kilossos begleitet deine Katze beim Abnehmen: Es zeichnet auf, rechnet nach und warnt, wenn etwas aus dem
-          sicheren Bereich läuft. <strong>Es ersetzt keinen Tierarzt</strong> und ist kein Medizinprodukt. Zielgewicht und Tagesmenge legt immer der Tierarzt fest.</p>
+          sicheren Bereich läuft. <strong>Es ersetzt keine tierärztliche Untersuchung</strong> und ist kein Medizinprodukt. Zielgewicht und Tagesmenge legt immer die Tierarztpraxis fest.</p>
         <p class="leise"><strong>Ist deine Katze krank</strong> (zum Beispiel Diabetes, Nieren-, Schilddrüsen- oder Lebererkrankung) oder frisst sie
-          plötzlich schlecht, besprich jede Änderung am Futter vorher mit deinem Tierarzt.
-          <strong>Frisst eine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort zum Tierarzt.</strong></p>
+          plötzlich schlecht, besprich jede Änderung am Futter vorher mit deiner Tierarztpraxis.
+          <strong>Frisst eine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort in die Tierarztpraxis.</strong></p>
         <p class="leise"><strong>Datenschutz:</strong> keine Anmeldung, keine Cloud, keine Werbung, keine Auswertung.
           Alle Daten bleiben auf diesem Handy, bis du selbst eine Sicherung speicherst.</p>
-        <p class="leise"><strong>Grenzwerte:</strong> nach den Leitlinien der Tierärzteverbände AAHA (2014, 2021) und WSAVA.</p>
+        <p class="leise"><strong>Grenzwerte:</strong> nach den Leitlinien der tierärztlichen Fachverbände AAHA (2014, 2021) und WSAVA.</p>
       </div>
       <div class="liste">
         <button type="button" class="eintrag" data-aktion="geschichte-oeffnen">
@@ -355,7 +355,7 @@
           <span data-symbol="katzenkopf"></span><span class="text">Demo ansehen<small>Beispieldaten von Kito und Zuki über ein Jahr. Deine Einträge bleiben, wie sie sind.</small></span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.78.1</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.79.0</span>
         </div>
       </div>
     </section>
@@ -451,7 +451,7 @@
             <span id="arm-zahlen"></span></p>
           <p class="tipp">Für den Wiegetag ist eine Tier- oder Babywaage (10-g-Schritte) deutlich genauer.
             Ohne Tierwaage geht es genauer mit der Transportbox: leere Box auf eine Küchen- oder Paketwaage, „Tara“ drücken, Katze hinein. Die Waage zeigt dann ihr Gewicht. Auf die Höchstlast achten.
-            Immer dieselbe Waage nehmen. Bei einer Warnung zum Tempo erst mit einer genauen Waage oder beim Tierarzt nachwiegen.</p>
+            Immer dieselbe Waage nehmen. Bei einer Warnung zum Tempo erst mit einer genauen Waage oder in der Tierarztpraxis nachwiegen.</p>
         </div>
       </details>
       <p class="wiegen-link"><button type="button" class="knopf-text" data-aktion="wiegen-erklaerung">Wie wiege ich meine Katze genau?</button></p>
@@ -459,7 +459,7 @@
         <input name="datum" type="date" required>
       </label>
       <label>Notiz (optional)
-        <input name="notiz" autocomplete="off" placeholder="z. B. Tierarzt">
+        <input name="notiz" autocomplete="off" placeholder="z. B. in der Praxis gewogen">
       </label>
       <p class="tipp" id="gewicht-foto-vorhanden" hidden></p>
       <button type="button" class="knopf-text" data-aktion="gewicht-foto-nachholen" id="gewicht-foto-nachholen" hidden>Monatsfoto nachholen (freiwillig)</button>
@@ -596,16 +596,16 @@
     </form>
   </dialog>
 
-  <!-- Formular: Freigabe vom Tierarzt -->
+  <!-- Formular: tierärztliche Freigabe -->
   <dialog id="dialog-freigabe">
     <form method="dialog" id="form-freigabe">
-      <h2 id="freigabe-titel">Freigabe vom Tierarzt</h2>
-      <p class="tipp">Bitte genau die Werte eintragen, die der Tierarzt festgelegt hat.</p>
+      <h2 id="freigabe-titel">Tierärztliche Freigabe</h2>
+      <p class="tipp">Bitte genau die Werte eintragen, die in der Tierarztpraxis festgelegt wurden.</p>
       <!-- Nur beim Ändern sichtbar (seit 0.34.0); Text aus js/freigaben.js (HINWEIS_AENDERN). -->
       <p class="tipp" id="freigabe-hinweis-aendern" hidden></p>
-      <!-- Plan und Befund getrennt (0.42.5): Ziel und Tagesmenge legt der Tierarzt fest, BCS/MCS beschreiben den
+      <!-- Plan und Befund getrennt (0.42.5): Ziel und Tagesmenge legt die Tierarztpraxis fest, BCS/MCS beschreiben den
            Zustand der Katze am Tag der Freigabe. Gespeichert wird alles wie bisher in einer Freigabe. -->
-      <h3 class="form-abschnitt">Plan vom Tierarzt</h3>
+      <h3 class="form-abschnitt">Tierärztlicher Plan</h3>
       <label>Zielgewicht in kg
         <input name="ziel" inputmode="decimal" autocomplete="off" placeholder="z. B. 7,2" required>
       </label>
@@ -615,15 +615,15 @@
       <label>Datum der Freigabe
         <input name="datum" type="date" required>
       </label>
-      <label>Tierarzt / Praxis
+      <label>Tierarztpraxis
         <input name="tierarzt" autocomplete="off" required>
       </label>
       <label>Notiz (optional)
         <input name="notiz" autocomplete="off" placeholder="z. B. nächste Kontrolle in 4 Wochen">
       </label>
       <h3 class="form-abschnitt befund">Befund am Tag der Freigabe <small>(freiwillig)</small></h3>
-      <div class="feld"><span id="label-bcs">BCS vom Tierarzt</span><div id="freigabe-bcs"></div></div>
-      <div class="feld"><span id="label-mcs">Muskelzustand (MCS) vom Tierarzt</span><div id="freigabe-mcs"></div></div>
+      <div class="feld"><span id="label-bcs">BCS</span><div id="freigabe-bcs"></div></div>
+      <div class="feld"><span id="label-mcs">Muskelzustand (MCS)</span><div id="freigabe-mcs"></div></div>
       <button type="button" class="knopf-text" data-aktion="bcs-erklaerung">Was ist der BCS?</button>
       <p class="fehler" id="freigabe-fehler" hidden></p>
       <div class="knoepfe">
@@ -666,7 +666,7 @@
       <label>Gewicht in der schlanken Zeit in kg (optional)
         <input name="schlank" inputmode="decimal" autocomplete="off" placeholder="z. B. 7,5">
       </label>
-      <p class="tipp">Hilft dem Tierarzt beim Zielgewicht. Das Zielgewicht selbst legt nur der Tierarzt fest.</p>
+      <p class="tipp">Hilft der Tierarztpraxis beim Zielgewicht. Das Zielgewicht selbst legt nur die Tierarztpraxis fest.</p>
       <label>Tierarztpraxis (optional)
         <input name="praxis" autocomplete="off" maxlength="80">
       </label>
@@ -691,12 +691,12 @@
     <form method="dialog">
       <h2>Warum schlägt Kilossos keine Futtermenge vor?</h2>
       <p>Rechner im Internet und in anderen Apps schätzen den Futterbedarf mit einer Formel aus dem Gewicht.
-        Für eine einzelne Katze kann das deutlich danebenliegen. Die Leitlinien der Tierärzteverbände (AAHA) sehen jede
-        Formel deshalb nur als Startwert, den der Tierarzt festlegt und danach in kleinen Schritten anpasst.</p>
+        Für eine einzelne Katze kann das deutlich danebenliegen. Die Leitlinien der tierärztlichen Fachverbände (AAHA) sehen jede
+        Formel deshalb nur als Startwert, den die Tierarztpraxis festlegt und danach in kleinen Schritten anpasst.</p>
       <p>Bei Katzen sind beide Richtungen riskant: Zu viel Futter bremst die Abnahme, zu wenig kann eine lebensgefährliche
         Fettleber auslösen.</p>
-      <p>Der Tierarzt kennt, was keine Formel kennt: Körperzustand, Muskeln, Vorerkrankungen und das Futter deiner Katze.
-        Deshalb trägst du seine Werte als Freigabe ein. Ab dann vergleicht Kilossos jeden Tag mit diesen Werten
+      <p>Die Tierarztpraxis kennt, was keine Formel kennt: Körperzustand, Muskeln, Vorerkrankungen und das Futter deiner Katze.
+        Deshalb trägst du ihre Werte als Freigabe ein. Ab dann vergleicht Kilossos jeden Tag mit diesen Werten
         und warnt, wenn etwas aus dem sicheren Bereich läuft.</p>
       <div class="knoepfe">
         <button value="abbrechen" class="knopf-haupt">Verstanden</button>
@@ -709,9 +709,9 @@
     <form method="dialog">
       <!-- autofocus auf der Überschrift: sonst springt der Fokus auf „Verstanden“ und das Blatt öffnet unten -->
       <h2 tabindex="-1" autofocus>Was ist der BCS?</h2>
-      <p>Der <strong>Body Condition Score (BCS)</strong> beschreibt, wie viel Fett eine Katze am Körper trägt. Der Tierarzt
-        bestimmt ihn mit Augen und Händen: Er tastet Rippen, Wirbelsäule und Bauch ab und schaut von oben und von
-        der Seite auf die Taille. Die Skala geht von 1 bis 9.</p>
+      <p>Der <strong>Body Condition Score (BCS)</strong> beschreibt, wie viel Fett eine Katze am Körper trägt. In der
+        Tierarztpraxis wird er mit Augen und Händen bestimmt: Rippen, Wirbelsäule und Bauch werden abgetastet, die Taille
+        wird von oben und von der Seite angeschaut. Die Skala geht von 1 bis 9.</p>
       <ul>
         <li><strong>1 bis 3: zu dünn.</strong> Rippen und Knochen sind gut zu sehen oder sehr leicht zu fühlen, kaum Fett.</li>
         <li><strong>4 und 5: ideal.</strong> Die Rippen sind unter einer dünnen Fettschicht gut zu fühlen. Von oben ist hinter den
@@ -722,17 +722,17 @@
           rund, auch am Rücken vor dem Schwanz sitzt Fett.</li>
         <li><strong>9: stark übergewichtig.</strong> Dicke Fettpolster an Bauch, Rücken, Gesicht und Beinen.</li>
       </ul>
-      <p>Jeder Punkt über 5 bedeutet ungefähr 10 % zu viel Gewicht. Daraus leitet der Tierarzt das Zielgewicht ab.</p>
+      <p>Jeder Punkt über 5 bedeutet ungefähr 10 % zu viel Gewicht. Daraus leitet die Tierarztpraxis das Zielgewicht ab.</p>
       <h3>Und der MCS?</h3>
-      <p>Der <strong>Muscle Condition Score (MCS)</strong> beschreibt die Muskeln, nicht das Fett. Der Tierarzt tastet dafür
-        Wirbelsäule, Schulterblätter, Kopf und Becken ab. Es gibt vier Stufen: normale Muskeln, leichter, mäßiger
+      <p>Der <strong>Muscle Condition Score (MCS)</strong> beschreibt die Muskeln, nicht das Fett. Dafür werden in der
+        Tierarztpraxis Wirbelsäule, Schulterblätter, Kopf und Becken abgetastet. Es gibt vier Stufen: normale Muskeln, leichter, mäßiger
         oder starker Muskelabbau. Eine dicke Katze kann trotzdem zu wenig Muskeln haben. Beim Abnehmen soll Fett
-        weggehen, keine Muskeln. Deshalb prüft der Tierarzt beides bei jeder Kontrolle.</p>
+        weggehen, keine Muskeln. Deshalb prüft die Tierarztpraxis beides bei jeder Kontrolle.</p>
       <h3>Warum fragt Kilossos nicht nach deiner eigenen Einschätzung?</h3>
       <p>Fell täuscht. Ob unter dem Fell Fett oder Muskeln sitzen, fühlt man erst mit Übung. Eine falsche
         Einstufung führt zu einem falschen Zielgewicht, und bei Katzen ist auch zu schnelles Abnehmen gefährlich.
-        Darum trägst du in Kilossos nur den BCS ein, den der Tierarzt bestimmt hat. Er steht dann in der Freigabe,
-        im Verlauf und in der Übersicht für den Tierarzt.</p>
+        Darum trägst du in Kilossos nur den BCS ein, den die Tierarztpraxis bestimmt hat. Er steht dann in der Freigabe,
+        im Verlauf und in der Übersicht für die Praxis.</p>
       <p class="leise">Quelle: WSAVA, Body-Condition-Score- und Muscle-Condition-Score-Tafeln für Katzen.</p>
       <div class="knoepfe">
         <button value="abbrechen" class="knopf-haupt">Verstanden</button>
@@ -745,46 +745,46 @@
     <form method="dialog">
       <h2 tabindex="-1" autofocus>Welche Grenzen gelten?</h2>
       <p>Kilossos prüft deine Einträge jeden Tag gegen feste Grenzen. Sie stammen aus den Leitlinien der
-        Tierärzteverbände AAHA und WSAVA und gelten für jede Katze gleich. Wie viel deine Katze fressen soll,
-        legt dein Tierarzt fest.</p>
+        tierärztlichen Fachverbände AAHA und WSAVA und gelten für jede Katze gleich. Wie viel deine Katze fressen soll,
+        legt deine Tierarztpraxis fest.</p>
       <h3>Abnehmen</h3>
       <ul>
         <li><strong>0,5 bis 2 % des Gewichts pro Woche.</strong> Bei einer 6-kg-Katze sind das 30 bis 120 g.
           Das klingt nach wenig: 100 g sind bei dieser Katze aber so viel wie 1,25 kg bei einem Menschen mit 75 kg.</li>
         <li><strong>Zu schnell:</strong> Liegt die Abnahme im Mittel über zwei Wochen bei mehr als 2 %, warnt Kilossos.
           Einmal wiegen reicht dafür nicht, weil Waagen zu Hause schwanken.</li>
-        <li><strong>Stillstand:</strong> Gibt es eine Freigabe und sind es über vier Wochen weniger als 0,5 % pro Woche, rät Kilossos, den Plan beim
-          Tierarzt zu besprechen.</li>
+        <li><strong>Stillstand:</strong> Gibt es eine Freigabe und sind es über vier Wochen weniger als 0,5 % pro Woche, rät Kilossos, den Plan in der
+          Tierarztpraxis zu besprechen.</li>
       </ul>
       <h3>Fressen</h3>
       <ul>
         <li><strong>Zu wenig an einem Tag:</strong> Steht weniger als die Hälfte der Tagesmenge im Tagebuch, fragt
-          Kilossos nach. Frisst eine Katze 24 Stunden lang nichts oder kaum etwas, sofort zum Tierarzt:
+          Kilossos nach. Frisst eine Katze 24 Stunden lang nichts oder kaum etwas, sofort in die Tierarztpraxis:
           Es droht eine Fettleber.</li>
         <li><strong>Mit Freigabe:</strong> Liegt ein Tag mehr als 10 % unter oder über der freigegebenen Menge,
           zeigt Kilossos einen Hinweis.</li>
-        <li><strong>Ohne Freigabe:</strong> Ohne Tierarzt kennt Kilossos kein Zielgewicht. Als Untergrenze gilt dann der
+        <li><strong>Ohne Freigabe:</strong> Ohne tierärztliche Freigabe kennt Kilossos kein Zielgewicht. Als Untergrenze gilt dann der
           Ruhebedarf beim kleinsten Zielgewicht, das bei Übergewicht überhaupt in Frage kommt. Wer weniger füttert,
           macht schon eine Diät ohne Plan.</li>
         <li><strong>Leckerlis:</strong> höchstens 10 % der Tageskalorien.</li>
       </ul>
-      <h3>Freigabe vom Tierarzt</h3>
+      <h3>Tierärztliche Freigabe</h3>
       <ul>
         <li><strong>Sehr niedrige Menge:</strong> Liegt die Tagesmenge unter 60 % des Ruhebedarfs beim Zielgewicht,
-          fragt Kilossos beim Eintragen nach. So wenig empfehlen die Leitlinien nur mit einem Fachtierarzt
+          fragt Kilossos beim Eintragen nach. So wenig empfehlen die Leitlinien nur mit tierärztlichen Fachleuten
           für Ernährung.</li>
         <li><strong>Diätfutter:</strong> Liegt die Freigabe unter dem Ruhebedarf beim Zielgewicht, liefert normales
-          Futter zu wenig Vitamine und Mineralstoffe. Dann empfiehlt Kilossos, Diätfutter mit dem Tierarzt
+          Futter zu wenig Vitamine und Mineralstoffe. Dann empfiehlt Kilossos, Diätfutter mit der Tierarztpraxis
           zu besprechen.</li>
         <li><strong>Kontrolle:</strong> Ist die Freigabe älter als drei Monate, erinnert Kilossos an einen Termin.</li>
       </ul>
       <h3>Was Kilossos nie tut</h3>
-      <p>Kilossos ändert keine Futtermenge und schlägt keine vor. Bei jeder Warnung gilt: mit dem Tierarzt sprechen,
+      <p>Kilossos ändert keine Futtermenge und schlägt keine vor. Bei jeder Warnung gilt: mit der Tierarztpraxis sprechen,
         nicht selbst kürzen.</p>
       <p class="leise">Quellen: AAHA Weight Management Guidelines 2014; AAHA Nutrition and Weight Management Guidelines 2021;
         WSAVA Nutritional Assessment Guidelines 2011 und Merkblatt Leckerlis 2025; Flanagan et al. 2018 (Studie mit
         über 700 Katzen). Alle Rechnungen in der
-        <a href="https://github.com/stefanpude/Kilossos/blob/main/docs/sicherheitsgrenzen.md" target="_blank" rel="noopener">Fachfassung für Tierärzte</a>.</p>
+        <a href="https://github.com/stefanpude/Kilossos/blob/main/docs/sicherheitsgrenzen.md" target="_blank" rel="noopener">Fachfassung für die Tierarztpraxis</a>.</p>
       <div class="knoepfe">
         <button value="abbrechen" class="knopf-haupt">Verstanden</button>
       </div>
@@ -813,12 +813,12 @@
       <p class="notfall-hinweis"><strong>Bitte nie hungern lassen.</strong> Der alte Rat, einfach nur das neue Futter
         hinzustellen, weil eine Katze vor vollem Napf nicht verhungert, ist gefährlich. Frisst eine Katze nicht, kann sie
         in wenigen Tagen eine Fettleber bekommen. Stelle neues Futter deshalb über mindestens eine Woche langsam um und biete es zuerst neben dem gewohnten an.
-        Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort zum Tierarzt.</p>
+        Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort in die Tierarztpraxis.</p>
       <h3>Eine andere Katze frisst mit</h3>
       <p>Füttere die Katzen getrennt und zu festen Zeiten, jede in einem eigenen Raum oder an einem Platz, den die
         andere nicht erreicht. Ein Futterautomat, der nur beim Chip der richtigen Katze öffnet, hilft ebenfalls.
         Manchmal ist es einfacher, wenn alle Katzen dasselbe Futter bekommen; ob das Diätfutter auch für die andere
-        Katze passt, klärt der Tierarzt.</p>
+        Katze passt, klärt die Tierarztpraxis.</p>
       <h3>Nicht alle machen mit</h3>
       <p>Sprich den Plan mit allen ab, die deine Katze füttern: Familie, Mitbewohner und bei Freigängern auch die
         Nachbarn. Am einfachsten wiegst du morgens das Futter für den ganzen Tag ab, und alle füttern nur daraus.</p>
@@ -836,14 +836,14 @@
         Küchenwaage, bevor du Wasser oder Brühe dazugibst.</p>
       <h3>Gefüttert wird nach der Packung</h3>
       <p>Die Fütterungstabelle auf der Packung gibt einen Startwert für eine durchschnittliche Katze, die ihr Gewicht
-        halten soll. Zum Abnehmen legt der Tierarzt die Tagesmenge fest und rechnet dabei mit dem Zielgewicht.</p>
+        halten soll. Zum Abnehmen legt die Tierarztpraxis die Tagesmenge fest und rechnet dabei mit dem Zielgewicht.</p>
       <h3>Die Abnahme wird langsamer</h3>
       <p>Mit jedem Kilo weniger braucht der Körper weniger Energie, und auch Krankheiten können die Abnahme bremsen.
         Gibt es eine Freigabe und sind es vier Wochen lang weniger als 0,5&nbsp;% pro Woche, zeigt Kilossos auf „Heute“
-        einen Hinweis. Besprich dann den Plan mit dem Tierarzt, nur er passt die Menge an.</p>
+        einen Hinweis. Besprich dann den Plan mit der Tierarztpraxis, nur dort wird die Menge angepasst.</p>
       <h3>Bitte nicht selbst kürzen</h3>
       <p>Weniger Futter auf eigene Faust kann eine Fettleber auslösen. Nimmt deine Katze trotz allem nicht ab, sprich
-        mit dem Tierarzt, denn nur er ändert die Tagesmenge.</p>
+        mit der Tierarztpraxis, denn nur dort wird die Tagesmenge geändert.</p>
       <p class="leise">Quellen: AAHA Weight Management Guidelines 2014, Tabelle 3; AAFP/ISFM-Konsens zur Fütterung von
         Katzen 2018; German et al. 2011 (Messbecher); WSAVA-Merkblatt Leckerlis 2025; Cornell Feline Health Center
         und Merck Veterinary Manual (Fettleber); Armstrong 2011 (WSAVA).</p>
@@ -857,12 +857,12 @@
   <dialog id="dialog-anleitung">
     <form method="dialog">
       <h2 tabindex="-1" autofocus>So nutzt du Kilossos</h2>
-      <p>Kilossos zeichnet auf, rechnet nach und warnt. Zielgewicht und Tagesmenge legt dein Tierarzt fest.
+      <p>Kilossos zeichnet auf, rechnet nach und warnt. Zielgewicht und Tagesmenge legt deine Tierarztpraxis fest.
         So kommst du gut durch den Alltag.</p>
-      <h3>1. Erst zum Tierarzt</h3>
-      <p>Lass deine Katze untersuchen, bevor sie abnimmt. Der Tierarzt legt Zielgewicht und Tagesmenge fest. Trag beides
+      <h3>1. Erst in die Tierarztpraxis</h3>
+      <p>Lass deine Katze untersuchen, bevor sie abnimmt. Die Tierarztpraxis legt Zielgewicht und Tagesmenge fest. Trag beides
         unter „Mehr“ bei „Freigabe eintragen“ ein. Ohne Freigabe zeichnet Kilossos nur auf und warnt. Mengen schlägt Kilossos nie selbst vor.
-        Bis zum Termin kannst du schon eintragen, was du jetzt fütterst. Die Übersicht zeigt dem Tierarzt dann, was deine
+        Bis zum Termin kannst du schon eintragen, was du jetzt fütterst. Die Übersicht zeigt der Tierarztpraxis dann, was deine
         Katze bisher bekommt.</p>
       <h3>2. Futtersorten anlegen</h3>
       <p>Unter „Futter“ wählst du deine Sorten mit „Aus der Futterliste wählen“, „Strichcode scannen“ oder „Eigene Sorte anlegen“.
@@ -879,23 +879,23 @@
         erst du mit Katze auf die Personenwaage, dann du allein.</p>
       <h3>5. Besondere Tage festhalten</h3>
       <p>Krank gewesen, genascht, mehr bewegt oder das Futter verweigert? Mit „Besonderen Tag eintragen“ auf „Heute“
-        hältst du fest, was anders war. Das hilft dir und deinem Tierarzt, die Gewichtskurve zu verstehen. Trägst du
+        hältst du fest, was anders war. Das hilft dir und deiner Tierarztpraxis, die Gewichtskurve zu verstehen. Trägst du
         „Futter verweigert“ ein, zeigt Kilossos sofort den roten Notfall-Hinweis.</p>
       <h3>6. Auf die Hinweise achten</h3>
       <p>Oben auf „Heute“ stehen Hinweise. Rote sind dringend, zum Beispiel wenn für gestern kaum etwas eingetragen ist.
         Ab dem Abend erinnert dich ein ruhiger Hinweis, wenn heute noch nichts eingetragen ist.</p>
-      <p class="notfall-hinweis"><strong>Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort zum Tierarzt.</strong></p>
+      <p class="notfall-hinweis"><strong>Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort in die Tierarztpraxis.</strong></p>
       <h3>7. Regelmäßig sichern</h3>
       <p>Deine Einträge liegen nur auf diesem Handy. Tippe unter „Mehr“ ab und zu auf „Sicherung speichern“ und leg die
         Datei woanders ab, zum Beispiel in deinem Cloud-Ordner oder per E-Mail an dich selbst. Kilossos erinnert dich daran.</p>
       <h3>8. Zum Termin die Übersicht mitnehmen</h3>
       <p>Unter „Mehr“ tippst du auf „Übersicht öffnen“. Dort wählst du oben den Zeitraum und mit „Fotos zeigen“, ob
         Fotos dabei sein sollen. Mit „Drucken / als PDF speichern“
-        nimmst du sie auf Papier oder als Datei mit. So sieht dein Tierarzt Gewicht, Futter und Hinweise auf einen Blick.</p>
+        nimmst du sie auf Papier oder als Datei mit. So sieht deine Tierarztpraxis Gewicht, Futter und Hinweise auf einen Blick.</p>
       <h3>Mehrere Katzen</h3>
       <p>Weitere Katzen legst du unter „Mehr“ mit „Tier hinzufügen“ an. Zum Wechseln tippst du oben auf „Heute“ auf den
         Namen. Alles, was du einträgst, gilt für die Katze, die gerade oben steht, auch Freigabe, Wiegetag und Übersicht.
-        Jede Katze braucht ihre eigene Freigabe vom Tierarzt. Deine Futtersorten gelten für alle Katzen.</p>
+        Jede Katze braucht ihre eigene tierärztliche Freigabe. Deine Futtersorten gelten für alle Katzen.</p>
       <div class="knoepfe">
         <button value="abbrechen" class="knopf-haupt">Verstanden</button>
       </div>
@@ -911,7 +911,7 @@
       <h2 tabindex="-1" autofocus>Was hilft einer schweren Katze im Alltag?</h2>
       <p>In einer großen Studie bekamen stark übergewichtige Katzen 4,9-mal so oft eine Lahmheit, die tierärztlich
         behandelt werden musste, wie Katzen mit Idealgewicht. Ob Übergewicht die Gelenke krank macht, ist nicht geklärt.
-        Schmerzende Gelenke belastet es aber zusätzlich. Diese Tipps machen den Alltag leichter, ersetzen aber keinen Tierarzt.</p>
+        Schmerzende Gelenke belastet es aber zusätzlich. Diese Tipps machen den Alltag leichter, ersetzen aber keine tierärztliche Untersuchung.</p>
       <h3>Stufen an die Lieblingsplätze</h3>
       <p>Stell einen Hocker, eine Stufe oder eine Rampe an Sofa, Bett oder Fensterbank, mit Teppich oder Gummi gegen
         Rutschen. Ist sie fit, darf sie weiter springen und klettern, das ist Bewegung. Zögert sie vor Sprüngen, nimm
@@ -937,11 +937,11 @@
       <p class="notfall-hinweis">Schau anfangs genau hin, ob deine Katze das Futter wirklich frisst. Leben mehrere Katzen
         bei dir, frisst vielleicht die andere mit, und die Einträge stimmen nicht mehr. Trag nur ein, was gefressen wurde;
         Reste ziehst du unter „Etwas übrig gelassen?“ im Fenster „Mahlzeit ändern“ ab.
-        <strong>Frisst eine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort zum Tierarzt.</strong></p>
+        <strong>Frisst eine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort in die Tierarztpraxis.</strong></p>
       <h3>Richtig hochheben</h3>
       <p>Nimm beide Hände: eine unter die Brust hinter den Vorderbeinen, die andere unter das Hinterteil. Halte sie dicht
         am Körper und lass sie gehen, wenn sie will. Heb sie nie am Nackenfell hoch.</p>
-      <h3>Wann zum Tierarzt?</h3>
+      <h3>Wann in die Tierarztpraxis?</h3>
       <p>Schmerz kann dahinterstecken, wenn deine Katze vor Sprüngen zögert, steif aufsteht, sich weniger putzt,
         struppiges Fell bekommt, neben die Toilette macht, weniger spielt oder sich weniger gern anfassen lässt als früher.
         Auch kleine Veränderungen zählen, dann bitte zur Praxis. Frisst sie weniger, gilt das ebenso; frisst sie
@@ -964,10 +964,10 @@
     <form method="dialog">
       <h2 tabindex="-1" autofocus>Warum ist meine Katze zu schwer geworden?</h2>
       <p>Übergewicht entsteht, wenn eine Katze auf Dauer mehr Energie aufnimmt, als sie verbraucht. Oft kommen mehrere
-        Gründe zusammen. Wer sie kennt, kann gezielt gegensteuern. Besprich mit dem Tierarzt, was bei deiner Katze
+        Gründe zusammen. Wer sie kennt, kann gezielt gegensteuern. Besprich mit der Tierarztpraxis, was bei deiner Katze
         zutrifft: Jeder Abnehmplan gehört in seine Hand.</p>
       <p class="notfall-hinweis">Weniger Futter auf eigene Faust kann eine Fettleber auslösen. Nimmt deine Katze trotz allem
-        nicht ab, sprich mit dem Tierarzt, denn nur er ändert die Tagesmenge.</p>
+        nicht ab, sprich mit der Tierarztpraxis, denn nur dort wird die Tagesmenge geändert.</p>
       <h3>Futter steht den ganzen Tag bereit</h3>
       <p>Steht immer ein voller Napf da, meist mit Trockenfutter, frisst eine Katze oft mehr, als sie braucht. Das gilt als
         einer der Hauptgründe für Übergewicht bei Katzen. Mehrere kleine, abgewogene Mahlzeiten über den Tag machen die
@@ -987,7 +987,7 @@
         leicht mehr zusammen, als man denkt.</p>
       <h3>Krankheiten und Medikamente</h3>
       <p>Manche Hormonstörungen und manche Medikamente, zum Beispiel Kortison oder bestimmte Mittel gegen Epilepsie, können
-        zu Übergewicht beitragen. Ob das bei deiner Katze eine Rolle spielt, klärt der Tierarzt. Setz ein Medikament nie
+        zu Übergewicht beitragen. Ob das bei deiner Katze eine Rolle spielt, klärt die Tierarztpraxis. Setz ein Medikament nie
         selbst ab.</p>
       <p>Wie es weitergeht, steht unter „Tipps fürs Abnehmen“.</p>
       <p class="leise">Quellen: Cornell Feline Health Center, Obesity; Larsen 2017 (Kastration); AAFP/ISFM-Konsens zur
@@ -1046,7 +1046,7 @@
         Halsband können eine kleine Änderung größer aussehen lassen, als sie ist.</p>
       <h3>Wenn ein Wert nicht passt</h3>
       <p>Zeigt Kilossos eine Warnung zum Tempo oder passt ein Wert nicht zum Verlauf, wiege erst nach: mit einer genauen
-        Waage oder in der Tierarztpraxis. Ändere die Futtermenge nur mit deinem Tierarzt.</p>
+        Waage oder in der Tierarztpraxis. Ändere die Futtermenge nur mit deiner Tierarztpraxis.</p>
       <p class="leise">Quellen: Association for Pet Obesity Prevention, Ratgeber zum Wiegen zu Hause; AAHA 2014 und
         Flanagan et al. 2018 (0,5 bis 2&nbsp;% pro Woche).</p>
       <div class="knoepfe">
@@ -1073,14 +1073,14 @@
         „Sicherung speichern“ und auf dem neuen auf „Sicherung einlesen“. Löschst du die Daten des Browsers oder
         beim Entfernen der App auch ihre Daten, sind Einträge ohne Sicherung verloren.</p>
       <h3>Warum schlägt Kilossos keine Futtermenge vor?</h3>
-      <p>Wie viel deine Katze bekommen soll, legt dein Tierarzt fest. Du trägst es unter „Mehr“ bei
+      <p>Wie viel deine Katze bekommen soll, legt deine Tierarztpraxis fest. Du trägst es unter „Mehr“ bei
         „Freigabe eintragen“ ein. Ohne Freigabe zeichnet Kilossos nur auf und warnt.</p>
       <p><button type="button" class="knopf-text" data-aktion="warum-kein-ziel">Warum keine Futtermenge?</button></p>
       <h3>Wie schnell darf meine Katze abnehmen?</h3>
-      <p>Das entscheidet dein Tierarzt. Ab wann Kilossos warnt und woher die Grenzen stammen, steht hier:</p>
+      <p>Das entscheidet deine Tierarztpraxis. Ab wann Kilossos warnt und woher die Grenzen stammen, steht hier:</p>
       <p><button type="button" class="knopf-text" data-aktion="grenzen-erklaerung">Welche Grenzen gelten?</button></p>
       <h3>Was tue ich, wenn meine Katze nicht frisst?</h3>
-      <p class="notfall-hinweis"><strong>Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort zum Tierarzt.</strong></p>
+      <p class="notfall-hinweis"><strong>Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort in die Tierarztpraxis.</strong></p>
       <h3>Ich habe mehrere Katzen. Geht das?</h3>
       <p>Ja. Weitere Katzen legst du unter „Mehr“ mit „Tier hinzufügen“ an. Jede Katze braucht ihre eigene Freigabe.</p>
       <div class="knoepfe">
@@ -1096,7 +1096,7 @@
       <p>Kilossos ist aus eigener Not entstanden.</p>
       <p class="leise">Kito ist mein Kater: kastriert, von Natur aus sehr groß – und inzwischen zu schwer.
         Seit vor unserer Tür eine Baustelle ist, kann er nicht mehr nach draußen. Weniger Bewegung, gleiches Futter,
-        und die Waage beim Tierarzt zeigte 9,32 kg. Zuki, unsere zweite Katze, ist zierlich gebaut,
+        und die Waage in der Tierarztpraxis zeigte 9,32 kg. Zuki, unsere zweite Katze, ist zierlich gebaut,
         aber im Verhältnis sogar noch dicker als Kito. Beide fressen getrennt, beide brauchen etwas anderes.</p>
       <p class="leise">Also wollte ich Kito beim Abnehmen helfen. Schnell habe ich gemerkt: Bei Katzen ist das heikler, als man denkt.
         Bekommt eine übergewichtige Katze zu wenig Futter, kann sie lebensgefährlich krank werden (Fettleber).
@@ -1104,7 +1104,7 @@
         und trotzdem war ich mir nie sicher, ob ich alles richtig mache.</p>
       <p class="leise">Daraus ist Kilossos geworden: eine App, die Futter in Gramm und Kalorien mitrechnet, das Gewicht im Blick behält
         und rechtzeitig warnt, wenn etwas aus dem sicheren Bereich läuft. Die Grenzen dafür stammen aus den Leitlinien
-        der Tierärzteverbände AAHA und WSAVA.</p>
+        der tierärztlichen Fachverbände AAHA und WSAVA.</p>
       <p class="leise">Der Name? <strong>Ki</strong>to + <strong>Kolossos</strong> (altgriechisch für „riesig“) + englisch <strong>loss</strong> (Verlust). Kilossos eben.
         Kito stand Pate, weil es einfach zu gut passte. Abnehmen müssen beide.</p>
       <div class="knoepfe">

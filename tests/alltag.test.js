@@ -20,18 +20,18 @@ test("Verweis in „Tipps fürs Abnehmen“ nach „Warum nimmt meine Katze nich
 test("Seite: Überschrift mit Fokus, alle Abschnitte, Knopf „Verstanden“", () => {
   const seite = blatt(lies("index.html"), "dialog-alltag");
   assert.ok(seite.includes('<h2 tabindex="-1" autofocus>Was hilft einer schweren Katze im Alltag?</h2>'));
-  for (const h3 of ["Stufen an die Lieblingsplätze", "Eine bequeme Toilette", "Hilfe bei der Fellpflege", "Bewegung in kleinen Portionen", "Richtig hochheben", "Wann zum Tierarzt?"]) {
+  for (const h3 of ["Stufen an die Lieblingsplätze", "Eine bequeme Toilette", "Hilfe bei der Fellpflege", "Bewegung in kleinen Portionen", "Richtig hochheben", "Wann in die Tierarztpraxis?"]) {
     assert.ok(seite.includes(`<h3>${h3}</h3>`), h3);
   }
   assert.ok(seite.includes('<button value="abbrechen" class="knopf-haupt">Verstanden</button>'));
 });
 
-test("Sicherheit: Notfallsatz unverändert im roten Kasten, „ersetzt keinen Tierarzt“, keine Futtermengen", () => {
+test("Sicherheit: Notfallsatz unverändert im roten Kasten, „ersetzt keine tierärztliche Untersuchung“, keine Futtermengen", () => {
   const seite = blatt(lies("index.html"), "dialog-alltag");
   const kasten = seite.match(/<p class="notfall-hinweis">([\s\S]*?)<\/p>/)?.[1] ?? "";
-  assert.ok(nurText(kasten).includes("Frisst eine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort zum Tierarzt."));
+  assert.ok(nurText(kasten).includes("Frisst eine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort in die Tierarztpraxis."));
   const text = nurText(seite);
-  assert.ok(text.includes("ersetzen aber keinen Tierarzt"));
+  assert.ok(text.includes("ersetzen aber keine tierärztliche Untersuchung"));
   assert.doesNotMatch(text, /\d+\s*(g|kcal)\b/);
   assert.doesNotMatch(text, /[—–]/);
 });

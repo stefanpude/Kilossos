@@ -164,9 +164,9 @@ test("warnungen: Stillstand über 4 Wochen nur mit Freigabe", () => {
   const mitFreigabe = { ...basis, tag: "2026-11-29", heute: "2026-11-30", freigabe: { ...freigabe, datum: "2026-11-01" } };
   assert.deepEqual(arten(warnungen({ ...mitFreigabe, gewichte: still })), ["hinweis:stillstand"]);
   assert.deepEqual(arten(warnungen({ ...mitFreigabe, freigabe: null, kcal: 300, gewichte: still })), []);
-  // 0.36.8: keine Mengenangabe mehr („üblich: 10 % weniger kcal“), die Menge legt nur der Tierarzt fest.
+  // 0.36.8: keine Mengenangabe mehr („üblich: 10 % weniger kcal“), die Menge legt nur die Tierarztpraxis fest.
   const [hinweis] = warnungen({ ...mitFreigabe, gewichte: still });
-  assert.match(hinweis.text, /^Seit 28 Tagen weniger als 0,5 % Abnahme pro Woche\. Beim nächsten Tierarzttermin den Plan besprechen – nicht selbst kürzen\.$/);
+  assert.match(hinweis.text, /^Seit 28 Tagen weniger als 0,5 % Abnahme pro Woche\. Beim nächsten Termin in der Tierarztpraxis den Plan besprechen – nicht selbst kürzen\.$/);
   assert.doesNotMatch(hinweis.text, /kcal|üblich/);
 });
 
@@ -194,7 +194,7 @@ test("gesternWenigGefressen: auf „Heute“ steht, wenn gestern kaum etwas eing
   const w = gesternWenigGefressen({ ...gestern, kcal: 38.5 });
   assert.equal(w.art, "sofort");
   assert.equal(w.id, "wenig-gefressen-gestern");
-  assert.match(w.text, /^Gestern sind nur 39 kcal eingetragen\. Hat Kito normal gefressen\? .*am selben Tag den Tierarzt anrufen/);
+  assert.match(w.text, /^Gestern sind nur 39 kcal eingetragen\. Hat Kito normal gefressen\? .*am selben Tag in der Tierarztpraxis anrufen/);
   // Seit 0.50.1 (Stefans Ja zum Wortlaut, .planning/erinnerung-abends.md Teil 2): erst „nur vergessen?“, dann
   // unverändert deutlich die Gefahr. Bleibt „sofort“ (rot), Tierarzt und Fettleber stehen vollständig drin.
   const leer = gesternWenigGefressen({ ...gestern, kcal: 0 });
@@ -202,7 +202,7 @@ test("gesternWenigGefressen: auf „Heute“ steht, wenn gestern kaum etwas eing
   assert.equal(
     leer.text,
     "Für gestern ist keine Mahlzeit eingetragen. Nur vergessen? Dann bitte nachtragen. Hat Kito wirklich nichts " +
-      "oder kaum etwas gefressen: am selben Tag den Tierarzt anrufen, Gefahr einer Fettleber."
+      "oder kaum etwas gefressen: am selben Tag in der Tierarztpraxis anrufen, Gefahr einer Fettleber."
   );
   assert.equal(gesternWenigGefressen({ ...gestern, kcal: 200 }), null); // nur unter der Freigabe: steht beim Zurückblättern
   assert.equal(gesternWenigGefressen({ ...gestern, kcal: 0, fruehereMahlzeiten: false }), null); // erster Tag der Nutzung
@@ -222,10 +222,10 @@ test("warnungen: Ein vergangener Tag ohne Mahlzeit fragt zuerst nach dem Nachtra
   const [w] = warnungen({ ...basis, kcal: 0 });
   assert.equal(w.art, "sofort");
   assert.match(w.text, /^Für diesen Tag ist keine Mahlzeit eingetragen\. Nur vergessen\? Dann bitte nachtragen\. /);
-  assert.match(w.text, /Hat Kito wirklich nichts oder kaum etwas gefressen: am selben Tag den Tierarzt anrufen, Gefahr einer Fettleber\.$/);
+  assert.match(w.text, /Hat Kito wirklich nichts oder kaum etwas gefressen: am selben Tag in der Tierarztpraxis anrufen, Gefahr einer Fettleber\.$/);
 });
 
 test("warnungen: Bei wenigen kcal bleibt der bisherige Text (dort ist ja etwas eingetragen)", () => {
   const [w] = warnungen({ ...basis, kcal: 100 });
-  assert.match(w.text, /^An diesem Tag sind nur 100 kcal eingetragen\. Hat Kito normal gefressen\? .*Tierarzt anrufen – Gefahr einer Fettleber\.$/);
+  assert.match(w.text, /^An diesem Tag sind nur 100 kcal eingetragen\. Hat Kito normal gefressen\? .*in der Tierarztpraxis anrufen – Gefahr einer Fettleber\.$/);
 });

@@ -196,7 +196,7 @@ test("berichtDaten: besondere Tage, die den Zeitraum berühren, nach Beginn sort
 });
 
 // ---------- 0.35.0: Besondere Tage als Liste direkt unter Kurve und Streifen ----------
-// Wunsch des Halters 05.11.2026: Der Tierarzt soll sehen, was war, ohne weiter unten in einer Tabelle zu suchen.
+// Wunsch des Halters 05.11.2026: Die Tierarztpraxis soll sehen, was war, ohne weiter unten in einer Tabelle zu suchen.
 // Zeilen der Liste als [Nummer?, Zeitraum, Art, Notiz, "notfall"?]; Tags in den Zellen (Nummernkreis) entfernt.
 const listenZeilen = (html) => {
   const liste = html.match(/<table class="bt-liste">([^]*?)<\/table>/)[1];

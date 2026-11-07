@@ -1,6 +1,6 @@
 // Erklärseiten (ab 0.30.0): „Begriffe kurz erklärt“ als Daten, damit Reihenfolge, Länge und Quellen testbar sind,
 // dazu der Knopf vom Hinweis „Abnahme stockt“ zur Seite „Warum nimmt meine Katze nicht ab?“ (Text in index.html).
-// Texte und Quellen: .planning/erklaerseiten.md. Feste Regel: keine Futtermengen, die legt nur der Tierarzt fest.
+// Texte und Quellen: .planning/erklaerseiten.md. Feste Regel: keine Futtermengen, die legt nur die Tierarztpraxis fest.
 import { aufklappKarte } from "./aufklappen.js";
 import { FUTTERLISTE } from "./futterliste.js";
 
@@ -45,7 +45,7 @@ export const BEGRIFFE = [
     text:
       "BARF steht für „biologisch artgerechtes rohes Futter“: rohes Fleisch, Innereien und oft Knochen, meist mit " +
       "Zusätzen. Die kcal hängen vor allem vom Fett im Fleisch ab, deshalb legst du BARF in Kilossos als eigene Sorte " +
-      "mit der Art „Frischfleisch / BARF“ und dem kcal-Wert von der Packung oder aus dem Rationsplan an. Plane eine BARF-Ernährung mit dem Tierarzt, weil " +
+      "mit der Art „Frischfleisch / BARF“ und dem kcal-Wert von der Packung oder aus dem Rationsplan an. Plane eine BARF-Ernährung mit der Tierarztpraxis, weil " +
       "selbst gemischte Rationen Nährstofflücken haben können und rohes Fleisch Keime enthalten kann.",
     quelle: "WSAVA Global Nutrition Committee, Raw Meat Based Diets for Pets (2021); NRC 2006",
   },
@@ -54,18 +54,18 @@ export const BEGRIFFE = [
     begriff: "BCS und MCS",
     text:
       "Der BCS (Body Condition Score) zeigt auf einer Skala von 1 bis 9, wie viel Fett eine Katze trägt; ideal sind " +
-      "4 und 5. Der MCS (Muscle Condition Score) beschreibt die Muskeln. Beide bestimmt der Tierarzt mit Augen und " +
-      "Händen.",
+      "4 und 5. Der MCS (Muscle Condition Score) beschreibt die Muskeln. Beide werden in der Tierarztpraxis mit Augen und " +
+      "Händen bestimmt.",
     quelle: "WSAVA, Body-Condition-Score- und Muscle-Condition-Score-Tafeln für Katzen",
     mehr: { aktion: "bcs-erklaerung", text: "Mehr zum BCS" },
   },
   {
     id: "diaetfutter",
-    begriff: "Diätfutter vom Tierarzt",
+    begriff: "Diätfutter aus der Tierarztpraxis",
     text:
       "Als „Diätfutter“ darf nur Futter für besondere Ernährungszwecke verkauft werden, das die EU eigens regelt. " +
       "Diätfutter zur Verringerung von Übergewicht liefert wenig Energie, soll dafür mehr Nährstoffe je kcal " +
-      "enthalten und trägt den Rat, vorher den Tierarzt zu fragen. Die Leitlinien empfehlen es, wenn eine Katze zum " +
+      "enthalten und trägt den Rat, vorher in der Tierarztpraxis zu fragen. Die Leitlinien empfehlen es, wenn eine Katze zum " +
       "Abnehmen sehr wenig Futter bekommen soll, weil normales Futter dann zu wenig Vitamine und Mineralstoffe liefert.",
     quelle: "EU-Verordnung 767/2009, Art. 18; EU-Verordnung 2020/354, Anhang Teil B Nr. 25; AAHA 2021, Tabelle 8",
   },
@@ -75,17 +75,17 @@ export const BEGRIFFE = [
     text:
       "Frisst eine Katze nicht oder viel zu wenig, lagert sich Fett in der Leber ein, bis sie nicht mehr richtig " +
       "arbeitet. Übergewichtige Katzen trifft das besonders oft, und ohne schnelle Behandlung ist es lebensgefährlich. " +
-      "Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort zum Tierarzt.",
+      "Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort in die Tierarztpraxis.",
     quelle: "Cornell Feline Health Center, Hepatic Lipidosis; Armstrong 2011 (WSAVA); AAHA 2014",
   },
   {
     id: "freigabe",
-    begriff: "Freigabe vom Tierarzt",
+    begriff: "Freigabe (tierärztlich)",
     text:
-      "So heißt in Kilossos, was dein Tierarzt für die Abnahme festlegt: Zielgewicht und Tagesmenge in kcal, auf " +
+      "So heißt in Kilossos, was deine Tierarztpraxis für die Abnahme festlegt: Zielgewicht und Tagesmenge in kcal, auf " +
       "Wunsch auch BCS und MCS. Mit der Freigabe vergleicht Kilossos jeden Tag die Fütterung mit dieser Menge und " +
-      "bewertet das Tempo der Abnahme. Du trägst sie unter „Mehr“ bei „Tierarzt“ ein.",
-    quelle: "AAHA 2014 und 2021 (Zielgewicht und Tagesmenge legt der Tierarzt fest)",
+      "bewertet das Tempo der Abnahme. Du trägst sie unter „Mehr“ bei „Tierarztpraxis“ ein.",
+    quelle: "AAHA 2014 und 2021 (Zielgewicht und Tagesmenge legt die Tierarztpraxis fest)",
   },
   {
     id: "kcal-me",
@@ -113,7 +113,7 @@ export const BEGRIFFE = [
       "Nassfutter besteht zu drei Vierteln oder mehr aus Wasser, Trockenfutter zu etwa einem Zehntel oder weniger. " +
       `Deshalb hat Trockenfutter pro Gramm ein Vielfaches an kcal (in der Kilossos-Futterliste ${trockenMin} bis ` +
       `${trockenMax} kcal pro 100\u00a0g, Nassfutter ${nassMin} bis ${nassMax}). Kilossos rechnet beides in kcal um, ` +
-      "damit du es mit der Tagesmenge vom Tierarzt vergleichen kannst.",
+      "damit du es mit der freigegebenen Tagesmenge vergleichen kannst.",
     quelle: "Kilossos-Futterliste (Hersteller- und Packungsangaben, einzelne Werte aus den Analysewerten geschätzt)",
   },
   {
@@ -121,21 +121,21 @@ export const BEGRIFFE = [
     begriff: "RER (Ruheenergiebedarf)",
     text:
       "Der RER ist die Energie, die eine Katze am Tag in Ruhe verbraucht; berechnet wird er aus dem Körpergewicht. " +
-      "Beim Abnehmen setzt der Tierarzt dafür das Zielgewicht ein, weil das heutige Gewicht zu viel Energie ergäbe. " +
+      "Beim Abnehmen setzt die Tierarztpraxis dafür das Zielgewicht ein, weil das heutige Gewicht zu viel Energie ergäbe. " +
       "Kilossos nutzt den RER nur für Warnungen und schlägt damit keine Futtermenge vor.",
     quelle: "NRC 2006; AAHA 2014; Armstrong 2011 (WSAVA)",
   },
   {
     // Seit 0.65.0 (Ideen-Tafel, Stefan 06.11.2026). Neutral: Stand der Forschung und Haltung eines Fachverbands,
-    // keine eigene Bewertung, keine Sorten, keine Mengen. Am 13.11. vom Tierarzt gegenlesen lassen.
+    // keine eigene Bewertung, keine Sorten, keine Mengen. Am 13.11. in der Tierarztpraxis gegenlesen lassen.
     id: "vegan",
     begriff: "Vegan und vegetarisch",
     text:
       "Katzen sind Fleischfresser: Taurin, Arachidonsäure und Vitamin A müssen sie fertig mit dem Futter aufnehmen, " +
       "veganes oder vegetarisches Katzenfutter setzt sie künstlich zu. Wie gut das auf Dauer klappt, ist wenig erforscht " +
-      "(die Studien sind klein oder beruhen auf Angaben der Halter), und der britische Tierärzteverband rät bei Katzen " +
+      "(die Studien sind klein oder beruhen auf Angaben der Halter), und der britische tierärztliche Fachverband rät bei Katzen " +
       "derzeit davon ab. Beim Abnehmen braucht die Katze genug Eiweiß, damit sie Fett und nicht Muskeln verliert, " +
-      "deshalb besprich eine Umstellung vorher mit dem Tierarzt.",
+      "deshalb besprich eine Umstellung vorher mit der Tierarztpraxis.",
     quelle:
       "NRC 2006; Domínguez-Oliva et al. 2023 (systematische Übersicht, Veterinary Sciences); Knight et al. 2023 " +
       "(Halter-Umfrage, PLOS ONE); British Veterinary Association 2024; AAHA 2014",
@@ -144,9 +144,9 @@ export const BEGRIFFE = [
     id: "zielgewicht",
     begriff: "Zielgewicht",
     text:
-      "Das Zielgewicht ist das Gewicht, das deine Katze am Ende der Abnahme haben soll. Der Tierarzt leitet es zum " +
+      "Das Zielgewicht ist das Gewicht, das deine Katze am Ende der Abnahme haben soll. Die Tierarztpraxis leitet es zum " +
       "Beispiel aus dem BCS ab, wobei jeder Punkt über 5 ungefähr 10\u00a0% zu viel Gewicht bedeutet. In Kilossos steht es in der " +
-      "Freigabe vom Tierarzt.",
+      "tierärztlichen Freigabe.",
     quelle: "AAHA 2014; Flanagan et al. 2018",
   },
 ];

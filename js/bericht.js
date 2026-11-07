@@ -1,4 +1,4 @@
-// Übersicht für den Tierarzt: eine druckfertige Seite (Drucken → "Als PDF speichern").
+// Übersicht für die Praxis: eine druckfertige Seite (Drucken → "Als PDF speichern").
 // berichtDaten rechnet (testbar in tests/bericht.test.js), berichtHtml baut daraus die Seite.
 
 import {
@@ -355,7 +355,7 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
   const teile = [];
   teile.push(`<header class="bericht-kopf">
     ${fotoGueltig(tier.foto) ? `<img class="bericht-foto" src="${sicher(tier.foto)}" alt="">` : ""}
-    <h1>Kilossos – Übersicht für den Tierarzt</h1>
+    <h1>Kilossos – Übersicht für die Tierarztpraxis</h1>
     <p><strong>${sicher(tier.name)}</strong>${tierText(tier) ? " · " + tierText(tier) : ""} · Zeitraum ${datum(b.von)} bis ${datum(b.bis)} · erstellt am ${datum(erstellt)}</p>
     ${profilZeile(tier, erstellt)}
     ${demo ? `<p class="bericht-demo">DEMO – simulierte Daten, nicht von ${sicher(tier.name)}</p>` : ""}
@@ -466,7 +466,7 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
   teile.push(`<section class="bericht-teil"><h2>Tierärztliche Freigaben</h2>
     ${
       b.freigaben.length
-        ? `<table><thead><tr><th>Datum</th><th>Zielgewicht</th><th>kcal/Tag</th><th>BCS</th><th>MCS</th><th>Tierarzt</th><th>Notiz</th></tr></thead><tbody>
+        ? `<table><thead><tr><th>Datum</th><th>Zielgewicht</th><th>kcal/Tag</th><th>BCS</th><th>MCS</th><th>Praxis</th><th>Notiz</th></tr></thead><tbody>
           ${b.freigaben
             .map(
               (fr) => `<tr><td>${datum(fr.datum)}</td><td>${zahl(fr.zielgewichtKg, 2)} kg</td><td>${zahl(fr.kcalProTag)}</td>
@@ -491,7 +491,7 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
     }</section>`);
 
   // Platz für den Tierarzt
-  teile.push(`<section class="bericht-teil bericht-notizen"><h2>Notizen des Tierarztes</h2>
+  teile.push(`<section class="bericht-teil bericht-notizen"><h2>Notizen aus der Praxis</h2>
     <p>BCS (1–9): ______ &nbsp; MCS: ______ &nbsp; Zielgewicht: ______ kg &nbsp; kcal/Tag: ______ &nbsp; nächste Kontrolle: __________</p>
     <div class="linie"></div><div class="linie"></div><div class="linie"></div>
     <p class="bericht-klein">Datum, Unterschrift / Stempel: ________________________________________</p>

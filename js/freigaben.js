@@ -8,7 +8,7 @@ const zahl = (wert, stellen = 0) =>
   wert.toLocaleString("de-DE", { minimumFractionDigits: stellen, maximumFractionDigits: stellen });
 
 export const HINWEIS_AENDERN =
-  "Nur für Fehler beim Eintragen. Hat der Tierarzt einen neuen Plan festgelegt, trag ihn über „Freigabe eintragen“ neu ein. " +
+  "Nur für Fehler beim Eintragen. Hat die Tierarztpraxis einen neuen Plan festgelegt, trag ihn über „Freigabe eintragen“ neu ein. " +
   "So bleibt der alte Plan im Verlauf.";
 // Die falsche kann die auf der Tafel oder die unter „Frühere Freigaben“ sein, deshalb kein Hinweis auf nur einen Ort.
 export const TEXT_ZWEI_AM_TAG = "An diesem Tag gibt es zwei Freigaben. Bitte prüf beide und lösche zuerst die falsche.";
@@ -16,7 +16,7 @@ export const TEXT_ANDERE_AM_TAG = "An diesem Tag gibt es schon eine andere Freig
 export const TEXT_GLEICHER_TAG_NICHT_GESPEICHERT = "Nicht gespeichert: Für diesen Tag gibt es schon eine Freigabe.";
 export const TEXT_DATUM_PRUEFEN = "Nicht gespeichert: Bitte das Datum prüfen.";
 export const TEXT_DATUM_KORRIGIEREN =
-  "Nicht gespeichert: Bitte das Datum prüfen. Ein neuer Plan vom Tierarzt kommt über „Freigabe eintragen“ dazu.";
+  "Nicht gespeichert: Bitte das Datum prüfen. Ein neuer tierärztlicher Plan kommt über „Freigabe eintragen“ dazu.";
 export const TEXT_ZIEL_PRUEFEN = "Nicht gespeichert: Bitte das Zielgewicht prüfen.";
 
 // Ändert die Freigabe an Ort und Stelle; id und tierId bleiben. BCS/MCS ohne Angabe fehlen danach ganz.
@@ -108,7 +108,7 @@ export function datumsFrage({ alt, datum, zielgewichtKg, kcalProTag, heute }) {
   return (
     `Du hast Ziel oder Tagesmenge geändert, das Datum ist aber noch der ${datumText(datum)}. ` +
     `Die neuen Werte (${freigabeKurz({ zielgewichtKg, kcalProTag })}) gelten dann rückwirkend ab diesem Tag, ` +
-    "auch in der Übersicht für den Tierarzt. Stimmt das Datum?"
+    "auch in der Übersicht für die Praxis. Stimmt das Datum?"
   );
 }
 

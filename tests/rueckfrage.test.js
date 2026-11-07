@@ -267,16 +267,16 @@ test("Lösch-Formulare verhindern das Schließen immer und schließen nach dem J
 });
 
 // ---------- Aufgabe 3: Freigabe ----------
-const SICHERHEIT = "Das empfehlen die Leitlinien nur mit einem Fachtierarzt für Ernährung. Hat der Tierarzt das genau so festgelegt?";
+const SICHERHEIT = "Das empfehlen die Leitlinien nur mit tierärztlichen Fachleuten für Ernährung. Wurde das in der Tierarztpraxis genau so festgelegt?";
 
 test("Sicherheitsfrage unter 60 % RER: Wortlaut gleich, Knöpfe „Ja, so festgelegt“ und „Nein“, Rückgabetext gleich", () => {
   const quelle = app();
   assert.equal(quelle.split(SICHERHEIT).length - 1, 1, "genau einmal");
-  const block = abschnitt(quelle, "const grenze = Math.round(harteUntergrenze(ziel));", 'return "Bitte die Tagesmenge mit dem Tierarzt klären.";');
+  const block = abschnitt(quelle, "const grenze = Math.round(harteUntergrenze(ziel));", 'return "Bitte die Tagesmenge mit der Tierarztpraxis klären.";');
   assert.ok(block.includes(SICHERHEIT));
   assert.match(block, /ja: "Ja, so festgelegt",\s*nein: "Nein",?/);
   assert.match(block, /await bestaetigt\(/);
-  assert.ok(quelle.includes('return "Bitte die Tagesmenge mit dem Tierarzt klären.";'));
+  assert.ok(quelle.includes('return "Bitte die Tagesmenge mit der Tierarztpraxis klären.";'));
   assert.ok(quelle.includes('`${zahl(kcal)} kcal liegen unter ${grenze} kcal (60 % des Ruhebedarfs beim Zielgewicht). `'));
 });
 

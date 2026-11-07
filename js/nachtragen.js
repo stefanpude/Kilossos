@@ -25,6 +25,6 @@ export function uhrzeitVorbelegung({ mahlzeit = null, gewaehlterTag, jetzt }) {
   if (tag === tagSchluessel(jetzt)) return { uhrzeit: hhmm(jetzt), tipp: null };
   return {
     uhrzeit: "",
-    tipp: `Du trägst für den ${datumText(tag)} nach: Bitte die Uhrzeit der Fütterung eintragen. Nur so zählt die Übersicht für den Tierarzt die Mahlzeiten richtig.`,
+    tipp: `Du trägst für den ${datumText(tag)} nach: Bitte die Uhrzeit der Fütterung eintragen. Nur so zählt die Übersicht für die Praxis die Mahlzeiten richtig.`,
   };
 }

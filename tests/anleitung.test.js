@@ -1,5 +1,5 @@
 // Erklärseite „So nutzt du Kilossos“ (0.51.0, Ideen-Tafel „kleine Anleitung“). Reine Bedienhilfe: keine Mengen,
-// keine Formeln, Zielgewicht und Tagesmenge legt der Tierarzt fest. Jede genannte Stelle muss es in der App geben.
+// keine Formeln, Zielgewicht und Tagesmenge legt die Tierarztpraxis fest. Jede genannte Stelle muss es in der App geben.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -19,7 +19,7 @@ test("Eintrag unter „Wissen“ vor „Tipps“ (seit 0.63.0 an zweiter Stelle)
 });
 
 const SCHRITTE = [
-  "1. Erst zum Tierarzt",
+  "1. Erst in die Tierarztpraxis",
   "2. Futtersorten anlegen",
   "3. Jede Mahlzeit wiegen und eintragen",
   "4. Einmal pro Woche wiegen",
@@ -42,10 +42,10 @@ test("Seite: Überschrift mit Fokus, alle Schritte in Reihenfolge, Knopf „Vers
 test("Regeln: Tierarzt legt Ziel und Menge fest, Notfallsatz im roten Kasten, keine Mengen, keine Gedankenstriche", () => {
   const seite = blatt(lies("index.html"), "dialog-anleitung");
   const text = nurText(seite);
-  assert.ok(text.includes("Zielgewicht und Tagesmenge legt dein Tierarzt fest"));
+  assert.ok(text.includes("Zielgewicht und Tagesmenge legt deine Tierarztpraxis fest"));
   assert.ok(text.includes("Mengen schlägt Kilossos nie selbst vor."));
   const kasten = seite.match(/<p class="notfall-hinweis">([\s\S]*?)<\/p>/)?.[1] ?? "";
-  assert.ok(nurText(kasten).includes("Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort zum Tierarzt."));
+  assert.ok(nurText(kasten).includes("Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort in die Tierarztpraxis."));
   assert.doesNotMatch(text, /\d+\s*(g|kcal)\b|\d+\s*%/);
   assert.doesNotMatch(text, /RER|Formel/);
   assert.doesNotMatch(text, /[—–]/);
@@ -85,6 +85,6 @@ test("Jede genannte Stelle gibt es in der App wirklich", () => {
 test("Mehrere Katzen: Einträge gelten für die Katze oben, Futtersorten für alle", () => {
   const text = nurText(blatt(lies("index.html"), "dialog-anleitung"));
   assert.ok(text.includes("gilt für die Katze, die gerade oben steht"));
-  assert.ok(text.includes("Jede Katze braucht ihre eigene Freigabe vom Tierarzt."));
+  assert.ok(text.includes("Jede Katze braucht ihre eigene tierärztliche Freigabe."));
   assert.ok(text.includes("Deine Futtersorten gelten für alle Katzen."));
 });

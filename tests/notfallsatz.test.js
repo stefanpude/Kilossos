@@ -12,7 +12,7 @@ test("0.77.1: kein Notfallsatz mehr mit „gar nicht“", () => {
 });
 
 test("0.77.1: Notfallsatz als Satz und als Frage mit „nichts oder kaum etwas“", () => {
-  const satz = html.match(/Frisst (deine|eine) Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort zum Tierarzt\./g) ?? [];
+  const satz = html.match(/Frisst (deine|eine) Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort in die Tierarztpraxis\./g) ?? [];
   const frage = html.match(/Frisst deine Katze einen Tag lang nichts oder kaum etwas\?<\/strong>/g) ?? [];
   assert.ok(satz.length >= 5, `Sätze: ${satz.length}`);
   assert.equal(frage.length, 2, "Notfall-Kasten und ruhiger Hinweis auf „Heute“");

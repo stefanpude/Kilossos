@@ -1,4 +1,4 @@
-// 0.77.0 (Prüfer A, 07.11.2026): Die Übersicht für den Tierarzt nennt ein Tempo pro Woche nur bei mindestens
+// 0.77.0 (Prüfer A, 07.11.2026): Die Übersicht für die Praxis nennt ein Tempo pro Woche nur bei mindestens
 // GRENZEN.tageTempo (7) Tagen Abstand, wie die App seit 0.75.0. Vorher stand bei 9,40 → 9,31 kg an zwei Tagen
 // „6,70 % KM/Woche“ neben dem Zielbereich 0,5–2 %.
 import { test } from "node:test";

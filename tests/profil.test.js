@@ -76,7 +76,7 @@ test("0.49.0: profilBereinigen entfernt eine Adresse, die kein Text oder zu lang
   assert.equal(profilBereinigen(daten, "2026-11-06"), 0);
 });
 
-test("0.49.0: profilBereinigen entfernt weiter unbekannte Felder beim Tierarzt", () => {
+test("0.49.0: profilBereinigen entfernt weiter unbekannte Felder in der Tierarztpraxis", () => {
   const daten = { tiere: [{ ...kito(), tierarzt: { adresse: "Musterstraße 1", email: "praxis@example.org", x: 1 } }] };
   assert.equal(profilBereinigen(daten, "2026-11-06"), 2);
   assert.deepEqual(daten.tiere[0].tierarzt, { adresse: "Musterstraße 1" });

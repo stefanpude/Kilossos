@@ -51,7 +51,7 @@ Zum Abhaken, in der Reihenfolge des Ablaufs. Die Fragenblätter stehen in [tiera
    Ein Nein ist in Ordnung.
 
 ## Nach dem Termin (am selben Tag)
-- [ ] **Freigabe in der App eintragen**, für jede Katze: „Mehr“ → „Tierarzt“ → „Freigabe eintragen“
+- [ ] **Freigabe in der App eintragen**, für jede Katze: „Mehr“ → „Tierarztpraxis“ → „Freigabe eintragen“
       (Zielgewicht, Tagesmenge in kcal, Datum, Praxis, BCS und MCS). Für Zuki vorher oben auf Zuki wechseln.
 - [ ] Das **Gewicht aus der Praxis** in die Notiz der Freigabe schreiben, nicht als Wägung eintragen
       (andere Waage, sonst springt das Tempo).

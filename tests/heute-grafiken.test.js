@@ -61,7 +61,7 @@ test("0.38.0: gefuettertHtml über der Tagesmenge: grau bis zum Spielraum, darü
 
 test("0.38.0: gefuettertHtml ohne Freigabe: Legende, Satz und Knopf, kein Balken, keine Kachel", () => {
   const h = html(DREI, false);
-  assert.match(h, /Ziel kommt mit der Freigabe vom Tierarzt\./);
+  assert.match(h, /Ziel kommt mit der tierärztlichen Freigabe\./);
   assert.match(h, /data-aktion="warum-kein-ziel"/);
   assert.match(h, /Warum kein Ziel\?/);
   assert.match(h, /gef-legende/);
@@ -391,7 +391,7 @@ test("0.44.0: gefuettertMehr ohne Mahlzeit: nichts (keine aufklappbare Zeile)", 
   assert.equal(gefuettertMehrHtml(null), "");
 });
 
-test("0.44.0: gefuettertMehr Satz zum Tierarzt: darüber, vergangener Tag darunter, genau erreicht (gleiche Rundung wie die Kachel)", () => {
+test("0.44.0: gefuettertMehr Satz in die Tierarztpraxis: darüber, vergangener Tag darunter, genau erreicht (gleiche Rundung wie die Kachel)", () => {
   // 220 + 12: 12 kcal Leckerli mehr (4 g × 300 kcal/100 g)
   const ueber = mehr([...KITO_TAG, MZ("p", 2.75, "19:00"), MZ("l", 4, "20:00")]);
   assert.equal(ueber.ziel.art, "ueber");
@@ -432,7 +432,7 @@ test("0.44.0: gefuettertMehrHtml mit Kitos Tag: zugeklappt, Kopf, Satz, Zeilen, 
   assert.match(h, /class="aufklapp gef-mehr"/);
   assert.match(h, /aria-expanded="false"/);
   assert.match(h, />Mehr zur Fütterung heute</);
-  assert.ok(h.includes(`Noch <b>9${NBSP}kcal</b> bis zur Tagesmenge vom Tierarzt (220${NBSP}kcal, Freigabe vom 1. Okt. 2026).`));
+  assert.ok(h.includes(`Noch <b>9${NBSP}kcal</b> bis zur freigegebenen Tagesmenge (220${NBSP}kcal, Freigabe vom 1. Okt. 2026).`));
   assert.ok(h.includes(`<span>Nassfutter</span><span>100${NBSP}g</span><b>77${NBSP}kcal</b>`));
   assert.ok(h.includes(`<span>Trockenfutter</span><span>41${NBSP}g</span><b>134${NBSP}kcal</b>`));
   // Seit 0.78.0 kein Satz „Leckerlis: … von höchstens …“ mehr; ohne leckerliKachel auch kein Leckerli-Block.
@@ -445,11 +445,11 @@ test("0.44.0: gefuettertMehrHtml mit Kitos Tag: zugeklappt, Kopf, Satz, Zeilen, 
 test("0.44.0: gefuettertMehrHtml: andere Tage, darüber, darunter, erreicht", () => {
   const gestern = gefuettertMehrHtml(mehr(KITO_TAG, { tag: "2026-11-04" }));
   assert.match(gestern, />Mehr zur Fütterung an diesem Tag</);
-  assert.ok(gestern.includes(`<b>9${NBSP}kcal</b> unter der Tagesmenge vom Tierarzt (220${NBSP}kcal, Freigabe vom 1. Okt. 2026).`));
+  assert.ok(gestern.includes(`<b>9${NBSP}kcal</b> unter der freigegebenen Tagesmenge (220${NBSP}kcal, Freigabe vom 1. Okt. 2026).`));
   const ueber = gefuettertMehrHtml(mehr([...KITO_TAG, MZ("p", 6.4, "19:00")]));
-  assert.ok(ueber.includes(`<b>12${NBSP}kcal</b> über der Tagesmenge vom Tierarzt (`));
+  assert.ok(ueber.includes(`<b>12${NBSP}kcal</b> über der freigegebenen Tagesmenge (`));
   const genau = gefuettertMehrHtml(mehr([...KITO_TAG, MZ("p", 2.63, "19:00")]));
-  assert.ok(genau.includes("Tagesmenge vom Tierarzt erreicht (220"));
+  assert.ok(genau.includes("Freigegebene Tagesmenge erreicht (220"));
   assert.doesNotMatch(genau, /Noch|-0/);
 });
 

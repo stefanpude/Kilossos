@@ -1,6 +1,6 @@
 // 0.54.0: Beim Nachtragen einer Mahlzeit für einen anderen Tag ist die Uhrzeit leer statt „jetzt“.
 // Grund (Prüfer-Fund 0.53.0): Mehrere Fütterungen eines Tages, auf einmal nachgetragen, lagen 1–2 Minuten auseinander
-// und zählten in der Übersicht für den Tierarzt als eine Mahlzeit (Plan .planning/mahlzeiten-pro-tag.md).
+// und zählten in der Übersicht für die Praxis als eine Mahlzeit (Plan .planning/mahlzeiten-pro-tag.md).
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -15,7 +15,7 @@ const abschnitt = (quelle, anfang, ende) => {
 
 const FEHLER = "Bitte die Uhrzeit der Fütterung eintragen.";
 const tippFuer = (datum) =>
-  `Du trägst für den ${datum} nach: Bitte die Uhrzeit der Fütterung eintragen. Nur so zählt die Übersicht für den Tierarzt die Mahlzeiten richtig.`;
+  `Du trägst für den ${datum} nach: Bitte die Uhrzeit der Fütterung eintragen. Nur so zählt die Übersicht für die Praxis die Mahlzeiten richtig.`;
 
 // 0.54.1: Verhalten als reine Funktion, mit festen Daten geprüft (Vorschlag des Prüfers zu 0.54.0).
 // Monate in new Date(j, m, t) zählen ab 0: 10 = November.

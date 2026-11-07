@@ -16,7 +16,7 @@ const ABGERUFEN_3 = "2026-11-04";
 const ABGERUFEN_4 = "2026-11-05";
 
 export const FUTTERLISTE = [
-  // ---------- Diätfutter vom Tierarzt ----------
+  // ---------- Diätfutter aus der Tierarztpraxis ----------
   {
     id: "royal-canin-satiety-trocken",
     name: "Royal Canin Veterinary Satiety Weight Management (trocken)",
@@ -145,7 +145,7 @@ export const FUTTERLISTE = [
     url: "https://www.hillspet.de/cat-food/prescription-diet-wd-chicken-weight-management-pouch",
     abgerufen: ABGERUFEN_4,
     hinweis:
-      "Diätfutter bei Diabetes, in Deutschland nicht zum Abnehmen deklariert: nur, wenn der Tierarzt es so verordnet. 85-g-Beutel = 69,1 kcal.",
+      "Diätfutter bei Diabetes, in Deutschland nicht zum Abnehmen deklariert: nur auf tierärztliche Verordnung. 85-g-Beutel = 69,1 kcal.",
     eanHinweis: "Die Nummer gehört zur 12er-Packung.",
   },
   // Vierte Runde (0.37.0): weitere Diätfuttermittel, jede Zahl von zwei Prüfern an den Quellen nachgesehen.
@@ -964,7 +964,7 @@ export function sucheFutter(text, liste = FUTTERLISTE) {
 // Gruppen im Blatt „Aus der Liste wählen“ (seit 0.69.0, Stefan 06.11.: Leckerlis gingen zwischen 48 Sorten unter):
 // Diätfutter bleibt wegen „nur nach Rücksprache“ eine eigene Gruppe, der Rest nach Art. Leere Gruppen fallen weg.
 const GRUPPEN = [
-  { id: "liste-diaet", titel: "Diätfutter vom Tierarzt – nur nach Rücksprache", passt: (e) => e.diaet },
+  { id: "liste-diaet", titel: "Diätfutter – nur nach tierärztlicher Rücksprache", passt: (e) => e.diaet },
   { id: "liste-nass", titel: "Nassfutter", passt: (e) => !e.diaet && e.typ === "nass" },
   { id: "liste-trocken", titel: "Trockenfutter", passt: (e) => !e.diaet && e.typ === "trocken" },
   { id: "liste-leckerli", titel: "Leckerlis", passt: (e) => !e.diaet && e.typ === "leckerli" },
@@ -995,7 +995,7 @@ const prozent = (wert) => `${String(wert).replace(".", ",")} %`;
 export function ausListe(eintrag, id) {
   const { protein, fett, asche, faser, feuchte } = eintrag.analyse;
   const teile = [
-    eintrag.diaet ? "Diätfutter – nur nach Rücksprache mit dem Tierarzt." : "",
+    eintrag.diaet ? "Diätfutter – nur nach tierärztlicher Rücksprache." : "",
     `Laut ${eintrag.quelle}: Protein ${prozent(protein)}, Fett ${prozent(fett)}, Asche ${prozent(asche)}, ` +
       `Faser ${prozent(faser)}, Feuchte ${feuchte === null ? "nicht angegeben" : prozent(feuchte)}.`,
     eintrag.kcalQuelle === "geschaetzt"

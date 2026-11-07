@@ -1,5 +1,5 @@
 // Ansicht "Verlauf": Eckdaten, Zeitraum-Umschalter, Gewichtskurve auf Millimeterpapier, Tempo pro Woche und
-// zwei aufklappbare Karten (Futter pro Tag, Befunde vom Tierarzt) – alles als HTML-Text, ohne Zusatzpakete.
+// zwei aufklappbare Karten (Futter pro Tag, Tierärztliche Befunde) – alles als HTML-Text, ohne Zusatzpakete.
 // gewichtDiagramm und kcalDiagramm sind die älteren Diagramme; sie dienen nur noch dem PDF-Bericht.
 // Farben kommen aus styles.css (--reihe-1, --reihe-2, --akzent, --gut, --rand, --text-leise).
 
@@ -277,7 +277,7 @@ const NBSP = " "; // geschütztes Leerzeichen zwischen Zahl und Einheit
 // PDF „Kalorien pro Tag, Durchschnitt je Woche“ (seit 0.68.0, Spezifikation .planning/grafiken-auswahl.md
 // Abschnitt 4, Variante B mit weichem Übergang): ein Punkt je Woche auf enger Achse, Freigabe als Stufe am Tag der
 // Freigabe, Band ±10 % um den Bezugswert der Woche, Punkte außerhalb in Bernstein mit Wert, Leckerli-Anteil als Spur.
-// Vorher Säulen ab 0, darin sah der Tierarzt Abweichungen von der Freigabe kaum.
+// Vorher Säulen ab 0, darin sah die Tierarztpraxis Abweichungen von der Freigabe kaum.
 export function kcalDiagramm(mahlzeiten, futterNachId, freigaben) {
   const sortiert = [...freigaben].sort((a, b) => a.datum.localeCompare(b.datum));
   const wochen = wochenKcal(mahlzeiten, futterNachId, sortiert);
@@ -433,7 +433,7 @@ export function glatt(p) {
 }
 
 // Gewichtskurve auf Millimeterpapier: gerade Linie von Wägung zu Wägung (wie von Hand eingetragen),
-// Ziel vom Tierarzt gestrichelt, Freigaben als senkrechte Marken, sicherer Bereich als blasse Fläche.
+// Ziel aus der Freigabe gestrichelt, Freigaben als senkrechte Marken, sicherer Bereich als blasse Fläche.
 // Gezeichnet werden die Wägungen ab "von"; der sichere Bereich rechnet aber vom Gewicht am Tag der ersten
 // Freigabe, das auch vor dem Zeitraum liegen kann – deshalb bekommt die Funktion immer alle Wägungen.
 // Der Name bleibt aus der Zeit der weichen Kurve, damit Aufrufer und Tests gleich bleiben.
@@ -521,7 +521,7 @@ export function weicheKurve(gewichte, freigaben, von = null, bis = null) {
 // sie enthält (Ziel unter dem Ausschnitt; Handy-Test 05.11.2026). „Besonderer Tag“ nur mit Zeitleiste (0.33.0).
 function legende(kurve, mitZeitleiste) {
   const teile = ['<span><i></i>Gewicht</span>'];
-  if (kurve.includes('class="ziel"')) teile.push('<span><i class="ziel"></i>Ziel vom Tierarzt</span>');
+  if (kurve.includes('class="ziel"')) teile.push('<span><i class="ziel"></i>Ziel aus der Freigabe</span>');
   if (kurve.includes('class="freigabe-marke"')) teile.push('<span><i class="freigabe"></i>Freigabe</span>');
   if (kurve.includes('class="band"')) teile.push('<span><i class="band"></i>sicher: 0,5 bis 2 % pro Woche</span>');
   if (mitZeitleiste) teile.push('<span><i class="besonders"></i>Besonderer Tag</span>');
@@ -807,7 +807,7 @@ function tempoKarte(gewichte, freigaben, von, heute) {
   const erklaerung = freigaben.length
     ? `Jeder Punkt steht für ein Wiegen, verglichen mit der Messung mindestens 7 Tage davor und auf 7 Tage umgerechnet. Grün: im sicheren Bereich, Bernstein: langsamer, Rot: schneller als ${schnell}. Unter der Nulllinie: zugenommen.` +
       (raten.some((r) => r.bewertung === "neutral") ? " Grau: vor der Freigabe, noch nicht bewertet." : "")
-    : `Jeder Punkt steht für ein Wiegen, verglichen mit der Messung mindestens 7 Tage davor und auf 7 Tage umgerechnet. Bewertet wird erst ab der Freigabe vom Tierarzt; schneller als ${schnell} ist immer rot. Unter der Nulllinie: zugenommen.`;
+    : `Jeder Punkt steht für ein Wiegen, verglichen mit der Messung mindestens 7 Tage davor und auf 7 Tage umgerechnet. Bewertet wird erst ab der tierärztlichen Freigabe; schneller als ${schnell} ist immer rot. Unter der Nulllinie: zugenommen.`;
   return `<section class="karte" aria-labelledby="tempo-titel">
     <h2 id="tempo-titel">Tempo pro Woche</h2>
     <p>Ø ${mitMinus(z.durchschnitt, 2)}${NB}% pro Woche${bereich}</p>
@@ -894,7 +894,7 @@ function befundKarte(freigaben) {
   return aufklappKarte({
     id: "befunde",
     klasse: "karte",
-    kopf: `<span class="zusammen"><span class="karte-titel">Befunde vom Tierarzt</span><br>${neueste}
+    kopf: `<span class="zusammen"><span class="karte-titel">Tierärztliche Befunde</span><br>${neueste}
       <small>${sortiert.length} ${sortiert.length === 1 ? "Freigabe" : "Freigaben"} · neueste zuerst</small></span>`,
     inhalt: zeilen,
   });

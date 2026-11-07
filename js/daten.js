@@ -16,8 +16,8 @@
 //   gewichte:   { id, tierId, kg, datum ("JJJJ-MM-TT"), notiz, foto? }
 //               foto: optional, wie beim Tier (256 × 256 px JPEG), Monatsfoto, Regeln in js/fotos.js (seit 0.25.0, monatlich seit 0.26.0)
 //   freigaben:  { id, tierId, datum, zielgewichtKg, kcalProTag, tierarzt, notiz, bcs?, mcs? }
-//               bcs: optional, Body Condition Score vom Tierarzt, ganze Zahl 1–9 (seit 0.12.0)
-//               mcs: optional, Muscle Condition Score vom Tierarzt, Schlüssel aus MCS (seit 0.12.0)
+//               bcs: optional, Body Condition Score aus der Tierarztpraxis, ganze Zahl 1–9 (seit 0.12.0)
+//               mcs: optional, Muscle Condition Score aus der Tierarztpraxis, Schlüssel aus MCS (seit 0.12.0)
 //               Ältere Freigaben haben beide Felder nicht – sie bleiben ohne Umwandlung gültig.
 //   besondereTage: { id, tierId, art, von ("JJJJ-MM-TT"), bis ("JJJJ-MM-TT" | null), notiz } (seit 0.33.0)
 //               Ereignis oder Phase, z. B. krank oder genascht; ohne kcal und Gramm, ohne Einfluss auf Rechnungen.
@@ -209,7 +209,7 @@ export function analyseBereinigen(daten) {
   return entfernt;
 }
 
-// ---------- BCS und MCS (nur vom Tierarzt, keine Selbst-Einstufung) ----------
+// ---------- BCS und MCS (nur aus der Tierarztpraxis, keine Selbst-Einstufung) ----------
 // Stufen des Muscle Condition Score nach der WSAVA-Tafel.
 export const MCS = {
   normal: "normale Muskeln",
@@ -238,7 +238,7 @@ export function freigabenBereinigen(daten) {
   return entfernt;
 }
 
-// "BCS 8 von 9 · leichter Muskelabbau"; leer, wenn der Tierarzt beides nicht angegeben hat.
+// "BCS 8 von 9 · leichter Muskelabbau"; leer, wenn die Tierarztpraxis beides nicht angegeben hat.
 export function befundText(freigabe) {
   const teile = [];
   if (bcsGueltig(freigabe.bcs)) teile.push(`BCS ${freigabe.bcs} von 9`);
