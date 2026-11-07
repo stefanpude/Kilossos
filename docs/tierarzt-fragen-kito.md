@@ -1,126 +1,59 @@
 # Fragen für den Tierarzttermin: Kito
 
-Zum Ausdrucken oder am Handy mitnehmen. Dazu: die Tierarzt-Übersicht als PDF aus der App
-(„Mehr“ → „Übersicht für den Tierarzt“ → „Übersicht öffnen“) und die Futterpackungen oder Fotos davon.
-Die Liste für Zuki: [tierarzt-fragen-zuki.md](tierarzt-fragen-zuki.md).
+Termin am 13.11.2026, zusammen mit Zuki. Zum Ausdrucken oder am Handy mitnehmen.
+Dazu: die Tierarzt-Übersicht als PDF aus der App („Mehr“ → „Übersicht öffnen“) und die Futterpackungen oder Fotos davon.
+
+Weitere Blätter: [Zuki](tierarzt-fragen-zuki.md) und [Fragen zur App](tierarzt-fragen-app.md)
+(nur zum Mitgeben, nicht für den Termin).
 
 ## Ausgangslage
 - Kito, Kater, kastriert, von Natur aus sehr groß
 - Gewicht: 9,32 kg (Praxis, Oktober 2026)
 - Wohnungskatze, wenig Bewegung (geht wegen der Baustelle nicht mehr raus)
-- Futter: Sheba Fresh & Fine „Huhn, Geflügel & Truthahn“ (ca. 77 kcal/100 g, aus den Werten auf dem Umkarton berechnet, etwa 38,5 kcal je 50-g-Beutel) und Purina ONE Light (trocken, ca. 327 kcal/100 g)
+- Futter: Sheba Fresh & Fine „Huhn, Geflügel & Truthahn“ (nass, ca. 77 kcal/100 g, aus den Werten auf dem Umkarton
+  berechnet, etwa 38,5 kcal je 50-g-Beutel) und Purina ONE Light (trocken, ca. 327 kcal/100 g)
+- An 5 von 7 Tagen ca. 20 g rohes Rindertatar, ungewürzt (ca. 27 kcal)
 - Wird getrennt von Zuki gefüttert
 
-## 1. Befund
-- [ ] Wie ist Kitos **Body Condition Score (BCS)**? (Skala 1–9)
-- [ ] Wie ist sein **Muskelzustand (MCS)**?
-- [ ] Sind vorher Blutwerte nötig (z. B. Schilddrüse, Zucker, Leber, Nieren)?
-- [ ] Gibt es Gründe, die gegen eine Abnahme sprechen?
+## Fragen zur medizinischen Einschätzung
 
-## 2. Ziel und Menge (das trägt nur der Tierarzt in die App ein)
-- [ ] Welches **Zielgewicht** ist für Kito realistisch, auch mit seinem großen Körperbau?
+### Befund
+- [ ] Wie ist Kitos **Body Condition Score (BCS)** (Skala 1–9) und sein **Muskelzustand (MCS)**?
+- [ ] Sind vor der Abnahme **Untersuchungen** nötig? Zum Beispiel Blut (Schilddrüse, Zucker, Leber, Nieren) oder Urin
+      (er ist ein kastrierter, schwerer Wohnungskater).
+- [ ] Spricht etwas **gegen die Abnahme**? Zum Beispiel Gelenkschmerzen (er bewegt sich wenig), Zähne oder Medikamente.
+
+### Ziel und Menge
+- [ ] Welches **Zielgewicht** ist für Kito realistisch, mit seinem großen Körperbau?
+      Ist ein **Zwischenziel** sinnvoll (z. B. 10–15 % weniger)?
 - [ ] Wie viele **kcal pro Tag** soll er bekommen?
-- [ ] Wie schnell soll er abnehmen? Die App warnt ab mehr als 2 % pro Woche
-      (bei 9,32 kg wären das mehr als 186 g pro Woche). Sinnvoll sind 0,5–2 %, also etwa 47–186 g pro Woche.
-- [ ] Ab welcher Abnahme pro Woche soll ich mich melden?
-- [ ] Die App rechnet „zu schnell“ im **Mittel über zwei Wochen**, weil das Wiegen zu Hause schwankt. Eine einzelne
-      Woche mit einem großen Sprung löst also noch keine Warnung aus. Ist das in Ordnung, oder soll die App schon nach
-      **einer Woche** warnen, und ab wie viel (z. B. mehr als 3 %, bei 9,32 kg etwa 280 g)?
+- [ ] Wie **schnell** soll er abnehmen, und ab wann soll ich mich melden?
+      (Leitlinien: 0,5–2 % pro Woche, bei 9,32 kg etwa 47–186 g pro Woche.)
 
-## 3. Futter
-- [ ] Reicht unser **Handelsfutter**, oder braucht Kito ein **Diätfutter**?
-      Hintergrund: Wenn die kcal pro Tag niedrig angesetzt werden, bekommt er mit normalem Futter
+### Futter
+- [ ] Passt unser **Futter**, oder braucht Kito ein **Diätfutter**? Bei wenig kcal bekommt er mit normalem Futter
       womöglich zu wenig Eiweiß, Vitamine und Mineralstoffe.
-- [ ] Wie soll ich Nass- und Trockenfutter aufteilen?
-- [ ] Wie viele Leckerlis sind erlaubt? (Die App warnt ab 10 % der Tageskalorien.)
-- [ ] Kito und Zuki fressen getrennt. Worauf soll ich achten, damit keiner beim anderen mitfrisst?
+- [ ] Ist das rohe **Tatar** in Ordnung, oder lieber weglassen?
 
-## 4. Sicherheit
-- [ ] Woran erkenne ich früh eine **Fettleber** (hepatische Lipidose)? Was tue ich, wenn er nicht frisst?
-- [ ] Wie lange darf er höchstens ohne Futter sein, bevor ich anrufen muss? Die App zeigt bisher:
-      an einem Tag **weniger als die Hälfte** der freigegebenen Menge → „am selben Tag den Tierarzt anrufen“;
-      **weniger als 90 %** → „nicht dauerhaft unterschreiten“. Passen diese Grenzen?
-      Und wie viele Tage hintereinander unter der Menge sind noch in Ordnung?
-- [ ] Ab wann ist **Erbrechen** ein Grund, sofort anzurufen? In der App trage ich es als „Auffälligkeit beim Fressen“
-      ein. Einen roten Notfall-Hinweis zeigt sie bisher nur bei „Futter verweigert“.
-- [ ] Wenn Kito **öfter etwas übrig lässt**: Ab wann ist das ein Warnzeichen, und wann soll ich mich melden?
-      (Ich wiege den Rest zurück und trage nur ein, was er wirklich gefressen hat.)
-- [ ] Wie wichtig ist Kitos **Wasseraufnahme** beim Abnehmen? Katzen nehmen einen großen Teil ihres Wassers
-      über Nassfutter auf; weniger Futter heißt auch weniger Wasser. Sollen wir etwas beachten
-      (z. B. Wasser ins Nassfutter, Trinkbrunnen), und sollen die Nierenwerte vorher bestimmt werden?
+### Sicherheit
+- [ ] **Wann muss ich sofort anrufen?** Dass er sofort zu Ihnen gehört, wenn er einen Tag lang nichts oder kaum etwas
+      frisst, weiß ich. Und wenn er **mehrere Tage nur einen Teil** frisst (ab wie vielen Tagen, unter welcher Menge)?
+      Ab wann beim **Erbrechen**?
 
-## 5. Kontrolle
-- [ ] Wie oft soll ich zum Wiegen in die Praxis kommen? (Zu Hause wiege ich 1× pro Woche,
-      gleicher Tag, gleiche Uhrzeit, gleiche Waage.)
-- [ ] Welche **Waage** empfehlen Sie für zu Hause, und wie genau muss sie sein? Bei 0,5–2 % pro Woche geht es
-      bei Kito um etwa 47–186 g. Eine Personenwaage (100-g-Schritte, Katze auf dem Arm) kann leicht 100 g
-      danebenliegen. Genauer wären eine Tier- oder Babywaage (10-g-Schritte) oder die Transportbox auf einer
-      Küchen- oder Paketwaage.
-- [ ] Helfen Ihnen **Fotos** von Kito bei der Kontrolle, zum Beispiel einmal im Monat **von oben und von der Seite**?
-      Die Übersicht kann das erste und das letzte Foto im Zeitraum zum Vergleich mit ausdrucken.
-      Worauf soll ich beim Fotografieren achten?
-- [ ] Wann ist der nächste Kontrolltermin, und in welchem **Abstand** sollen wir danach zur Kontrolle kommen?
-      (Die App könnte dann daran erinnern.)
-- [ ] Welche **Ausnahmen** soll ich in der App festhalten, damit Sie sie bei der Kontrolle sehen? Dafür gibt es den
-      Eintrag „Besonderer Tag“, als einzelner Tag oder als Phase über mehrere Tage, mit diesen Arten:
-      mehr Bewegung, weniger Bewegung, krank, Futter verweigert, außer der Reihe genascht,
-      Auffälligkeit beim Fressen (z. B. nur die Hälfte gefressen, erbrochen, sehr gierig), Futterumstellung, Sonstiges.
-      In der PDF-Übersicht stehen sie nummeriert unter der Gewichtskurve, mit einer kurzen Liste direkt darunter.
-      Fehlt etwas, oder ist etwas davon unwichtig?
-- [ ] Kito geht wegen der Baustelle gerade nicht raus. Soll ich mich melden, wenn er wieder rausgeht?
-      (Mehr Bewegung, aber vielleicht auch Futter bei Nachbarn.)
-
-## 6. Zur App (optional)
-- [ ] Würden Sie sich die Grenzwerte der App ansehen? (Quellen: AAHA- und WSAVA-Leitlinien,
-      siehe `docs/sicherheitsgrenzen.md`)
-- [ ] In der PDF-Übersicht steht je Monat eine Bilanz in % pro Woche. Soll ein Monat mit mehr als 2 % pro Woche
-      dort **markiert** sein? (Zu schnelle Phasen stehen bisher unter „Auffälligkeiten im Zeitraum“.)
-- [ ] Was halten Sie von **veganem oder vegetarischem Katzenfutter**, besonders beim Abnehmen?
-      (Seit Version 0.65.0 steht ein neutraler Eintrag unter „Begriffe kurz erklärt“, bitte gegenlesen. Wir füttern es nicht.)
-- [ ] Spielen **Zucker oder Getreide** im Futter beim Abnehmen eine Rolle, oder zählen nur die kcal?
-      Ist „getreidefrei“ für Kito sinnvoll? (Für einen möglichen neutralen Eintrag „Zutatenliste“ in der App.)
-- [ ] Bitte den neuen Abschnitt **„Genug Wasser“** auf der Alltag-Seite gegenlesen (Nieren beim Nichtfressen, seit 0.66.0).
-- [ ] Nennen Sie die Tagesmenge lieber in **kcal oder in Gramm** einer Sorte? (Die App fragt bisher kcal.)
-- [ ] Würden Sie Kilossos anderen Haltern **empfehlen**? Was fehlt Ihnen in der PDF-Übersicht?
-- [ ] Darf ich in der Praxis einen kleinen **Aushang** machen? Ich suche 3–5 Halter, deren Katze abnehmen soll, für
-      einen Test der App über zwei Wochen (kostenlos, ohne Anmeldung, Daten nur auf dem Handy). Oder würden Sie den
-      Zettel Haltern mitgeben, denen Sie gerade zum Abnehmen raten? (Auf dem Zettel steht nicht, dass die Praxis die
-      App empfiehlt.)
-
-## 7. Ergänzt nach der Prüfung (07.11.2026)
-- [ ] Hatte Kito je Probleme beim **Wasserlassen**? Ist eine **Urinuntersuchung** (Dichte, Kristalle, Zucker) vor der
-      Umstellung sinnvoll? Wäre ein Diätfutter mit Schutz für die Harnwege passend? (Kastrierter, schwerer Wohnungskater.)
-- [ ] Ist ein **Diabetes-Check** sinnvoll (z. B. Fructosamin)? Soll ich seine **Trinkmenge** jetzt einmal messen,
-      als Vergleichswert für später?
-- [ ] Bewegt er sich nur wegen der Baustelle wenig oder auch wegen **Gelenkschmerzen**?
-- [ ] Frisst er schmerzfrei, auch Trockenfutter (**Zähne**)?
-- [ ] **Tatar:** Kito bekommt an 5 von 7 Tagen ca. 20 g rohes Rindertatar (ca. 27 kcal). Ist roh unbedenklich?
-      Zählt es wie Leckerlis unter die 10 % der Tageskalorien? Hilft es beim Eiweiß?
-- [ ] Ist ein **Zwischenziel** sinnvoll (z. B. 10–15 % weniger), und wann bewerten wir neu?
-- [ ] Was passiert **nach dem Ziel**: Wie wird die Menge erhöht, und wie oft kontrollieren wir dann?
-- [ ] Darf ich zwischendurch **zum Wiegen** in die Praxis kommen (kostenlos)?
-- [ ] Woran erkenne ich zu Hause **Muskelabbau**?
-- [ ] Bekommt Kito **Medikamente**, auf die ich beim Füttern achten muss?
-- [ ] Frisst er mehrere Tage nur **einen Teil** seiner Menge: Ab wie vielen Tagen unter welcher Menge soll ich mich melden?
+### Kontrolle
+- [ ] Wann ist der **nächste Kontrolltermin**, und in welchem Abstand danach?
+      Darf ich zwischendurch zum Wiegen in die Praxis kommen?
 
 ## Antworten
 | Frage | Antwort |
 |---|---|
-| BCS | |
-| MCS | |
-| Zielgewicht | |
+| BCS / MCS | |
+| Untersuchungen vorher | |
+| Spricht etwas dagegen? | |
+| Zielgewicht / Zwischenziel | |
 | kcal pro Tag | |
-| „Zu schnell“: nach 1 oder 2 Wochen warnen, ab wie viel | |
-| Zu wenig gefressen: ab wann anrufen | |
-| Erbrechen: ab wann anrufen | |
-| Übrig gelassenes Futter: ab wann melden | |
-| Diätfutter? | |
-| Nächster Termin | |
-| Abstand der Kontrollen | |
-| Waage für zu Hause | |
-| Fotos: hilfreich, welche Ansicht | |
-| Ausnahmen für die App | |
-| Veganes/vegetarisches Futter | |
-| Zucker/Getreide, getreidefrei | |
-| Abschnitt „Genug Wasser“ | |
-| Aushang/Zettel für Tester in der Praxis | |
+| Tempo, ab wann melden | |
+| Futter / Diätfutter | |
+| Tatar | |
+| Sofort anrufen bei | |
+| Nächster Termin, Abstand | |

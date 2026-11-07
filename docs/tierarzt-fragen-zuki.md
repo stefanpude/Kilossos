@@ -1,97 +1,60 @@
 # Fragen für den Tierarzttermin: Zuki
 
-Zum Ausdrucken oder am Handy mitnehmen. Dazu die Futterpackungen oder Fotos davon. Außerdem die Tierarzt-Übersicht als PDF:
-in der App oben auf Zuki wechseln, dann „Mehr“ → „Übersicht für den Tierarzt“ → „Übersicht öffnen“.
-Die Liste für Kito: [tierarzt-fragen-kito.md](tierarzt-fragen-kito.md). Fragen zur App selbst stehen dort.
+Termin am 13.11.2026, zusammen mit Kito. Zum Ausdrucken oder am Handy mitnehmen.
+Dazu: die Tierarzt-Übersicht als PDF (in der App oben auf Zuki wechseln, dann „Mehr“ → „Übersicht öffnen“)
+und die Futterpackungen oder Fotos davon.
+
+Weitere Blätter: [Kito](tierarzt-fragen-kito.md) und [Fragen zur App](tierarzt-fragen-app.md)
+(nur zum Mitgeben, nicht für den Termin).
 
 ## Ausgangslage
 - Zuki, zierlich gebaut, im Verhältnis aber noch dicker als Kito
-- Geschlecht und kastriert: bitte ergänzen
-- Alter oder Geburtsdatum: bitte ergänzen
-- Gewicht: 7,33 kg (zu Hause gewogen am 06.11.2026; mit einer Personenwaage kann das 100–200 g danebenliegen),
-  bitte in der Praxis nachwiegen
+- Geschlecht, kastriert: _______ (vorher selbst eintragen)
+- Alter oder Geburtsdatum: _______ (vorher selbst eintragen)
+- Gewicht: 7,33 kg (zu Hause gewogen am 06.11.2026; mit einer Personenwaage kann das 100–200 g danebenliegen)
 - Futter: dasselbe wie Kito: Sheba Fresh & Fine in Sauce (nass, 50-g-Beutel, ca. 77 kcal/100 g) und
-  Purina One Light (trocken, ca. 327,5 kcal/100 g)
+  Purina ONE Light (trocken, ca. 327 kcal/100 g)
 - Wird getrennt von Kito gefüttert
 
-## 1. Befund
-- [ ] Wie viel wiegt Zuki auf der Praxiswaage? (Zu Hause: 7,33 kg)
-- [ ] Wie ist Zukis **Body Condition Score (BCS)**? (Skala 1–9)
-- [ ] Wie ist Zukis **Muskelzustand (MCS)**?
-- [ ] Sind vorher Blutwerte nötig (z. B. Schilddrüse, Zucker, Leber, Nieren)?
-- [ ] Gibt es Gründe, die gegen eine Abnahme sprechen?
+## Fragen zur medizinischen Einschätzung
 
-## 2. Ziel und Menge (das trägt nur der Tierarzt in die App ein)
-- [ ] Welches **Zielgewicht** ist für Zuki realistisch, bei dem zierlichen Körperbau?
-- [ ] Wie viele **kcal pro Tag** soll Zuki bekommen?
-- [ ] Wie schnell soll Zuki abnehmen? Die App warnt ab mehr als 2 % pro Woche.
-      Sinnvoll sind 0,5–2 % des Körpergewichts pro Woche.
-- [ ] Ab welcher Abnahme pro Woche soll ich mich melden?
+### Befund
+- [ ] Wie viel wiegt Zuki auf der **Praxiswaage**? (Zu Hause: 7,33 kg)
+- [ ] Wie ist Zukis **Body Condition Score (BCS)** (Skala 1–9) und ihr **Muskelzustand (MCS)**?
+- [ ] Sind vor der Abnahme **Untersuchungen** nötig? Zum Beispiel Blut (Schilddrüse, Zucker, Leber, Nieren),
+      bei einer älteren Katze besonders die Schilddrüse.
+- [ ] Spricht etwas **gegen die Abnahme**? Zum Beispiel Schmerzen, Zähne oder Medikamente.
 
-## 3. Futter
-- [ ] Reicht unser **Handelsfutter**, oder braucht Zuki ein **Diätfutter**?
-      Hintergrund: Wenn die kcal pro Tag niedrig angesetzt werden, bekommt Zuki mit normalem Futter
+### Ziel und Menge
+- [ ] Welches **Zielgewicht** ist für Zuki realistisch, bei dem zierlichen Körperbau? Falls sie über BCS 9 liegt:
+      Wie bestimmen wir das Ziel? Ist ein **Zwischenziel** sinnvoll (z. B. 10–15 % weniger)?
+- [ ] Wie viele **kcal pro Tag** soll sie bekommen?
+- [ ] Wie **schnell** soll sie abnehmen, und ab wann soll ich mich melden?
+      (Leitlinien: 0,5–2 % pro Woche, bei 7,33 kg etwa 37–147 g pro Woche.)
+
+### Futter
+- [ ] Passt unser **Futter**, oder braucht Zuki ein **Diätfutter**? Bei wenig kcal bekommt sie mit normalem Futter
       womöglich zu wenig Eiweiß, Vitamine und Mineralstoffe.
-- [ ] Wie soll ich Nass- und Trockenfutter aufteilen?
-- [ ] Wie viele Leckerlis sind erlaubt? (Die App warnt ab 10 % der Tageskalorien.)
-- [ ] Kito und Zuki fressen getrennt. Worauf soll ich achten, damit keiner beim anderen mitfrisst?
-- [ ] Falls bei Kito noch nicht gefragt: Was halten Sie von **veganem oder vegetarischem Katzenfutter**, besonders
-      beim Abnehmen? (Seit Version 0.65.0 steht ein neutraler Eintrag unter „Begriffe kurz erklärt“. Wir füttern es nicht.)
-- [ ] Falls bei Kito noch nicht gefragt: Spielen **Zucker oder Getreide** im Futter beim Abnehmen eine Rolle, oder
-      zählen nur die kcal? Ist „getreidefrei“ für Zuki sinnvoll?
 
-## 4. Sicherheit
-- [ ] Woran erkenne ich früh eine **Fettleber** (hepatische Lipidose)? Was tue ich, wenn Zuki nicht frisst?
-- [ ] Wie lange darf Zuki höchstens ohne Futter sein, bevor ich anrufen muss?
-      (Die App rät bisher: einen Tag oder länger gar nichts gefressen → sofort zum Tierarzt. Passt diese Grenze?)
-- [ ] Wenn Zuki **öfter etwas übrig lässt**: Ab wann ist das ein Warnzeichen, und wann soll ich mich melden?
-      (Ich wiege den Rest zurück und trage nur ein, was sie wirklich gefressen hat.)
-- [ ] Wie wichtig ist Zukis **Wasseraufnahme** beim Abnehmen? Katzen nehmen einen großen Teil ihres Wassers
-      über Nassfutter auf; weniger Futter heißt auch weniger Wasser. Sollen wir etwas beachten
-      (z. B. Wasser ins Nassfutter, Trinkbrunnen), und sollen die Nierenwerte vorher bestimmt werden?
+### Sicherheit
+- [ ] **Wann muss ich sofort anrufen?** Dass sie sofort zu Ihnen gehört, wenn sie einen Tag lang nichts oder kaum etwas
+      frisst, weiß ich. Und wenn sie **mehrere Tage nur einen Teil** frisst (ab wie vielen Tagen, unter welcher Menge)?
+      Ab wann beim **Erbrechen**?
 
-## 5. Kontrolle
-- [ ] Wie oft soll ich Zuki zum Wiegen in die Praxis bringen? (Zu Hause wiege ich 1× pro Woche,
-      gleicher Tag, gleiche Uhrzeit, gleiche Waage.)
-- [ ] Welche **Waage** empfehlen Sie für zu Hause, und wie genau muss sie sein? Zuki ist zierlich, bei 0,5–2 % pro
-      Woche geht es um noch weniger Gramm als bei Kito (bei 7,33 kg etwa 35–150 g). Eine Personenwaage
-      (100-g-Schritte, Katze auf dem Arm) kann leicht 100 g danebenliegen. Genauer wären eine Tier- oder Babywaage
-      (10-g-Schritte) oder die Transportbox auf einer Küchen- oder Paketwaage.
-- [ ] Helfen Ihnen **Fotos** von Zuki bei der Kontrolle, zum Beispiel einmal im Monat **von oben und von der Seite**?
-      Die Übersicht kann das erste und das letzte Foto im Zeitraum zum Vergleich mit ausdrucken.
-      Worauf soll ich beim Fotografieren achten?
-- [ ] Wann ist der nächste Kontrolltermin, und in welchem **Abstand** sollen wir danach zur Kontrolle kommen?
-      (Die App könnte dann daran erinnern.)
-- [ ] Welche **Ausnahmen** soll ich in der App festhalten, damit Sie sie bei der Kontrolle sehen? Dafür gibt es den
-      Eintrag „Besonderer Tag“, als einzelner Tag oder als Phase über mehrere Tage, mit diesen Arten:
-      mehr Bewegung, weniger Bewegung, krank, Futter verweigert, außer der Reihe genascht,
-      Auffälligkeit beim Fressen (z. B. nur die Hälfte gefressen, erbrochen, sehr gierig), Futterumstellung, Sonstiges.
-      In der PDF-Übersicht stehen sie nummeriert unter der Gewichtskurve, mit einer kurzen Liste direkt darunter.
-      Fehlt etwas, oder ist etwas davon unwichtig?
-
-## 6. Ergänzt nach der Prüfung (07.11.2026)
-- [ ] Wie alt ist Zuki ungefähr? Bei einer älteren Katze: Ist ein **Schilddrüsenwert** sinnvoll?
-- [ ] Ist Zuki über BCS 9 hinaus verfettet? Wie bestimmen wir dann das **Zielgewicht**?
-- [ ] Ist ein **Zwischenziel** sinnvoll (z. B. 10–15 % weniger), und wann bewerten wir neu?
-- [ ] Die App fragt nach, wenn ein Ziel mehr als 40 % unter dem Gewicht liegt („Zahlendreher?“). Bei Zuki könnte
-      ein echtes Ziel dort liegen. Ist die Rückfrage dann irreführend?
-- [ ] Bekommt Zuki **Medikamente**, auf die ich beim Füttern achten muss?
-- [ ] Frisst sie mehrere Tage nur **einen Teil** ihrer Menge: Ab wie vielen Tagen unter welcher Menge soll ich mich melden?
+### Kontrolle
+- [ ] Wann ist der **nächste Kontrolltermin**, und in welchem Abstand danach?
+      Darf ich zwischendurch zum Wiegen in die Praxis kommen?
 
 ## Antworten
 | Frage | Antwort |
 |---|---|
-| Gewicht | |
-| BCS | |
-| MCS | |
-| Zielgewicht | |
+| Gewicht (Praxis) | |
+| BCS / MCS | |
+| Untersuchungen vorher | |
+| Spricht etwas dagegen? | |
+| Zielgewicht / Zwischenziel | |
 | kcal pro Tag | |
-| Diätfutter? | |
-| Übrig gelassenes Futter: ab wann melden | |
-| Nächster Termin | |
-| Abstand der Kontrollen | |
-| Waage für zu Hause | |
-| Fotos: hilfreich, welche Ansicht | |
-| Ausnahmen für die App | |
-| Veganes/vegetarisches Futter | |
-| Zucker/Getreide, getreidefrei | |
+| Tempo, ab wann melden | |
+| Futter / Diätfutter | |
+| Sofort anrufen bei | |
+| Nächster Termin, Abstand | |
