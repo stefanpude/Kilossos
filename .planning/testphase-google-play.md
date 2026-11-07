@@ -74,4 +74,7 @@ answer/9845334 (geschlossenen Test einrichten), beide abgerufen 06.11.2026.
 ## Offen
 
 - Startdatum (frühestens nach Phase 0, realistisch nicht vor Januar 2027)
-- Ob vorher ein Web-Vortest im Freundeskreis läuft (Stefan hat am 06.11. den Google-Test als Ziel für diesen Plan gewählt)
+- ~~Ob vorher ein Web-Vortest im Freundeskreis läuft~~ Ja (07.11.): Web-Vortest mit Bekannten über die GitHub-Adresse,
+  Start nach dem Tierarzttermin am 13.11. Blatt: `docs/tester-hinweise-web.md`. Zählt nicht für Google; die Vortester
+  am Ende fragen, ob sie beim Google-Test wieder mitmachen. Während des Vortests Änderungen sammeln und seltener
+  hochladen, weil jede Änderung sofort bei allen ankommt.
