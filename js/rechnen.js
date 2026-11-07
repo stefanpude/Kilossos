@@ -232,9 +232,13 @@ export function menschVergleich(katzeKg, gramm = 100, menschKg = 75) {
   return Math.round((menschKg * gramm * 10) / (katzeKg * 1000)) / 10;
 }
 
-// Gewichte, neueste zuerst.
+// Gewichte, neueste zuerst. Am selben Tag gilt die zuletzt eingetragene (steht weiter hinten in der Liste), seit
+// 0.77.0 (Prüfer A): sonst verdeckte eine Korrektur nach unten die Warnung „zu schnell“.
 export function gewichteSortiert(gewichte) {
-  return [...gewichte].sort((a, b) => b.datum.localeCompare(a.datum));
+  return gewichte
+    .map((g, i) => [g, i])
+    .sort(([a, i], [b, j]) => b.datum.localeCompare(a.datum) || j - i)
+    .map(([g]) => g);
 }
 
 // ---------- Sicherheitsgrenzen (Begründung und Quellen: docs/sicherheitsgrenzen.md) ----------

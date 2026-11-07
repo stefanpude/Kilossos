@@ -55,10 +55,10 @@ test("berichtDaten: Fütterung nur über abgeschlossene Tage ab dem ersten Eintr
 test("berichtDaten: Gewichte im Zeitraum mit Änderung zur Messung davor", () => {
   const b = berichtDaten(eingabe);
   assert.deepEqual(
-    b.gewichte.map((g) => [g.datum, g.kg, g.diffG, g.prozentProWoche.toFixed(2)]),
+    b.gewichte.map((g) => [g.datum, g.kg, g.diffG, g.prozentProWoche?.toFixed(2) ?? null]),
     [
       ["2026-11-01", 9.32, -80, "0.85"],
-      ["2026-11-04", 9.28, -40, "1.00"],
+      ["2026-11-04", 9.28, -40, null], // seit 0.77.0: 3 Tage Abstand, kein Tempo (erst ab 7 Tagen)
     ]
   );
   assert.deepEqual([b.abnahme.startKg, b.abnahme.endKg, b.abnahme.diffG], [9.32, 9.28, 40]);

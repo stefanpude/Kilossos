@@ -69,6 +69,15 @@ Die Liste für Kito: [tierarzt-fragen-kito.md](tierarzt-fragen-kito.md). Fragen 
       In der PDF-Übersicht stehen sie nummeriert unter der Gewichtskurve, mit einer kurzen Liste direkt darunter.
       Fehlt etwas, oder ist etwas davon unwichtig?
 
+## 6. Ergänzt nach der Prüfung (07.11.2026)
+- [ ] Wie alt ist Zuki ungefähr? Bei einer älteren Katze: Ist ein **Schilddrüsenwert** sinnvoll?
+- [ ] Ist Zuki über BCS 9 hinaus verfettet? Wie bestimmen wir dann das **Zielgewicht**?
+- [ ] Ist ein **Zwischenziel** sinnvoll (z. B. 10–15 % weniger), und wann bewerten wir neu?
+- [ ] Die App fragt nach, wenn ein Ziel mehr als 40 % unter dem Gewicht liegt („Zahlendreher?“). Bei Zuki könnte
+      ein echtes Ziel dort liegen. Ist die Rückfrage dann irreführend?
+- [ ] Bekommt Zuki **Medikamente**, auf die ich beim Füttern achten muss?
+- [ ] Frisst sie mehrere Tage nur **einen Teil** ihrer Menge: Ab wie vielen Tagen unter welcher Menge soll ich mich melden?
+
 ## Antworten
 | Frage | Antwort |
 |---|---|

@@ -70,7 +70,8 @@ export function berichtDaten({ tier, gewichte, mahlzeiten, freigaben, besondereT
       kg: g.kg,
       notiz: g.notiz ?? "",
       diffG: davor ? Math.round((g.kg - davor.kg) * 1000) : null,
-      prozentProWoche: davor && tage > 0 ? ((davor.kg - g.kg) / davor.kg / (tage / 7)) * 100 : null,
+      // Tempo erst ab GRENZEN.tageTempo Tagen Abstand, wie in der App (seit 0.77.0 auch hier).
+      prozentProWoche: davor && tage >= GRENZEN.tageTempo ? ((davor.kg - g.kg) / davor.kg / (tage / 7)) * 100 : null,
     });
   });
   let abnahme = null;
@@ -78,14 +79,17 @@ export function berichtDaten({ tier, gewichte, mahlzeiten, freigaben, besondereT
   const letzteW = gewichteImZeitraum.at(-1);
   // Erst ab zwei verschiedenen Tagen (sonst „−∞ %“). Linear wie die Spalte „Monat“ und die Warnregeln (seit 0.36.2).
   if (gewichteImZeitraum.length >= 2 && tageZwischen(ersteW.datum, letzteW.datum) > 0) {
-    const wochen = tageZwischen(ersteW.datum, letzteW.datum) / 7;
+    const tage = tageZwischen(ersteW.datum, letzteW.datum);
+    const wochen = tage / 7;
     abnahme = {
+      tage,
       startKg: ersteW.kg,
       endKg: letzteW.kg,
       diffG: Math.round((ersteW.kg - letzteW.kg) * 1000),
       prozent: ((ersteW.kg - letzteW.kg) / ersteW.kg) * 100,
       wochen,
-      proWoche: ((ersteW.kg - letzteW.kg) / ersteW.kg / wochen) * 100,
+      // Unter GRENZEN.tageTempo Tagen kein Tempo (seit 0.77.0, Prüfer A): 90 g an einem Tag wären sonst „6,70 %“.
+      proWoche: tage >= GRENZEN.tageTempo ? ((ersteW.kg - letzteW.kg) / ersteW.kg / wochen) * 100 : null,
     };
   }
 
@@ -290,7 +294,10 @@ export function waegungsMonate(gewichte) {
       bilanz:
         von === bis || tage <= 0
           ? null
-          : { diffG: Math.round((bis.kg - von.kg) * 1000), prozentProWoche: ((von.kg - bis.kg) / von.kg / (tage / 7)) * 100 },
+          : {
+              diffG: Math.round((bis.kg - von.kg) * 1000),
+              prozentProWoche: tage >= GRENZEN.tageTempo ? ((von.kg - bis.kg) / von.kg / (tage / 7)) * 100 : null,
+            },
     };
   });
   return { monate, notizen };
@@ -304,9 +311,11 @@ function waegungsRaster(gewichte, berichtBis) {
     return `<td class="wg-zelle"><span class="wg-tag">${tagMonat(g.datum)}</span><b class="wg-kg">${zahl(g.kg, 2)}${marke}</b><span class="wg-diff">${diff}</span></td>`;
   };
   const bilanzText = (b) =>
-    b
-      ? `<b>${vorzeichen(b.diffG)} g</b><small>${b.prozentProWoche < 0 ? "Zunahme " : ""}${zahl(Math.abs(b.prozentProWoche), 2)} % KM/Woche</small>`
-      : "–";
+    !b
+      ? "–"
+      : b.prozentProWoche === null
+        ? `<b>${vorzeichen(b.diffG)} g</b>`
+        : `<b>${vorzeichen(b.diffG)} g</b><small>${b.prozentProWoche < 0 ? "Zunahme " : ""}${zahl(Math.abs(b.prozentProWoche), 2)} % KM/Woche</small>`;
   const zeilen = monate.flatMap((m) =>
     m.zeilen.map((liste, i) => {
       const n = m.zeilen.length;
@@ -363,8 +372,13 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
     // Zunahme ausgeschrieben statt mit Minus vor der Rate (seit 0.36.2), wie in der Spalte „Monat“.
     const zunahme = a.diffG < 0;
     const gText = a.diffG === 0 ? "±0 g" : `${zunahme ? "+" : "−"}${zahl(Math.abs(a.diffG))} g`;
-    teile.push(`<p>${zahl(a.startKg, 2)} kg → <strong>${zahl(a.endKg, 2)} kg</strong> in ${zahl(a.wochen, 1)} Wochen:
-      ${gText} (${zahl(Math.abs(a.prozent), 1)} %${zunahme ? " Zunahme" : ""}), im Mittel <strong>${zunahme ? "Zunahme " : ""}${zahl(Math.abs(a.proWoche), 2)} % KM/Woche</strong>
+    const dauer = a.proWoche === null ? `${a.tage} ${a.tage === 1 ? "Tag" : "Tagen"}` : `${zahl(a.wochen, 1)} Wochen`;
+    const tempo =
+      a.proWoche === null
+        ? `Tempo pro Woche erst ab ${GRENZEN.tageTempo} Tagen Abstand`
+        : `im Mittel <strong>${zunahme ? "Zunahme " : ""}${zahl(Math.abs(a.proWoche), 2)} % KM/Woche</strong>`;
+    teile.push(`<p>${zahl(a.startKg, 2)} kg → <strong>${zahl(a.endKg, 2)} kg</strong> in ${dauer}:
+      ${gText} (${zahl(Math.abs(a.prozent), 1)} %${zunahme ? " Zunahme" : ""}), ${tempo}
       (Zielbereich ${zahl(GRENZEN.abnahmeMin, 1)}–${zahl(GRENZEN.abnahmeMax)} %).</p>`);
     const imZeitraum = gewichte.filter((g) => g.datum >= b.von && g.datum <= b.bis);
     // Streifen der besonderen Tage mit derselben Achse: von der ersten Wägung im Zeitraum bis zum Berichtsende.

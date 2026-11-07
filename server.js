@@ -19,9 +19,19 @@ const TYPEN = {
 
 http
   .createServer((anfrage, antwort) => {
-    const pfad = decodeURIComponent(new URL(anfrage.url, "http://localhost").pathname);
-    const datei = path.join(WURZEL, pfad === "/" ? "index.html" : pfad);
-    if (!datei.startsWith(WURZEL)) {
+    let pfad;
+    try {
+      pfad = decodeURIComponent(new URL(anfrage.url, "http://localhost").pathname);
+    } catch {
+      antwort.writeHead(400).end();
+      return;
+    }
+    const datei = path.resolve(WURZEL, "." + path.sep + (pfad === "/" ? "index.html" : pfad));
+    // Nur Dateien im Projektordner, keine Punkt-Ordner wie .git oder .claude (seit 0.77.0, Prüfer C). Vorher reichte
+    // ein gleicher Namensanfang („Kilossos-Social“ beginnt mit „Kilossos“), um Nachbarordner auf dem Desktop zu lesen.
+    const relativ = path.relative(WURZEL, datei);
+    const teile = relativ.split(path.sep);
+    if (!relativ || path.isAbsolute(relativ) || teile[0] === ".." || teile.some((t) => t.startsWith("."))) {
       antwort.writeHead(403).end();
       return;
     }
@@ -34,4 +44,5 @@ http
       antwort.end(inhalt);
     });
   })
-  .listen(PORT, () => console.log(`Kilossos läuft auf http://localhost:${PORT}`));
+  // Nur auf diesem Rechner erreichbar, nicht im WLAN (seit 0.77.0).
+  .listen(PORT, "127.0.0.1", () => console.log(`Kilossos läuft auf http://localhost:${PORT}`));

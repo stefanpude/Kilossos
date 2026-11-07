@@ -80,6 +80,24 @@ Die Liste für Zuki: [tierarzt-fragen-zuki.md](tierarzt-fragen-zuki.md).
 - [ ] Spielen **Zucker oder Getreide** im Futter beim Abnehmen eine Rolle, oder zählen nur die kcal?
       Ist „getreidefrei“ für Kito sinnvoll? (Für einen möglichen neutralen Eintrag „Zutatenliste“ in der App.)
 - [ ] Bitte den neuen Abschnitt **„Genug Wasser“** auf der Alltag-Seite gegenlesen (Nieren beim Nichtfressen, seit 0.66.0).
+- [ ] Nennen Sie die Tagesmenge lieber in **kcal oder in Gramm** einer Sorte? (Die App fragt bisher kcal.)
+- [ ] Würden Sie Kilossos anderen Haltern **empfehlen**? Was fehlt Ihnen in der PDF-Übersicht?
+
+## 7. Ergänzt nach der Prüfung (07.11.2026)
+- [ ] Hatte Kito je Probleme beim **Wasserlassen**? Ist eine **Urinuntersuchung** (Dichte, Kristalle, Zucker) vor der
+      Umstellung sinnvoll? Wäre ein Diätfutter mit Schutz für die Harnwege passend? (Kastrierter, schwerer Wohnungskater.)
+- [ ] Ist ein **Diabetes-Check** sinnvoll (z. B. Fructosamin)? Soll ich seine **Trinkmenge** jetzt einmal messen,
+      als Vergleichswert für später?
+- [ ] Bewegt er sich nur wegen der Baustelle wenig oder auch wegen **Gelenkschmerzen**?
+- [ ] Frisst er schmerzfrei, auch Trockenfutter (**Zähne**)?
+- [ ] **Tatar:** Kito bekommt an 5 von 7 Tagen ca. 20 g rohes Rindertatar (ca. 27 kcal). Ist roh unbedenklich?
+      Zählt es wie Leckerlis unter die 10 % der Tageskalorien? Hilft es beim Eiweiß?
+- [ ] Ist ein **Zwischenziel** sinnvoll (z. B. 10–15 % weniger), und wann bewerten wir neu?
+- [ ] Was passiert **nach dem Ziel**: Wie wird die Menge erhöht, und wie oft kontrollieren wir dann?
+- [ ] Darf ich zwischendurch **zum Wiegen** in die Praxis kommen (kostenlos)?
+- [ ] Woran erkenne ich zu Hause **Muskelabbau**?
+- [ ] Bekommt Kito **Medikamente**, auf die ich beim Füttern achten muss?
+- [ ] Frisst er mehrere Tage nur **einen Teil** seiner Menge: Ab wie vielen Tagen unter welcher Menge soll ich mich melden?
 
 ## Antworten
 | Frage | Antwort |
