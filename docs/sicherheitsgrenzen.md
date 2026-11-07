@@ -11,7 +11,7 @@ Tier: Kito, Kater, kastriert, Wohnungskatze · 9,32 kg (Praxis, Oktober 2026) ·
 
 ---
 
-## Teil A – Für Stefan, in einfachen Worten
+## Teil A – Kurzfassung in einfachen Worten
 
 **Worum es geht:** Kito soll langsam abnehmen. Wenn eine dicke Katze plötzlich viel zu wenig frisst, kann ihre Leber
 verfetten (Fettleber, „hepatische Lipidose“). Das ist lebensgefährlich, oft schon nach wenigen Tagen. Deshalb
