@@ -372,7 +372,7 @@ const KITO_TAG = [MZ("s", 50, "07:00"), MZ("p", 20, "09:00"), MZ("s", 50, "13:00
 const mehr = (mahlzeiten, { mitFreigabe = true, tag = "2026-11-05", sorten = KITO_SORTEN } = {}) =>
   gefuettertMehr({ mahlzeiten, futterNachId: sorten, freigabe: mitFreigabe ? KITO_FREIGABE : null, tag, heute: "2026-11-05" });
 
-test("0.44.0: gefuettertMehr mit Kitos Tag: Noch 9 kcal, Nass 100 g/77, Trocken 41 g/134, Leckerli 0 von 22", () => {
+test("0.44.0: gefuettertMehr mit Kitos Tag: Noch 9 kcal, Nass 100 g/77, Trocken 41 g/134 (Leckerlis seit 0.78.0 über leckerliKachel)", () => {
   const w = mehr(KITO_TAG);
   assert.equal(w.heute, true);
   assert.deepEqual(w.ziel, { art: "noch", kcal: 9, soll: 220, datum: "2026-10-01" });
@@ -380,9 +380,7 @@ test("0.44.0: gefuettertMehr mit Kitos Tag: Noch 9 kcal, Nass 100 g/77, Trocken 
     w.arten.map((a) => [a.typ, a.gramm, a.kcal]),
     [["nass", 100, 77], ["trocken", 41, 134]]
   );
-  assert.equal(w.leckerli.kcal, 0);
-  assert.equal(Math.round(w.leckerli.max * 10) / 10, 22);
-  assert.equal(w.leckerli.prozent, GRENZEN.leckerliMax * 100);
+  assert.equal("leckerli" in w, false);
   assert.deepEqual(w.geschaetzt, ["Sheba Fresh n Fine in Sauce mit Geflügel"]);
   assert.equal(w.geloescht, false);
 });
@@ -410,10 +408,9 @@ test("0.44.0: gefuettertMehr Satz zum Tierarzt: darüber, vergangener Tag darunt
   assert.equal(kachel.kcal, mehr(KITO_TAG).ziel.kcal);
 });
 
-test("0.44.0: gefuettertMehr ohne Freigabe: nur Arten und ca.-Sorten, kein Tierarzt-Satz, keine Leckerli-Grenze", () => {
+test("0.44.0: gefuettertMehr ohne Freigabe: nur Arten und ca.-Sorten, kein Tierarzt-Satz", () => {
   const w = mehr(KITO_TAG, { mitFreigabe: false });
   assert.equal(w.ziel, null);
-  assert.equal(w.leckerli, null);
   assert.equal(w.arten.length, 2);
   assert.deepEqual(w.geschaetzt, ["Sheba Fresh n Fine in Sauce mit Geflügel"]);
 });
@@ -429,7 +426,7 @@ test("0.44.0: gefuettertMehr: ca.-Sorten nur einmal und nur ohne genaue Quelle; 
   assert.deepEqual(mehr([MZ("p", 20, "09:00")]).geschaetzt, []);
 });
 
-test("0.44.0: gefuettertMehrHtml mit Kitos Tag: zugeklappt, Kopf, Satz, Zeilen, Leckerlis, ca.-Satz", () => {
+test("0.44.0: gefuettertMehrHtml mit Kitos Tag: zugeklappt, Kopf, Satz, Zeilen, ca.-Satz (Leckerli-Block: tests/leckerli-aufklapp.test.js)", () => {
   const h = gefuettertMehrHtml(mehr(KITO_TAG));
   assert.match(h, /data-aufklapp="gef-mehr"/);
   assert.match(h, /class="aufklapp gef-mehr"/);
@@ -438,7 +435,8 @@ test("0.44.0: gefuettertMehrHtml mit Kitos Tag: zugeklappt, Kopf, Satz, Zeilen, 
   assert.ok(h.includes(`Noch <b>9${NBSP}kcal</b> bis zur Tagesmenge vom Tierarzt (220${NBSP}kcal, Freigabe vom 1. Okt. 2026).`));
   assert.ok(h.includes(`<span>Nassfutter</span><span>100${NBSP}g</span><b>77${NBSP}kcal</b>`));
   assert.ok(h.includes(`<span>Trockenfutter</span><span>41${NBSP}g</span><b>134${NBSP}kcal</b>`));
-  assert.ok(h.includes(`Leckerlis: 0 von höchstens 22${NBSP}kcal (10${NBSP}% der Tagesmenge).`));
+  // Seit 0.78.0 kein Satz „Leckerlis: … von höchstens …“ mehr; ohne leckerliKachel auch kein Leckerli-Block.
+  assert.doesNotMatch(h, /Leckerlis:|höchstens|gef-leckerli/);
   assert.ok(h.includes("„ca.“, weil der kcal-Wert von Sheba Fresh n Fine in Sauce mit Geflügel nur geschätzt ist."));
   // Zahl und Einheit nie mit normalem Leerzeichen (Umbruch „9 / kcal“).
   assert.doesNotMatch(h, /\d (kcal|g|%)/);
@@ -488,7 +486,7 @@ test("0.44.0: „Mehr zur Fütterung“ nennt nie eine Futtermenge", () => {
 
 test("0.44.0: app.js hängt „Mehr zur Fütterung“ an die Karte, vor der ca.-Zeile", () => {
   const app = readFileSync(new URL("../app.js", import.meta.url), "utf8");
-  assert.match(app, /gefuettertHtml\(gefuettert\) \+\s*gefuettertMehrHtml\(\s*gefuettertMehr\(\{ mahlzeiten, futterNachId: futter, freigabe, tag, heute \}\)\s*\)/);
+  assert.match(app, /gefuettertHtml\(gefuettert\) \+\s*gefuettertMehrHtml\(\s*gefuettertMehr\(\{ mahlzeiten, futterNachId: futter, freigabe, tag, heute \}\),\s*leckerliKachel\(/);
   const css = readFileSync(new URL("../styles.css", import.meta.url), "utf8");
   assert.match(css, /\.gef-zeilen \{[^}]*grid-template-columns/);
   assert.match(css, /\.gef-zeilen [^{]*\{[^}]*white-space: nowrap/);

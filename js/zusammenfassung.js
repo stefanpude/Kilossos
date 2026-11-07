@@ -206,7 +206,7 @@ export function gefuettertWerte({ mahlzeiten, futterNachId, freigabe, tag, heute
 // Werte für „Mehr zur Fütterung“ (ab 0.44.0), aufklappbar unten in der Karte „Gefüttert“. Gleiche Eingaben wie
 // gefuettertWerte. Ohne Mahlzeit null (dann keine Zeile). ziel: Abstand zur Tagesmenge mit derselben Rundung wie die
 // Kachel (Math.round(kcal − soll)), dazu Tagesmenge und Datum der geltenden Freigabe. arten: Gramm und kcal je Art,
-// kcal wie in der Legende (ergeben zusammen die große Zahl). leckerli: Grenze aus GRENZEN.leckerliMax, nur mit Freigabe.
+// kcal wie in der Legende (ergeben zusammen die große Zahl). Leckerlis seit 0.78.0 über leckerliKachel.
 // geschaetzt: Namen der Sorten des Tages ohne genaue Quelle (je Sorte einmal, nach Uhrzeit); geloescht: eine Mahlzeit
 // gehört zu einer gelöschten Sorte. Keine Futtermenge: hier wird nichts in Gramm umgerechnet oder vorgeschlagen.
 export function gefuettertMehr({ mahlzeiten, futterNachId, freigabe, tag, heute }) {
@@ -226,25 +226,18 @@ export function gefuettertMehr({ mahlzeiten, futterNachId, freigabe, tag, heute 
     if (!GENAUE_QUELLEN.includes(futter.kcalQuelle) && !geschaetzt.includes(futter.name)) geschaetzt.push(futter.name);
   }
   let ziel = null;
-  let leckerli = null;
   if (freigabe) {
     const soll = freigabe.kcalProTag;
     const d = Math.round(werte.kcal - soll);
     const art = d > 0 ? "ueber" : d === 0 ? "erreicht" : tag >= heute ? "noch" : "unter";
     // Math.abs: aus Math.round(-0,4) = -0 wird 0.
     ziel = { art, kcal: Math.abs(d), soll, datum: freigabe.datum };
-    leckerli = {
-      kcal: Math.round(leckerliKcal(mahlzeiten, futterNachId)),
-      max: soll * GRENZEN.leckerliMax,
-      prozent: GRENZEN.leckerliMax * 100,
-    };
   }
   return {
     heute: tag >= heute,
     kcal: werte.kcal,
     ziel,
     arten: werte.arten.map((a) => ({ typ: a.typ, gramm: gramm.get(a.typ) ?? 0, kcal: a.kcal })),
-    leckerli,
     geschaetzt,
     geloescht,
   };

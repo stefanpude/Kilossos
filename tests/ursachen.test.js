@@ -30,7 +30,7 @@ test("Blatt: Überschrift mit Fokus, sechs Abschnitte, Knopf „Verstanden“, �
 // 0.63.0 (Stefan 06.11.): Die Seite steht unter „Wissen“ ganz oben, „Tipps“ hat nur noch zwei Abschnitte.
 test("0.63.0: Eintrag ganz oben unter „Wissen“, „Tipps“ ohne „Bevor es losgeht“", () => {
   const html = lies("index.html");
-  const wissen = html.slice(html.indexOf('<h3 class="gruppe-titel">Wissen</h3>'), html.indexOf('<h3 class="gruppe-titel">Einstellungen</h3>'));
+  const wissen = html.slice(html.indexOf('<h3 class="gruppe-titel">Wissen</h3>'), html.indexOf('<h3 class="gruppe-titel">Wiegen</h3>'));
   const aktionen = [...wissen.matchAll(/data-aktion="([^"]+)"/g)].map((m) => m[1]);
   assert.equal(aktionen[0], "ursachen-erklaerung");
   const tipps = blatt(html, "dialog-tipps");
@@ -65,7 +65,7 @@ test("0.62.1/0.63.0: keine Links auf der Seite, Schlusssatz nennt „Tipps fürs
   assert.ok(text.includes(schluss));
   assert.ok(text.indexOf(schluss) < text.indexOf("Quellen:"));
   assert.ok(!text.includes("auf „Tipps“ unter"));
-  const wissen = html.slice(html.indexOf('<h3 class="gruppe-titel">Wissen</h3>'), html.indexOf('<h3 class="gruppe-titel">Einstellungen</h3>'));
+  const wissen = html.slice(html.indexOf('<h3 class="gruppe-titel">Wissen</h3>'), html.indexOf('<h3 class="gruppe-titel">Wiegen</h3>'));
   assert.ok(wissen.includes('<span class="text">Tipps fürs Abnehmen</span>'));
   assert.ok(lies("app.js").includes('case "ursachen-erklaerung":'));
   const aufrufer = [...html.matchAll(/data-aktion="ursachen-erklaerung"/g)].length;

@@ -173,7 +173,6 @@
       </section>
 
       <div id="heute-gewicht"></div>
-      <div id="heute-leckerli"></div>
 
       <!-- Notfall-Hinweis: immer sichtbar, bewusst ruhig gestaltet (Ideen-Tafel, 0.14.0). -->
       <p class="notfall-hinweis"><strong>Frisst deine Katze einen Tag lang nichts oder kaum etwas?</strong>
@@ -282,16 +281,12 @@
         </button>
       </div>
 
-      <h3 class="gruppe-titel">Einstellungen</h3>
+      <!-- Seit 0.78.0 getrennt: „Wiegen“ gilt für das gewählte Tier, „App“ (weiter unten) für dieses Gerät. -->
+      <h3 class="gruppe-titel">Wiegen</h3>
       <div class="liste">
         <div class="eintrag eintrag-auswahl">
           <span data-symbol="waage"></span><span class="text"><span id="label-wiegetag">Wiegetag</span><small id="wiegetag-tier" hidden></small></span>
           <div id="wiegetag-feld"></div>
-        </div>
-        <div class="eintrag eintrag-auswahl">
-          <span data-symbol="darstellung"></span>
-          <span class="text"><span id="label-anzeige">Darstellung</span><small>Gilt nur für dieses Gerät.</small></span>
-          <div id="anzeige-feld"></div>
         </div>
       </div>
       <p class="tipp mehr-hinweis">Am besten immer am gleichen Wochentag, zur gleichen Uhrzeit, mit der gleichen Waage. An diesem Tag erinnert „Heute“ daran, am letzten Wiegetag im Monat auch an das Monatsfoto.</p>
@@ -323,6 +318,15 @@
       </div>
       <p class="tipp mehr-hinweis">Löscht alle Einträge, das Profil und die Einstellungen auf diesem Handy. Speichere vorher eine Sicherung, wenn du die Daten noch brauchst.</p>
 
+      <h3 class="gruppe-titel">App</h3>
+      <div class="liste">
+        <div class="eintrag eintrag-auswahl">
+          <span data-symbol="darstellung"></span>
+          <span class="text"><span id="label-anzeige">Darstellung</span><small>Gilt nur für dieses Gerät.</small></span>
+          <div id="anzeige-feld"></div>
+        </div>
+      </div>
+
       <h3 class="gruppe-titel">Über Kilossos</h3>
       <div class="karte">
         <p class="leise">Kilossos begleitet deine Katze beim Abnehmen: Es zeichnet auf, rechnet nach und warnt, wenn etwas aus dem
@@ -351,7 +355,7 @@
           <span data-symbol="katzenkopf"></span><span class="text">Demo ansehen<small>Beispieldaten von Kito und Zuki über ein Jahr. Deine Einträge bleiben, wie sie sind.</small></span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.77.1</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.78.0</span>
         </div>
       </div>
     </section>

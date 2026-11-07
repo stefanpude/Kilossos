@@ -76,9 +76,31 @@ const ART_ZEILE = { nass: "Nassfutter", trocken: "Trockenfutter", frischfleisch:
 // „A“, „A und B“, „A, B und C“
 const mitUnd = (namen) => (namen.length < 2 ? namen.join("") : `${namen.slice(0, -1).join(", ")} und ${namen.at(-1)}`);
 
+// Leckerli-Block (seit 0.78.0 im Aufklappmenü statt eigener Karte unter „Letzte Messung“).
+// lk aus leckerliKachel (js/zusammenfassung.js): gleiche Basis wie die Leckerli-Warnung, Farbe nur von der Warnung.
+export function leckerliHtml(lk) {
+  const anteil =
+    lk.anteil === null
+      ? lk.amTagesende
+        ? "wird am Tagesende bewertet"
+        : ""
+      : `${zahl(lk.anteil * 100)}${NB}% der Tages-kcal · Grenze ${zahl(GRENZEN.leckerliMax * 100)}${NB}%`;
+  const breite = lk.anteil === null ? 0 : Math.min(100, (lk.anteil / GRENZEN.leckerliMax) * 100);
+  return (
+    `<div class="gef-leckerli">` +
+    `<div class="oben"><span class="label">Leckerli</span><span class="wert">${zahl(lk.kcal)}${NB}<small class="leise">kcal</small></span></div>` +
+    (anteil ? `<span class="leise">${anteil}</span>` : "") +
+    (lk.anteil === null
+      ? ""
+      : `<span class="balken sofort${lk.stufe === "achtung" ? " gefahr" : ""}"><i style="--w: ${breite.toFixed(1)}%"></i></span>`) +
+    `</div>`
+  );
+}
+
 // Aufklappbare Zeile unten in der Karte „Gefüttert“ (standardmäßig zu, Zustand nur im Speicher wie überall).
-// mehr aus gefuettertMehr (js/zusammenfassung.js); null ergibt nichts. Zahl und Einheit immer mit NB.
-export function gefuettertMehrHtml(mehr) {
+// mehr aus gefuettertMehr (js/zusammenfassung.js); null ergibt nichts. lk aus leckerliKachel (seit 0.78.0), ohne lk
+// kein Leckerli-Block. Zahl und Einheit immer mit NB.
+export function gefuettertMehrHtml(mehr, lk = null) {
   if (!mehr) return "";
   const kcal = (k, stellen = 0) => `${sicher(k.toLocaleString("de-DE", { maximumFractionDigits: stellen }))}${NB}kcal`;
   const teile = [];
@@ -103,14 +125,9 @@ export function gefuettertMehrHtml(mehr) {
         )
         .join("")}</div>`
     );
-  if (mehr.leckerli) {
-    const { kcal: k, max, prozent } = mehr.leckerli;
-    // Grenze mit höchstens einer Nachkommastelle (23,5 statt gerundet 24), damit „höchstens“ stimmt.
-    teile.push(
-      `<p class="gef-klein">Leckerlis: ${sicher(zahl(k))} von höchstens ${kcal(max, 1)} ` +
-        `(${sicher(zahl(prozent))}${NB}% der Tagesmenge).</p>`
-    );
-  }
+  // Bis 0.77.1 stand hier „Leckerlis: … von höchstens …“ (Bezug Freigabe), daneben eine eigene Karte mit anderem
+  // Bezug. Seit 0.78.0 nur noch der Block aus leckerliKachel.
+  if (lk) teile.push(leckerliHtml(lk));
   const namen = mehr.geschaetzt.map(sicher);
   const geschaetzt = namen.length
     ? namen.length === 1

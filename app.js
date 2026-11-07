@@ -531,9 +531,14 @@ function zeichneHeute(vonNull = false) {
     ? `${ca}von ${zahl(gefuettert.ziel.soll)} kcal vom Tierarzt`
     : `${ca}kcal · ${zahl(gefuettert.gramm)} g Futter`;
   // Darunter „Mehr zur Fütterung“ (0.44.0): aufklappbar, nur mit mindestens einer Mahlzeit; die ca.-Zeile bleibt darunter.
+  // Seit 0.78.0 stehen dort auch die Leckerlis (vorher eigene Karte unter „Letzte Messung“), gleiche Basis wie die
+  // Leckerli-Warnung in warnungen().
   $("kcal-text").innerHTML =
     gefuettertHtml(gefuettert) +
-    gefuettertMehrHtml(gefuettertMehr({ mahlzeiten, futterNachId: futter, freigabe, tag, heute }));
+    gefuettertMehrHtml(
+      gefuettertMehr({ mahlzeiten, futterNachId: futter, freigabe, tag, heute }),
+      leckerliKachel({ tag, heute, kcal: summe.kcal, leckerli, freigabe, warnungAktiv: liste.some((w) => w.id === "leckerli") })
+    );
   $("summe-hinweis").hidden = !gefuettert.unsicher;
 
   // Mahlzeiten als Protokoll: Uhrzeit, Futter, Gramm und kcal. Antippen ändert, Kreuz löscht.
@@ -568,16 +573,6 @@ function zeichneHeute(vonNull = false) {
   $("heute-gewicht").innerHTML = messungHtml(messung);
 
   zeichneBesondereTage(tag, heute);
-
-  // Leckerli: gleiche Basis wie die Leckerli-Warnung in warnungen().
-  const lk = leckerliKachel({ tag, heute, kcal: summe.kcal, leckerli, freigabe, warnungAktiv: liste.some((w) => w.id === "leckerli") });
-  const anteilText =
-    lk.anteil === null ? (lk.amTagesende ? "wird am Tagesende bewertet" : "") : `${zahl(lk.anteil * 100)} % der Tages-kcal · Grenze 10 %`;
-  const breite = lk.anteil === null ? 0 : Math.min(100, (lk.anteil / GRENZEN.leckerliMax) * 100);
-  $("heute-leckerli").innerHTML = `<section class="karte leckerli-zeile" aria-label="Leckerli">
-      <div class="oben"><span class="label">Leckerli</span><span class="wert">${zahl(lk.kcal)} <small class="leise">kcal</small></span></div>
-      ${anteilText ? `<span class="leise">${anteilText}</span>` : ""}
-      ${lk.anteil === null ? "" : `<span class="balken sofort${lk.stufe === "achtung" ? " gefahr" : ""}"><i style="--w: ${breite.toFixed(1)}%"></i></span>`}</section>`;
 }
 
 // ---------- Besonderer Tag (0.33.0, .planning/besonderer-tag.md) ----------

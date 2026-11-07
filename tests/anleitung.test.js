@@ -10,7 +10,7 @@ const nurText = (html) => html.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").
 
 test("Eintrag unter „Wissen“ vor „Tipps“ (seit 0.63.0 an zweiter Stelle), öffnet die Seite", () => {
   const html = lies("index.html");
-  const wissen = html.slice(html.indexOf('<h3 class="gruppe-titel">Wissen</h3>'), html.indexOf('<h3 class="gruppe-titel">Einstellungen</h3>'));
+  const wissen = html.slice(html.indexOf('<h3 class="gruppe-titel">Wissen</h3>'), html.indexOf('<h3 class="gruppe-titel">Wiegen</h3>'));
   const erster = wissen.indexOf('data-aktion="anleitung-erklaerung"');
   assert.ok(erster >= 0);
   assert.ok(erster < wissen.indexOf('data-aktion="tipps-erklaerung"'));

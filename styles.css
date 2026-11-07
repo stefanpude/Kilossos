@@ -617,6 +617,10 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .gef-zeilen span:nth-child(3n + 2) { color: var(--text-leise); }
 .gef-zeilen b { font-weight: 600; }
 .gef-klein { margin: 0 0 4px; color: var(--text-leise); font-size: 0.875rem; }
+/* Leckerlis im Aufklappmenü (seit 0.78.0, vorher eigene Karte unter „Letzte Messung“) */
+.gef-leckerli { display: grid; gap: 6px; margin: 0 0 10px; padding-top: 10px; border-top: 1px solid var(--rand); font-size: 0.9375rem; }
+.gef-leckerli .oben { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.gef-leckerli .wert { font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .kcal-rest { margin: 0; font-size: 0.9375rem; }
 .kcal-rest b { font-family: var(--serif); font-weight: 600; }
 .ca-hinweis { margin: 0; color: var(--text-leise); font-size: 0.8125rem; }
@@ -686,9 +690,6 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .mess-urteil.langsam, .mess-urteil.zunahme { color: var(--warnung); }
 .mess-urteil.zu-schnell { color: var(--gefahr); }
 @keyframes zeichnen { to { stroke-dashoffset: 0; } }
-.leckerli-zeile { display: grid; gap: 6px; }
-.leckerli-zeile .oben { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.leckerli-zeile .wert { font-size: 1.125rem; }
 
 .notfall-hinweis {
   margin: 4px 0 0; padding: 2px 0 2px 12px; border-left: 3px solid var(--warnung);
