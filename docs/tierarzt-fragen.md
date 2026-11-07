@@ -1,7 +1,7 @@
 # Fragen für die Tierärztin
 
 Zum Ausdrucken oder am Handy mitnehmen. Ablauf und was wann zu erledigen ist:
-[tierarzt-termin-checkliste.md](tierarzt-termin-checkliste.md).
+eigene Checkliste (liegt nur lokal, nicht auf GitHub).
 
 - Kito, medizinisch: [tierarzt-fragen-kito.md](tierarzt-fragen-kito.md)
 - Zuki, medizinisch: [tierarzt-fragen-zuki.md](tierarzt-fragen-zuki.md)
