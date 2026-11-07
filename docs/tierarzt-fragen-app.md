@@ -14,10 +14,10 @@ Kurz mündlich im Termin, falls es passt:
 - [ ] Würden Sie sich die **Grenzwerte** der App ansehen? (Quellen: AAHA- und WSAVA-Leitlinien, Unterlage liegt bei.)
 - [ ] Die App rechnet „zu schnell“ (mehr als 2 % pro Woche) im **Mittel über zwei Wochen**, weil das Wiegen zu Hause
       schwankt. Ist das in Ordnung, oder soll sie schon nach **einer Woche** warnen, und ab wie viel (z. B. mehr als 3 %)?
-- [ ] **Zu wenig gefressen:** an einem Tag weniger als die Hälfte der freigegebenen Menge → „am selben Tag den Tierarzt
+- [ ] **Zu wenig gefressen:** an einem Tag weniger als die Hälfte der freigegebenen Menge → „am selben Tag in der Tierarztpraxis
       anrufen“; weniger als 90 % → „nicht dauerhaft unterschreiten“. Passen diese Grenzen?
-- [ ] **Notfall:** Die App sagt: „Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort zum
-      Tierarzt.“ Einen roten Hinweis zeigt sie bisher nur bei „Futter verweigert“. Geplant ist ein Kasten mit
+- [ ] **Notfall:** Die App sagt: „Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort in die
+      Tierarztpraxis.“ Einen roten Hinweis zeigt sie bisher nur bei „Futter verweigert“. Geplant ist ein Kasten mit
       Alarmzeichen (Erbrechen, Gelbfärbung, Teilnahmslosigkeit, Atemnot, kein Urin oder Pressen). Fehlt etwas?
 - [ ] **Leckerlis:** Die App warnt ab 10 % der Tageskalorien. Soll rohes Fleisch (z. B. Tatar) dazuzählen?
 - [ ] Die App fragt nach, wenn ein Zielgewicht mehr als 40 % unter dem Gewicht liegt („Zahlendreher?“). Bei einer sehr
