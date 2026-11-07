@@ -45,7 +45,7 @@ test("Regeln: Tierarzt legt Ziel und Menge fest, Notfallsatz im roten Kasten, ke
   assert.ok(text.includes("Zielgewicht und Tagesmenge legt dein Tierarzt fest"));
   assert.ok(text.includes("Mengen schlägt Kilossos nie selbst vor."));
   const kasten = seite.match(/<p class="notfall-hinweis">([\s\S]*?)<\/p>/)?.[1] ?? "";
-  assert.ok(nurText(kasten).includes("Frisst deine Katze einen Tag oder länger gar nicht, gehört sie sofort zum Tierarzt."));
+  assert.ok(nurText(kasten).includes("Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort zum Tierarzt."));
   assert.doesNotMatch(text, /\d+\s*(g|kcal)\b|\d+\s*%/);
   assert.doesNotMatch(text, /RER|Formel/);
   assert.doesNotMatch(text, /[—–]/);

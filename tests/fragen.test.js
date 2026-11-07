@@ -46,7 +46,7 @@ test("Jeder Verweis führt zu einer Seite, die es gibt", () => {
 
 test("Sicherheit: Notfallsatz wörtlich wie in der Anleitung, im roten Kasten", () => {
   const html = lies("index.html");
-  const satz = "Frisst deine Katze einen Tag oder länger gar nicht, gehört sie sofort zum Tierarzt.";
+  const satz = "Frisst deine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort zum Tierarzt.";
   assert.ok(nurText(blatt(html, "dialog-anleitung")).includes(satz));
   const kasten = blatt(html, "dialog-fragen").match(/<p class="notfall-hinweis">([\s\S]*?)<\/p>/)?.[1] ?? "";
   assert.ok(nurText(kasten).includes(satz));

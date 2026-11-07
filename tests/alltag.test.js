@@ -29,7 +29,7 @@ test("Seite: Überschrift mit Fokus, alle Abschnitte, Knopf „Verstanden“", (
 test("Sicherheit: Notfallsatz unverändert im roten Kasten, „ersetzt keinen Tierarzt“, keine Futtermengen", () => {
   const seite = blatt(lies("index.html"), "dialog-alltag");
   const kasten = seite.match(/<p class="notfall-hinweis">([\s\S]*?)<\/p>/)?.[1] ?? "";
-  assert.ok(nurText(kasten).includes("Frisst eine Katze einen Tag oder länger gar nicht, gehört sie sofort zum Tierarzt."));
+  assert.ok(nurText(kasten).includes("Frisst eine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort zum Tierarzt."));
   const text = nurText(seite);
   assert.ok(text.includes("ersetzen aber keinen Tierarzt"));
   assert.doesNotMatch(text, /\d+\s*(g|kcal)\b/);

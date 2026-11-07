@@ -291,7 +291,7 @@ test("0.45.0: erster Absatz „Über Kilossos“ mit neuem ersten Satz, Rest wö
   assert.doesNotMatch(lies("index.html"), /begleitet die Abnahme von Kito und anderen Katzen/);
   assert.match(
     ueber,
-    /<p class="leise"><strong>Ist deine Katze krank<\/strong> \(zum Beispiel Diabetes, Nieren-, Schilddrüsen- oder Lebererkrankung\) oder frisst sie\s+plötzlich schlecht, besprich jede Änderung am Futter vorher mit deinem Tierarzt\.\s+<strong>Frisst eine Katze einen Tag oder länger gar nicht, gehört sie sofort zum Tierarzt\.<\/strong><\/p>/,
+    /<p class="leise"><strong>Ist deine Katze krank<\/strong> \(zum Beispiel Diabetes, Nieren-, Schilddrüsen- oder Lebererkrankung\) oder frisst sie\s+plötzlich schlecht, besprich jede Änderung am Futter vorher mit deinem Tierarzt\.\s+<strong>Frisst eine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort zum Tierarzt\.<\/strong><\/p>/, // seit 0.77.1
   );
 });
 
