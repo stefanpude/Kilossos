@@ -663,3 +663,26 @@ Sorten, davon 24 Diätfutter, 78 mit EAN.**
 - Normales Light-Futter aus derselben Liste (Happy Cat Care Light, Eukanuba Sterilised Weight Control, IAMS Vitality Sterilisiert
   & Übergewichtig, Orijen Fit & Trim, Farmina N&D Quinoa Gewichtsmanagement, Royal Canin Ultra Light, Jarco Weight Reduction):
   Kandidaten für eine spätere Breiten-Runde, nicht für die Diät-Gruppe.
+
+# Geprüft und nicht als Quelle geeignet: Nährwert-Sammlungen und NfE-Rechner (Stand 08.11.2026)
+
+Anlass: Stefans zweite Linkliste zu Diätfutter (Beschreibungen vermutlich aus einer KI-Zusammenfassung, sie übertreiben
+deutlich). Ergebnis: **keine neue Sorte, kein neuer Wert, keine Änderung an der App.** Hier festgehalten, damit diese Seiten
+nicht noch einmal geprüft werden.
+
+| Seite | Was wirklich drin ist | Warum nicht |
+|---|---|---|
+| kretakatzen.de/Ernaehrung/Naehrwert2.htm | private Sammlung, „Stand Februar 2004“, „alle Angaben ohne Gewähr“; Tabellen nur als Bilder, Werte teils von zooplus und aus Lehrbüchern | 22 Jahre alt, Rezepturen haben sich geändert, keine Herstellerquelle |
+| catinfo.org/chart (PDF) | Tabelle von Lisa Pierson (DVM), Stand 2017, US-Markt, nur Nassfutter; Anteile an den Kalorien (Protein, Fett, Kohlenhydrate) und Phosphor je 100 kcal, kein kcal-Wert je 100 g | US-Rezepturen, veraltet; die enthaltenen Diätsorten (Hill's Metabolic, r/d, w/d, Purina OM) stehen schon mit deutschen Herstellerwerten in der Liste |
+| futter-rechner.de/nfe-rechner-hund-katze | Rechner ohne Sorten und ohne Quellen; nachgerechnet vermutlich mit 4/9/4 kcal je g | keine Daten; 4/9/4 ergibt für Katzenfutter zu viele kcal. Kretakatzen nennt die ältere Fassung fehlerhaft |
+| iknowmycat.com/de/tools/carbs | Rechner ohne Formel, Quellen und Sorten | keine Daten |
+| schlitzohr.de/blogs/ernaehrung/nfe-rechner-katze-hund | Shop-Blog mit Provisionslinks (Stand 06.01.2024), nur NfE-Werte einzelner Sorten, keine Analysewerte, keine kcal; als Spezialfutter nur Diabetesfutter (Kattovit Diabetes, Royal Canin Diabetic, Integra Protect Diabetes) | keine kcal; Diabetesfutter nehmen wir bewusst nicht als Abnehm-Diätfutter auf |
+| gewuschelt.de/ernaehrungsrechner-katzen | schon in Runde 9 abgelehnt; erneut geprüft: keine Markenfutter, nur Durchschnittswerte ohne Zahlen, FEDIAF ohne Fassung, „43“ bzw. „45“ Prüfwerte, gibt Futtermengen vor | keine Sorten; Mengenvorgabe widerspricht der Kilossos-Regel |
+
+**Was davon bleibt:**
+- Kilossos rechnet weiter nach NRC 2006 (`kcalAusBestandteilen` in `js/rechnen.js`: Bruttoenergie 5,7/9,4/4,1, Verdaulichkeit
+  nach Rohfaser in der Trockenmasse, minus 0,77 × Protein), nicht mit 4/9/4. Das ist für Katzenfutter genauer.
+- Der NfE (Kohlenhydrate als Rest aus den Analysewerten) fällt in dieser Rechnung schon an. Eine Anzeige „Kohlenhydrate in der
+  Trockenmasse“ wäre technisch einfach, gehört aber zur Karte „Zucker und Getreide“ auf der Ideen-Tafel (nach dem 13.11.,
+  mit der Antwort der Tierärztin). Beim Abnehmen zählen vor allem die kcal; Kohlenhydrate sind eher bei Diabetes wichtig.
+- Weitere Diätfutter kommen am ehesten über Fotos aus der Praxis (13.11.).
