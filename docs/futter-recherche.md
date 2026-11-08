@@ -500,3 +500,84 @@ Die Fressnapf-Suche findet keine Nummern. Die Analysewerte auf der zweiten Funds
   nennt andere Werte (41 % Protein, 14,5 % Fett) als die Liste (37 / 12 von rossmann.de). Erst mit Packungsfoto klären.
 - Catessy Häppchen in Gelee und Felix Party Mix: Die zooplus-Nummern gehören zu Mischpaketen.
 
+
+# Kilossos-Futterliste, siebte Runde: Leckerlis mit Stückgewicht (Stand 08.11.2026, Version 0.83.0)
+
+Auftrag von Stefan: In Leckerlis steckt das größte Risiko, viele Halter wissen nicht, wie energiereich sie sind. Deshalb
+nennt jetzt **jedes Leckerli im Hinweis, was ein Stück, ein Stick oder ein Beutel bringt** („1 Stück ≈ 0,5 g ≈ 2 kcal“),
+oder sagt ausdrücklich „Stückgewicht nicht angegeben“ (Test). Das Stückgewicht stammt aus der Packungsangabe
+(z. B. „6 Sticks à 6 g“), aus der Fütterungstabelle des Herstellers („13 g entspricht etwa 30 Stück“) oder ist aus
+„x kcal pro Stück“ und den kcal pro 100 g zurückgerechnet. Alle neuen Leckerlis tragen den Ergänzungsfutter-Satz.
+
+**32 neue Leckerlis, zusammen 163 Sorten** (Diätfutter 18, Nassfutter 64, Trockenfutter 39, Leckerlis 42). 9 neue Werte
+vom Hersteller, 23 geschätzt. Quellen: zooplus.de (Produktseiten mit Analysewerten und Fütterungsempfehlung), whiskas.de.
+**Bei Abweichung gilt die Packung.**
+
+**EANs:** 5 neue Nummern, je von whiskas.de und der zooplus-Suche nach der Nummer bestätigt: Whiskas Knuspertaschen
+Anti-Hairball 5998749146583 (50 g), Relax & Unwind 5998749145616 (45 g), Dentabites 5998749146590 (40 g), Crunch
+5998749146637 (100 g), Sticks Huhn 4008429048432 (6 × 6 g). **Jetzt 74 von 163 mit EAN.**
+
+| Sorte | kcal/100 g | Status | NRC | Was ein Stück bringt |
+|---|---|---|---|---|
+| **Knuspersnacks** | | | | |
+| Dreamies Shake Ups Multivitamins | 414 | Hersteller | 412,1 | 1 Stück ≈ 0,5 g ≈ 2 kcal |
+| Whiskas Knuspertaschen Anti-Hairball | 411 | Hersteller | 409,7 | nicht angegeben |
+| Whiskas Snacks Relax & Unwind, Pounce & Play, Groom & Care | 407 | Hersteller | 405,3 | unter 5 kcal, ≈ 1,2 g |
+| Whiskas Dentabites | 325 | Hersteller | 328,7 | unter 2 kcal, ≈ 0,6 g |
+| Whiskas Crunch | 358 | Hersteller | 353,9 | nicht angegeben |
+| Felix Tasty Nuggets Huhn & Ente | 403 | geschätzt | 402,7 | 13 g ≈ 30 Stück: 0,4 g ≈ 1,7 kcal |
+| Purina Dentalife Katze | 368 | geschätzt | 367,7 | nicht angegeben |
+| GimCat Nutri Pockets | 412 | geschätzt | 411,9 | 2 kcal (Händlerseite), ≈ 0,5 g |
+| GimCat Crunchy Snacks | 376 | geschätzt | 376,1 | nicht angegeben |
+| GimCat Käse Rollis | 376 | geschätzt | 376,0 | nicht angegeben |
+| Vitakraft Crispy Crunch mit Geflügel | 405 | geschätzt | 405,2 | nicht angegeben |
+| animonda Milkies Knuspertaschen | 413 | geschätzt | 413,3 | 1,5 kcal (Händlerseite), ≈ 0,4 g |
+| Catessy Knuspersnacks (zooplus) | 407 | geschätzt | 407,0 | nicht angegeben |
+| Trixie Denta Fun Dentinos | 373 | geschätzt | 372,8 | nicht angegeben |
+| **Sticks und weiche Happen** | | | | |
+| Dreamies Meaty Sticks | 350 | Hersteller | 349,9 | 1 Stick = 5 g ≈ 17,5 kcal |
+| Whiskas Sticks Huhn | 355 | Hersteller | 348,1 | 1 Stick = 6 g ≈ 21 kcal |
+| Catessy Sticks (zooplus) | 329 | geschätzt | 328,7 | 1 Stick = 5 g ≈ 16 kcal |
+| GimCat Sticks | 367 | geschätzt | 367,3 | nicht angegeben |
+| animonda Carny Adult Meaty Strips | 364 | geschätzt | 364,3 | 4 g ≈ 10 Stück: 0,4 g ≈ 1,5 kcal |
+| Miamor Kissies | 328 | geschätzt | 327,5 | nicht angegeben |
+| Miamor Gnabries Knabbersticks | 350 | geschätzt | 350,0 | nicht angegeben |
+| Vitakraft Cat Yums | 264 | geschätzt | 264,2 | nicht angegeben |
+| Vitakraft Choupette | 299 | geschätzt | 299,2 | nicht angegeben |
+| Trixie Premio Chicken Filet Bites | 290 | geschätzt | 289,6 | nicht angegeben |
+| **Cremige Snacks, Drinks, Tube** | | | | |
+| Sheba Creamy Snacks mit Käse | 98 | Hersteller | 97,8 | 12-g-Beutel ≈ 11,8 kcal |
+| Felix Deli Moments | 57,1 | Hersteller | 57,1 | 10-g-Beutel ≈ 5,7 kcal |
+| Gourmet Nature's Creations Snack | 56 | geschätzt | 56,1 | 10-g-Beutel ≈ 5,6 kcal |
+| Miamor Cat Cream Geflügel-Cream | 57 | geschätzt | 56,9 | 16-g-Beutel ≈ 9 kcal |
+| Vitakraft Jelly Lovers Huhn & Pute | 71 | geschätzt | 71,0 | 15-g-Beutel ≈ 10,7 kcal |
+| GimCat Yoghurt | 74 | geschätzt | 74,2 | 15 g (2 bis 3 Teelöffel) ≈ 11 kcal |
+| Vitakraft Katzen-Drink mit Huhn | 31 | geschätzt | 30,7 | 30-g-Beutel ≈ 9 kcal |
+| Trixie Premio Leberwurst (Tube) | 285 | geschätzt | 284,7 | 1 g ≈ 2,9 kcal |
+
+**Bestehende Leckerlis ergänzt:** Dreamies (1 Stück ≈ 0,5 g ≈ 2 kcal), Whiskas Knuspertaschen und Catisfactions (unter
+2 kcal, ≈ 0,5 g), Felix Crispies (13 g ≈ 65 Stück: 0,2 g ≈ 0,8 kcal), Felix Party Mix heißt jetzt „Felix Party Mix
+(KnabberMix)“ (so heißt er bei zooplus; 13 g ≈ 35 Stück: 0,4 g ≈ 1,5 kcal), Vitakraft Cat Stick (1 Stick = 6 g ≈ 20 kcal,
+gleiche Werte mit Lachs), dm Knabbertaschen (Stückgewicht nicht angegeben). Namensänderung ohne Migration: übernommene
+Kopien behalten ihren Namen.
+
+**Nicht aufgenommen:**
+- Malzpasten und Vitaminpasten aus der Tube (GimCat Malt-Soft, Multi-Vitamin, Cheese, Duo-Pasten; Trixie Katzenmalz,
+  Malt'n'Cheese, Multi-Vitamin-Paste): 34 bis 39 % Fett, nachgerechnet 468 bis 492 kcal/100 g, über der Leckerli-Grenze
+  von 450 (`KCAL_GRENZEN.leckerli`). Gerade diese Pasten sind sehr energiereich (6 cm ≈ 3 g ≈ 14 kcal am Tag).
+  Grenze anheben erst nach dem 13.11. (Ideen-Tafel).
+- Miamor Cat Snack Malt-Cream: zooplus nennt 57 kcal, die Nachrechnung ergibt 39 (31 % daneben). Erst mit Packungsfoto.
+- Gefriergetrocknete Snacks (Miamor Crispy Sensible, Trixie gefriergetrocknet): 73 bis 84 % Protein ohne Feuchte, mit der
+  Annahme von 8 % Feuchte ergäben sich negative Kohlenhydrate. Ohne Feuchte von der Packung nicht sinnvoll zu rechnen.
+- Sorten mit gleichen Werten wie schon vorhandene (Dreamies Mix und andere Geschmacksrichtungen, Vitakraft Liquid-Snacks
+  mit Lachs oder Hähnchen, Whiskas Milch-Kätzchen und Vitamin E-Xtra, Felix KnabberMix): im Hinweis der vorhandenen Sorte
+  genannt oder ohne neuen Nutzen.
+- Drogerie-Snacks von Rossmann (Winston) und weitere dm-Snacks: Die Suche bei rossmann.de liefert ohne Skript nichts, deshalb
+  in einer späteren Runde.
+
+**Was auffällt:**
+- Ein Stick (Dreamies Meaty Sticks 17,5 kcal, Whiskas Sticks 21 kcal, Vitakraft Cat Stick 20 kcal) bringt so viel wie 9 bis
+  10 Dreamies. Für eine Katze mit 200 kcal am Tag ist ein Stick schon die ganze Leckerli-Grenze von 10 %.
+- Die Empfehlungen der Hersteller liegen oft über der 10-%-Grenze: 17 Dentabites ≈ 34 kcal, 20 Nutri Pockets ≈ 40 kcal,
+  22 Shake Ups ≈ 44 kcal. Bei 200 kcal am Tag sind nur 20 kcal Leckerli vorgesehen.
+- Cremige Snacks sind pro Beutel klein (5 bis 12 kcal), die Käse-Sorte von Sheba hat aber fast doppelt so viel wie die anderen.

@@ -260,9 +260,9 @@ test("0.37.0: liegt ein gemessener Energiewert unter dem Packungswert, steht er 
 
 // ---------- 0.80.0: fünfte Runde, Breite (docs/futter-recherche.md) ----------
 
-test("0.80.0 und 0.81.0: Runde 5 bringt 39 Sorten, Runde 6 weitere 34, zusammen 131", () => {
-  assert.equal(FUTTERLISTE.length, 131);
-  assert.equal(FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-08").length, 39 + 34);
+test("0.80.0 bis 0.83.0: Runde 5 bringt 39 Sorten, Runde 6 weitere 34, Runde 7 (Leckerlis) 32, zusammen 163", () => {
+  assert.equal(FUTTERLISTE.length, 163);
+  assert.equal(FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-08").length, 39 + 34 + 32);
 });
 
 test("0.81.0: Runde 6 mit Herstellerwerten (Josera, Bozita in kJ, Royal Canin, Kitekat in Gelee)", () => {
@@ -379,7 +379,7 @@ test("0.82.0: 18 neue Nummern, jede von zwei Firmen bestätigt, gehören zur ric
     assert.match(e.eanQuelle, /, /, `${id}: zwei Firmen`);
     assert.ok(e.eanHinweis, id);
   }
-  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 51 + 18);
+  // Gesamtzahl seit 0.83.0 im Test „der Scanner findet die neuen Whiskas-Nummern“ (69 + 5).
 });
 
 test("0.82.0: Werte vom Hersteller statt veralteter Händlerangaben", () => {
@@ -392,4 +392,72 @@ test("0.82.0: Werte vom Hersteller statt veralteter Händlerangaben", () => {
   assert.equal(e("happy-cat-minkas-sterilised-trocken").kcalPro100g, 347);
   assert.deepEqual(e("happy-cat-minkas-perfect-mix-trocken").analyse, { protein: 30, fett: 12, asche: 7, faser: 3, feuchte: null });
   assert.equal(e("happy-cat-minkas-perfect-mix-trocken").kcalPro100g, 368);
+});
+
+// ---------- 0.83.0: siebte Runde, Leckerlis mit Stückgewicht (docs/futter-recherche.md) ----------
+
+test("0.83.0: 42 Leckerlis, jedes sagt, was ein Stück oder ein Beutel bringt, oder dass das Stückgewicht fehlt", () => {
+  const leckerlis = FUTTERLISTE.filter((e) => e.typ === "leckerli");
+  assert.equal(leckerlis.length, 10 + 32);
+  for (const e of leckerlis) {
+    assert.match(e.hinweis, /≈ [\d,]+ kcal|Stückgewicht nicht angegeben/, e.id);
+  }
+});
+
+test("0.83.0: jedes neue Leckerli sagt, dass es nur zusätzlich zu einem Alleinfutter gehört", () => {
+  const neu = FUTTERLISTE.filter((e) => e.typ === "leckerli" && FUTTERLISTE.indexOf(e) > FUTTERLISTE.findIndex((x) => x.id === "dm-dein-bestes-dental-knabbertaschen"));
+  assert.equal(neu.length, 32);
+  for (const e of neu) assert.match(e.hinweis, /Ergänzungsfuttermittel, kein Alleinfutter/, e.id);
+});
+
+test("0.83.0: Stück-Angaben passen zu den kcal pro 100 g (von Hand nachgerechnet)", () => {
+  const e = (id) => FUTTERLISTE.find((x) => x.id === id);
+  // Stückgewicht × kcal pro 100 g / 100
+  assert.equal(Math.round(5 * e("dreamies-meaty-sticks").kcalPro100g) / 100, 17.5);
+  assert.equal(Math.round(6 * e("whiskas-sticks-huhn").kcalPro100g / 100), 21);
+  assert.equal(Math.round(5 * e("catessy-sticks").kcalPro100g / 100), 16);
+  assert.equal(Math.round(12 * e("sheba-creamy-snacks-kaese").kcalPro100g / 10) / 10, 11.8);
+  assert.equal(Math.round(30 * e("vitakraft-katzen-drink").kcalPro100g / 100), 9);
+  assert.match(e("dreamies-meaty-sticks").hinweis, /1 Stick = 5 g ≈ 17,5 kcal/);
+  assert.match(e("whiskas-sticks-huhn").hinweis, /1 Stick = 6 g ≈ 21 kcal/);
+});
+
+test("0.83.0: Herstellerwerte der neuen Leckerlis", () => {
+  const kcal = (id) => FUTTERLISTE.find((e) => e.id === id)?.kcalPro100g;
+  assert.equal(kcal("dreamies-shake-ups-multivitamins"), 414);
+  assert.equal(kcal("dreamies-meaty-sticks"), 350);
+  assert.equal(kcal("whiskas-sticks-huhn"), 355);
+  assert.equal(kcal("whiskas-dentabites"), 325);
+  assert.equal(kcal("whiskas-crunch"), 358);
+  assert.equal(kcal("whiskas-snacks-relax-pounce-groom"), 407);
+  assert.equal(kcal("whiskas-knuspertaschen-anti-hairball"), 411);
+  assert.equal(kcal("sheba-creamy-snacks-kaese"), 98);
+  assert.equal(kcal("felix-deli-moments"), 57.1);
+});
+
+test("0.83.0: der Scanner findet die neuen Whiskas-Nummern (whiskas.de und zooplus.de)", () => {
+  const neu = {
+    "5998749146583": "whiskas-knuspertaschen-anti-hairball",
+    "5998749145616": "whiskas-snacks-relax-pounce-groom",
+    "5998749146590": "whiskas-dentabites",
+    "5998749146637": "whiskas-crunch",
+    "4008429048432": "whiskas-sticks-huhn",
+  };
+  for (const [ean, id] of Object.entries(neu)) {
+    assert.equal(findeNachEan(ean, []).eintrag.id, id, ean);
+    assert.match(FUTTERLISTE.find((e) => e.id === id).eanQuelle, /whiskas\.de, zooplus\.de/, id);
+  }
+  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 69 + 5);
+});
+
+test("0.83.0: Suche findet den Felix Party Mix auch als KnabberMix, Leckerli-Gruppe zeigt alle 42", () => {
+  assert.deepEqual(sucheFutter("knabbermix").map((e) => e.id), ["felix-party-mix"]);
+  const gruppe = listenGruppen(FUTTERLISTE).find((g) => g.id === "liste-leckerli");
+  assert.equal(gruppe.eintraege.length, 42);
+});
+
+test("0.83.0: keine Paste über der Leckerli-Grenze in der Liste (GimCat- und Trixie-Malzpasten bleiben draußen)", () => {
+  for (const e of FUTTERLISTE.filter((x) => x.typ === "leckerli")) assert.ok(e.kcalPro100g <= 450, e.id);
+  assert.equal(sucheFutter("malt-soft").length, 0);
+  assert.equal(sucheFutter("katzenmalz").length, 0);
 });
