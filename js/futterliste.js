@@ -18,6 +18,7 @@ const ABGERUFEN_5 = "2026-11-08";
 const ABGERUFEN_6 = "2026-11-08"; // Runde 6, gleicher Tag wie Runde 5
 const ABGERUFEN_7 = "2026-11-08"; // Runde 7 (Leckerlis), gleicher Tag
 const ABGERUFEN_8 = "2026-11-08"; // Runde 8 (Nass- und Hauptfutter), gleicher Tag
+const ABGERUFEN_9 = "2026-11-08"; // Runde 9 (Diätfutter aus der Medpets-Liste „Übergewicht“), gleicher Tag
 const ERGAENZUNG ="Ergänzungsfuttermittel, kein Alleinfutter: nur zusätzlich zu einem Alleinfutter füttern.";
 const ZOOPLUS_SNACKS = "https://www.zooplus.de/shop/katzen/katzensnacks/";
 
@@ -313,6 +314,94 @@ export const FUTTERLISTE = [
     url: "https://www.fressnapf.de/p/select-gold-medica-trockenfutter-katze-adult-reduktiondiabetes-300-g-1458681/",
     abgerufen: ABGERUFEN_5,
     hinweis: "Diätfuttermittel von Fressnapf, deklariert zur Verringerung von Übergewicht und bei Diabetes. Sehr viel Rohfaser.",
+  },
+  // Runde 9 (0.86.0): Diätfutter aus der Liste „Übergewicht“ von medpets.de, Regeln wie Runde 4 (docs/futter-recherche.md)
+  {
+    id: "hills-metabolic-stew-nass",
+    name: "Hill's Prescription Diet Metabolic Stew (Ragout) mit Huhn & Gemüse (Dose)",
+    typ: "nass",
+    diaet: true,
+    kcalPro100g: 78.6,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 8.3, fett: 2.8, asche: 1.4, faser: 2, feuchte: 78.2 },
+    quelle: "medpets.de (Deklaration: 786 kcal/kg)",
+    url: "https://www.medpets.de/hills-metabolic-stew-verschreibungspflichtige-diaet-feline",
+    abgerufen: ABGERUFEN_9,
+    hinweis: "82-g-Dose = 64,5 kcal. Auf hillspet.de nicht aufgeführt, in Deutschland bisher nur bei medpets.de gefunden.",
+  },
+  {
+    id: "hills-metabolic-mousse-nass",
+    name: "Hill's Prescription Diet Metabolic Mousse (nass)",
+    typ: "nass",
+    diaet: true,
+    kcalPro100g: 79.2,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 8.6, fett: 3, asche: 1.4, faser: 2.4, feuchte: 78 },
+    quelle: "medpets.de (Deklaration: 792 kcal/kg)",
+    url: "https://www.medpets.de/hills-metabolic-weight-management-prescription-diet-katze-mousse",
+    abgerufen: ABGERUFEN_9,
+    hinweis: "Auf hillspet.de nicht aufgeführt, in Deutschland bisher nur bei medpets.de gefunden.",
+  },
+  {
+    id: "hills-metabolic-mobility-nass",
+    name: "Hill's Prescription Diet Metabolic + Mobility mit Huhn (Beutel)",
+    typ: "nass",
+    diaet: true,
+    kcalPro100g: 68.8,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 7.6, fett: 2.9, asche: 1.3, faser: 2.1, feuchte: 81 },
+    quelle: "hillspet.de, gleiche Werte auf medpets.de",
+    url: "https://www.hillspet.de/cat-food/prescription-diet-weight-management-pouch",
+    abgerufen: ABGERUFEN_9,
+    hinweis:
+      "85-g-Beutel = 58,5 kcal. Deklariert zur Verringerung von Übergewicht und für die Gelenke bei Arthrose. hillspet.de nennt die Rohfaser einmal mit 2,1 und einmal mit 2,2 %.",
+  },
+  {
+    id: "brit-veterinary-obesity-trocken",
+    name: "Brit Veterinary Diet Cat Obesity, getreidefrei (trocken)",
+    typ: "trocken",
+    diaet: true,
+    kcalPro100g: 348,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 43, fett: 10, asche: 7, faser: 6, feuchte: 10 },
+    ean: ["8595602528479"],
+    quelle: "medpets.de, gleiche Werte auf zooplus.de (Deklaration: 3480 kcal/kg)",
+    eanQuelle: "medpets.de, zooplus.de",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_trockenfutter/ohne_huhn/9980181119",
+    abgerufen: ABGERUFEN_9,
+    hinweis: "Diät-Alleinfuttermittel zur Verringerung von Übergewicht. In Deutschland vertrieben von ALLCO (Thedinghausen).",
+    eanHinweis: "Die Nummer gehört zur 2-kg-Packung.",
+  },
+  {
+    id: "affinity-advance-weight-balance-trocken",
+    name: "Affinity Advance Veterinary Diets Weight Balance (trocken)",
+    typ: "trocken",
+    diaet: true,
+    kcalPro100g: 340.8,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 40, fett: 9, asche: 7, faser: 10, feuchte: null },
+    ean: ["8410650239132"],
+    quelle: "medpets.de (Deklaration: 3408 kcal/kg, berechnet), gleiche Analysewerte auf zooplus.de",
+    eanQuelle: "medpets.de, zooplus.de",
+    url: "https://www.zooplus.de/shop/katzen/katzenfutter_trockenfutter/affinity_advance_veterinary_diets/389064",
+    abgerufen: ABGERUFEN_9,
+    hinweis:
+      "Deklariert zur Verringerung von Übergewicht und bei Hyperlipidämie. Der Hersteller nennt zusätzlich einen gemessenen Wert von 350 kcal/100 g.",
+    eanHinweis: "Die Nummer gehört zur 1,5-kg-Packung.",
+  },
+  {
+    id: "prins-vitalcare-weight-reduction-diabetic-trocken",
+    name: "Prins VitalCare Veterinary Diet Weight Reduction & Diabetic (trocken)",
+    typ: "trocken",
+    diaet: true,
+    kcalPro100g: 354,
+    kcalQuelle: "hersteller",
+    analyse: { protein: 34, fett: 12, asche: 6.5, faser: 12, feuchte: 8 },
+    quelle: "medpets.de (Deklaration: 3540 kcal/kg)",
+    url: "https://www.medpets.de/prins-vitalcare-weight-reduction-diabetic",
+    abgerufen: ABGERUFEN_9,
+    hinweis:
+      "Niederländische Marke, in Deutschland bisher nur bei medpets.de gefunden. Zum Abnehmen und bei Diabetes, laut Händler zunächst höchstens 6 Monate.",
   },
   // ---------- Light-Futter aus dem Handel ----------
   {

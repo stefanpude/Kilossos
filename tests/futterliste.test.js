@@ -107,6 +107,9 @@ test("Suche findet Einträge über mehrere Wörter, ohne auf Groß-/Kleinschreib
       "hills-metabolic-mobility-trocken",
       "hills-cd-stress-metabolic-trocken",
       "hills-cd-stress-metabolic-nass",
+      "hills-metabolic-stew-nass", // seit 0.86.0
+      "hills-metabolic-mousse-nass", // seit 0.86.0
+      "hills-metabolic-mobility-nass", // seit 0.86.0
     ]
   );
   assert.deepEqual(
@@ -260,9 +263,9 @@ test("0.37.0: liegt ein gemessener Energiewert unter dem Packungswert, steht er 
 
 // ---------- 0.80.0: fünfte Runde, Breite (docs/futter-recherche.md) ----------
 
-test("0.80.0 bis 0.84.0: Runde 5 bringt 39 Sorten, Runde 6 34, Runde 7 (Leckerlis) 32, Runde 8 (Nass und Haupt) 12, zusammen 175", () => {
-  assert.equal(FUTTERLISTE.length, 175);
-  assert.equal(FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-08").length, 39 + 34 + 32 + 12);
+test("0.80.0 bis 0.86.0: Runde 5 bringt 39 Sorten, Runde 6 34, Runde 7 (Leckerlis) 32, Runde 8 (Nass und Haupt) 12, Runde 9 (Diät) 6, zusammen 181", () => {
+  assert.equal(FUTTERLISTE.length, 181);
+  assert.equal(FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-08").length, 39 + 34 + 32 + 12 + 6);
 });
 
 test("0.81.0: Runde 6 mit Herstellerwerten (Josera, Bozita in kJ, Royal Canin, Kitekat in Gelee)", () => {
@@ -464,10 +467,10 @@ test("0.83.0: keine Paste über der Leckerli-Grenze in der Liste (GimCat- und Tr
 
 // ---------- 0.84.0: achte Runde, Nass- und Hauptfutter (docs/futter-recherche.md) ----------
 
-test("0.84.0: Runde 8 bringt 5 Trockenfutter und 7 Nassfutter, die Gruppen zählen 18/71/44/42", () => {
+test("0.84.0 und 0.86.0: Runde 8 bringt 5 Trockenfutter und 7 Nassfutter, Runde 9 sechs Diätfutter, die Gruppen zählen 24/71/44/42", () => {
   assert.deepEqual(
     listenGruppen(FUTTERLISTE).map((g) => g.eintraege.length),
-    [18, 64 + 7, 39 + 5, 42]
+    [18 + 6, 64 + 7, 39 + 5, 42]
   );
 });
 
@@ -491,5 +494,69 @@ test("0.84.0: zwei neue Nummern, je von Fressnapf und zooplus bestätigt", () =>
   for (const ean of ["9003579309544", "9003579308738", "4002633758132", "4250839505641", "7613036730358", "7613033057991"]) {
     assert.equal(findeNachEan(ean, []), null, ean);
   }
-  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 69 + 5 + 2);
+  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 69 + 5 + 2 + 2); // + 2 aus Runde 9 (0.86.0)
+});
+
+// ---------- 0.86.0: neunte Runde, Diätfutter aus der Medpets-Liste „Übergewicht“ (docs/futter-recherche.md) ----------
+
+const RUNDE_9 = {
+  "hills-metabolic-stew-nass": 78.6, // 786 kcal/kg, medpets.de
+  "hills-metabolic-mousse-nass": 79.2, // 792 kcal/kg, medpets.de
+  "hills-metabolic-mobility-nass": 68.8, // 688 kcal/kg, hillspet.de
+  "brit-veterinary-obesity-trocken": 348, // 3480 kcal/kg, medpets.de und zooplus.de
+  "affinity-advance-weight-balance-trocken": 340.8, // 3408 kcal/kg berechnet, medpets.de
+  "prins-vitalcare-weight-reduction-diabetic-trocken": 354, // 3540 kcal/kg, medpets.de
+};
+
+test("0.86.0: Runde 9 bringt sechs Diätfutter, alle mit Herstellerwert", () => {
+  for (const [id, kcal] of Object.entries(RUNDE_9)) {
+    const e = FUTTERLISTE.find((x) => x.id === id);
+    assert.ok(e, id);
+    assert.equal(e.diaet, true, id);
+    assert.equal(e.kcalQuelle, "hersteller", id);
+    assert.equal(e.kcalPro100g, kcal, id);
+    assert.equal(e.abgerufen, "2026-11-08", id);
+  }
+});
+
+test("0.86.0: Nachrechnung der neuen Diätfutter von Hand (NRC 2006, kcalAusBestandteilen)", () => {
+  const nr = (id) => Math.round(nachrechnung(FUTTERLISTE.find((e) => e.id === id)) * 10) / 10;
+  assert.equal(nr("hills-metabolic-stew-nass"), 82.8);
+  assert.equal(nr("hills-metabolic-mousse-nass"), 82.7);
+  assert.equal(nr("hills-metabolic-mobility-nass"), 72.4);
+  assert.equal(nr("brit-veterinary-obesity-trocken"), 346);
+  assert.equal(nr("affinity-advance-weight-balance-trocken"), 329.7);
+  assert.equal(nr("prins-vitalcare-weight-reduction-diabetic-trocken"), 331.9);
+});
+
+test("0.86.0: zwei neue Nummern, je von medpets.de und zooplus.de bestätigt", () => {
+  assert.equal(findeNachEan("8595602528479", []).eintrag.id, "brit-veterinary-obesity-trocken");
+  assert.equal(findeNachEan("8410650239132", []).eintrag.id, "affinity-advance-weight-balance-trocken");
+  for (const id of ["brit-veterinary-obesity-trocken", "affinity-advance-weight-balance-trocken"]) {
+    assert.equal(FUTTERLISTE.find((e) => e.id === id).eanQuelle, "medpets.de, zooplus.de", id);
+  }
+  // Nummern nur bei einer Firma (Hill's Stew, Mousse, Metabolic + Mobility Beutel, Prins) bleiben draußen.
+  for (const ean of ["0052742021638", "0052742087405", "0052742085586", "8713595740078"]) {
+    assert.equal(findeNachEan(ean, []), null, ean);
+  }
+});
+
+test("0.86.0: Suche findet die neuen Diätfutter über ein Wort", () => {
+  assert.equal(sucheFutter("stew")[0]?.id, "hills-metabolic-stew-nass");
+  assert.equal(sucheFutter("metabolic ragout")[0]?.id, "hills-metabolic-stew-nass");
+  assert.equal(sucheFutter("mousse")[0]?.id, "hills-metabolic-mousse-nass");
+  assert.equal(sucheFutter("brit obesity")[0]?.id, "brit-veterinary-obesity-trocken");
+  assert.equal(sucheFutter("affinity")[0]?.id, "affinity-advance-weight-balance-trocken");
+  assert.equal(sucheFutter("prins")[0]?.id, "prins-vitalcare-weight-reduction-diabetic-trocken");
+});
+
+test("0.86.0: Hinweise nennen Messwert (Affinity) und Beutel-kcal (Hill's), Brit-Dose und Trovet bleiben draußen", () => {
+  const hinweis = (id) => FUTTERLISTE.find((e) => e.id === id).hinweis;
+  assert.match(hinweis("affinity-advance-weight-balance-trocken"), /350 kcal/);
+  assert.match(hinweis("hills-metabolic-mobility-nass"), /58,5 kcal/);
+  assert.match(hinweis("hills-metabolic-stew-nass"), /64,5 kcal/);
+  assert.equal(Math.round(78.6 * 0.82 * 10) / 10, 64.5);
+  assert.equal(sucheFutter("trovet").length, 0);
+  assert.equal(sucheFutter("brit dose").length, 0);
+  assert.equal(sucheFutter("sanimed").length, 0);
 });

@@ -619,3 +619,47 @@ Hersteller (8710255150109, 8710255150130) und zooplus (8710255126029, 8710255125
   von fressnapf.de (Stand 08.11. vormittags), die Huhn-Seite zeigte nachmittags nur noch den kcal-Wert.
 
 **Nicht aufgenommen:** Animonda Rafiné (bei Fressnapf und zooplus nicht gefunden).
+
+# Kilossos-Futterliste, neunte Runde: Diätfutter aus der Medpets-Liste (Stand 08.11.2026, Version 0.86.0)
+
+Anlass: Stefans Karte auf der Ideen-Tafel „links für diätfutter prüfen“ (vier Links). Davon brauchbar war nur
+medpets.de/katzen/uebergewicht (Online-Tierapotheke, liefert nach Deutschland, 4 Seiten mit etwa 70 Produkten). Die anderen
+drei: vetkriter.com (Ratgeber mit Provisionslinks, 30 normale Nassfutter, kein Diätfutter, keine kcal), gewuschelt.de (Rechner,
+der Futtermengen vorgibt, ohne Quellen und ohne Sorten), catfood.mariaelia.de (Rechner auf derselben Grundlage wie Kilossos,
+RER 70 × kg^0,75, NRC, WSAVA, ohne Futterdaten).
+
+Regeln wie Runde 4: Bei Diätfutter nur ein kcal-Wert vom Hersteller (Herstellerseite oder Händlerseite mit der Deklaration),
+Nachrechnung nach NRC 2006 höchstens 10 % daneben, EAN nur mit zwei verschiedenen Firmen. **6 neue Diätsorten, zusammen 181
+Sorten, davon 24 Diätfutter, 78 mit EAN.**
+
+| Sorte | Art | kcal/100 g | NRC-Nachrechnung | EAN | Quelle |
+|---|---|---|---|---|---|
+| Hill's PD Metabolic Stew (Ragout) mit Huhn & Gemüse (82-g-Dose) | nass | 78,6 | 82,8 | – (nur medpets) | medpets.de (786 kcal/kg) |
+| Hill's PD Metabolic Mousse | nass | 79,2 | 82,7 | – (nur medpets) | medpets.de (792 kcal/kg) |
+| Hill's PD Metabolic + Mobility mit Huhn (85-g-Beutel) | nass | 68,8 | 72,4 | – (nur medpets) | hillspet.de (688 kcal/kg, 58,5 kcal/Beutel) |
+| Brit Veterinary Diet Cat Obesity, getreidefrei | trocken | 348 | 346,0 | 8595602528479 (2 kg) | medpets.de und zooplus.de (3480 kcal/kg) |
+| Affinity Advance Veterinary Diets Weight Balance | trocken | 340,8 | 329,7 | 8410650239132 (1,5 kg) | medpets.de (3408 kcal/kg berechnet, 3500 gemessen); Analysewerte gleich auf zooplus.de |
+| Prins VitalCare Veterinary Diet Weight Reduction & Diabetic | trocken | 354 | 331,9 | – (nur medpets) | medpets.de (3540 kcal/kg) |
+
+**Was auffällt:**
+- Hill's Metabolic Stew und Mousse stehen nicht auf hillspet.de und bei keinem anderen deutschen Händler, den ich gefunden habe
+  (zooplus.de hat nur das Hunde-Ragout 354 g). Die Mousse war in Runde 4 deshalb abgelehnt; jetzt gibt es mit medpets.de einen
+  Händler mit Deklaration. Für den Stew nennen britische und Schweizer Händler laut Websuche dieselben 786 kcal/kg
+  (ipet.ch selbst lieferte 403).
+- Affinity nennt neben dem berechneten Wert einen höheren gemessenen (350). In der Liste steht der berechnete Packungswert,
+  der Messwert im Hinweis (Regel aus Runde 4 sinngemäß).
+- Brit und Affinity: zooplus.de nennt weitere Nummern (Brit 8595602549849, Affinity 8410650239385 und …239163), die medpets
+  nicht hat. Sie bleiben draußen, bis eine zweite Firma sie bestätigt.
+
+**Nicht aufgenommen:**
+- Brit Veterinary Diet Cat Obesity (Dose, 8595602549900): deklariert 107 kcal/100 g, Nachrechnung 94,4 (13 % daneben).
+- Trovet WRD Katze: wieder widersprüchlich. medpets: Asche 7 %, Rohfaser 4,5 %, 3254 kcal/kg (Nachrechnung 349, 7 % darüber);
+  ein anderer Händler nennt Asche 4,5 %. Bleibt draußen bis zum Packungsfoto.
+- SANIMED Weight Reduction (trocken und Beutel): Die medpets-Seiten mischen Trocken- und Nasswerte (Trockenwerte 35/8/5,2/15/8
+  mit „804 kcal/kg“, das zum Beutel gehört). Für den Beutel fehlt die Rohasche, für das Trockenfutter der kcal-Wert.
+- Specific FRD/FRW: auch medpets nennt keine Analysewerte. Weiter nur über ein Packungsfoto.
+- Nicht zum Abnehmen deklariert und deshalb kein Kandidat: Hill's m/d, Purina DM, Calibra Diabetes, VetLife Diabetic, Brit
+  Diabetes, Royal Canin Diabetic, Royal Canin Urinary S/O Moderate Calorie, Royal Canin VCN Neutered (Erhaltungsfutter).
+- Normales Light-Futter aus derselben Liste (Happy Cat Care Light, Eukanuba Sterilised Weight Control, IAMS Vitality Sterilisiert
+  & Übergewichtig, Orijen Fit & Trim, Farmina N&D Quinoa Gewichtsmanagement, Royal Canin Ultra Light, Jarco Weight Reduction):
+  Kandidaten für eine spätere Breiten-Runde, nicht für die Diät-Gruppe.
