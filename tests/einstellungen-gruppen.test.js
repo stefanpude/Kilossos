@@ -16,17 +16,9 @@ const gruppe = (name) => {
   return mehr.slice(a, b < 0 ? undefined : b);
 };
 
-test("0.78.0: Reihenfolge der Gruppen unter „Mehr“, keine Gruppe „Einstellungen“ mehr", () => {
-  assert.deepEqual(titel, ["Tiere", "Tierarztpraxis", "Übersicht für die Praxis", "Wissen", "Wiegen", "Daten", "App", "Über Kilossos"]);
-});
-
-test("0.78.0: „Wiegen“ enthält nur den Wiegetag und den Wiege-Tipp", () => {
-  const w = gruppe("Wiegen");
-  assert.match(w, /id="label-wiegetag">Wiegetag</);
-  assert.match(w, /<small id="wiegetag-tier" hidden><\/small>/);
-  assert.match(w, /<div id="wiegetag-feld"><\/div>/);
-  assert.match(w, /Am besten immer am gleichen Wochentag/);
-  assert.doesNotMatch(w, /anzeige-feld|Darstellung/);
+// Seit 0.85.0 ohne „Wiegen“: Der Wiegetag steht auf der Seite „Gewicht“ (tests/wiegetag-ort.test.js).
+test("0.85.0: Reihenfolge der Gruppen unter „Mehr“, keine Gruppe „Einstellungen“ und „Wiegen“ mehr", () => {
+  assert.deepEqual(titel, ["Tiere", "Tierarztpraxis", "Übersicht für die Praxis", "Wissen", "Daten", "App", "Über Kilossos"]);
 });
 
 test("0.78.0: „App“ enthält nur die Darstellung, ohne Wiege-Tipp", () => {

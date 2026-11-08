@@ -67,7 +67,7 @@ import { leseAnzeige, merkeAnzeige, aufgeloest } from "./js/anzeige.js";
 import { aufklappKarte, merkeZustand, zustandVon, zustandVergessen, aufklappenAnmelden } from "./js/aufklappen.js";
 import { begriffeHtml, hinweisKnopf, kcalSpanne } from "./js/wissen.js";
 import { auswahlFeld, auswahlAnmelden } from "./js/auswahl.js";
-import { alterText, telefonLink, telefonGueltig, istWiegetag, WOCHENTAGE, HALTUNG, kartenLink, praxisVorschlag } from "./js/profil.js";
+import { alterText, telefonLink, telefonGueltig, istWiegetag, wiegetagAusAuswahl, WOCHENTAGE, HALTUNG, kartenLink, praxisVorschlag } from "./js/profil.js";
 import { aktivesTier, leseAktivesTier, merkeAktivesTier, vergissDemoTier, neuesTier, eintraegeVon, tierEntfernen } from "./js/tiere.js";
 import { wischenAnmelden } from "./js/wischen.js";
 import { datumText, freigabeTafel } from "./js/mehr.js";
@@ -875,6 +875,15 @@ function oeffneProfil(einTier) {
     ],
     wert: einTier ? (p.kastriert ? "ja" : "nein") : undefined,
   });
+  // Wiegetag (0.85.0) nur beim Anlegen eines weiteren Tiers; ändern lässt er sich danach unter „Gewicht“.
+  $("profil-wiegetag-bereich").hidden = Boolean(einTier);
+  $("profil-wiegetag").innerHTML = auswahlFeld({
+    name: "profil-wiegetag",
+    beschriftung: "label-profil-wiegetag",
+    // Montag zuerst, wie im deutschen Kalender
+    optionen: [{ wert: "", text: "Kein fester Tag" }, ...[1, 2, 3, 4, 5, 6, 0].map((t) => ({ wert: String(t), text: WOCHENTAGE[t] }))],
+    wert: "",
+  });
   $("profil-haltung").innerHTML = auswahlFeld({
     name: "haltung",
     beschriftung: "label-haltung",
@@ -924,6 +933,7 @@ beimSpeichern("form-profil", "profil-fehler", (werte) => {
   setze("koerperbau", werte.get("koerperbau").trim());
   setze("haltung", werte.get("haltung"));
   setze("schlankKg", schlank);
+  if (!bearbeitetesTier) setze("wiegetag", wiegetagAusAuswahl(werte.get("profil-wiegetag")));
   const tierarzt = { ...(praxis && { praxis }), ...(telefon && { telefon }), ...(adresse && { adresse }) };
   setze("tierarzt", Object.keys(tierarzt).length ? tierarzt : null);
   const fotoNeu = bearbeitetesTier ? profilFoto !== (fotoGueltig(bearbeitetesTier.foto) ? bearbeitetesTier.foto : null) : Boolean(profilFoto);

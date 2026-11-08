@@ -11,7 +11,7 @@ const nurText = (html) => html.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").
 
 test("Eintrag unter „Wissen“ ganz unten, nach „Begriffe kurz erklärt“ (seit 0.63.0), öffnet die Seite", () => {
   const html = lies("index.html");
-  const wissen = html.slice(html.indexOf('<h3 class="gruppe-titel">Wissen</h3>'), html.indexOf('<h3 class="gruppe-titel">Wiegen</h3>'));
+  const wissen = html.slice(html.indexOf('<h3 class="gruppe-titel">Wissen</h3>'), html.indexOf('<h3 class="gruppe-titel">Daten</h3>'));
   const aktionen = [...wissen.matchAll(/data-aktion="([^"]+)"/g)].map((m) => m[1]);
   assert.deepEqual(aktionen.slice(-2), ["begriffe-erklaerung", "fragen-erklaerung"]);
   assert.ok(wissen.includes('<span class="text">Häufige Fragen</span>'));

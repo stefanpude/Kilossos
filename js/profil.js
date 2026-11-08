@@ -119,6 +119,13 @@ export function praxisVorschlag(tier) {
   return Object.keys(vorschlag).length ? vorschlag : null;
 }
 
+// Wert aus dem Auswahlmenü „Wiegetag“ (0.85.0, Fenster „Neues Tier“): "0"–"6" → Zahl, alles andere
+// („Kein fester Tag“ = "") → null, dann wird das Feld nicht gespeichert.
+export function wiegetagAusAuswahl(wert) {
+  if (typeof wert !== "string" || !/^[0-6]$/.test(wert)) return null;
+  return Number(wert);
+}
+
 export function istWiegetag(tier, tag) {
   if (!Number.isInteger(tier.wiegetag)) return false;
   const [j, m, t] = tag.split("-").map(Number);
