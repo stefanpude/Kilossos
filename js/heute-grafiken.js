@@ -169,6 +169,9 @@ const ms = (iso) => {
 };
 // „29.10.“ ohne führende Nullen
 const kurzDatum = (iso) => `${Number(iso.slice(8, 10))}.${Number(iso.slice(5, 7))}.`;
+// „13. Sep.“ für die Kurve (0.84.1): fester Monatsname, weil Node und Browser verschieden kürzen.
+const MONATE_KURZ = ["Jan.", "Feb.", "März", "Apr.", "Mai", "Juni", "Juli", "Aug.", "Sep.", "Okt.", "Nov.", "Dez."];
+const monatDatum = (iso) => `${Number(iso.slice(8, 10))}.${NB}${MONATE_KURZ[Number(iso.slice(5, 7)) - 1]}`;
 const wochentag = (iso) => new Date(ms(iso)).toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "short" });
 const vorzeichen = (v) => (v > 0 ? "+" : v < 0 ? "−" : "±");
 
@@ -217,8 +220,9 @@ function skalaSvg(prozent, bewertung) {
 
 // Kleine Kurve der letzten 8 Wochen (älteste zuerst), ohne Korridor. Achse nur aus den Wägungen:
 // unten Minimum − 0,08 kg, oben Maximum + 0,05 kg, je auf 0,1 kg gerundet.
+// Seit 0.84.1 hat die Datumszeile eigenen Platz (U 22, Grundlinie H − 5) unter der unteren kg-Zahl.
 function kurveSvg(liste, bewertung) {
-  const W = 320, H = 58, L = 30, R = 40, O = 6, U = 14;
+  const W = 320, H = 66, L = 30, R = 40, O = 6, U = 22;
   const von = ms(liste[0].datum);
   const bis = ms(liste.at(-1).datum);
   // Alle Wägungen am selben Tag: keine Zeitspanne, alle Punkte rechts (sonst Teilung durch 0).
@@ -237,7 +241,7 @@ function kurveSvg(liste, bewertung) {
   const lx = x(bis);
   const ly = y(letzte.kg);
   const ersteDatum =
-    bis > von ? `<text class="achse" x="${x(von)}" y="${H - 3}" text-anchor="start">${sicher(kurzDatum(liste[0].datum))}</text>` : "";
+    bis > von ? `<text class="achse" x="${x(von)}" y="${H - 5}" text-anchor="start">${sicher(monatDatum(liste[0].datum))}</text>` : "";
   return (
     `<svg class="mess-kurve" viewBox="0 0 ${W} ${H}" aria-hidden="true">` +
     `<line class="gitter" x1="${L}" x2="${W - R}" y1="${y(hi)}" y2="${y(hi)}"/>` +
@@ -249,7 +253,7 @@ function kurveSvg(liste, bewertung) {
     `<circle class="mess-end ${sicher(bewertung)}" cx="${lx}" cy="${ly}" r="4.5"/>` +
     `<text class="mess-endtext" x="${lx + 7}" y="${ly + 4}">${sicher(zahl(letzte.kg, 2))}</text>` +
     ersteDatum +
-    `<text class="achse" x="${lx}" y="${H - 3}" text-anchor="end">${sicher(kurzDatum(letzte.datum))}</text>` +
+    `<text class="achse" x="${lx}" y="${H - 5}" text-anchor="end">${sicher(monatDatum(letzte.datum))}</text>` +
     `</svg>`
   );
 }

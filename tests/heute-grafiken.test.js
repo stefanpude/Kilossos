@@ -171,13 +171,14 @@ test("0.39.0: messungHtml mit einem Gewicht: Kopf mit Datum und Knopf, Satz zum 
 test("0.39.0: messungHtml mit Vergleich und Kurve: Gramm seit, Kurve, Skala, Urteil", () => {
   const h = mess([G("2026-09-10", 6.5), G("2026-10-29", 6.24), G("2026-11-05", 6.12)]);
   assert.ok(h.includes(`−120${NB}g seit 29.10.`), "Vorzeichen −, Datum ohne führende Null");
-  assert.match(h, /<svg class="mess-kurve" viewBox="0 0 320 58" aria-hidden="true">/);
+  assert.match(h, /<svg class="mess-kurve" viewBox="0 0 320 66" aria-hidden="true">/);
   assert.match(h, /<svg class="mess-skala" viewBox="0 0 300 35" aria-hidden="true">/);
   // 1,92 % liegt näher als 0,1 an 2 %: seit 0.40.1 zwei Nachkommastellen (tempoZahl).
   assert.ok(h.includes(`<p class="mess-urteil neutral"><b>1,92${NB}% pro Woche</b> · noch ohne Bewertung</p>`));
   // Erstes und letztes Datum unter der Kurve, Gewicht neben dem letzten Punkt, Hilfslinien mit kg.
-  assert.match(h, />10\.9\.</);
-  assert.match(h, />5\.11\.</);
+  // Seit 0.84.1 mit Monatsnamen (Stefans Karte: „13.9.“ sah aus wie eine Zahl der Skala).
+  assert.ok(h.includes(`>10.${NB}Sep.<`));
+  assert.ok(h.includes(`>5.${NB}Nov.<`));
   assert.match(h, /class="mess-end neutral"/);
   assert.match(h, />6,12<\/text>/);
   assert.match(h, />6,6<\/text>/); // oben: 6,5 + 0,05 aufgerundet
@@ -189,6 +190,20 @@ test("0.39.0: messungHtml mit Vergleich und Kurve: Gramm seit, Kurve, Skala, Urt
   assert.match(h, /class="mess-sk-zone"/);
   assert.match(h, /class="mess-sk-punkt neutral" cx="[\d.]+" cy="10" r="6"/);
   assert.doesNotMatch(h, /[‹›]<\/text>/);
+});
+
+test("0.84.1: Kurve „Letzte Messung“: Datum mit Monatsnamen in eigener Zeile unter der kg-Zahl", () => {
+  const h = mess([G("2026-03-02", 6.5), G("2026-03-30", 6.3), G("2026-04-27", 6.12)], false, "2026-04-27");
+  // Fester Monatsname (Node und Browser kürzen sonst verschieden), ohne Punkt bei „März“.
+  assert.ok(h.includes(`>2.${NB}März</text>`));
+  assert.ok(h.includes(`>27.${NB}Apr.</text>`));
+  assert.doesNotMatch(h, />2\.3\.<|>27\.4\.</);
+  // Untere kg-Zahl und Datum überlappen nicht: Datum mindestens 11 tiefer (Schrift 11).
+  const kurve = h.match(/<svg class="mess-kurve"[^]*?<\/svg>/)[0];
+  const kgY = Number(kurve.match(/<text class="achse" x="25" y="([\d.]+)" text-anchor="end">6,0<\/text>/)[1]);
+  const datumY = [...kurve.matchAll(/<text class="achse" x="[\d.]+" y="([\d.]+)" text-anchor="(?:start|end)">\d+\./g)].map((m) => Number(m[1]));
+  assert.equal(datumY.length, 2);
+  for (const y of datumY) assert.ok(y - kgY >= 11, `Datum y ${y} zu nah an kg-Zahl y ${kgY}`);
 });
 
 test("0.39.0: messungHtml Bewertungen: sicher, zu schnell, Zunahme", () => {
