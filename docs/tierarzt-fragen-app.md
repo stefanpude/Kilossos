@@ -9,6 +9,9 @@ Kurz mündlich im Termin, falls es passt:
       einen Test der App über zwei Wochen (kostenlos, ohne Anmeldung, Daten nur auf dem Handy). Oder würden Sie den
       Zettel Haltern mitgeben, denen Sie gerade zum Abnehmen raten? (Auf dem Zettel steht nicht, dass die Praxis die
       App empfiehlt.)
+- [ ] Welche **Diätfutter** verordnen Sie zum Abnehmen am häufigsten (2–3 Sorten)? Darf ich hier im Regal die Rückseite
+      und den Strichcode eines **einzelnen** Beutels oder einer Dose fotografieren? (Damit die App diese Sorten beim
+      Scannen erkennt; bisher kennt sie bei Nassfutter oft nur den Code des Kartons.)
 
 ## 1. Grenzwerte und Warnungen
 - [ ] Würden Sie sich die **Grenzwerte** der App ansehen? (Quellen: AAHA- und WSAVA-Leitlinien, Unterlage liegt bei.)
@@ -50,6 +53,7 @@ In der App unter „Mehr“ → „Wissen“, auf Wunsch als Ausdruck.
 | Frage | Antwort |
 |---|---|
 | Aushang / Zettel | |
+| Diätfutter (häufigste Sorten), Fotos erlaubt? | |
 | Grenzwerte angesehen | |
 | „Zu schnell“: 1 oder 2 Wochen, ab wie viel | |
 | Zu wenig gefressen: Grenzen | |
