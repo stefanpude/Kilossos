@@ -385,3 +385,66 @@ reine Nummern nicht, eine zweite Quelle fehlt deshalb. Sie bleiben vorerst ohne 
   Whiskas Tasty Mix (73).
 - Getreidefreies Online-Futter ist kalorienreich: Purizon nass 114, Feringa 107, Purizon trocken 409 kcal/100 g.
 - Sheba Creamy Snacks sind „flüssig“: ein 12-g-Beutel hat nur etwa 6,5 kcal, deutlich weniger als ein Vitakraft Cat Stick (≈ 20).
+
+# Kilossos-Futterliste, sechste Runde: Drogerie, Josera und Sterilised (Stand 08.11.2026, Version 0.81.0)
+
+Direkt nach Runde 5, gleiche Regeln und gleicher Abruftag. **34 neue Sorten, zusammen 131** (Diätfutter 18, Nassfutter 64,
+Trockenfutter 39, Leckerlis 10). 11 neue Werte vom Hersteller, 23 geschätzt (jetzt 58 von 131 mit Herstellerwert).
+Quellen: fressnapf.de, rossmann.de, dm.de (Produktdaten mit „Rechtliche Kategorie“), zooplus.de. **Bei Abweichung gilt die Packung.**
+
+**EANs:** 1 neue Nummer mit zwei Firmen bestätigt: Kitekat in Gelee Geflügel-Allerlei 4008429157226 (fressnapf.de, rossmann.de).
+Josera, Sanabelle, Bozita, MAC's, Applaws, FIT+FUN, Winston und dm stehen nur bei einem der geprüften Händler. **Jetzt 51 von 131 mit EAN.**
+
+| Sorte | Art | kcal/100 g | Status | NRC | Quelle |
+|---|---|---|---|---|---|
+| **Light und kastriert** | | | | | |
+| Sanabelle Light Low Calorie | trocken | 346 | geschätzt | 345,6 | fressnapf.de, zooplus.de |
+| MAC's Cat 7+ Senior Light Geflügel | trocken | 356 | geschätzt | 355,5 | fressnapf.de |
+| Sanabelle Sterilized | trocken | 346 | geschätzt | 345,6 | fressnapf.de, zooplus.de |
+| JosiCat Sterilised Classic | trocken | 353,7 | Hersteller | 353,7 | fressnapf.de |
+| Bozita Active & Sterilised Lamm | trocken | 373,1 | Hersteller (1561 kJ) | 373,0 | fressnapf.de |
+| Purina ONE Sterilcat Truthahn (Beutel) | nass | 93 | geschätzt | 92,7 | fressnapf.de |
+| Royal Canin Indoor Sterilised in Soße | nass | 80 | Hersteller | 80,7 | zooplus.de |
+| **Supermarkt und Drogerie** | | | | | |
+| Kitekat in Gelee Geflügel-Allerlei | nass | 69,4 | Hersteller (59 kcal/85 g) | 68,7 | fressnapf.de, rossmann.de |
+| Whiskas Pure Delight Geflügel Ragout | nass | 70,6 | Hersteller (60 kcal/85 g) | 70,0 | rossmann.de |
+| Felix Doppelt Lecker in Gelee | nass | 75 | geschätzt | 74,6 | rossmann.de |
+| Gourmet Gold Zarte Häppchen | nass | 73 | geschätzt | 72,8 | fressnapf.de |
+| Gourmet Gold Raffiniertes Ragout | nass | 110 | geschätzt | 110,5 | fressnapf.de |
+| Purina ONE Adult Rind (Beutel) | nass | 92 | geschätzt | 91,6 | fressnapf.de |
+| Purina ONE Indoor Formula | trocken | 361 | geschätzt | 361,4 | zooplus.de |
+| Perfect Fit Indoor 1+ Huhn | trocken | 369 | Hersteller | 361,7 | rossmann.de |
+| Winston Deluxe Adult Geflügel | trocken | 379 | geschätzt | 378,6 | rossmann.de |
+| Winston Knusperdinner | trocken | 361 | geschätzt | 360,9 | rossmann.de |
+| Winston Premium Pastete Rind mit Pute | nass | 95 | geschätzt | 95,1 | rossmann.de |
+| Winston Schlemmer-Menü Geflügel | nass | 90 | geschätzt | 90,0 | rossmann.de |
+| Winston Hühnchen in Karottengelee | nass | 88 | geschätzt | 88,2 | rossmann.de |
+| dm Dein Bestes reich an Pute | trocken | 394 | geschätzt | 394,0 | dm.de |
+| dm Dein Bestes Hühnchen in Sauce | nass | 81 | geschätzt | 80,9 | dm.de |
+| dm Dein Bestes Geflügel Variationen | nass | 86 | geschätzt | 85,7 | dm.de |
+| dm Dein Bestes Geflügel mit Leber (415-g-Dose) | nass | 85 | geschätzt | 85,2 | dm.de |
+| **Zoohandel und online** | | | | | |
+| Josera Catelux | trocken | 391,2 | Hersteller | 391,2 | fressnapf.de |
+| Josera Culinesse | trocken | 373,5 | Hersteller | 373,5 | fressnapf.de |
+| JosiCat Crunchy Chicken | trocken | 349,6 | Hersteller | 349,7 | fressnapf.de |
+| MAC's Superfood Adult | trocken | 391 | geschätzt | 391,4 | fressnapf.de |
+| Applaws Adult Huhn mit Lachs | trocken | 404,4 | Hersteller | 393,5 | fressnapf.de |
+| Lily's Kitchen Organic Pâté Rind | nass | 80 | Hersteller | 86,0 | fressnapf.de |
+| FIT+FUN Ragout | nass | 85 | geschätzt | 84,6 | fressnapf.de |
+| **Leckerlis** | | | | | |
+| Dreamies Creamy Huhn (Ergänzungsfutter) | Leckerli | 54 | geschätzt | 53,8 | fressnapf.de |
+| Vitakraft Liquid-Snack Rind (Ergänzungsfutter) | Leckerli | 54 | geschätzt | 53,8 | fressnapf.de |
+| dm Dein Bestes Dental Knabbertaschen (Ergänzungsfutter) | Leckerli | 377 | geschätzt | 377,1 | dm.de |
+
+**Nicht aufgenommen:**
+- dm Dein Bestes Knuspermix: dm nennt „Rohfaser 6,5 %, Rohasche 3,0 %“, bei baugleichen Sorten (REWE ja!, Winston) ist es
+  umgekehrt. Vermutlich vertauscht, deshalb erst mit Packungsfoto. dm Knabberstäbchen BBQ: Protein „33,5,0 %“ (Tippfehler).
+- Royal Canin Sensory und Sterilised in Soße: Die Seiten zeigten keine Analysewerte. Felix Doppelt Lecker bei Fressnapf ohne Feuchte
+  (Werte von Rossmann genommen).
+- Sanabelle Grande, Royal Canin Hair & Skin, Kitten- und Senior-Sorten außer MAC's 7+ Light: für das Abnehmen nicht der Schwerpunkt.
+- Whiskas Sterile nass, Perfect Fit Sterile nass, Felix Sterilised: bei keinem Händler gefunden (vermutlich in Deutschland nicht im Handel).
+
+**Was auffällt:**
+- Josera Catelux (20 % Fett, 391 kcal) und Applaws (404 kcal) gehören zu den kalorienreichsten Trockenfuttern der Liste.
+- Winston Knusperdinner und REWE ja! Knusper-Mix haben genau dieselben Analysewerte (gleicher Hersteller ist wahrscheinlich).
+- Gourmet Gold Raffiniertes Ragout hat 110 kcal/100 g, die Zarten Häppchen derselben Marke nur 73.

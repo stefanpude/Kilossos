@@ -260,9 +260,26 @@ test("0.37.0: liegt ein gemessener Energiewert unter dem Packungswert, steht er 
 
 // ---------- 0.80.0: fünfte Runde, Breite (docs/futter-recherche.md) ----------
 
-test("0.80.0: Runde 5 bringt 39 Sorten dazu, zusammen 97", () => {
-  assert.equal(FUTTERLISTE.length, 97);
-  assert.equal(FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-08").length, 39);
+test("0.80.0 und 0.81.0: Runde 5 bringt 39 Sorten, Runde 6 weitere 34, zusammen 131", () => {
+  assert.equal(FUTTERLISTE.length, 131);
+  assert.equal(FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-08").length, 39 + 34);
+});
+
+test("0.81.0: Runde 6 mit Herstellerwerten (Josera, Bozita in kJ, Royal Canin, Kitekat in Gelee)", () => {
+  const kcal = (id) => FUTTERLISTE.find((e) => e.id === id)?.kcalPro100g;
+  assert.equal(kcal("josera-catelux-trocken"), 391.2);
+  assert.equal(kcal("josera-culinesse-trocken"), 373.5);
+  assert.equal(kcal("josicat-sterilised-classic-trocken"), 353.7);
+  assert.equal(kcal("bozita-active-sterilised-lamm-trocken"), 373.1); // 1561 kJ / 4,184
+  assert.equal(kcal("royal-canin-indoor-sterilised-sosse"), 80);
+  assert.equal(kcal("kitekat-gelee-gefluegel-allerlei"), 69.4); // 59 kcal je 85 g
+  assert.equal(kcal("whiskas-pure-delight-gefluegel-ragout"), 70.6); // 60 kcal je 85 g
+  assert.equal(findeNachEan("4008429157226", []).eintrag.id, "kitekat-gelee-gefluegel-allerlei");
+});
+
+test("0.81.0: Eigenmarken von dm und Rossmann sind über die Suche zu finden", () => {
+  assert.equal(sucheFutter("dein bestes").length, 6); // 1 aus Runde 2, 5 aus Runde 6 (mit Leckerli)
+  assert.equal(sucheFutter("winston").length, 6); // 1 aus Runde 2, 5 aus Runde 6
 });
 
 test("0.80.0: neue Sorten mit Herstellerwert", () => {
