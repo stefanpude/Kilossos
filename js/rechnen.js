@@ -28,7 +28,7 @@ export function kcalAusBestandteilen({ protein, fett, asche, faser, feuchte }) {
 export const FEUCHTE_TROCKEN_ANNAHME = 8;
 
 // ---------- kJ-Schutz im Fenster „Eigene Sorte“ (seit 0.32.0, Plan .planning/kcal-rechner-kj.md) ----------
-// Höchstwerte der Kilossos-Futterliste: Nass 126, Trocken 396, Leckerli 438. Kleinster kJ-Wert bei Nassfutter 254,
+// Höchstwerte der Kilossos-Futterliste: Nass 126, Trocken 409, Leckerli 438 (Stand 0.80.0). Kleinster kJ-Wert bei Nassfutter 254,
 // kleinster kcal-pro-kg-Wert 607: beide liegen über 150. Ein Wert genau auf der Grenze ist in Ordnung.
 // Frischfleisch (0.72.0, .planning/barf.md): 300. Rohes Rinderhack mit 20 % Fett hat 254 kcal (USDA FoodData Central,
 // FDC 174036); mageres Fleisch in kJ (120 kcal = 502 kJ) liegt sicher darüber. Sehr fettes Fleisch kann wirklich über

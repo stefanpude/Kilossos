@@ -297,3 +297,91 @@ jede Zahl an den Quellen nachgesehen haben. Regeln wie in Runde 2 und 3, dazu:
   7 % weniger (Farmina). Bei einer Verordnung dieser Sorten lohnt die Frage, mit welchem Wert der Tierarzt rechnet.
 
 **Jetzt 46 von 58 Sorten mit EAN, 17 Diätsorten, alle mit Herstellerwert.**
+
+# Kilossos-Futterliste, fünfte Runde: Breite (Stand 08.11.2026, Version 0.80.0)
+
+Schwerpunkt: die Sorten, die in Deutschland am häufigsten im Napf landen. **39 neue Sorten, zusammen 97** (Diätfutter 18,
+Nassfutter 48, Trockenfutter 24, Leckerlis 7). 13 neue Werte vom Hersteller, 26 geschätzt (jetzt 47 von 97 mit Herstellerwert). Gleiche Prüfung wie in den Runden 1–4:
+Herstellerwerte höchstens 10 % neben der NRC-Nachrechnung, geschätzte Werte genau die gerundete Nachrechnung (Trockenfutter
+ohne Feuchteangabe mit 8 %). Gelesen wurden die Händlerseiten im Browser (rewe.de, fressnapf.de, zooplus.de, rossmann.de),
+abgerufen am 08.11.2026. **Bei Abweichung gilt die Packung.**
+
+**EAN-Regel wie in Runde 4:** nur mit zwei verschiedenen Firmen. Bestätigt wurden 4 neue Nummern (fressnapf.de und
+rossmann.de): Felix Sensations 7613036898775 (24 × 85 g), Sheba Selection Geflügel 3065890158207 (12 × 85 g), Perfect Fit
+Indoor 8410136052323 (12 × 85 g), Sheba Creamy Snacks 4008429119798 (Multipack). Die übrigen Nummern (REWE ja!, Fressnapf-
+und zooplus-Eigenmarken, Happy Cat, Whiskas, Felix Tasty Shreds) stehen nur bei einem Händler. Die eingebaute Websuche findet
+reine Nummern nicht, eine zweite Quelle fehlt deshalb. Sie bleiben vorerst ohne EAN. **Jetzt 50 von 97 Sorten mit EAN.**
+
+| Sorte | Art | kcal/100 g | Status | NRC | Quelle |
+|---|---|---|---|---|---|
+| **Diätfutter** | | | | | |
+| Select Gold Medica Reduktion + Diabetes | trocken | 313,8 | Hersteller (ME NRC 2006) | 317,5 | fressnapf.de |
+| **Light und kastriert** | | | | | |
+| Select Gold Adult Light (Beutel) | nass | 78 | geschätzt | 78,0 | fressnapf.de |
+| Select Gold Adult Light Geflügel & Reis | trocken | 340 | geschätzt | 339,5 | fressnapf.de |
+| Concept for Life Light Adult | trocken | 349,1 | Hersteller | 345,5 | zooplus.de |
+| Concept for Life Light in Soße | nass | 68,2 | Hersteller | 68,2 | zooplus.de |
+| Premiere Meat Menu Adult Sterilised | trocken | 368 | geschätzt | 368,3 | fressnapf.de |
+| Happy Cat Minkas Sterilised | trocken | 348 | geschätzt | 347,8 | fressnapf.de |
+| Concept for Life Sterilised in Gelee | nass | 78,3 | Hersteller | 78,3 | zooplus.de |
+| **Supermarkt und Drogerie** | | | | | |
+| REWE ja! Feine Häppchen | nass | 94 | geschätzt | 94,3 | rewe.de |
+| REWE ja! Genießer Menü | nass | 82 | geschätzt | 82,2 | rewe.de |
+| REWE ja! Zarte Stückchen in Sauce mit Huhn (Dose) | nass | 87 | geschätzt | 86,9 | rewe.de |
+| REWE ja! Knusper-Mix Huhn | trocken | 361 | geschätzt | 360,9 | rewe.de |
+| Sheba Classics in Pastete | nass | 83,5 | Hersteller (71 kcal/85 g) | 83,4 | fressnapf.de |
+| Sheba Selection in Sauce Geflügel | nass | 84,7 | Hersteller (72 kcal/85 g) | 84,9 | fressnapf.de, rossmann.de |
+| Whiskas Tasty Mix in Sauce | nass | 72,9 | Hersteller (62 kcal/85 g) | 73,0 | fressnapf.de |
+| Whiskas 1+ mit Rind | trocken | 374 | Hersteller | 366,3 | fressnapf.de |
+| Perfect Fit Indoor in Sauce | nass | 74 | Hersteller | 73,6 | fressnapf.de, rossmann.de |
+| Felix Sensations in Gelee | nass | 75 | geschätzt | 74,6 | fressnapf.de, rossmann.de |
+| Felix Tasty Shreds | nass | 90 | geschätzt | 90,4 | fressnapf.de |
+| Gourmet Mon Petit Intense | nass | 80 | geschätzt | 80,1 | fressnapf.de |
+| Miamor Ragout Royale in Sauce | nass | 82 | geschätzt | 81,7 | fressnapf.de |
+| Miamor Feine Filets in Jelly Huhn (Ergänzungsfutter) | nass | 66 | geschätzt | 66,5 | fressnapf.de |
+| Schmusy Ragout in Sauce | nass | 100 | geschätzt | 100,2 | fressnapf.de |
+| Catessy Häppchen in Gelee | nass | 79 | geschätzt | 79,3 | zooplus.de |
+| Happy Cat Minkas Perfect Mix | trocken | 369 | geschätzt | 368,6 | fressnapf.de |
+| **Zoohandel und online** | | | | | |
+| animonda Carny Adult Geflügel-Cocktail | nass | 91 | geschätzt | 91,0 | fressnapf.de |
+| animonda vom Feinsten Adult mit Pute | nass | 85 | geschätzt | 85,3 | fressnapf.de |
+| Real Nature Wilderness Pure Chicken (Dose) | nass | 92 | geschätzt | 92,3 | fressnapf.de |
+| Real Nature Wilderness Pure Chicken | trocken | 389 | geschätzt | 389,0 | fressnapf.de |
+| Select Gold Adult Classic Fit | nass | 92 | geschätzt | 91,9 | fressnapf.de |
+| Premiere Finest Jelly und Royal Ragout | nass | 83 | geschätzt | 83,5 | fressnapf.de |
+| Premiere Meat Menu Adult Geflügel | trocken | 394 | geschätzt | 394,2 | fressnapf.de |
+| Purizon Adult Hühnerfilet mit Lachs | nass | 114 | Hersteller (ME FEDIAF) | 114,5 | zooplus.de |
+| Purizon Adult Single Meat Huhn | trocken | 409 | geschätzt | 409,0 | zooplus.de |
+| Feringa Classic Meat Menü Geflügel | nass | 107 | Hersteller (ME FEDIAF) | 107,4 | zooplus.de |
+| Rosie's Farm Adult Huhn | nass | 96 | Hersteller (ME FEDIAF) | 95,5 | zooplus.de |
+| Cosma Original Hühnchenbrust in Jelly (Ergänzungsfutter) | nass | 70 | geschätzt | 69,8 | zooplus.de |
+| **Leckerlis** | | | | | |
+| Sheba Creamy Snacks (Ergänzungsfutter) | Leckerli | 54 | Hersteller | 53,8 | rossmann.de, zooplus.de |
+| Felix Party Mix (Ergänzungsfutter) | Leckerli | 410 | geschätzt | 409,9 | zooplus.de |
+
+**Entscheidungen beim Eintragen:**
+- Eine Sorte je Produktlinie, wenn die Geschmacksrichtungen gleiche Werte haben (z. B. REWE ja! Genießer Menü, Premiere Finest
+  Jelly und Royal Ragout). Bei zooplus-Linien mit Sortentabelle steht die erste Sorte in der Liste, die anderen kcal im Hinweis.
+- Sheba Creamy Snacks: zooplus nennt beim Multipack 89 % Feuchte und 56 kcal, Rossmann und zooplus (Einzelsorten) 88,5 % und
+  54 kcal. In der Liste steht der Wert der Rossmann-Seite mit derselben EAN.
+- Purizon Single Meat trocken: zooplus schreibt „4,13 kcal/kg“ (offensichtlich verschrieben). Deshalb „geschätzt“ (409).
+- Perfect Fit Indoor: Die Händler schreiben „Rohasche 83,8 %“, gemeint ist die Feuchte (die Summe geht sonst nicht auf).
+- Ergänzungsfutter (Miamor Feine Filets, Cosma Original, Sheba Creamy, Felix Party Mix) sagt das im Hinweis.
+
+**Nicht aufgenommen:**
+- **Lidl Coshida, Aldi Cachet, Edeka, Gut & Günstig, Netto, Penny:** keine Analysewerte auf den offiziellen Seiten. Aldi Süd
+  zeigt Nährwerte nur mit dem Hinweis, dass sie je nach Lieferant abweichen. Edeka-Werte gibt es nur bei Preisvergleichsseiten.
+  → **Packungsfotos** (Rückseite mit „Analytische Bestandteile“ und Strichcode), z. B. beim nächsten Einkauf.
+- GimCat Malt-Soft Paste: rund 468 kcal/100 g (38,5 % Fett). Das liegt über der Leckerli-Grenze der Eingabeprüfung (450),
+  die App würde bei dieser echten Sorte nachfragen. Erst die Grenze prüfen (nach dem 13.11.), dann aufnehmen.
+- Gourmet A la Carte: Die Seite nennt zwei Feuchtewerte (80,5 und 79 %). Premiere Meat Menu nass: ebenfalls zwei Werte (79 und 77 %).
+- Concept for Life Sterilised trocken: zwei kcal-Werte (alte und neue Rezeptur).
+- Whiskas Temptations: in Deutschland bei keinem der Händler gefunden. Kitekat trocken: wie in Runde 2 und 3 keine Quelle.
+- Purina Pro Plan Veterinary OM: steht seit Runde 1 in der Liste (trocken und nass). Specific FRD/FRW: weiter nur über ein
+  Packungsfoto (siehe Runde 4).
+
+**Was auffällt:**
+- Viele Beutel liegen bei 80–95 kcal/100 g, also über Kitos Sheba (77). Sehr leicht sind Concept for Life Light (68) und
+  Whiskas Tasty Mix (73).
+- Getreidefreies Online-Futter ist kalorienreich: Purizon nass 114, Feringa 107, Purizon trocken 409 kcal/100 g.
+- Sheba Creamy Snacks sind „flüssig“: ein 12-g-Beutel hat nur etwa 6,5 kcal, deutlich weniger als ein Vitakraft Cat Stick (≈ 20).

@@ -258,6 +258,54 @@ test("0.37.0: liegt ein gemessener Energiewert unter dem Packungswert, steht er 
   assert.match(hinweis("purina-om-trocken"), /322 kcal/);
 });
 
+// ---------- 0.80.0: fünfte Runde, Breite (docs/futter-recherche.md) ----------
+
+test("0.80.0: Runde 5 bringt 39 Sorten dazu, zusammen 97", () => {
+  assert.equal(FUTTERLISTE.length, 97);
+  assert.equal(FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-08").length, 39);
+});
+
+test("0.80.0: neue Sorten mit Herstellerwert", () => {
+  const kcal = (id) => FUTTERLISTE.find((e) => e.id === id)?.kcalPro100g;
+  assert.equal(kcal("select-gold-medica-reduktion-diabetes-trocken"), 313.8);
+  assert.equal(kcal("concept-for-life-light-trocken"), 349.1);
+  assert.equal(kcal("concept-for-life-light-sosse-nass"), 68.2);
+  assert.equal(kcal("sheba-classics-pastete"), 83.5); // 71 kcal je 85 g
+  assert.equal(kcal("sheba-selection-sauce-gefluegel"), 84.7); // 72 kcal je 85 g
+  assert.equal(kcal("whiskas-tasty-mix-sauce"), 72.9); // 62 kcal je 85 g
+  assert.equal(kcal("whiskas-1plus-rind-trocken"), 374);
+  assert.equal(kcal("purizon-adult-huhn-lachs-nass"), 114);
+  assert.equal(kcal("sheba-creamy-snacks"), 54);
+});
+
+test("0.80.0: Select Gold Medica ist Diätfutter, Handelsmarken und Eigenmarken sind es nicht", () => {
+  const e = (id) => FUTTERLISTE.find((x) => x.id === id);
+  assert.equal(e("select-gold-medica-reduktion-diabetes-trocken").diaet, true);
+  assert.match(e("select-gold-medica-reduktion-diabetes-trocken").hinweis, /Verringerung von Übergewicht/);
+  for (const id of ["rewe-ja-feine-haeppchen-nass", "select-gold-light-nass", "concept-for-life-light-trocken"]) assert.equal(e(id).diaet, false, id);
+});
+
+test("0.80.0: Ergänzungsfutter sagt das im Hinweis", () => {
+  for (const id of ["miamor-feine-filets-jelly-huhn", "cosma-original-jelly-huhn", "sheba-creamy-snacks", "felix-party-mix"]) {
+    assert.match(FUTTERLISTE.find((e) => e.id === id).hinweis, /Ergänzungsfuttermittel, kein Alleinfutter/, id);
+  }
+});
+
+test("0.80.0: der Scanner findet die neuen Nummern", () => {
+  assert.equal(findeNachEan("7613036898775", []).eintrag.id, "felix-sensations-gelee");
+  assert.equal(findeNachEan("3065890158207", []).eintrag.id, "sheba-selection-sauce-gefluegel");
+  assert.equal(findeNachEan("8410136052323", []).eintrag.id, "perfect-fit-indoor-sauce");
+  assert.equal(findeNachEan("4008429119798", []).eintrag.id, "sheba-creamy-snacks");
+});
+
+test("0.80.0: Suche findet REWE ja! und Premiere über ein Wort", () => {
+  assert.equal(sucheFutter("ja!").length, 4);
+  assert.deepEqual(
+    sucheFutter("premiere").map((e) => e.id),
+    ["premiere-meat-menu-sterilised-trocken", "premiere-finest-jelly-royal-ragout", "premiere-meat-menu-gefluegel-trocken"]
+  );
+});
+
 test("0.69.0: listenGruppen teilt die Futterliste in Diätfutter, Nassfutter, Trockenfutter und Leckerlis", () => {
   const gruppen = listenGruppen(FUTTERLISTE);
   assert.deepEqual(
