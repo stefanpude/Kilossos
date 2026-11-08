@@ -581,3 +581,41 @@ Kopien behalten ihren Namen.
 - Die Empfehlungen der Hersteller liegen oft über der 10-%-Grenze: 17 Dentabites ≈ 34 kcal, 20 Nutri Pockets ≈ 40 kcal,
   22 Shake Ups ≈ 44 kcal. Bei 200 kcal am Tag sind nur 20 kcal Leckerli vorgesehen.
 - Cremige Snacks sind pro Beutel klein (5 bis 12 kcal), die Käse-Sorte von Sheba hat aber fast doppelt so viel wie die anderen.
+
+# Kilossos-Futterliste, achte Runde: Nass- und Hauptfutter (Stand 08.11.2026, Version 0.84.0)
+
+Gleicher Tag und gleiche Regeln wie Runde 5 bis 7. **12 neue Sorten, zusammen 175** (Diätfutter 18, Nassfutter 71,
+Trockenfutter 44, Leckerlis 42). 3 neue Werte vom Hersteller, 9 geschätzt. Quellen: zooplus.de, fressnapf.de, bozita.com.
+Bei Leonardo (leonardo-catfood.de: „reduzierter Energiegehalt“, aber keine Zahl), Wildes Land, IAMS (iams.eu) und
+Royal Canin (kein kcal-Wert im Seitentext) fand sich kein kcal-Wert, deshalb „geschätzt“. **Bei Abweichung gilt die Packung.**
+
+**EANs:** 2 neue Nummern, je bei Fressnapf und zooplus: Royal Canin Regular Fit 32 3182550702157 (400 g), IAMS Sterilised
+8710255150550 (10 kg). **Jetzt 76 von 175 mit EAN.** Nur bei zooplus gefunden und deshalb ohne EAN: Royal Canin Instinctive
+in Gelee 9003579309544 und in Soße 9003579308738 (Fressnapf nur Hausnummer), Leonardo 32/16 4002633758132, Wildes Land
+4250839505641, Felix Gravy Lover 7613036730358, Gourmet À la Carte 7613033057991 (Mischpaket). Bei IAMS Adult nennen
+Hersteller (8710255150109, 8710255150130) und zooplus (8710255126029, 8710255125954) verschiedene Nummern.
+
+| Sorte | Art | kcal/100 g | Status | NRC | Quelle |
+|---|---|---|---|---|---|
+| Royal Canin Regular Fit 32 | trocken | 375 | geschätzt | 374,8 | zooplus.de (royalcanin.com: Faser 4,7 statt 4,6) |
+| IAMS Adult Cat mit Huhn | trocken | 386 | geschätzt | 386,2 | zooplus.de, iams.eu |
+| IAMS Sterilised Cat mit Huhn | trocken | 363 | geschätzt | 363,4 | zooplus.de, iams.eu |
+| Leonardo Adult Complete 32/16 | trocken | 384 | geschätzt | 384,5 | zooplus.de |
+| Wildes Land Huhn & Gartengemüse | trocken | 401 | geschätzt | 400,5 | zooplus.de |
+| Royal Canin Instinctive in Gelee | nass | 92 | geschätzt | 91,7 | zooplus.de |
+| Royal Canin Instinctive in Soße | nass | 84 | geschätzt | 83,5 | zooplus.de |
+| Felix Gravy Lover | nass | 75 | geschätzt | 75,0 | zooplus.de |
+| Gourmet À la Carte | nass | 80 | geschätzt | 79,8 | zooplus.de |
+| Sheba Sauce Lover Huhn | nass | 84,7 | Hersteller (72 kcal/85 g) | 82,1 | fressnapf.de |
+| Bozita Häppchen in Gelee mit Rentier | nass | 81,5 | Hersteller (341 kJ) | 81,5 | bozita.com, zooplus.de |
+| Bozita Sterilised Häppchen in Gelee Huhn & Rind | nass | 69,3 | Hersteller (290 kJ) | 69,2 | bozita.com |
+
+**Was auffällt:**
+- Royal Canin Instinctive in Gelee (92) hat fast 10 % mehr Energie als dieselbe Sorte in Soße (84), weil mehr Fett drin ist.
+  Die deutsche Herstellerseite der Soße zeigte am 08.11. die Werte der Gelee-Sorte.
+- Wildes Land (401) gehört zu den drei kalorienreichsten Trockenfuttern der Liste, IAMS Sterilised (363) liegt deutlich darunter.
+- Bozita Sterilised in Gelee (69,3) liegt so niedrig wie die Light-Sorten aus dem Handel.
+- Sheba Sauce Lover: Fressnapf nennt für Huhn 72 kcal je Schale, zooplus für die Sorten-Mischung 70. Die Analysewerte stammen
+  von fressnapf.de (Stand 08.11. vormittags), die Huhn-Seite zeigte nachmittags nur noch den kcal-Wert.
+
+**Nicht aufgenommen:** Animonda Rafiné (bei Fressnapf und zooplus nicht gefunden).

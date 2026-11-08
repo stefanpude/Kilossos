@@ -260,9 +260,9 @@ test("0.37.0: liegt ein gemessener Energiewert unter dem Packungswert, steht er 
 
 // ---------- 0.80.0: fünfte Runde, Breite (docs/futter-recherche.md) ----------
 
-test("0.80.0 bis 0.83.0: Runde 5 bringt 39 Sorten, Runde 6 weitere 34, Runde 7 (Leckerlis) 32, zusammen 163", () => {
-  assert.equal(FUTTERLISTE.length, 163);
-  assert.equal(FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-08").length, 39 + 34 + 32);
+test("0.80.0 bis 0.84.0: Runde 5 bringt 39 Sorten, Runde 6 34, Runde 7 (Leckerlis) 32, Runde 8 (Nass und Haupt) 12, zusammen 175", () => {
+  assert.equal(FUTTERLISTE.length, 175);
+  assert.equal(FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-08").length, 39 + 34 + 32 + 12);
 });
 
 test("0.81.0: Runde 6 mit Herstellerwerten (Josera, Bozita in kJ, Royal Canin, Kitekat in Gelee)", () => {
@@ -447,7 +447,7 @@ test("0.83.0: der Scanner findet die neuen Whiskas-Nummern (whiskas.de und zoopl
     assert.equal(findeNachEan(ean, []).eintrag.id, id, ean);
     assert.match(FUTTERLISTE.find((e) => e.id === id).eanQuelle, /whiskas\.de, zooplus\.de/, id);
   }
-  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 69 + 5);
+  // Gesamtzahl seit 0.84.0 im Test „0.84.0: zwei neue Nummern“ (69 + 5 + 2).
 });
 
 test("0.83.0: Suche findet den Felix Party Mix auch als KnabberMix, Leckerli-Gruppe zeigt alle 42", () => {
@@ -460,4 +460,36 @@ test("0.83.0: keine Paste über der Leckerli-Grenze in der Liste (GimCat- und Tr
   for (const e of FUTTERLISTE.filter((x) => x.typ === "leckerli")) assert.ok(e.kcalPro100g <= 450, e.id);
   assert.equal(sucheFutter("malt-soft").length, 0);
   assert.equal(sucheFutter("katzenmalz").length, 0);
+});
+
+// ---------- 0.84.0: achte Runde, Nass- und Hauptfutter (docs/futter-recherche.md) ----------
+
+test("0.84.0: Runde 8 bringt 5 Trockenfutter und 7 Nassfutter, die Gruppen zählen 18/71/44/42", () => {
+  assert.deepEqual(
+    listenGruppen(FUTTERLISTE).map((g) => g.eintraege.length),
+    [18, 64 + 7, 39 + 5, 42]
+  );
+});
+
+test("0.84.0: Herstellerwerte (Bozita in kJ, Sheba je Schale)", () => {
+  const kcal = (id) => FUTTERLISTE.find((e) => e.id === id)?.kcalPro100g;
+  assert.equal(kcal("bozita-haeppchen-gelee-rentier"), 81.5); // 341 kJ / 4,184
+  assert.equal(kcal("bozita-sterilised-haeppchen-gelee-huhn-rind"), 69.3); // 290 kJ / 4,184
+  assert.equal(kcal("sheba-sauce-lover-huhn"), 84.7); // 72 kcal je 85 g
+  assert.equal(Math.round((341 / 4.184) * 10) / 10, 81.5);
+  assert.equal(Math.round((290 / 4.184) * 10) / 10, 69.3);
+  assert.equal(Math.round((72 / 85) * 1000) / 10, 84.7);
+});
+
+test("0.84.0: zwei neue Nummern, je von Fressnapf und zooplus bestätigt", () => {
+  assert.equal(findeNachEan("3182550702157", []).eintrag.id, "royal-canin-regular-fit-32-trocken");
+  assert.equal(findeNachEan("8710255150550", []).eintrag.id, "iams-sterilised-huhn-trocken");
+  for (const id of ["royal-canin-regular-fit-32-trocken", "iams-sterilised-huhn-trocken"]) {
+    assert.equal(FUTTERLISTE.find((e) => e.id === id).eanQuelle, "fressnapf.de, zooplus.de", id);
+  }
+  // Nummern nur bei einer Firma (Royal Canin Instinctive, Leonardo, Wildes Land, Felix, Gourmet) bleiben draußen.
+  for (const ean of ["9003579309544", "9003579308738", "4002633758132", "4250839505641", "7613036730358", "7613033057991"]) {
+    assert.equal(findeNachEan(ean, []), null, ean);
+  }
+  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 69 + 5 + 2);
 });
