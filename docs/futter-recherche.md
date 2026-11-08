@@ -322,7 +322,7 @@ reine Nummern nicht, eine zweite Quelle fehlt deshalb. Sie bleiben vorerst ohne 
 | Concept for Life Light Adult | trocken | 349,1 | Hersteller | 345,5 | zooplus.de |
 | Concept for Life Light in Soße | nass | 68,2 | Hersteller | 68,2 | zooplus.de |
 | Premiere Meat Menu Adult Sterilised | trocken | 368 | geschätzt | 368,3 | fressnapf.de |
-| Happy Cat Minkas Sterilised | trocken | 348 | geschätzt | 347,8 | fressnapf.de |
+| Happy Cat Minkas Sterilised | trocken | 347 (bis 0.81.0: 348) | geschätzt | 347,0 | happycat.de (seit 0.82.0) |
 | Concept for Life Sterilised in Gelee | nass | 78,3 | Hersteller | 78,3 | zooplus.de |
 | **Supermarkt und Drogerie** | | | | | |
 | REWE ja! Feine Häppchen | nass | 94 | geschätzt | 94,3 | rewe.de |
@@ -341,7 +341,7 @@ reine Nummern nicht, eine zweite Quelle fehlt deshalb. Sie bleiben vorerst ohne 
 | Miamor Feine Filets in Jelly Huhn (Ergänzungsfutter) | nass | 66 | geschätzt | 66,5 | fressnapf.de |
 | Schmusy Ragout in Sauce | nass | 100 | geschätzt | 100,2 | fressnapf.de |
 | Catessy Häppchen in Gelee | nass | 79 | geschätzt | 79,3 | zooplus.de |
-| Happy Cat Minkas Perfect Mix | trocken | 369 | geschätzt | 368,6 | fressnapf.de |
+| Happy Cat Minkas Perfect Mix | trocken | 368 (bis 0.81.0: 369) | geschätzt | 368,1 | happycat.de (seit 0.82.0) |
 | **Zoohandel und online** | | | | | |
 | animonda Carny Adult Geflügel-Cocktail | nass | 91 | geschätzt | 91,0 | fressnapf.de |
 | animonda vom Feinsten Adult mit Pute | nass | 85 | geschätzt | 85,3 | fressnapf.de |
@@ -402,12 +402,12 @@ Josera, Sanabelle, Bozita, MAC's, Applaws, FIT+FUN, Winston und dm stehen nur be
 | MAC's Cat 7+ Senior Light Geflügel | trocken | 356 | geschätzt | 355,5 | fressnapf.de |
 | Sanabelle Sterilized | trocken | 346 | geschätzt | 345,6 | fressnapf.de, zooplus.de |
 | JosiCat Sterilised Classic | trocken | 353,7 | Hersteller | 353,7 | fressnapf.de |
-| Bozita Active & Sterilised Lamm | trocken | 373,1 | Hersteller (1561 kJ) | 373,0 | fressnapf.de |
+| Bozita Active & Sterilised Lamm | trocken | 390,3 (bis 0.81.0: 373,1) | Hersteller (1633 kJ) | 397,4 | bozita.com (seit 0.82.0) |
 | Purina ONE Sterilcat Truthahn (Beutel) | nass | 93 | geschätzt | 92,7 | fressnapf.de |
 | Royal Canin Indoor Sterilised in Soße | nass | 80 | Hersteller | 80,7 | zooplus.de |
 | **Supermarkt und Drogerie** | | | | | |
 | Kitekat in Gelee Geflügel-Allerlei | nass | 69,4 | Hersteller (59 kcal/85 g) | 68,7 | fressnapf.de, rossmann.de |
-| Whiskas Pure Delight Geflügel Ragout | nass | 70,6 | Hersteller (60 kcal/85 g) | 70,0 | rossmann.de |
+| Whiskas Pure Delight Geflügel Ragout | nass | 77 (bis 0.81.0: 70,6) | Hersteller | 76,5 | whiskas.de, zooplus.de (seit 0.82.0) |
 | Felix Doppelt Lecker in Gelee | nass | 75 | geschätzt | 74,6 | rossmann.de |
 | Gourmet Gold Zarte Häppchen | nass | 73 | geschätzt | 72,8 | fressnapf.de |
 | Gourmet Gold Raffiniertes Ragout | nass | 110 | geschätzt | 110,5 | fressnapf.de |
@@ -448,3 +448,55 @@ Josera, Sanabelle, Bozita, MAC's, Applaws, FIT+FUN, Winston und dm stehen nur be
 - Josera Catelux (20 % Fett, 391 kcal) und Applaws (404 kcal) gehören zu den kalorienreichsten Trockenfuttern der Liste.
 - Winston Knusperdinner und REWE ja! Knusper-Mix haben genau dieselben Analysewerte (gleicher Hersteller ist wahrscheinlich).
 - Gourmet Gold Raffiniertes Ragout hat 110 kcal/100 g, die Zarten Häppchen derselben Marke nur 73.
+
+
+# EAN-Gegenprüfung für Runde 5 und 6 (Stand 08.11.2026, Version 0.82.0)
+
+Geprüft wurden die 68 neuen Sorten ohne EAN. Gleiche Regel wie in Runde 4: eine Nummer kommt nur in die Liste, wenn zwei
+verschiedene Firmen sie derselben Sorte und Packung zuordnen. Hausnummern der Händler (2050000…) werden nie übernommen.
+Firecrawl war leer (0 Credits), deshalb im eingebauten Browser direkt bei den Firmen: Fressnapf-Produktseiten (`gtin`),
+zooplus-Suche nach der Nummer (`/search/results?q=<EAN>`, eine erfundene Nummer liefert nichts), rossmann.de `/de/p/<EAN>`
+(404 bei unbekannter Nummer), Kaufland-Suche (`/s/?search_value=<EAN>`) und Herstellerseiten (`gtin` im Seitenkopf).
+Die Fressnapf-Suche findet keine Nummern. Die Analysewerte auf der zweiten Fundstelle wurden mit der Liste verglichen.
+**18 neue Nummern, jetzt 69 von 131 Sorten mit EAN.**
+
+| Sorte | EAN | Packung | Fundstelle | Bestätigt durch |
+|---|---|---|---|---|
+| Applaws Adult Huhn mit Lachs | 5060122491433 | 2 kg | fressnapf.de | zooplus.de |
+| Bozita Active & Sterilised Lamm | 7311030313217 | 2 kg | fressnapf.de | zooplus.de |
+| Felix Tasty Shreds | 8445290411297 | 80 × 80 g | fressnapf.de | zooplus.de |
+| Josera Catelux | 4032254749066 | 2 kg | fressnapf.de | zooplus.de, kaufland.de |
+| Josera Culinesse | 4032254749158 | 2 kg | fressnapf.de | zooplus.de |
+| JosiCat Crunchy Chicken | 4032254776017 | 650 g | fressnapf.de | zooplus.de |
+| JosiCat Sterilised Classic | 4032254753438 | 650 g | fressnapf.de | zooplus.de („Classic Lachs“, gleiche Werte) |
+| MAC's Cat 7+ Senior Light | 4027245805524 | 1,5 kg | fressnapf.de | zooplus.de |
+| MAC's Superfood Adult | 4027245805227 | 1,5 kg | fressnapf.de | zooplus.de |
+| Sanabelle Light Low Calorie | 4015598025508 | 2 kg | fressnapf.de | zooplus.de |
+| Sanabelle Sterilized | 4015598025409 | 2 kg | fressnapf.de | zooplus.de |
+| Purina ONE Indoor Formula | 8445290067289 | 750 g | zooplus.de | fressnapf.de (gleiche Werte) |
+| Royal Canin Indoor Sterilised in Soße | 9003579013793 | 12 × 85 g | zooplus.de | kaufland.de (gleiche Werte) |
+| Felix Doppelt Lecker in Gelee | 7613036898638 | 24 × 85 g | rossmann.de | zooplus.de (gleiche Werte) |
+| Whiskas Pure Delight Geflügel Ragout | 5900951302299 | 40 × 85 g | rossmann.de | zooplus.de, whiskas.de |
+| Whiskas 1+ mit Rind (trocken) | 5900951258770 | 3,8 kg | fressnapf.de | whiskas.de |
+| Happy Cat Minkas Sterilised | 4001967074208 | 1,5 kg | fressnapf.de | happycat.de |
+| Happy Cat Minkas Perfect Mix | 4001967074314 | 4 kg | fressnapf.de | happycat.de |
+
+**Werte korrigiert (Herstellerseite statt veralteter Händlerangabe):**
+- Bozita Active & Sterilised Lamm: bozita.com nennt 33 % Protein, 20 % Fett, 4 % Faser, 7 % Asche, 9 % Feuchte, 1633 kJ
+  = **390,3 kcal/100 g** (NRC 397,4). Fressnapf hatte 14 % Fett und 1561 kJ (373,1), zooplus nennt 1688 kJ. 0.81.0 war
+  nie live, deshalb braucht es keine Korrektur in gespeicherten Daten.
+- Whiskas Pure Delight Geflügel Ragout: whiskas.de und zooplus.de nennen 12,9 / 2,8 / 1,1 / 0,25 / 83,2 und **77 kcal/100 g**
+  (65,5 je Beutel). Rossmann hatte noch 60 kcal je Beutel (70,6).
+- Happy Cat Minkas Sterilised (34,5 / 9,5 / 7,5 / 5,5) und Perfect Mix (30 / 12 / 7 / 3) mit den Werten von happycat.de,
+  geschätzt 347 und 368 statt 348 und 369.
+
+**Ohne EAN geblieben:**
+- Eigenmarken, die nur eine Firma verkauft: Fressnapf (Select Gold, Premiere, Real Nature, FIT+FUN), zooplus (Concept for
+  Life, Purizon, Feringa, Rosie's Farm, Cosma), Rossmann (Winston), dm (Dein Bestes), REWE (ja!). Hier hilft nur das Packungsfoto.
+- Hausnummern bei Fressnapf (2050000…): Sheba Classics, Miamor, Schmusy, Gourmet Gold, Gourmet Mon Petit, Purina ONE nass,
+  animonda, Lily's Kitchen, Dreamies Creamy, Vitakraft Liquid-Snack.
+- Whiskas Tasty Mix: Fressnapf 4008429156113, whiskas.de nennt für Country Collection 4008429155888 (andere Packungsgröße?).
+- Perfect Fit Indoor 1+ Huhn (trocken): Rossmann 4008429159411 nur dort. Die 750-g-Packung 5900951307553 (Fressnapf, zooplus)
+  nennt andere Werte (41 % Protein, 14,5 % Fett) als die Liste (37 / 12 von rossmann.de). Erst mit Packungsfoto klären.
+- Catessy Häppchen in Gelee und Felix Party Mix: Die zooplus-Nummern gehören zu Mischpaketen.
+

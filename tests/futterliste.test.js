@@ -270,10 +270,10 @@ test("0.81.0: Runde 6 mit Herstellerwerten (Josera, Bozita in kJ, Royal Canin, K
   assert.equal(kcal("josera-catelux-trocken"), 391.2);
   assert.equal(kcal("josera-culinesse-trocken"), 373.5);
   assert.equal(kcal("josicat-sterilised-classic-trocken"), 353.7);
-  assert.equal(kcal("bozita-active-sterilised-lamm-trocken"), 373.1); // 1561 kJ / 4,184
+  assert.equal(kcal("bozita-active-sterilised-lamm-trocken"), 390.3); // 1633 kJ / 4,184 (bozita.com, seit 0.82.0)
   assert.equal(kcal("royal-canin-indoor-sterilised-sosse"), 80);
   assert.equal(kcal("kitekat-gelee-gefluegel-allerlei"), 69.4); // 59 kcal je 85 g
-  assert.equal(kcal("whiskas-pure-delight-gefluegel-ragout"), 70.6); // 60 kcal je 85 g
+  assert.equal(kcal("whiskas-pure-delight-gefluegel-ragout"), 77); // whiskas.de (seit 0.82.0, vorher 70,6 von rossmann.de)
   assert.equal(findeNachEan("4008429157226", []).eintrag.id, "kitekat-gelee-gefluegel-allerlei");
 });
 
@@ -348,4 +348,48 @@ test("0.69.0: listenGruppen lässt leere Gruppen weg (z. B. bei einer Suche)", (
 
 test("0.69.0: LISTEN_GRUPPEN nennt alle Gruppen (Auf/Zu vor einer Suche merken)", () => {
   assert.deepEqual(LISTEN_GRUPPEN, ["liste-diaet", "liste-nass", "liste-trocken", "liste-leckerli"]);
+});
+
+// ---------- 0.82.0: EAN-Gegenprüfung für Runde 5 und 6 (docs/futter-recherche.md) ----------
+
+test("0.82.0: 18 neue Nummern, jede von zwei Firmen bestätigt, gehören zur richtigen Sorte", () => {
+  const neu = {
+    "applaws-adult-huhn-lachs-trocken": "5060122491433",
+    "bozita-active-sterilised-lamm-trocken": "7311030313217",
+    "felix-tasty-shreds": "8445290411297",
+    "josera-catelux-trocken": "4032254749066",
+    "josera-culinesse-trocken": "4032254749158",
+    "josicat-crunchy-chicken-trocken": "4032254776017",
+    "josicat-sterilised-classic-trocken": "4032254753438",
+    "macs-senior-light-gefluegel-trocken": "4027245805524",
+    "macs-superfood-adult-trocken": "4027245805227",
+    "sanabelle-light-low-calorie-trocken": "4015598025508",
+    "sanabelle-sterilized-trocken": "4015598025409",
+    "purina-one-indoor-trocken": "8445290067289",
+    "royal-canin-indoor-sterilised-sosse": "9003579013793",
+    "felix-doppelt-lecker-gelee": "7613036898638",
+    "whiskas-pure-delight-gefluegel-ragout": "5900951302299",
+    "whiskas-1plus-rind-trocken": "5900951258770",
+    "happy-cat-minkas-sterilised-trocken": "4001967074208",
+    "happy-cat-minkas-perfect-mix-trocken": "4001967074314",
+  };
+  for (const [id, ean] of Object.entries(neu)) {
+    assert.equal(findeNachEan(ean, []).eintrag.id, id, ean);
+    const e = FUTTERLISTE.find((x) => x.id === id);
+    assert.match(e.eanQuelle, /, /, `${id}: zwei Firmen`);
+    assert.ok(e.eanHinweis, id);
+  }
+  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 51 + 18);
+});
+
+test("0.82.0: Werte vom Hersteller statt veralteter Händlerangaben", () => {
+  const e = (id) => FUTTERLISTE.find((x) => x.id === id);
+  assert.deepEqual(e("bozita-active-sterilised-lamm-trocken").analyse, { protein: 33, fett: 20, asche: 7, faser: 4, feuchte: 9 });
+  assert.equal(e("bozita-active-sterilised-lamm-trocken").kcalQuelle, "hersteller");
+  assert.deepEqual(e("whiskas-pure-delight-gefluegel-ragout").analyse, { protein: 12.9, fett: 2.8, asche: 1.1, faser: 0.25, feuchte: 83.2 });
+  assert.match(e("whiskas-pure-delight-gefluegel-ragout").hinweis, /65,5 kcal/);
+  assert.deepEqual(e("happy-cat-minkas-sterilised-trocken").analyse, { protein: 34.5, fett: 9.5, asche: 7.5, faser: 5.5, feuchte: null });
+  assert.equal(e("happy-cat-minkas-sterilised-trocken").kcalPro100g, 347);
+  assert.deepEqual(e("happy-cat-minkas-perfect-mix-trocken").analyse, { protein: 30, fett: 12, asche: 7, faser: 3, feuchte: null });
+  assert.equal(e("happy-cat-minkas-perfect-mix-trocken").kcalPro100g, 368);
 });
