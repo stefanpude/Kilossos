@@ -29,6 +29,17 @@ test("0.85.0: Wiegetag steht auf der Seite „Gewicht“ zwischen Gewicht-Karte 
   assert.equal(g.split("Am besten 1× pro Woche wiegen").length, 2);
 });
 
+// 0.86.1 (Stefan 08.11.): Mit einem Jahr Daten lag „Gewicht eintragen“ unter der Monatsliste weit unten.
+// Der Knopf steht jetzt direkt unter der Gewicht-Karte, über dem Wiegetag, und nur einmal auf der Seite.
+test("0.86.1: „Gewicht eintragen“ steht direkt unter der Gewicht-Karte, vor Wiegetag und Monaten", () => {
+  const g = ansicht("gewicht");
+  const knopf = g.indexOf('data-aktion="gewicht-neu"');
+  assert.ok(knopf > g.indexOf('id="gewicht-trend"'), "nach der Gewicht-Karte");
+  assert.ok(knopf < g.indexOf('<div class="eintrag eintrag-auswahl">'), "vor dem Wiegetag");
+  assert.ok(knopf < g.indexOf('id="gewicht-monate"'), "vor den Monaten");
+  assert.equal(g.split('data-aktion="gewicht-neu"').length, 2, "nur ein Knopf auf der Seite");
+});
+
 test("0.85.0: unter „Mehr“ gibt es keinen Wiegetag mehr", () => {
   const m = ansicht("mehr");
   assert.doesNotMatch(m, /wiegetag|Wiegen<\/h3>|Wochentag/i);
