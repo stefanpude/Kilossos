@@ -690,11 +690,55 @@ test("Tempo pro Woche: Achse bei Ausreißern begrenzt, Punkte am Rand mit Pfeil,
 test("Tempo pro Woche: Ø-Text innen weicht dem Wert des neuesten Punkts aus", () => {
   // −0,2 % und −0,6 %: „Ø −0,40“ passt nicht in den Rand und steht innen, der neueste Punkt liegt knapp darunter.
   const g = [G("2026-10-01", 9.0), G("2026-10-08", 9.018), G("2026-10-15", 9.0721)];
-  const svgText = tempoSvg(tVerlauf({ gewichte: g, freigaben: [], heute: "2026-10-15" }));
+  // heute zwei Tage nach dem letzten Wiegen: der Punkt liegt weiter innen, sein Wert bleibt links über ihm (seit 0.89.2;
+  // am rechten Rand stünde er im Rand und nicht mehr neben dem inneren Ø).
+  const svgText = tempoSvg(tVerlauf({ gewichte: g, freigaben: [], heute: "2026-10-17" }));
   const durch = svgText.match(/class="tempo-durch-text" x="([\d.]+)" y="([\d.]+)" text-anchor="end">Ø −0,40</);
   assert.ok(durch, "Ø innen");
-  const wertY = Number(svgText.match(/class="tempo-end-text" x="[\d.]+" y="([\d.]+)"/)[1]);
-  assert.ok(Math.abs(Number(durch[2]) - wertY) >= 12, `Ø bei y ${durch[2]}, Wert bei y ${wertY}`);
+  const wert = svgText.match(/class="tempo-end-text" x="[\d.]+" y="([\d.]+)" text-anchor="end"/);
+  assert.ok(wert, "Wert links über dem Punkt");
+  assert.ok(Math.abs(Number(durch[2]) - Number(wert[1])) >= 14, `Ø bei y ${durch[2]}, Wert bei y ${wert[1]}`);
+});
+
+// 0.89.2 (Stefan, Screenshot 09.11.): Bei einem Jahr Wiegungen liegen die Punkte nur etwa 5 Einheiten auseinander; der
+// Wert links über dem neuesten Punkt lag auf den letzten Punkten. Am rechten Rand steht er jetzt rechts im Rand wie „Ø“.
+const endText = (svgText) => {
+  const m = svgText.match(/class="tempo-end-text" x="([\d.]+)" y="([\d.]+)" text-anchor="(start|end)">([^<]*)<\/text>/);
+  return { x: Number(m[1]), y: Number(m[2]), anker: m[3], text: m[4] };
+};
+const tViele = Array.from({ length: 40 }, (_, i) => G(plusWochen(T_START, i), Math.round(9.6 * 0.993 ** i * 1000 + (i % 2) * 15) / 1000));
+
+test("0.89.2: viele Wochen, neuester Punkt am Rand – Wert rechts im Rand, Ø weicht aus", () => {
+  const html = tVerlauf({ gewichte: tViele, freigaben: [], heute: tViele.at(-1).datum });
+  const svgText = tempoSvg(html);
+  const punkte = tempoPunkte(html);
+  const letzter = punkte.at(-1);
+  assert.equal(letzter.x, 300);
+  const wert = endText(svgText);
+  assert.equal(wert.anker, "start");
+  assert.equal(wert.x, 308); // wie der Ø-Text im Rand
+  assert.ok(Math.abs(wert.y - (letzter.y + 4)) < 0.11, `Wert bei y ${wert.y}, Punkt bei y ${letzter.y}`);
+  assert.ok(punkte.every((p) => p.x + Number(p.r) < wert.x), "kein Punkt unter dem Wert");
+  const durch = svgText.match(/class="tempo-durch-text" x="([\d.]+)" y="([\d.]+)">Ø/);
+  assert.ok(durch, "Ø im Rand");
+  assert.ok(Math.abs(Number(durch[2]) - wert.y) >= 14, `Ø bei y ${durch[2]}, Wert bei y ${wert.y}`);
+  assert.doesNotMatch(html, /NaN/);
+});
+
+test("0.89.2: neuester Punkt weiter innen oder Wert zu breit – Wert wie bisher links über dem Punkt", () => {
+  // Zwei Wochen nach dem letzten Wiegen: der Punkt liegt etwa 30 Einheiten vor dem Rand.
+  const innen = tVerlauf({ heute: plusWochen(T_START, 17) });
+  const p = tempoPunkte(innen).at(-1);
+  assert.ok(300 - p.x > 12, `Punkt bei x ${p.x}`);
+  const wInnen = endText(tempoSvg(innen));
+  assert.equal(wInnen.anker, "end");
+  assert.equal(wInnen.x, Math.round((p.x - 2) * 10) / 10);
+  assert.equal(wInnen.y, Math.round((p.y - 9) * 10) / 10);
+  // Große Zunahme am Rand: „−15,5 %“ passt nicht in den Rand.
+  const breit = tempoSvg(tVerlauf({ gewichte: [G("2026-10-01", 9.0), G("2026-10-08", 7.85), G("2026-10-15", 9.07)], freigaben: [], heute: "2026-10-15" }));
+  const wBreit = endText(breit);
+  assert.equal(wBreit.text, `−15,5${NB}%`);
+  assert.equal(wBreit.anker, "end");
 });
 
 test("Tempo pro Woche: „Alle Wochen“ bleibt, Kopfzeile unverändert", () => {

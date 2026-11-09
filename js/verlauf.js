@@ -745,22 +745,34 @@ function tempoDiagramm(raten, { vonMs, bisMs }, durchschnitt) {
   const lx = x(ms(letzte.datum));
   const ly = yk(letzte.prozent);
   const links = lx - 2 > L + 34;
-  const endY = r1(ly - 9 < TEMPO.oben ? ly + 16 : ly - 9); // am oberen Rand (Ausreißer) unter den Punkt
   // Zahl nahe den Grenzen mit zwei Stellen in Richtung des Urteils (tempoZahl, seit 0.40.1); Zunahme mit echtem Minus.
   const endZahl = tempoZahl(letzte.prozent);
-  const endWert = letzte.prozent < 0 && /[1-9]/.test(endZahl) ? `−${endZahl}` : endZahl;
-  const endText = `<text class="tempo-end-text" x="${links ? r1(lx - 2) : r1(lx + 8)}" y="${endY}" text-anchor="${links ? "end" : "start"}">${sicher(endWert)}${NB}%</text>`;
+  const endWert = `${letzte.prozent < 0 && /[1-9]/.test(endZahl) ? `−${endZahl}` : endZahl}${NB}%`;
+  // Seit 0.89.2: Liegt der neueste Punkt am rechten Rand (höchstens 12 Einheiten davor), steht sein Wert rechts daneben
+  // im Rand wie der Ø-Text. Bei vielen Wochen (Punkte etwa 5 Einheiten auseinander) lag er links über dem Punkt auf
+  // den letzten Punkten (Stefan, Screenshot 09.11.2026). Passt er nicht in den Rand (geschätzt 6 Einheiten je Zeichen,
+  // 4 Einheiten Innenabstand des Papiers) oder liegt der Punkt weiter innen, steht er wie bisher über dem Punkt.
+  const randX = W - R + 8;
+  const wertImRand = W - R - lx <= 12 && randX + endWert.length * 6 <= W + 4;
+  const endX = wertImRand ? randX : links ? r1(lx - 2) : r1(lx + 8);
+  const endY = wertImRand
+    ? r1(Math.min(grund, Math.max(TEMPO.oben + 9, ly + 4)))
+    : r1(ly - 9 < TEMPO.oben ? ly + 16 : ly - 9); // am oberen Rand (Ausreißer) unter den Punkt
+  const endText = `<text class="tempo-end-text" x="${endX}" y="${endY}" text-anchor="${wertImRand || !links ? "start" : "end"}">${sicher(endWert)}</text>`;
 
   // Ø im rechten Rand, wenn der Text dort hineinpasst (geschätzt 6 Einheiten je Zeichen, 4 Einheiten Innenabstand
-  // des Papiers dürfen mitgenutzt werden); sonst innen am rechten Rand. Innen weicht der Text dem Wert des neuesten
-  // Punkts aus (Grundlinien mindestens 12 Einheiten auseinander), der Strich bleibt beim Durchschnitt.
+  // des Papiers dürfen mitgenutzt werden); sonst innen am rechten Rand. Steht der Wert des neuesten Punkts in derselben
+  // Spalte (beide im Rand, seit 0.89.2, oder beide innen), weicht der Ø-Text aus (Grundlinien mindestens 14 Einheiten
+  // auseinander, bis 0.89.1 waren es 12: im Browser nur knapp 2 Einheiten zwischen den Ziffern); der Strich bleibt
+  // beim Durchschnitt.
   const yd = yk(durchschnitt);
   const dText = `Ø ${mitMinus(durchschnitt, 2)}`;
   const imRand = W - R + 8 + dText.length * 6 <= W + 4;
+  const gleicheSpalte = imRand ? wertImRand : !wertImRand && links;
   let dy = r1(yd + 4);
-  if (!imRand && links && Math.abs(dy - endY) < 12) {
-    const drueber = r1(endY - 12);
-    const drunter = r1(endY + 12);
+  if (gleicheSpalte && Math.abs(dy - endY) < 14) {
+    const drueber = r1(endY - 14);
+    const drunter = r1(endY + 14);
     dy = (dy < endY && drueber >= TEMPO.oben) || drunter > grund ? drueber : drunter;
   }
   const durch = imRand
