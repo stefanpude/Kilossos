@@ -1,7 +1,7 @@
 # Kilossos – Sicherheitsgrenzen für die Gewichtsabnahme bei Katzen
 
 **Entwurf vom 01.11.2026, Quellen abgeglichen am 02.11.2026 – zur Prüfung durch die behandelnde Tierärztin**
-Tier: Kito, Kater, kastriert, Wohnungskatze · 9,32 kg (Praxis, Oktober 2026) · BCS noch nicht erhoben
+Tier: Kito, Kater, kastriert, Wohnungskatze · 9,32 kg (Praxis, 17.09.2026) · BCS noch nicht erhoben
 
 > **Wichtiger Hinweis.** Dieses Dokument hat eine KI (Claude, Anthropic) verfasst. Sie hat dafür veröffentlichte
 > Leitlinien und Fachliteratur ausgewertet und dabei aus tierärztlicher Sicht argumentiert.

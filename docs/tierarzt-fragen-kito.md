@@ -8,7 +8,7 @@ Weitere Blätter: [Zuki](tierarzt-fragen-zuki.md) und [Fragen zur App](tierarzt-
 
 ## Ausgangslage
 - Kito, Kater, kastriert, von Natur aus sehr groß
-- Gewicht: 9,32 kg (Praxis, Oktober 2026)
+- Gewicht: 9,32 kg (Praxis, 17.09.2026)
 - Wohnungskatze, wenig Bewegung (geht wegen der Baustelle nicht mehr raus)
 - Futter: Sheba Fresh & Fine „Huhn, Geflügel & Truthahn“ (nass, ca. 77 kcal/100 g, aus den Werten auf dem Umkarton
   berechnet, etwa 38,5 kcal je 50-g-Beutel) und Purina ONE Light (trocken, ca. 327 kcal/100 g)
