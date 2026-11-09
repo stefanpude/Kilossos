@@ -263,8 +263,8 @@ test("0.37.0: liegt ein gemessener Energiewert unter dem Packungswert, steht er 
 
 // ---------- 0.80.0: fünfte Runde, Breite (docs/futter-recherche.md) ----------
 
-test("0.80.0 bis 0.86.0: Runde 5 bringt 39 Sorten, Runde 6 34, Runde 7 (Leckerlis) 32, Runde 8 (Nass und Haupt) 12, Runde 9 (Diät) 6, zusammen 181", () => {
-  assert.equal(FUTTERLISTE.length, 181);
+test("0.80.0 bis 0.86.0: Runde 5 bringt 39 Sorten, Runde 6 34, Runde 7 (Leckerlis) 32, Runde 8 (Nass und Haupt) 12, Runde 9 (Diät) 6, zusammen 181 (mit Runde 10 seit 0.87.0: 202)", () => {
+  assert.equal(FUTTERLISTE.length, 181 + 21);
   assert.equal(FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-08").length, 39 + 34 + 32 + 12 + 6);
 });
 
@@ -401,7 +401,7 @@ test("0.82.0: Werte vom Hersteller statt veralteter Händlerangaben", () => {
 
 test("0.83.0: 42 Leckerlis, jedes sagt, was ein Stück oder ein Beutel bringt, oder dass das Stückgewicht fehlt", () => {
   const leckerlis = FUTTERLISTE.filter((e) => e.typ === "leckerli");
-  assert.equal(leckerlis.length, 10 + 32);
+  assert.equal(leckerlis.length, 10 + 32 + 7); // + 7 aus Runde 10 (0.87.0)
   for (const e of leckerlis) {
     assert.match(e.hinweis, /≈ [\d,]+ kcal|Stückgewicht nicht angegeben/, e.id);
   }
@@ -409,7 +409,7 @@ test("0.83.0: 42 Leckerlis, jedes sagt, was ein Stück oder ein Beutel bringt, o
 
 test("0.83.0: jedes neue Leckerli sagt, dass es nur zusätzlich zu einem Alleinfutter gehört", () => {
   const neu = FUTTERLISTE.filter((e) => e.typ === "leckerli" && FUTTERLISTE.indexOf(e) > FUTTERLISTE.findIndex((x) => x.id === "dm-dein-bestes-dental-knabbertaschen"));
-  assert.equal(neu.length, 32);
+  assert.equal(neu.length, 32 + 7); // + 7 aus Runde 10 (0.87.0), stehen am Ende der Liste
   for (const e of neu) assert.match(e.hinweis, /Ergänzungsfuttermittel, kein Alleinfutter/, e.id);
 });
 
@@ -456,7 +456,7 @@ test("0.83.0: der Scanner findet die neuen Whiskas-Nummern (whiskas.de und zoopl
 test("0.83.0: Suche findet den Felix Party Mix auch als KnabberMix, Leckerli-Gruppe zeigt alle 42", () => {
   assert.deepEqual(sucheFutter("knabbermix").map((e) => e.id), ["felix-party-mix"]);
   const gruppe = listenGruppen(FUTTERLISTE).find((g) => g.id === "liste-leckerli");
-  assert.equal(gruppe.eintraege.length, 42);
+  assert.equal(gruppe.eintraege.length, 42 + 7); // + 7 aus Runde 10 (0.87.0)
 });
 
 test("0.83.0: keine Paste über der Leckerli-Grenze in der Liste (GimCat- und Trixie-Malzpasten bleiben draußen)", () => {
@@ -470,7 +470,7 @@ test("0.83.0: keine Paste über der Leckerli-Grenze in der Liste (GimCat- und Tr
 test("0.84.0 und 0.86.0: Runde 8 bringt 5 Trockenfutter und 7 Nassfutter, Runde 9 sechs Diätfutter, die Gruppen zählen 24/71/44/42", () => {
   assert.deepEqual(
     listenGruppen(FUTTERLISTE).map((g) => g.eintraege.length),
-    [18 + 6, 64 + 7, 39 + 5, 42]
+    [18 + 6, 64 + 7 + 10, 39 + 5 + 4, 42 + 7] // + Runde 10 (0.87.0): 10 nass, 4 trocken, 7 Leckerli
   );
 });
 
@@ -494,7 +494,7 @@ test("0.84.0: zwei neue Nummern, je von Fressnapf und zooplus bestätigt", () =>
   for (const ean of ["9003579309544", "9003579308738", "4002633758132", "4250839505641", "7613036730358", "7613033057991"]) {
     assert.equal(findeNachEan(ean, []), null, ean);
   }
-  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 69 + 5 + 2 + 2); // + 2 aus Runde 9 (0.86.0)
+  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 69 + 5 + 2 + 2 + 3); // + 2 aus Runde 9 (0.86.0), + 3 Sorten aus Runde 10 (0.87.0)
 });
 
 // ---------- 0.86.0: neunte Runde, Diätfutter aus der Medpets-Liste „Übergewicht“ (docs/futter-recherche.md) ----------
@@ -559,4 +559,103 @@ test("0.86.0: Hinweise nennen Messwert (Affinity) und Beutel-kcal (Hill's), Brit
   assert.equal(sucheFutter("trovet").length, 0);
   assert.equal(sucheFutter("brit dose").length, 0);
   assert.equal(sucheFutter("sanimed").length, 0);
+});
+
+// ---------- 0.87.0: zehnte Runde, Purina Gourmet und Felix (docs/futter-recherche.md) ----------
+
+const RUNDE_10 = {
+  // Nassfutter (Alleinfutter)
+  "felix-original-gelee": ["nass", 71],
+  "felix-koestliche-scheibchen": ["nass", 74],
+  "felix-so-gut-junior": ["nass", 90],
+  "felix-so-gut-senior": ["nass", 82],
+  "gourmet-gold-feine-komposition": ["nass", 79],
+  "gourmet-gold-saftig-feine-streifen": ["nass", 86],
+  "gourmet-gold-terrine": ["nass", 98],
+  "gourmet-natures-creations": ["nass", 85],
+  "gourmet-natures-creations-gravy-heart": ["nass", 101],
+  "gourmet-revelations-mousse": ["nass", 86],
+  // Suppen, Saucen und Snacks (Ergänzungsfutter, zählen als Leckerli)
+  "gourmet-soup-royale": ["leckerli", 53],
+  "felix-soup-time-original": ["leckerli", 49],
+  "felix-soup-time-tender-strips": ["leckerli", 49],
+  "felix-sauce-time": ["leckerli", 25],
+  "felix-tasty-nuggets-lachs-forelle": ["leckerli", 405],
+  "felix-tasty-nuggets-rind-lamm": ["leckerli", 398],
+  "felix-play-tubes": ["leckerli", 414],
+  // Trockenfutter
+  "felix-doppelt-lecker-trocken": ["trocken", 360],
+  "felix-inhome-doppelt-lecker-trocken": ["trocken", 356],
+  "felix-junior-doppelt-lecker-trocken": ["trocken", 372],
+  "felix-senior-doppelt-lecker-trocken": ["trocken", 355],
+};
+
+test("0.87.0: Runde 10 bringt 21 Sorten von Gourmet und Felix (10 nass, 7 Leckerli, 4 trocken), zusammen 202", () => {
+  for (const [id, [typ, kcal]] of Object.entries(RUNDE_10)) {
+    const e = FUTTERLISTE.find((x) => x.id === id);
+    assert.ok(e, id);
+    assert.equal(e.typ, typ, id);
+    assert.equal(e.kcalPro100g, kcal, id);
+    assert.equal(e.diaet, false, id);
+    assert.equal(e.abgerufen, "2026-11-09", id);
+    assert.match(e.name, /^(Gourmet|Felix) /, id);
+  }
+  assert.equal(FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-09").length, 21);
+  assert.equal(FUTTERLISTE.length, 202);
+});
+
+test("0.87.0: nur Sauce Time hat einen Herstellerwert (10 kcal je 40-g-Beutel, zooplus.de und rossmann.de)", () => {
+  const neu = FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-09");
+  assert.deepEqual(neu.filter((e) => e.kcalQuelle === "hersteller").map((e) => e.id), ["felix-sauce-time"]);
+  assert.equal((10 / 40) * 100, 25);
+  assert.equal(Math.round(nachrechnung(FUTTERLISTE.find((e) => e.id === "felix-sauce-time")) * 10) / 10, 23.8);
+  assert.match(FUTTERLISTE.find((e) => e.id === "felix-sauce-time").hinweis, /10 kcal/);
+});
+
+test("0.87.0: Suppen und Saucen sind Ergänzungsfutter, sagen das und nennen die kcal je Beutel", () => {
+  const hinweis = (id) => FUTTERLISTE.find((e) => e.id === id).hinweis;
+  for (const id of ["gourmet-soup-royale", "felix-soup-time-original", "felix-soup-time-tender-strips", "felix-sauce-time", "felix-tasty-nuggets-lachs-forelle", "felix-tasty-nuggets-rind-lamm", "felix-play-tubes"]) {
+    assert.match(hinweis(id), /Ergänzungsfuttermittel, kein Alleinfutter/, id);
+  }
+  // Beutelgewicht × kcal pro 100 g / 100, von Hand: 45 × 53 = 23,85; 48 × 49 = 23,52; 40 × 25 = 10
+  assert.match(hinweis("gourmet-soup-royale"), /45-g-Beutel ≈ 23,9 kcal/);
+  assert.match(hinweis("felix-soup-time-original"), /48-g-Beutel ≈ 23,5 kcal/);
+  assert.match(hinweis("felix-soup-time-tender-strips"), /48-g-Beutel ≈ 23,5 kcal/);
+  assert.match(hinweis("felix-sauce-time"), /40-g-Beutel ≈ 10 kcal/);
+  // 13 g ≈ 30 Stück: 0,43 g × 405 = 1,75; 0,43 g × 398 = 1,72
+  assert.match(hinweis("felix-tasty-nuggets-lachs-forelle"), /1 Stück ≈ 0,4 g ≈ 1,8 kcal/);
+  assert.match(hinweis("felix-tasty-nuggets-rind-lamm"), /1 Stück ≈ 0,4 g ≈ 1,7 kcal/);
+  assert.match(hinweis("felix-play-tubes"), /Stückgewicht nicht angegeben/);
+});
+
+test("0.87.0: fünf neue Nummern, je von rossmann.de und zooplus.de bestätigt", () => {
+  const neu = {
+    "7613036631952": "felix-soup-time-original", // 6 × 48 g vom Land
+    "7613036631976": "felix-soup-time-original", // 6 × 48 g aus dem Wasser
+    "8445291989993": "felix-sauce-time", // 6 × 40 g
+    "8445291848467": "gourmet-soup-royale", // 6 × 45 g Fleischauswahl
+    "8445291848702": "gourmet-soup-royale", // 6 × 45 g Fischauswahl
+  };
+  for (const [ean, id] of Object.entries(neu)) assert.equal(findeNachEan(ean, []).eintrag.id, id, ean);
+  for (const id of ["felix-soup-time-original", "felix-sauce-time", "gourmet-soup-royale"]) {
+    assert.equal(FUTTERLISTE.find((e) => e.id === id).eanQuelle, "rossmann.de, zooplus.de", id);
+  }
+  // Nur bei einer Firma gefunden, deshalb ohne Nummer: Tender Strips (zooplus 7613287068798, Fressnapf 7613287611864),
+  // Felix in Gelee, Köstliche Scheibchen, Junior, Senior, Gourmet Gold, Nature's Creations, Revelations, Trockenfutter, Nuggets.
+  for (const ean of ["7613287068798", "7613287611864", "7613287334497", "7613287762962", "7613036894623", "8445290502438", "8445291678637", "8445290518200"]) {
+    assert.equal(findeNachEan(ean, []), null, ean);
+  }
+  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 69 + 5 + 2 + 2 + 3);
+});
+
+test("0.87.0: Suche findet die neuen Sorten über ein Wort, Stefans zwei Suppen zuerst", () => {
+  assert.deepEqual(sucheFutter("soup royale").map((e) => e.id), ["gourmet-soup-royale"]);
+  assert.deepEqual(sucheFutter("tender strips").map((e) => e.id), ["felix-soup-time-tender-strips"]);
+  assert.deepEqual(sucheFutter("soup time").map((e) => e.id), ["felix-soup-time-original", "felix-soup-time-tender-strips"]);
+  assert.equal(sucheFutter("sauce time")[0]?.id, "felix-sauce-time");
+  assert.equal(sucheFutter("tasty nuggets").length, 3);
+  assert.equal(sucheFutter("doppelt lecker trocken").length, 4);
+  assert.equal(sucheFutter("mousse")[0]?.id, "hills-metabolic-mousse-nass"); // Diätfutter bleibt vorn
+  assert.equal(sucheFutter("gourmet").length, 7 + 7);
+  assert.equal(sucheFutter("felix").length, 9 + 14);
 });

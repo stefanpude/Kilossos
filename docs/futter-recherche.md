@@ -686,3 +686,74 @@ nicht noch einmal geprüft werden.
   Trockenmasse“ wäre technisch einfach, gehört aber zur Karte „Zucker und Getreide“ auf der Ideen-Tafel (nach dem 13.11.,
   mit der Antwort der Tierärztin). Beim Abnehmen zählen vor allem die kcal; Kohlenhydrate sind eher bei Diabetes wichtig.
 - Weitere Diätfutter kommen am ehesten über Fotos aus der Praxis (13.11.).
+
+# Kilossos-Futterliste, zehnte Runde: Purina Gourmet und Felix (Stand 09.11.2026, Version 0.87.0)
+
+Auftrag von Stefan: Gourmet Soup Royale und Felix Soup Time Tender Strips aufnehmen, dazu alles, was sich sonst zu Gourmet und
+Felix findet. **21 neue Sorten, zusammen 202** (Diätfutter 24, Nassfutter 81, Trockenfutter 48, Leckerlis 49). Gleiche Prüfung
+wie in den Runden 1 bis 9: geschätzte Werte sind genau die gerundete NRC-Nachrechnung (Trockenfutter ohne Feuchteangabe mit 8 %),
+Herstellerwerte höchstens 10 % daneben. **Bei Abweichung gilt die Packung.**
+
+**Quellen:** purina.de (Produktseiten mit Analysewerten, aber ohne kcal und ohne EAN), zooplus.de (Analysewerte, EANs, auch
+ohne kcal), rossmann.de und fressnapf.de für die Gegenprüfung der EANs. purina.de hat nach 49 Produktseiten den Zugriff gesperrt
+(Bot-Schutz „Incapsula“, Antwort 403); die übrigen Sorten kommen deshalb von zooplus.de. Nur Felix Sauce Time nennt einen
+kcal-Wert („10 kcal pro Beutel“, zooplus.de und rossmann.de).
+
+**Suppen, Saucen und Snacks zählen als Leckerli:** Soup Royale, Soup Time und Sauce Time sind Ergänzungsfuttermittel. Wie die
+cremigen Snacks (Runde 7) stehen sie deshalb unter „Leckerlis“ und zählen in die 10-%-Grenze für Extras.
+
+**EANs:** 5 neue Nummern bei 3 Sorten, je von rossmann.de und zooplus.de bestätigt: Felix Soup Time Original 7613036631952
+(6 × 48 g vom Land) und 7613036631976 (6 × 48 g aus dem Wasser), Felix Sauce Time 8445291989993 (6 × 40 g), Gourmet Soup Royale
+8445291848467 (6 × 45 g Fleischauswahl) und 8445291848702 (6 × 45 g Fischauswahl). **Jetzt 81 von 202 Sorten mit EAN.**
+Nur bei einer Firma gefunden und deshalb ohne EAN: Felix Soup Time Tender Strips (zooplus.de 7613287068798 und 7613287069122,
+fressnapf.de 7613287611864 für „Rind, Huhn, Thunfisch“), Soup Time Gemischte Vielfalt 7613036632416, Felix in Gelee
+7613287334497, Original Mix 7613039916254, Köstliche Scheibchen 7613287762962/…2993, Junior 7613036894623, Senior
+7613036893701/…3596, Nature's Creations 7613038054636, Gravy Heart 8445290985491, Saftig-feine Streifen 8445290502438/…2452,
+Revelations 7613287352996/…3054/7613287080059, Terrine 3222270171359, Duo Delice 3222270493901, alle Felix-Trockenfutter
+(8445291671751, …730830, …677951, …678637, …679726, …673618) und die Tasty Nuggets (8445290518200, …518170).
+
+| Sorte | Art | kcal/100 g | Status | NRC | Quelle |
+|---|---|---|---|---|---|
+| **Nassfutter** | | | | | |
+| Felix Original in Gelee | nass | 71 | geschätzt | 71,4 | zooplus.de |
+| Felix Köstliche Scheibchen in Gelee | nass | 74 | geschätzt | 73,9 | zooplus.de |
+| Felix So gut wie es aussieht Junior | nass | 90 | geschätzt | 89,7 | purina.de, zooplus.de |
+| Felix So gut wie es aussieht Senior | nass | 82 | geschätzt | 81,9 | purina.de, zooplus.de |
+| Gourmet Gold Feine Komposition | nass | 79 | geschätzt | 79,3 | purina.de (zooplus.de „Duo Delice“: Fett 2,7 %) |
+| Gourmet Gold Saftig-feine Streifen | nass | 86 | geschätzt | 85,5 | zooplus.de |
+| Gourmet Gold Terrine mit Gemüse | nass | 98 | geschätzt | 98,1 | zooplus.de |
+| Gourmet Nature's Creations | nass | 85 | geschätzt | 85,3 | purina.de, zooplus.de |
+| Gourmet Nature's Creations Gravy Heart | nass | 101 | geschätzt | 100,8 | zooplus.de |
+| Gourmet Revelations Mousse | nass | 86 | geschätzt | 85,6 | zooplus.de |
+| **Suppen, Saucen und Snacks (Leckerli)** | | | | | |
+| Gourmet Soup Royale (45 g ≈ 23,9 kcal) | Leckerli | 53 | geschätzt | 52,6 | purina.de, zooplus.de |
+| Felix Soup Time Original (48 g ≈ 23,5 kcal) | Leckerli | 49 | geschätzt | 49,4 | purina.de, zooplus.de |
+| Felix Soup Time Tender Strips (48 g ≈ 23,5 kcal) | Leckerli | 49 | geschätzt | 49,4 | zooplus.de, fressnapf.de |
+| Felix Sauce Time (40 g ≈ 10 kcal) | Leckerli | 25 | Hersteller (10 kcal/40 g) | 23,8 | zooplus.de, rossmann.de |
+| Felix Tasty Nuggets Lachs & Forelle | Leckerli | 405 | geschätzt | 405,0 | zooplus.de |
+| Felix Tasty Nuggets Rind & Lamm | Leckerli | 398 | geschätzt | 398,0 | zooplus.de |
+| Felix Play Tubes | Leckerli | 414 | geschätzt | 413,5 | purina.de |
+| **Trockenfutter** | | | | | |
+| Felix Doppelt lecker | trocken | 360 | geschätzt | 360,1 | zooplus.de |
+| Felix Inhome Doppelt lecker | trocken | 356 | geschätzt | 356,2 | zooplus.de |
+| Felix Junior Doppelt lecker | trocken | 372 | geschätzt | 372,0 | zooplus.de |
+| Felix Senior Doppelt lecker | trocken | 355 | geschätzt | 355,2 | zooplus.de |
+
+**Was auffällt:**
+- Die Suppen haben nur gut halb so viel Energie wie normales Nassfutter (49–53 statt 71–101 kcal/100 g), ein Beutel bringt
+  etwa 24 kcal. Felix Sauce Time ist fast nur Wasser (93,8 %), 10 kcal je Beutel.
+- Gourmet Nature's Creations Gravy Heart (101) und Gourmet Gold Terrine (98) liegen deutlich über den übrigen Gourmet-Beuteln.
+- Felix Original in Gelee hat weniger Eiweiß (8,5 %) als „So gut wie es aussieht“ (11,5 %).
+- Junior-Sorten (nass 90, trocken 372) sind für Kätzchen gedacht, nicht zum Abnehmen; der Hinweis sagt das.
+
+**Schon in der Liste, nicht doppelt aufgenommen:** Gourmet Mon Petit (gleiche Werte wie „Mon Petit Intense“), Gourmet Gold
+Raffiniertes Ragout Duetto (fast gleich wie Raffiniertes Ragout), Felix Sensations Extras und Crunchy (gleiche Werte wie
+„So gut wie es aussieht“), Felix KnabberMix-Sorten (beim Felix Party Mix), Felix Crispies Lamm, Felix Deli Moments.
+
+**Nicht aufgenommen:**
+- Gourmet Perle Duetto, Perle „Genuss in Sauce/Gelee“ und die Mischpakete: zooplus.de nennt für alle Mischungen einer Seite
+  nur einen Satz Analysewerte (11/2,5/2/0,1/82), die Herstellerseiten waren gesperrt. Später über purina.de nachholen.
+- Gourmet My Fresh, Gourmet Gold Delicatesse, Gourmet Revelations Feine Häppchen in Gelee, Felix Sensations Saucen,
+  Felix Doppelt Lecker InHome nass: nur auf purina.de gelistet, Seiten gesperrt.
+- Felix Doppelt lecker Lachs & Seefisch (trocken): zooplus.de nennt 30 % Rohasche und 8 % Rohfaser (offenbar Tippfehler).
+- Ältere Felix-Trockenfutter (Sensations, Crunchy & Soft): bei zooplus.de nur noch Weiterleitung, keine Werte.
