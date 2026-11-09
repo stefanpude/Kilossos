@@ -406,7 +406,8 @@ function profilHtml(einTier, groesse) {
     ? `<img src="${sicher(einTier.foto)}" alt="">`
     : `<span class="initiale" aria-hidden="true">${initiale}</span>`;
   if (groesse === "klein") return `<span class="avatar">${bild}</span>`;
-  return `${bild}<span class="kamera" aria-hidden="true">${SYMBOL.kamera}</span>`;
+  // Kamera-Symbol nur als Hinweis ohne Foto (0.86.2): Auf einem Foto verdeckte es dessen Ecke.
+  return fotoGueltig(einTier.foto) ? bild : `${bild}<span class="kamera" aria-hidden="true">${SYMBOL.kamera}</span>`;
 }
 
 // ---------- Heute ----------

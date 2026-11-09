@@ -36,6 +36,15 @@ test("0.74.1: Kamera-Knopf am Profilbild ist ein Quadrat mit 21 % Ecken", () => 
   assert.doesNotMatch(r, /50%/);
 });
 
+// 0.86.2 (Stefan 09.11.2026): Mit Foto verdeckte das Kamera-Symbol dessen Ecke. Es bleibt nur als Hinweis ohne Foto.
+test("0.86.2: Kamera-Symbol auf „Heute“ nur, solange kein Foto hinterlegt ist", () => {
+  const app = readFileSync(new URL("../app.js", import.meta.url), "utf8");
+  const start = app.indexOf("function profilHtml(");
+  const f = app.slice(start, app.indexOf("\n}", start));
+  assert.match(f, /return fotoGueltig\(einTier\.foto\) \? bild : `\$\{bild\}<span class="kamera" aria-hidden="true">/);
+  assert.equal(f.split('class="kamera"').length, 2, "nur eine Stelle mit dem Symbol");
+});
+
 test("0.74.1: Tagespfeile auf „Heute“ (.knopf-rund) sind Quadrate mit 21 % Ecken, Tippfläche bleibt 48 px", () => {
   const r = regel(".knopf-rund");
   assert.match(r, /border-radius: 21%;/);
