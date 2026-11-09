@@ -90,6 +90,7 @@ import { sicherungPruefen, einleseFrage } from "./js/sicherung.js";
 import { frage, bestaetigt } from "./js/rueckfrage.js";
 import { uhrzeitVorbelegung, tagAusKalender } from "./js/nachtragen.js";
 import { zuruecktaste } from "./js/zurueck.js";
+import { profilAktion, zoomVon } from "./js/profilbild.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
 if ("serviceWorker" in navigator) {
@@ -473,7 +474,7 @@ function zeichneHeute(vonNull = false) {
 
   // Kopf
   $("profil").innerHTML = profilHtml(tier, "gross");
-  $("profil").setAttribute("aria-label", `Profil und Foto von ${tier.name}`);
+  $("profil").setAttribute("aria-label", profilAktion(tier) === "gross" ? `Foto von ${tier.name} groß ansehen` : `Profil und Foto von ${tier.name}`);
   const mehrere = daten.tiere.length > 1;
   $("tier-wechsel").disabled = !mehrere;
   $("tier-pfeil").hidden = !mehrere;
@@ -1039,7 +1040,11 @@ $("form-profil").addEventListener("submit", async (ereignis) => {
 function verlaufKopf() {
   const erste = gewichteSortiert(daten.gewichte.filter((g) => g.tierId === tier.id)).at(-1);
   const seit = erste ? ` · seit dem ${new Date(erste.datum + "T12:00").toLocaleDateString("de-DE")}` : "";
-  return `<div class="verlauf-kopf">${profilHtml(tier, "klein")}<div><h2>Verlauf</h2><p>${sicher(tier.name)}${seit}</p></div></div>`;
+  // Mit Foto ist das Bild ein Knopf zur Großansicht (0.89.0), ohne Foto bleibt es Schmuck.
+  const bild = profilAktion(tier) === "gross"
+    ? `<button type="button" class="profilbild-knopf" data-aktion="profilbild-gross" aria-label="Foto von ${sicher(tier.name)} groß ansehen">${profilHtml(tier, "klein")}</button>`
+    : profilHtml(tier, "klein");
+  return `<div class="verlauf-kopf">${bild}<div><h2>Verlauf</h2><p>${sicher(tier.name)}${seit}</p></div></div>`;
 }
 
 // Vorher/Nachher: ältestes und neuestes Foto an Wägungen; fehlt eins, steht der gezeichnete Katzenkopf da.
@@ -2739,21 +2744,102 @@ function menueTastatur(feld, zu) {
 menueTastatur($("profil-feld"), profilMenueZu);
 menueTastatur($("tier-feld"), tierMenueZu);
 
+// Mit Foto zeigt Antippen das Bild groß (0.89.0); Foto ändern oder entfernen geht dann im Profil-Fenster.
+// Ohne Foto bleibt das Menü, das Kamera-Symbol lädt dazu ein.
 function profilAntippen() {
   if ($("profil-feld").classList.contains("offen")) return profilMenueZu();
   tierMenueZu();
-  const mitFoto = fotoGueltig(tier.foto);
+  if (profilAktion(tier) === "gross") return oeffneProfilbild(() => $("profil"));
   $("profil-feld").insertAdjacentHTML(
     "beforeend",
     `<ul class="auswahl-menue profil-menue" role="menu">
       <li role="none"><button type="button" role="menuitem" data-aktion="profil-oeffnen">Profil bearbeiten</button></li>
-      <li role="none"><button type="button" role="menuitem" data-aktion="foto-aendern">${mitFoto ? "Foto ändern" : "Foto wählen"}</button></li>
-      ${mitFoto ? '<li role="none"><button type="button" role="menuitem" data-aktion="foto-entfernen">Foto entfernen</button></li>' : ""}
+      <li role="none"><button type="button" role="menuitem" data-aktion="foto-aendern">Foto wählen</button></li>
     </ul>`
   );
   $("profil-feld").classList.add("offen");
   $("profil-feld").querySelector(".profil-menue button").focus();
 }
+
+// Großansicht des Profilbilds (0.89.0, .planning/profilbild-gross.md): Das Bild wächst von seiner Stelle in die Mitte
+// (FLIP mit der Web Animations API, nur transform) und beim Schließen schneller dorthin zurück.
+// Bei „weniger Bewegung“ nur Ein- und Ausblenden. Die Zurücktaste schließt das Fenster wie jedes <dialog> (0.88.0).
+const ZOOM_KURVE = "cubic-bezier(0.23, 1, 0.32, 1)";
+let profilbildQuelle = null; // findet das kleine Bild neu, weil Heute und Verlauf es beim Zeichnen ersetzen
+let profilbildSchliesst = false;
+
+function profilbildRahmen() {
+  const el = profilbildQuelle?.();
+  if (!el?.isConnected || !el.checkVisibility()) return null;
+  const r = el.getBoundingClientRect();
+  return r.bottom > 0 && r.top < innerHeight ? r : null;
+}
+
+function einblenden(el, aus, optionen) {
+  return el.animate(aus ? [{ opacity: 1 }, { opacity: 0 }] : [{ opacity: 0 }, { opacity: 1 }], { fill: aus ? "forwards" : "backwards", ...optionen });
+}
+
+function oeffneProfilbild(quelle) {
+  if (profilAktion(tier) !== "gross") return;
+  const dialog = $("dialog-profilbild");
+  const bild = $("profilbild-bild");
+  profilbildQuelle = quelle;
+  profilbildSchliesst = false;
+  bild.src = tier.foto;
+  bild.alt = `Foto von ${tier.name}`;
+  $("profilbild-name").textContent = tier.name;
+  dialog.showModal();
+  const zoom = ohneBewegung() ? null : zoomVon(profilbildRahmen(), bild.getBoundingClientRect());
+  if (zoom) {
+    // 21 % Ecken am Anfang = 21 % des kleinen Bildes nach dem Verkleinern, so sieht der Start aus wie das Profilbild.
+    bild.animate(
+      [{ transform: zoom.transform, borderRadius: "21%" }, { transform: "none", borderRadius: getComputedStyle(bild).borderRadius }],
+      { duration: 280, easing: ZOOM_KURVE }
+    );
+  } else einblenden(bild, false, { duration: 150, easing: "ease-out" });
+  for (const el of dialog.querySelectorAll("figcaption, .profilbild-profil, .profilbild-zu")) {
+    einblenden(el, false, { duration: 200, delay: zoom ? 120 : 0, easing: "ease-out" });
+  }
+}
+
+function schliesseProfilbild() {
+  const dialog = $("dialog-profilbild");
+  if (!dialog.open || profilbildSchliesst) return;
+  profilbildSchliesst = true;
+  const bild = $("profilbild-bild");
+  const zoom = ohneBewegung() ? null : zoomVon(profilbildRahmen(), bild.getBoundingClientRect());
+  const dauer = zoom ? 200 : 120;
+  for (const el of dialog.querySelectorAll("figcaption, .profilbild-profil, .profilbild-zu")) einblenden(el, true, { duration: 100 });
+  try {
+    einblenden(dialog, true, { duration: dauer, easing: "ease-out", pseudoElement: "::backdrop" });
+  } catch {
+    // ältere Browser ohne Animation am Hintergrund: er verschwindet dann mit dem Fenster
+  }
+  const lauf = zoom
+    ? bild.animate(
+        [{ transform: "none", borderRadius: getComputedStyle(bild).borderRadius }, { transform: zoom.transform, borderRadius: "21%" }],
+        { duration: dauer, easing: ZOOM_KURVE, fill: "forwards" }
+      )
+    : einblenden(bild, true, { duration: dauer, easing: "ease-out" });
+  lauf.finished.then(() => dialog.open && dialog.close("schliessen"), () => {});
+}
+
+// Antippen von Bild, Name oder Hintergrund schließt; die Knöpfe laufen über den Klick-Schalter unten.
+$("dialog-profilbild").addEventListener("click", (ereignis) => {
+  if (!ereignis.target.closest("button")) schliesseProfilbild();
+});
+// Escape schließt mit derselben Animation.
+$("dialog-profilbild").addEventListener("cancel", (ereignis) => {
+  ereignis.preventDefault();
+  schliesseProfilbild();
+});
+$("dialog-profilbild").addEventListener("close", () => {
+  for (const lauf of $("dialog-profilbild").getAnimations({ subtree: true })) lauf.cancel();
+  profilbildSchliesst = false;
+  profilbildQuelle = null;
+  $("profilbild-bild").removeAttribute("src");
+});
+// ---------- Ende Profilbild
 
 $("foto-datei").addEventListener("change", async (ereignis) => {
   const datei = ereignis.target.files[0];
@@ -3216,6 +3302,13 @@ document.addEventListener("click", (ereignis) => {
     }
     case "profil":
       return profilAntippen();
+    case "profilbild-gross":
+      return oeffneProfilbild(() => document.querySelector(".verlauf-kopf .profilbild-knopf"));
+    case "profilbild-zu":
+      return schliesseProfilbild();
+    case "profilbild-profil":
+      $("dialog-profilbild").close("profil");
+      return oeffneProfil(tier);
     case "profil-oeffnen":
       profilMenueZu();
       return oeffneProfil(id ? daten.tiere.find((t) => t.id === id) : tier);
@@ -3243,10 +3336,6 @@ document.addEventListener("click", (ereignis) => {
       return $("foto-datei").click();
     case "alles-loeschen":
       return allesLoeschen();
-    case "foto-entfernen":
-      profilMenueZu();
-      if (setzeFoto(null)) zeigeToast("Foto entfernt");
-      return;
     case "bericht-oeffnen":
       zeichneBericht();
       zeigeAnsicht("bericht");

@@ -24,6 +24,7 @@ export const SYMBOL = {
   loeschen: ico('<path d="M7 7l10 10M17 7L7 17"/>'),
   plus: ico('<path d="M12 5v14M5 12h14"/>'),
   minus: ico('<path d="M5 12h14"/>'),
+  schliessen: ico('<path d="M6 6l12 12M18 6L6 18"/>'),
   zurueck: ico('<path d="M14.5 6l-6 6 6 6"/>'),
   weiter: ico('<path d="M9.5 6l6 6-6 6"/>'),
   runter: ico('<path d="M6 9.5l6 6 6-6"/>'),

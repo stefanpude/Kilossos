@@ -354,7 +354,7 @@
           <span data-symbol="katzenkopf"></span><span class="text">Demo ansehen<small>Beispieldaten von Kito und Zuki über ein Jahr. Deine Einträge bleiben, wie sie sind.</small></span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.88.0</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.89.0</span>
         </div>
       </div>
     </section>
@@ -510,6 +510,16 @@
         <button value="speichern" class="knopf-haupt">Speichern</button>
       </div>
     </form>
+  </dialog>
+
+  <!-- Profilbild groß ansehen (0.89.0): Antippen von Bild oder Hintergrund schließt, die Zurücktaste ebenfalls -->
+  <dialog id="dialog-profilbild" class="profilbild-gross" aria-labelledby="profilbild-name">
+    <button type="button" class="profilbild-zu" data-aktion="profilbild-zu" aria-label="Schließen"><span data-symbol="schliessen"></span></button>
+    <figure class="profilbild-inhalt">
+      <img id="profilbild-bild" alt="">
+      <figcaption id="profilbild-name"></figcaption>
+    </figure>
+    <button type="button" class="profilbild-profil" data-aktion="profilbild-profil">Profil bearbeiten</button>
   </dialog>
 
   <!-- Foto einer Wägung groß ansehen -->
