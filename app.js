@@ -89,6 +89,7 @@ import { belegteZeichen, speicherAnzeige } from "./js/speicher.js";
 import { sicherungPruefen, einleseFrage } from "./js/sicherung.js";
 import { frage, bestaetigt } from "./js/rueckfrage.js";
 import { uhrzeitVorbelegung, tagAusKalender } from "./js/nachtragen.js";
+import { zuruecktaste } from "./js/zurueck.js";
 
 // Offline-Fähigkeit: den Service Worker anmelden, sobald die Seite geladen ist.
 if ("serviceWorker" in navigator) {
@@ -360,6 +361,32 @@ function gemerkteAnsichtZeigen() {
   if (name && name !== "heute" && erlaubt.includes(name)) zeigeAnsicht(name);
 }
 
+// Zurücktaste des Handys (0.88.0, js/zurueck.js): Fenster in der Reihenfolge, in der sie aufgingen. Erklärseiten
+// öffnen über anderen Fenstern (z. B. „Für den Alltag“ aus „Tipps“), die Reihenfolge im HTML hilft da nicht.
+let offeneFenster = [];
+const sichtbareAnsicht = () => document.querySelector(".ansicht:not([hidden])")?.dataset.ansicht ?? "heute";
+const zurueck = zuruecktaste({
+  verlauf: history,
+  lesen: () => ({ ansicht: sichtbareAnsicht(), fenster: offeneFenster.length }),
+  // Nach Zurück: oberste Fenster schließen wie „Abbrechen“ (Rückfrage zählt dann als „Nein“), dann die Ansicht.
+  anwenden: (ziel) => {
+    offeneFenster = offeneFenster.filter((dialog) => dialog.open);
+    while (offeneFenster.length > ziel.fenster) offeneFenster.pop().close("abbrechen");
+    if (offeneFenster.length || ziel.ansicht === sichtbareAnsicht()) return;
+    if (ziel.ansicht === "bericht") zeichneBericht();
+    zeigeAnsicht(ziel.ansicht);
+  },
+});
+new MutationObserver((aenderungen) => {
+  for (const { target } of aenderungen) {
+    if (target.tagName !== "DIALOG") continue;
+    offeneFenster = offeneFenster.filter((dialog) => dialog !== target);
+    if (target.open) offeneFenster.push(target);
+  }
+  zurueck.abgleichen();
+}).observe(document.body, { subtree: true, attributes: true, attributeFilter: ["open"] });
+window.addEventListener("popstate", (ereignis) => zurueck.beiPopstate(ereignis.state));
+
 // richtung: 1/-1 nach einem Wischen, dann gleitet der Bereich von der Seite herein.
 function zeigeAnsicht(name, richtung = 0) {
   merkeAnsicht(name);
@@ -377,6 +404,7 @@ function zeigeAnsicht(name, richtung = 0) {
   window.scrollTo(0, 0);
   versteckeInfoblase();
   if (name === "heute") zeichneHeute(true);
+  zurueck.abgleichen();
 }
 
 // Kalender am Tagestitel (0.70.0): gewählter Tag wird gezeigt; leer, kaputt oder Zukunft ändert nichts.
@@ -3267,3 +3295,4 @@ zeigeSpeicherStatus();
 if (einrichtungLaeuft) einrichtungZeigen();
 else gemerkteAnsichtZeigen();
 delete document.documentElement.dataset.start; // Marke aus dem Kopf-Skript in index.html: ab jetzt steuert zeigeAnsicht
+zurueck.starten(); // erst jetzt: Ansicht und Einrichtung stehen
