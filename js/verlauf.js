@@ -758,7 +758,14 @@ function tempoDiagramm(raten, { vonMs, bisMs }, durchschnitt) {
   const endY = wertImRand
     ? r1(Math.min(grund, Math.max(TEMPO.oben + 9, ly + 4)))
     : r1(ly - 9 < TEMPO.oben ? ly + 16 : ly - 9); // am oberen Rand (Ausreißer) unter den Punkt
-  const endText = `<text class="tempo-end-text" x="${endX}" y="${endY}" text-anchor="${wertImRand || !links ? "start" : "end"}">${sicher(endWert)}</text>`;
+  // Seit 0.89.3: Im Rand steht klein „zuletzt“ über dem Wert (am oberen Rand darunter), damit er nicht wie ein
+  // zweiter Durchschnitt neben „Ø“ wirkt (Stefan: „Was sagen die 0,7 % aus?“). „zuletzt“ ist etwa 35 Einheiten breit.
+  const labelY = wertImRand ? r1(endY - 11 - 8 < 0 ? endY + 11 : endY - 11) : null;
+  const endText =
+    (wertImRand ? `<text class="tempo-end-label" x="${endX}" y="${labelY}">zuletzt</text>` : "") +
+    `<text class="tempo-end-text" x="${endX}" y="${endY}" text-anchor="${wertImRand || !links ? "start" : "end"}">${sicher(endWert)}</text>`;
+  const blockOben = wertImRand ? Math.min(endY, labelY) : endY;
+  const blockUnten = wertImRand ? Math.max(endY, labelY) : endY;
 
   // Ø im rechten Rand, wenn der Text dort hineinpasst (geschätzt 6 Einheiten je Zeichen, 4 Einheiten Innenabstand
   // des Papiers dürfen mitgenutzt werden); sonst innen am rechten Rand. Steht der Wert des neuesten Punkts in derselben
@@ -770,9 +777,9 @@ function tempoDiagramm(raten, { vonMs, bisMs }, durchschnitt) {
   const imRand = W - R + 8 + dText.length * 6 <= W + 4;
   const gleicheSpalte = imRand ? wertImRand : !wertImRand && links;
   let dy = r1(yd + 4);
-  if (gleicheSpalte && Math.abs(dy - endY) < 14) {
-    const drueber = r1(endY - 14);
-    const drunter = r1(endY + 14);
+  if (gleicheSpalte && dy > blockOben - 14 && dy < blockUnten + 14) {
+    const drueber = r1(blockOben - 14);
+    const drunter = r1(blockUnten + 14);
     dy = (dy < endY && drueber >= TEMPO.oben) || drunter > grund ? drueber : drunter;
   }
   const durch = imRand

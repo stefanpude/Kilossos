@@ -722,6 +722,12 @@ test("0.89.2: viele Wochen, neuester Punkt am Rand – Wert rechts im Rand, Ø w
   const durch = svgText.match(/class="tempo-durch-text" x="([\d.]+)" y="([\d.]+)">Ø/);
   assert.ok(durch, "Ø im Rand");
   assert.ok(Math.abs(Number(durch[2]) - wert.y) >= 14, `Ø bei y ${durch[2]}, Wert bei y ${wert.y}`);
+  // 0.89.3 (Stefan: „Was sagen die 0,7 % aus?“): klein „zuletzt“ über dem Wert, Ø weicht auch dieser Zeile aus.
+  const zuletzt = svgText.match(/class="tempo-end-label" x="([\d.]+)" y="([\d.]+)">zuletzt<\/text>/);
+  assert.ok(zuletzt, "„zuletzt“ im Rand");
+  assert.equal(Number(zuletzt[1]), 308);
+  assert.ok(Math.abs(Number(zuletzt[2]) - (wert.y - 11)) < 0.11, `„zuletzt“ bei y ${zuletzt[2]}`);
+  assert.ok(Math.abs(Number(durch[2]) - Number(zuletzt[2])) >= 14, `Ø bei y ${durch[2]}, „zuletzt“ bei y ${zuletzt[2]}`);
   assert.doesNotMatch(html, /NaN/);
 });
 
@@ -734,6 +740,7 @@ test("0.89.2: neuester Punkt weiter innen oder Wert zu breit – Wert wie bisher
   assert.equal(wInnen.anker, "end");
   assert.equal(wInnen.x, Math.round((p.x - 2) * 10) / 10);
   assert.equal(wInnen.y, Math.round((p.y - 9) * 10) / 10);
+  assert.doesNotMatch(tempoSvg(innen), /tempo-end-label/); // „zuletzt“ nur im Rand
   // Große Zunahme am Rand: „−15,5 %“ passt nicht in den Rand.
   const breit = tempoSvg(tVerlauf({ gewichte: [G("2026-10-01", 9.0), G("2026-10-08", 7.85), G("2026-10-15", 9.07)], freigaben: [], heute: "2026-10-15" }));
   const wBreit = endText(breit);
