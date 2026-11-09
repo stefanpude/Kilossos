@@ -72,10 +72,19 @@ test("zeichneVerlauf: Zeitraum-Umschalter sind Umschaltknöpfe (aria-pressed), k
   assert.match(html, /data-wert="1m" aria-pressed="false"/);
 });
 
-test("zeichneVerlauf: Änderungs-Marke ist neutral (kein Grün ohne Bewertung)", () => {
+// 0.89.1 (Stefan, Screenshot 09.11.): Zahl und Änderungs-Marke im Kopf der Gewicht-Karte wiederholten nur „Jetzt“
+// und „Abgenommen“ aus den Kacheln darüber. Mit Kurve steht im Kopf nur noch der Titel; ohne Kurve (keine Kacheln)
+// bleibt das aktuelle Gewicht, sonst stünde es nirgends auf der Seite.
+test("zeichneVerlauf: Gewicht-Karte wiederholt Jetzt und Abgenommen nicht (0.89.1)", () => {
   const html = zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [], futterNachId: new Map(), zeitraum: "alles", heute: "2026-10-20", kopf: "" });
-  const marke = html.match(/<span class="marke[^"]*">[^<]* kg<\/span>/)[0];
-  assert.doesNotMatch(marke, /marke-(gut|warnung|gefahr)/);
+  const karte = html.slice(html.indexOf('<section class="karte" aria-'), html.indexOf('class="papier"'));
+  assert.match(karte, /<h2 id="gewicht-titel">Gewicht<\/h2>/); // Titel wie bei „Tempo pro Woche“ darunter
+  assert.doesNotMatch(karte, /class="wert"/);
+  assert.doesNotMatch(karte, /class="marke/);
+  assert.match(html, /Jetzt<\/span><strong>9,00 kg/);
+  assert.match(html, /Abgenommen: 0,32 kg/);
+  const ohneKurve = zeichneVerlauf({ gewichte, mahlzeiten: [], freigaben: [], futterNachId: new Map(), zeitraum: "1m", heute: "2026-11-24", kopf: "" });
+  assert.match(ohneKurve, /class="wert">9,00 <small>kg/);
 });
 
 test("zeichneVerlauf: Kennzahl-Kacheln folgen dem Zeitraum", () => {

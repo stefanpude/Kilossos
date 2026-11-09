@@ -655,7 +655,6 @@ function eckdaten(liste, freigaben) {
   <p class="tipp">${diff >= 0 ? "Abgenommen" : "Zugenommen"}: ${zahl(Math.abs(diff), 2)} kg (${zahl(Math.abs(prozent), 1)} %) in ${zahl(wochen)} ${Math.round(wochen) === 1 ? "Woche" : "Wochen"}.</p>`;
 }
 
-const vorzeichen = (wert, stellen) => (wert > 0 ? "+" : wert < 0 ? "−" : "±") + zahl(Math.abs(wert), stellen);
 
 const NB = " "; // geschütztes Leerzeichen zwischen Zahl und Einheit
 const grenzeText = (wert) => wert.toLocaleString("de-DE"); // Grenze aus GRENZEN als Text, z. B. „2“ oder „0,5“
@@ -914,12 +913,6 @@ export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, besondereTage 
   const imZeitraum = verlaufGewichte(gewichte, von);
   const alle = verlaufGewichte(gewichte, null);
   const aktuell = alle.at(-1);
-  let aenderung = "";
-  if (imZeitraum.length >= 2) {
-    const diff = imZeitraum.at(-1).kg - imZeitraum[0].kg;
-    // Neutral: ob eine Abnahme gut ist, bewertet nur „Tempo pro Woche“ (mit Freigabe, über 2 % immer markiert).
-    aenderung = `<span class="marke">${vorzeichen(diff, 2)} kg</span>`;
-  }
   const svg = imZeitraum.length >= 2 ? weicheKurve(gewichte, freigaben, von, heute) : "";
   // Gleiches Achsenende wie die Kurve: heute, mindestens die letzte Wägung.
   const leiste = svg
@@ -934,10 +927,17 @@ export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, besondereTage 
          ${legende(svg, !!leiste)}
          <p class="tipp">${tipp} Alle Gewichte als Liste stehen unter „Gewicht“.</p>`
       : `<p class="leer">Im gewählten Zeitraum wurde weniger als zweimal gewogen.</p>`;
-  const gewichtKarte = `<section class="karte" aria-label="Gewicht">
+  // Seit 0.89.1: Mit Kurve stehen „Jetzt“ und „Abgenommen“ schon in den Kacheln darüber, der Kopf zeigt nur den Titel.
+  // Ohne Kurve gibt es keine Kacheln, dann bleibt das aktuelle Gewicht hier stehen.
+  const gewichtKarte =
+    imZeitraum.length >= 2
+      ? `<section class="karte" aria-labelledby="gewicht-titel">
+    <h2 id="gewicht-titel">Gewicht</h2>
+    ${kurve}
+  </section>`
+      : `<section class="karte" aria-label="Gewicht">
     <div class="diagramm-kopf">
       <div><span class="label">Gewicht</span><div class="wert">${zahl(aktuell.kg, 2)} <small>kg</small></div></div>
-      ${aenderung}
     </div>
     ${kurve}
   </section>`;
