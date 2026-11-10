@@ -24,7 +24,10 @@ test("0.85.0: Reihenfolge der Gruppen unter „Mehr“, keine Gruppe „Einstell
 test("0.78.0: „App“ enthält nur die Darstellung, ohne Wiege-Tipp", () => {
   const a = gruppe("App");
   assert.match(a, /id="label-anzeige">Darstellung</);
-  assert.match(a, /Gilt nur für dieses Gerät\./);
+  // 0.89.5 (Stefan, 10.11.): Der Zusatz stand fest unter „Darstellung“ und las sich wie zur Auswahl „Hell“ gehörig,
+  // auch bei „Wie das Handy“. Er ist weg.
+  assert.doesNotMatch(a, /dieses Gerät/);
+  assert.match(a, /<span class="text"><span id="label-anzeige">Darstellung<\/span><\/span>/);
   assert.match(a, /<div id="anzeige-feld"><\/div>/);
   assert.doesNotMatch(a, /wiegetag|Wochentag/);
 });
