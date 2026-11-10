@@ -349,18 +349,9 @@ test("0.61.2: Knopfreihe mit rotem Knopf auf dem Handy bündig in zwei Zeilen", 
   }
 });
 
-// 0.63.0 (Stefan 06.11.: „Wiegetag von Kito“ steht nicht neben „Kein fester Tag“ wie bei „Darstellung“):
-// Titel und Auswahl waren zusammen breiter als die Zeile (375 px: 294 von 275 px), das Menü rutschte nach unten.
-// Jetzt wie „Darstellung“: Titel „Wiegetag“, der Name des Tiers klein darunter, die Vorlesefunktion liest beides.
-test("0.63.0: Wiegetag mit kurzem Titel, Tiername klein darunter, beides in der Beschriftung", () => {
-  const html = lies("index.html");
-  assert.match(html, /<span class="text"><span id="label-wiegetag">Wiegetag<\/span><small id="wiegetag-tier" hidden><\/small><\/span>\s*<div id="wiegetag-feld"><\/div>/);
-  const js = lies("app.js");
-  const fn = js.slice(js.indexOf("function zeichneWiegetag()"), js.indexOf("document.addEventListener", js.indexOf("function zeichneWiegetag()")));
-  assert.ok(!fn.includes("Wiegetag von"));
-  assert.ok(fn.includes('beschriftung: "label-wiegetag wiegetag-tier",'));
-  assert.ok(fn.includes("klein.hidden = !mehrere;"));
-  assert.ok(fn.includes('klein.textContent = mehrere ? `Für ${tier.name}.` : "";'));
+// 0.63.0: Die Wiegetag-Zeile (Titel, Tiername klein darunter) gibt es seit 0.90.0 nicht mehr; der Wiegetag steht im
+// Profil (tests/wiegetag-ort.test.js). Die Zeilenregel gilt weiter für „Darstellung“ unter „Mehr“.
+test("0.63.0: Auswahlzeilen lassen dem Menü Platz (gilt für „Darstellung“)", () => {
   // Platz bei 375 px: 311 px innen = Symbol 22 + Abstand 14 + Text-Mindestbreite + Abstand 14 + Menü 142 (gemessen)
   assert.match(lies("styles.css"), /\.eintrag-auswahl \.text \{ flex: 1 1 6\.5rem; overflow-wrap: normal; \}/);
 });

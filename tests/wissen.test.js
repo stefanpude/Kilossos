@@ -190,9 +190,9 @@ test("Willkommensseite verspricht nichts, was die App nicht halten kann (Stefan,
   assert.doesNotMatch(html, /ohne Fettleber-Risiko|für jede Sorte/);
 });
 
-test("Version 0.89.5: Cache v159 mit js/profilbild.js, js/zurueck.js, js/rueckfrage.js, js/nachtragen.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
+test("Version 0.90.0: Cache v160 mit js/profilbild.js, js/zurueck.js, js/rueckfrage.js, js/nachtragen.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
   const sw = lies("sw.js");
-  assert.match(sw, /const CACHE_NAME = "kilossos-v159";/);
+  assert.match(sw, /const CACHE_NAME = "kilossos-v160";/);
   assert.match(sw, /"js\/profilbild\.js",/);
   assert.match(sw, /"js\/zurueck\.js",/);
   assert.match(sw, /"js\/nachtragen\.js",/);
@@ -202,7 +202,7 @@ test("Version 0.89.5: Cache v159 mit js/profilbild.js, js/zurueck.js, js/rueckfr
   assert.match(sw, /"js\/besondere-tage\.js",/);
   assert.match(sw, /"js\/freigaben\.js",/);
   assert.match(sw, /"js\/heute-grafiken\.js",/);
-  assert.match(lies("index.html"), /id="version">Version 0.89.5</);
+  assert.match(lies("index.html"), /id="version">Version 0.90.0</);
 });
 
 // 0.42.7: Wiege-Tipp Transportbox im Bereich „Auf dem Arm gewogen?“ (Ideen-Tafel, Halter 06.11.2026).

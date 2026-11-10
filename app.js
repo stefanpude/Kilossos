@@ -905,14 +905,13 @@ function oeffneProfil(einTier) {
     ],
     wert: einTier ? (p.kastriert ? "ja" : "nein") : undefined,
   });
-  // Wiegetag (0.85.0) nur beim Anlegen eines weiteren Tiers; ändern lässt er sich danach unter „Gewicht“.
-  $("profil-wiegetag-bereich").hidden = Boolean(einTier);
+  // Wiegetag seit 0.90.0 nur hier, beim Anlegen und beim Bearbeiten (vorher unter „Gewicht“).
   $("profil-wiegetag").innerHTML = auswahlFeld({
     name: "profil-wiegetag",
     beschriftung: "label-profil-wiegetag",
     // Montag zuerst, wie im deutschen Kalender
     optionen: [{ wert: "", text: "Kein fester Tag" }, ...[1, 2, 3, 4, 5, 6, 0].map((t) => ({ wert: String(t), text: WOCHENTAGE[t] }))],
-    wert: "",
+    wert: Number.isInteger(p.wiegetag) ? String(p.wiegetag) : "",
   });
   $("profil-haltung").innerHTML = auswahlFeld({
     name: "haltung",
@@ -963,7 +962,7 @@ beimSpeichern("form-profil", "profil-fehler", (werte) => {
   setze("koerperbau", werte.get("koerperbau").trim());
   setze("haltung", werte.get("haltung"));
   setze("schlankKg", schlank);
-  if (!bearbeitetesTier) setze("wiegetag", wiegetagAusAuswahl(werte.get("profil-wiegetag")));
+  setze("wiegetag", wiegetagAusAuswahl(werte.get("profil-wiegetag")));
   const tierarzt = { ...(praxis && { praxis }), ...(telefon && { telefon }), ...(adresse && { adresse }) };
   setze("tierarzt", Object.keys(tierarzt).length ? tierarzt : null);
   const fotoNeu = bearbeitetesTier ? profilFoto !== (fotoGueltig(bearbeitetesTier.foto) ? bearbeitetesTier.foto : null) : Boolean(profilFoto);
@@ -1096,7 +1095,6 @@ function zeichneAlles() {
   zeichneFutter();
   zeichneFreigabe();
   zeichneTiere();
-  zeichneWiegetag();
   zeichneSicherung();
   zeichneVerlaufAnsicht();
   zeichneSpeicherBelegt();
@@ -2963,28 +2961,7 @@ $("anzeige-feld").innerHTML = auswahlFeld({
   ],
   wert: leseAnzeige(),
 });
-// Der Wiegetag gehört zum aktiven Tier; beim Wechsel wird das Feld neu gezeichnet.
-function zeichneWiegetag() {
-  // Tiername klein unter dem Titel wie bei „Darstellung“ (0.63.0), sonst rutscht das Menü in die nächste Zeile.
-  const mehrere = daten.tiere.length > 1;
-  const klein = $("wiegetag-tier");
-  klein.hidden = !mehrere;
-  klein.textContent = mehrere ? `Für ${tier.name}.` : "";
-  $("wiegetag-feld").innerHTML = auswahlFeld({
-    name: "wiegetag",
-    beschriftung: "label-wiegetag wiegetag-tier",
-    // Montag zuerst, wie im deutschen Kalender
-    optionen: [{ wert: "", text: "Kein fester Tag" }, ...[1, 2, 3, 4, 5, 6, 0].map((t) => ({ wert: String(t), text: WOCHENTAGE[t] }))],
-    wert: Number.isInteger(tier.wiegetag) ? String(tier.wiegetag) : "",
-  });
-}
-document.addEventListener("change", (ereignis) => {
-  if (ereignis.target.name !== "wiegetag") return;
-  if (ereignis.target.value === "") delete tier.wiegetag;
-  else tier.wiegetag = Number(ereignis.target.value);
-  sichern();
-  zeigeToast("✓ Wiegetag gespeichert");
-});
+// Die Wiegetag-Auswahl auf „Gewicht“ (0.85.0 bis 0.89.x) ist seit 0.90.0 im Profil (oeffneProfil).
 document.addEventListener("change", (ereignis) => {
   if (ereignis.target.name !== "anzeige") return;
   try {

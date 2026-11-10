@@ -941,7 +941,6 @@ dialog .haken-zeile input[type="checkbox"] {
 }
 #besonders-bis-feld[hidden] { display: none; }
 /* 0.85.0: Wiegetag im Profil nur beim Anlegen eines Tiers; .feld setzt display: grid und würde hidden überstimmen. */
-#profil-wiegetag-bereich[hidden] { display: none; }
 
 /* Gewicht eintragen: große Zahl mit ±10 g */
 .waage { display: flex; align-items: center; justify-content: space-between; gap: 10px; }

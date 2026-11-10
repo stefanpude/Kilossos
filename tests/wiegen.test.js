@@ -36,7 +36,7 @@ test("Wortlaut der Kernsätze (Stefans Ja)", () => {
     "leere Box auf die Waage, „Tara“ drücken, Katze hinein. Die Waage zeigt dann ihr Gewicht. Auf die Höchstlast achten.",
     "Personenwaage mit Katze auf dem Arm: am gröbsten.",
     "kann das Ergebnis leicht 100 g oder mehr danebenliegen, so viel wie eine ganze Woche Abnahme.",
-    "Nimm immer dieselbe Waage, am gleichen Wochentag („Wiegetag“ unter „Gewicht“) und etwa zur gleichen Uhrzeit, wenn möglich vor dem Füttern.",
+    "Nimm immer dieselbe Waage, am gleichen Wochentag („Wiegetag“ im Profil deiner Katze) und etwa zur gleichen Uhrzeit, wenn möglich vor dem Füttern.",
     "Halsband oder Geschirr vorher ab.",
     "wiege erst nach: mit einer genauen Waage oder in der Tierarztpraxis. Ändere die Futtermenge nur mit deiner Tierarztpraxis.",
   ]) {

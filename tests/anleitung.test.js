@@ -63,7 +63,8 @@ test("Jede genannte Stelle gibt es in der App wirklich", () => {
     "„Etwas übrig gelassen?“": "Etwas übrig gelassen?<",
     "„Gewicht eintragen“": ">Gewicht eintragen<",
     "„Auf dem Arm gewogen?“": "Auf dem Arm gewogen?<",
-    "„Wiegetag“": 'id="label-wiegetag">Wiegetag<',
+    "„Wiegetag“": 'id="label-profil-wiegetag">Wiegetag', // seit 0.90.0 im Profil
+    "„Tiere“": '<h3 class="gruppe-titel">Tiere</h3>',
     "„Besonderen Tag eintragen“": ">Besonderen Tag eintragen<",
     "„Sicherung speichern“": "Sicherung speichern<",
     "„Übersicht öffnen“": '<span class="text">Übersicht öffnen',

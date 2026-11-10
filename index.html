@@ -189,14 +189,8 @@
       </div>
       <!-- Knopf seit 0.86.1 direkt unter der Karte: Mit einem Jahr Daten stand er unter der Monatsliste weit unten. -->
       <button class="knopf-haupt" data-aktion="gewicht-neu">Gewicht eintragen</button>
-      <!-- Wiegetag seit 0.85.0 hier statt unter „Mehr“: eine Gewohnheit je Tier, keine App-Einstellung. -->
-      <div class="liste">
-        <div class="eintrag eintrag-auswahl">
-          <span data-symbol="waage"></span><span class="text"><span id="label-wiegetag">Wiegetag</span><small id="wiegetag-tier" hidden></small></span>
-          <div id="wiegetag-feld"></div>
-        </div>
-      </div>
-      <p class="tipp">Am besten 1× pro Woche wiegen: gleicher Wochentag, gleiche Uhrzeit, gleiche Waage. Am Wiegetag erinnert „Heute“ daran, am letzten Wiegetag im Monat auch an das Monatsfoto.</p>
+      <!-- Wiegetag 0.85.0 bis 0.89.x hier; seit 0.90.0 im Profil (legt man meist einmal fest). Der Tipp zeigt dorthin. -->
+      <p class="tipp">Am besten 1× pro Woche wiegen: gleicher Wochentag, gleiche Uhrzeit, gleiche Waage. Einen festen Wiegetag stellst du im Profil deiner Katze ein (unter „Mehr“ → „Tiere“), dann erinnert „Heute“ daran.</p>
       <div class="karte" id="gewicht-monate"></div>
     </section>
 
@@ -289,7 +283,7 @@
         </button>
       </div>
 
-      <!-- Die Gruppe „Wiegen“ (0.78.0) ist seit 0.85.0 weg: Der Wiegetag steht auf der Seite „Gewicht“. -->
+      <!-- Die Gruppe „Wiegen“ (0.78.0) ist seit 0.85.0 weg: Der Wiegetag steht seit 0.90.0 im Profil. -->
       <h3 class="gruppe-titel">Daten</h3>
       <p class="leise mehr-hinweis">Alle Einträge liegen nur auf diesem Handy. Speichere regelmäßig eine Sicherung, zum Beispiel in deinem Cloud-Ordner oder per Mail an dich selbst.</p>
       <div class="liste">
@@ -354,7 +348,7 @@
           <span data-symbol="katzenkopf"></span><span class="text">Demo ansehen<small>Beispieldaten von Kito und Zuki über ein Jahr. Deine Einträge bleiben, wie sie sind.</small></span><span class="weiter" data-symbol="weiter"></span>
         </a>
         <div class="eintrag">
-          <span data-symbol="info"></span><span class="text" id="version">Version 0.89.5</span>
+          <span data-symbol="info"></span><span class="text" id="version">Version 0.90.0</span>
         </div>
       </div>
     </section>
@@ -462,7 +456,7 @@
       </label>
       <p class="tipp" id="gewicht-foto-vorhanden" hidden></p>
       <button type="button" class="knopf-text" data-aktion="gewicht-foto-nachholen" id="gewicht-foto-nachholen" hidden>Monatsfoto nachholen (freiwillig)</button>
-      <p class="tipp" id="gewicht-foto-wiegetag-tipp" hidden>Tipp: Lege unter „Gewicht“ einen Wiegetag fest. Am letzten Wiegetag im Monat fragt die App dann nach dem Foto.</p>
+      <p class="tipp" id="gewicht-foto-wiegetag-tipp" hidden>Tipp: Lege im Profil deiner Katze einen Wiegetag fest (unter „Mehr“ → „Tiere“). Am letzten Wiegetag im Monat fragt die App dann nach dem Foto.</p>
       <div class="feld" id="gewicht-foto-bereich"><span id="label-gewicht-foto">Monatsfoto (freiwillig)</span>
         <div class="gewicht-foto">
           <img id="gewicht-foto-vorschau" alt="Vorschau des Fotos" hidden>
@@ -664,8 +658,6 @@
         <div class="feld"><span id="label-geschlecht">Geschlecht</span><div id="profil-geschlecht"></div></div>
         <div class="feld"><span id="label-kastriert">Kastriert</span><div id="profil-kastriert"></div></div>
       </div>
-      <!-- 0.85.0: nur beim Anlegen eines weiteren Tiers sichtbar (app.js oeffneProfil) -->
-      <div class="feld" id="profil-wiegetag-bereich" hidden><span id="label-profil-wiegetag">Wiegetag (freiwillig)</span><div id="profil-wiegetag"></div></div>
       <label>Geburtsdatum (optional)
         <input name="geburtsdatum" type="date">
       </label>
@@ -674,6 +666,8 @@
         <input name="koerperbau" autocomplete="off" maxlength="80" placeholder="z. B. von Natur aus sehr groß">
       </label>
       <div class="feld"><span id="label-haltung">Haltung (optional)</span><div id="profil-haltung"></div></div>
+      <!-- Wiegetag seit 0.90.0 hier, beim Anlegen und beim Bearbeiten (0.85.0: nur beim Anlegen, sonst unter „Gewicht“) -->
+      <div class="feld" id="profil-wiegetag-bereich"><span id="label-profil-wiegetag">Wiegetag (optional)</span><div id="profil-wiegetag"></div></div>
       <label>Gewicht in der schlanken Zeit in kg (optional)
         <input name="schlank" inputmode="decimal" autocomplete="off" placeholder="z. B. 7,5">
       </label>
@@ -884,9 +878,9 @@
         ein, sie zählen mit. Bleibt etwas im Napf, tippe die
         Mahlzeit an und zieh den Rest unter „Etwas übrig gelassen?“ ab.</p>
       <h3>4. Einmal pro Woche wiegen</h3>
-      <p>Am besten am gleichen Wochentag, zur gleichen Uhrzeit, mit der gleichen Waage. Den Tag stellst du unter „Gewicht“
-        bei „Wiegetag“ ein, dann erinnert dich „Heute“ daran. Das Gewicht trägst du dort mit „Gewicht eintragen“
-        ein. Ohne Tierwaage geht es mit der Transportbox auf der Küchenwaage genauer. Zur Not hilft „Auf dem Arm gewogen?“:
+      <p>Am besten am gleichen Wochentag, zur gleichen Uhrzeit, mit der gleichen Waage. Den Tag stellst du im Profil deiner Katze
+        bei „Wiegetag“ ein (unter „Mehr“ → „Tiere“), dann erinnert dich „Heute“ daran. Das Gewicht trägst du unter „Gewicht“
+        mit „Gewicht eintragen“ ein. Ohne Tierwaage geht es mit der Transportbox auf der Küchenwaage genauer. Zur Not hilft „Auf dem Arm gewogen?“:
         erst du mit Katze auf die Personenwaage, dann du allein.</p>
       <h3>5. Besondere Tage festhalten</h3>
       <p>Krank gewesen, genascht, mehr bewegt oder das Futter verweigert? Mit „Besonderen Tag eintragen“ auf „Heute“
@@ -1052,7 +1046,7 @@
           „Auf dem Arm gewogen?“ aus.</li>
       </ul>
       <h3>Immer gleich wiegen</h3>
-      <p>Nimm immer dieselbe Waage, am gleichen Wochentag („Wiegetag“ unter „Gewicht“) und etwa zur gleichen Uhrzeit, wenn
+      <p>Nimm immer dieselbe Waage, am gleichen Wochentag („Wiegetag“ im Profil deiner Katze) und etwa zur gleichen Uhrzeit, wenn
         möglich vor dem Füttern. Halsband oder Geschirr vorher ab. Eine andere Waage, eine frische Mahlzeit oder ein
         Halsband können eine kleine Änderung größer aussehen lassen, als sie ist.</p>
       <h3>Wenn ein Wert nicht passt</h3>
