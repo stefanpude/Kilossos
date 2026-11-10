@@ -61,6 +61,23 @@ test("0.90.1: Punkt 1 der Nutzungsbedingungen wechselt die Bezeichnungen ab", ()
   assert.equal(punkt1.split("Tierarztpraxis").length - 1, 1, "nur im Notfallsatz");
 });
 
+// 0.90.2 (Stefan, 10.11.): Drei weitere Absätze in index.html nannten „Tierarztpraxis“ zweimal.
+test("0.90.2: Profil-Tipp, MCS-Erklärung und Anleitung nennen „Tierarztpraxis“ nur einmal", () => {
+  const html = ohneHtmlKommentare(lies("index.html"));
+  const absatz = (anfang) => {
+    const start = html.indexOf(anfang);
+    assert.ok(start >= 0, anfang);
+    return html.slice(html.lastIndexOf("<p", start), html.indexOf("</p>", start));
+  };
+  const zaehle = (text) => text.split("Tierarztpraxis").length - 1;
+  assert.match(html, /<p class="tipp">Hilft beim Festlegen des Zielgewichts\. Das Zielgewicht selbst legt nur die Tierarztpraxis fest\.<\/p>/);
+  assert.match(html, /Deshalb prüft die Praxis beides bei jeder Kontrolle\./);
+  assert.match(html, /Die Übersicht zeigt der Praxis dann, was deine/);
+  for (const anfang of ["Hilft beim Festlegen", "Muscle Condition Score (MCS)", "Lass deine Katze untersuchen"]) {
+    assert.equal(zaehle(absatz(anfang)), 1, anfang);
+  }
+});
+
 test("0.90.1: Die Doppelform ist erlaubt, „deinem Tierarzt“ allein nicht", () => {
   assert.doesNotMatch(ohneDoppelform("Sprich mit deiner Tierärztin oder deinem Tierarzt."), MAENNLICH);
   assert.match(ohneDoppelform("Sprich mit deinem Tierarzt."), MAENNLICH);
