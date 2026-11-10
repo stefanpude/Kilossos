@@ -286,12 +286,12 @@ test("0.45.0: erster Absatz „Über Kilossos“ mit neuem ersten Satz, Rest wö
   const ueber = abschnitt(ansichtMehr(), /<h3 class="gruppe-titel">Über Kilossos<\/h3>/);
   assert.match(
     ueber,
-    /<p class="leise">Kilossos begleitet deine Katze beim Abnehmen: Es zeichnet auf, rechnet nach und warnt, wenn etwas aus dem\s+sicheren Bereich läuft\.\s+<strong>Es ersetzt keine tierärztliche Untersuchung<\/strong> und ist kein Medizinprodukt\. Zielgewicht und Tagesmenge legt immer die Tierarztpraxis fest\.<\/p>/,
+    /<p class="leise">Kilossos begleitet deine Katze beim Abnehmen: Es zeichnet auf, rechnet nach und warnt, wenn etwas aus dem\s+sicheren Bereich läuft\.\s+<strong>Es ersetzt keine tierärztliche Untersuchung<\/strong> und ist kein Medizinprodukt\. Zielgewicht und Tagesmenge legt immer die Praxis fest, die deine Katze behandelt\.<\/p>/, // seit 0.90.1
   );
   assert.doesNotMatch(lies("index.html"), /begleitet die Abnahme von Kito und anderen Katzen/);
   assert.match(
     ueber,
-    /<p class="leise"><strong>Ist deine Katze krank<\/strong> \(zum Beispiel Diabetes, Nieren-, Schilddrüsen- oder Lebererkrankung\) oder frisst sie\s+plötzlich schlecht, besprich jede Änderung am Futter vorher mit deiner Tierarztpraxis\.\s+<strong>Frisst eine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort in die Tierarztpraxis\.<\/strong><\/p>/, // seit 0.77.1
+    /<p class="leise"><strong>Ist deine Katze krank<\/strong> \(zum Beispiel Diabetes, Nieren-, Schilddrüsen- oder Lebererkrankung\) oder frisst sie\s+plötzlich schlecht, besprich jede Änderung am Futter vorher mit deiner\s+Tierärztin oder deinem Tierarzt\.\s+<strong>Frisst eine Katze einen Tag lang nichts oder kaum etwas, gehört sie sofort in die Tierarztpraxis\.<\/strong><\/p>/, // seit 0.77.1, Anrede seit 0.90.1
   );
 });
 

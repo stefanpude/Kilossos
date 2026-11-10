@@ -12,13 +12,16 @@ const ohneJsKommentare = (text) => text.split("\n").filter((z) => !z.trim().star
 // „Tierarzt“ als ganzes Wort mit Artikel oder Präposition davor, auch über einen Zeilenumbruch.
 const MAENNLICH = /\b(der|den|dem|des|dein|deinem|deinen|zum|vom|beim|keinen|einen|einem)\s+Tierarzt(es)?(?![a-zäöüß-])/i;
 const PLURAL = /Tierärzte(?![a-zäöüß])|Tierärzteverb/;
+// 0.90.1 (Stefan, 10.11.): Erlaubt ist die Doppelform in der Anrede, z. B. „deiner Tierärztin oder deinem Tierarzt“.
+// Sie ersetzt einzelne „Tierarztpraxis“, damit das Wort nicht drei-, viermal hintereinander steht.
+const ohneDoppelform = (text) => text.replace(/Tierärztin\s+oder\s+(?:dein|deinem|deinen|der|dem|den|ein|einem|einen)?\s*Tierarzt(?![a-zäöüß-])/g, "");
 
 const SEITEN = ["index.html", "datenschutz.html", "nutzungsbedingungen.html"];
 const SKRIPTE = ["app.js", ...fs.readdirSync(new URL("../js/", import.meta.url)).map((d) => "js/" + d)];
 
 test("0.79.0: Seiten sprechen nicht von „der Tierarzt“ oder „Tierärzten“", () => {
   for (const datei of SEITEN) {
-    const text = ohneHtmlKommentare(lies(datei));
+    const text = ohneDoppelform(ohneHtmlKommentare(lies(datei)));
     assert.doesNotMatch(text, MAENNLICH, datei);
     assert.doesNotMatch(text, PLURAL, datei);
   }
@@ -26,7 +29,7 @@ test("0.79.0: Seiten sprechen nicht von „der Tierarzt“ oder „Tierärzten�
 
 test("0.79.0: Texte in den Skripten sprechen nicht von „der Tierarzt“", () => {
   for (const datei of SKRIPTE) {
-    const text = ohneJsKommentare(lies(datei));
+    const text = ohneDoppelform(ohneJsKommentare(lies(datei)));
     assert.doesNotMatch(text, MAENNLICH, datei);
     assert.doesNotMatch(text, PLURAL, datei);
   }
@@ -44,4 +47,21 @@ test("0.79.0: Notfallsatz überall gleich und neutral, auch in den Nutzungsbedin
   const satz = /einen Tag lang nichts oder kaum etwas, gehört sie sofort in die Tierarztpraxis\./;
   assert.match(lies("nutzungsbedingungen.html"), satz);
   assert.doesNotMatch(lies("nutzungsbedingungen.html"), /gar nicht, gehört/);
+});
+
+// 0.90.1 (Stefan, 10.11.): In Punkt 1 stand „Tierarztpraxis“ viermal in Überschrift und drei Sätzen.
+// Jetzt abwechselnd; nur der Notfallsatz behält das Wort (überall wortgleich).
+test("0.90.1: Punkt 1 der Nutzungsbedingungen wechselt die Bezeichnungen ab", () => {
+  const nb = ohneHtmlKommentare(lies("nutzungsbedingungen.html"));
+  const punkt1 = nb.slice(nb.indexOf("<h3>1."), nb.indexOf("<h3>2."));
+  assert.match(punkt1, /<h3>1\. Was Kilossos nicht ersetzt<\/h3>/);
+  assert.match(punkt1, /Zielgewicht und Tagesmenge legt\s+immer die Praxis fest, die deine Katze behandelt\./);
+  assert.match(punkt1, /Sprich mit deiner Tierärztin oder deinem Tierarzt\./);
+  assert.match(punkt1, /<strong>Die App ersetzt keine tierärztliche Untersuchung und ist kein Medizinprodukt\.<\/strong>/);
+  assert.equal(punkt1.split("Tierarztpraxis").length - 1, 1, "nur im Notfallsatz");
+});
+
+test("0.90.1: Die Doppelform ist erlaubt, „deinem Tierarzt“ allein nicht", () => {
+  assert.doesNotMatch(ohneDoppelform("Sprich mit deiner Tierärztin oder deinem Tierarzt."), MAENNLICH);
+  assert.match(ohneDoppelform("Sprich mit deinem Tierarzt."), MAENNLICH);
 });
