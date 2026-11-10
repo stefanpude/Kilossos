@@ -921,13 +921,23 @@ function befundKarte(freigaben) {
 // fotos: fertige Vorher/Nachher-Karte aus app.js (ab 0.25.0), steht seit 0.29.4 ganz am Ende (freiwillig, ändert sich selten).
 // besondereTage (seit 0.33.0): nur die des Tiers; erscheinen als Zeitleiste unter der Kurve.
 export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, besondereTage = [], futterNachId, zeitraum, heute, kopf, fotos = "" }) {
-  if (gewichte.length < 2) {
-    return `${kopf}<p class="leer">Sobald mindestens zwei Gewichte eingetragen sind, erscheint hier der Verlauf.</p>${fotos}`;
-  }
   const von = zeitraumStart(zeitraum, heute);
   const umschalter = `<div class="umschalter" role="group" aria-label="Zeitraum">
     ${ZEITRAEUME.map(([wert, text]) => `<button type="button" data-aktion="zeitraum" data-wert="${wert}" aria-pressed="${wert === zeitraum}">${text}</button>`).join("")}
   </div>`;
+  const futter = mahlzeiten.length ? futterKarte(mahlzeiten, futterNachId, freigaben, von, heute) : "";
+  // Seit 0.89.4: Nur Kurve, Kacheln und Tempo brauchen zwei Wägungen; „Futter pro Tag“ und Befunde erscheinen trotzdem.
+  // Der Umschalter hängt an den Mahlzeiten, nicht an der Karte: sonst verschwände er in einem Zeitraum ohne Futter.
+  if (gewichte.length < 2) {
+    return (
+      kopf +
+      (mahlzeiten.length ? umschalter : "") +
+      `<p class="leer">Sobald mindestens zwei Gewichte eingetragen sind, erscheint hier der Verlauf.</p>` +
+      futter +
+      befundKarte(freigaben) +
+      fotos
+    );
+  }
 
   const imZeitraum = verlaufGewichte(gewichte, von);
   const alle = verlaufGewichte(gewichte, null);
@@ -967,7 +977,7 @@ export function zeichneVerlauf({ gewichte, mahlzeiten, freigaben, besondereTage 
     umschalter +
     gewichtKarte +
     tempoKarte(gewichte, freigaben, von, heute) +
-    (mahlzeiten.length ? futterKarte(mahlzeiten, futterNachId, freigaben, von, heute) : "") +
+    futter +
     befundKarte(freigaben) +
     fotos
   );

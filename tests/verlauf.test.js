@@ -187,6 +187,26 @@ test("zeichneVerlauf: Fotos erscheinen auch, wenn es noch keinen Verlauf gibt", 
   assert.match(html, /id="fotos-test"/);
 });
 
+// 0.89.4 (Stefan, 10.11.): Mit weniger als zwei Wägungen fehlten auch „Futter pro Tag“ und die Befunde,
+// obwohl beide keine Wägungen brauchen. Nur Kurve, Kacheln und Tempo hängen an zwei Wägungen.
+test("0.89.4: Futter pro Tag und Befunde erscheinen auch mit weniger als zwei Wägungen", () => {
+  const futter = new Map([["s", { id: "s", name: "Sheba", typ: "nass", kcalProPackung: null, kcalPro100g: 77 }]]);
+  const mahlzeiten = [{ id: "m", tierId: "k", futterId: "s", gramm: 50, zeitpunkt: "2026-10-19T07:00:00" }];
+  for (const g of [[], gewichte.slice(0, 1)]) {
+    const html = zeichneVerlauf({ gewichte: g, mahlzeiten, freigaben: [freigabe], futterNachId: futter, zeitraum: "3m", heute: "2026-10-20", kopf: "", fotos: "<section id=\"fotos-test\"></section>" });
+    assert.match(html, /Sobald mindestens zwei Gewichte/);
+    assert.match(html, /Futter pro Tag/);
+    assert.match(html, /Tierärztliche Befunde/);
+    assert.match(html, /data-aktion="zeitraum"/, "Zeitraum-Umschalter für die Futterkarte");
+    assert.doesNotMatch(html, /Tempo pro Woche/);
+    assert.doesNotMatch(html, /class="papier"/);
+    assert.ok(html.indexOf("Futter pro Tag") < html.indexOf('id="fotos-test"'), "Fotos bleiben am Ende");
+  }
+  // Ohne Mahlzeiten und Freigaben bleibt es beim Satz, ohne Umschalter.
+  const leer = zeichneVerlauf({ gewichte: [], mahlzeiten: [], freigaben: [], futterNachId: new Map(), zeitraum: "3m", heute: "2026-10-20", kopf: "" });
+  assert.doesNotMatch(leer, /data-aktion="zeitraum"/);
+});
+
 
 // ---------- 0.33.0: Zeitachse bis heute ----------
 const letztesX = (kurve) => JSON.parse(kurve.match(/data-punkte="([^"]*)"/)[1].replace(/&quot;/g, '"')).at(-1)[0];
