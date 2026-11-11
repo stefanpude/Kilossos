@@ -7,24 +7,10 @@ Nur Fakten aus CLAUDE.md verwendet; offene Stellen sind mit [ ] markiert.
 
 ## Wie Kilossos entstanden ist
 
-Kilossos ist aus eigener Not entstanden.
-
-Kito ist mein Kater: kastriert, von Natur aus sehr groß – und inzwischen zu schwer.
-Seit vor unserer Tür eine Baustelle ist, kann er nicht mehr nach draußen. Weniger Bewegung, gleiches Futter,
-und die Waage beim Tierarzt zeigte 9,32 kg. Zuki, unsere zweite Katze, ist zierlich gebaut,
-aber im Verhältnis sogar noch dicker als Kito. Beide fressen getrennt, beide brauchen etwas anderes.
-
-Also wollte ich Kito beim Abnehmen helfen. Schnell habe ich gemerkt: Bei Katzen ist das heikler, als man denkt.
-Bekommt eine übergewichtige Katze zu wenig Futter, kann sie lebensgefährlich krank werden (Fettleber).
-Zu langsam bringt aber auch nichts. Meine Excel-Tabellen mit Futtersorten, Gramm und Kalorien wurden immer länger –
-und trotzdem war ich mir nie sicher, ob ich alles richtig mache.
-
-Daraus ist Kilossos geworden: eine App, die Futter in Gramm und Kalorien mitrechnet, das Gewicht im Blick behält
-und rechtzeitig warnt, wenn etwas aus dem sicheren Bereich läuft. Die Grenzen dafür stammen aus den Leitlinien
-der Tierärzteverbände AAHA und WSAVA.
-
-Der Name? **Ki**to + **Kolossos** (altgriechisch für „riesig“) + englisch **loss** (Verlust). Kilossos eben.
-Kito stand Pate, weil es einfach zu gut passte. Abnehmen müssen beide.
+Seit 0.90.3 (11.11.2026) neu geschrieben: zwei kleine Porträts („Kito, der Koloss“, „Zuki, die Aussitzerin“) mit je einem
+Foto (`bilder/kito.webp`, `bilder/zuki.webp`), danach „Warum eine App?“ und „Und der Name?“ (ohne englisch „loss“),
+Gruß „Stefan, mit Kito und Zuki“. Der Wortlaut steht nur noch in `index.html` (`#dialog-geschichte`), damit es keine
+zweite, veraltende Fassung gibt. Die alte Fassung von 02.11.2026 steht in der Git-Geschichte dieser Datei.
 
 ## Wichtig: Immer mit dem Tierarzt
 

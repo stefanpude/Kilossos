@@ -159,6 +159,13 @@ body.willkommen-offen { overflow: hidden; }
 #dialog-bcs h3, #dialog-grenzen h3 { margin: 4px 0 0; font-size: 1.0625rem; }
 #dialog-bcs h2:focus, #dialog-grenzen h2:focus, #dialog-geschichte h2:focus { outline: none; }
 #dialog-grenzen .leise a { color: inherit; font-weight: 700; }
+/* Geschichte ab 0.90.3: zwei Porträts mit Foto (4:3), Überschriften wie auf den Erklärseiten */
+#dialog-geschichte h3 { margin: 18px 0 6px; font-size: 1.0625rem; }
+.geschichte-foto {
+  display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover;
+  border-radius: var(--rund); box-shadow: 0 0 0 1px var(--rand-stark); margin: 4px 0 6px; background: var(--akzent-hell);
+}
+.geschichte-gruss { margin-top: 14px; font-style: italic; }
 /* Erklärseiten ab 0.30.0: „Warum nimmt meine Katze nicht ab?“ wie „Welche Grenzen gelten?“,
    „Begriffe kurz erklärt“ als ruhige Liste mit Trennlinien, Begriff halbfett, Quelle klein darunter. */
 #dialog-nicht-ab p { margin: 0 0 10px; }
