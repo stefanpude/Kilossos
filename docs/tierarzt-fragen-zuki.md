@@ -1,6 +1,6 @@
 # Fragen für den Tierarzttermin: Zuki
 
-Termin am 13.11.2026, zusammen mit Kito. Zum Ausdrucken oder am Handy mitnehmen.
+Termin am 26.11.2026, zusammen mit Kito. Zum Ausdrucken oder am Handy mitnehmen.
 Dazu: die Übersicht als PDF (in der App oben auf Zuki wechseln, dann „Mehr“ → „Übersicht öffnen“)
 und die Futterpackungen oder Fotos davon.
 
