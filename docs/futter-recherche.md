@@ -835,7 +835,7 @@ Werten der Sammlung. Regeln (Stefan, 16.11.):
 - nur deutsche Etiketten (griechische Coshida-Packung 20302498 und belgische Aldi-Snacks „Juliet“ 4061458007184 verworfen);
 - kcal immer „geschätzt“ (NRC 2006), keine der Packungen nennt kcal;
 - EAN nur, wenn der Strichcode auf dem Foto lesbar ist (`eanQuelle: "Strichcode auf dem Packungsfoto"`), weil die Packung
-  selbst die Nummer zeigt; die übliche Zwei-Firmen-Prüfung entfällt hier;
+  selbst die Nummer zeigt; die übliche Zwei-Firmen-Prüfung entfällt hier (von Stefan am 16.11. bestätigt);
 - jeder Eintrag mit dem Hinweis, die Werte mit der eigenen Packung zu vergleichen.
 
 Gelesen von einem Helfer, Stichproben selbst gegengelesen (Attica Senior Lamm, dm Knabberstäbchen, Coshida MSC-Seelachs,
