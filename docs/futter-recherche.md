@@ -498,6 +498,7 @@ Die Fressnapf-Suche findet keine Nummern. Die Analysewerte auf der zweiten Funds
 - Whiskas Tasty Mix: Fressnapf 4008429156113, whiskas.de nennt für Country Collection 4008429155888 (andere Packungsgröße?).
 - Perfect Fit Indoor 1+ Huhn (trocken): Rossmann 4008429159411 nur dort. Die 750-g-Packung 5900951307553 (Fressnapf, zooplus)
   nennt andere Werte (41 % Protein, 14,5 % Fett) als die Liste (37 / 12 von rossmann.de). Erst mit Packungsfoto klären.
+  (Seit Runde 11, 16.11.2026: perfect-fit.de bestätigt 37 / 12, Wert jetzt 370 kcal; die EAN fehlt weiter.)
 - Catessy Häppchen in Gelee und Felix Party Mix: Die zooplus-Nummern gehören zu Mischpaketen.
 
 
@@ -757,3 +758,66 @@ Raffiniertes Ragout Duetto (fast gleich wie Raffiniertes Ragout), Felix Sensatio
   Felix Doppelt Lecker InHome nass: nur auf purina.de gelistet, Seiten gesperrt.
 - Felix Doppelt lecker Lachs & Seefisch (trocken): zooplus.de nennt 30 % Rohasche und 8 % Rohfaser (offenbar Tippfehler).
 - Ältere Felix-Trockenfutter (Sensations, Crunchy & Soft): bei zooplus.de nur noch Weiterleitung, keine Werte.
+
+
+# Kilossos-Futterliste, elfte Runde: Perfect Fit (Stand 16.11.2026, Version 0.91.0)
+
+Auftrag von Stefan: alle in Deutschland erhältlichen Sorten von Perfect Fit (Mars). **14 neue Sorten, zusammen 216**
+(Diätfutter 24, Nassfutter 85, Trockenfutter 58, Leckerlis 49). Alle mit Herstellerwert; die NRC-Nachrechnung (Trockenfutter
+ohne Feuchteangabe mit 8 %) liegt bei Trockenfutter 1,8 bis 2,1 % darunter, bei Nassfutter fast genau gleich. **Bei Abweichung
+gilt die Packung.**
+
+**Quellen:** perfect-fit.de (Herstellerseite, nicht perfectfit.de, das ist nur eine Domain zum Verkauf). Unter „Alle Produkte“
+stehen 23 Katzensorten (12 trocken, 11 nass), jede Produktseite nennt Analysewerte und Brennwert, aber keine EAN.
+rossmann.de und dm.de für Gegenprüfung und EANs. Perfect Fit hat in Deutschland **keine Leckerlis**.
+Auf Stefans Wunsch auch die Senior-Sorten (7+ und 11+); Junior (395 kcal) nicht, weil für Kätzchen.
+
+**Korrektur alter Einträge:** Indoor 1+ trocken 369 → 370 (Werte von perfect-fit.de: 37 / 12 / 8,9 / 3,7; rossmann.de nennt je
+nach Packung 369 oder 370), Sterile 1+ trocken 374 → 373 (34 / 12 / 8,5 / 2,8; vorher fressnapf.de 34 / 12 / 8 / 3).
+Damit ist die offene Frage zu Indoor 1+ (Runde 6, EAN-Gegenprüfung) beantwortet: Der Hersteller bestätigt 37 % Protein und
+12 % Fett. Die 750-g-Packung 5900951307553 mit 41 / 14,5 bei Fressnapf und zooplus ist vermutlich eine ältere Rezeptur;
+dm.de zeigt zu dieser Nummer keine Werte. Indoor in Sauce (74) passt schon.
+
+**EANs:** 5 neue Nummern bei 4 Sorten, je von rossmann.de und dm.de bestätigt: Adult 1+ Rind 5900951307775 (750 g, im Handel
+„Active 1+ mit Rind“), Senior 7+ trocken 5900951307546 (750 g), Sensitive in Sauce 8410136052248 (12 × 85 g), Natural
+Vitality nass 4770608259549 (6 × 50 g Truthahn & Huhn) und 4770608259556 (6 × 50 g Hochseefisch & Lachs). **Jetzt 85 von
+216 Sorten mit EAN.** Nur bei einer Firma gefunden und deshalb ohne EAN: Adult 1+ Huhn 4008429159473 und Lachs 4008429159497
+(rossmann.de), Natural Vitality trocken Huhn & Truthahn 4008429136030, Rind & Huhn 4008429136061, Lachs & Weißfisch
+4008429135996 (dm.de), Sensitive trocken 750 g 4008429160318 (dm.de), Indoor trocken 4008429159404 und 4008429159411
+(rossmann.de) bzw. 5900951307553 (dm.de).
+
+| Sorte | Art | kcal/100 g | Status | NRC | Quelle |
+|---|---|---|---|---|---|
+| **Trockenfutter** | | | | | |
+| Perfect Fit Adult 1+ Huhn | trocken | 386 | Hersteller | 378,8 | perfect-fit.de (rossmann.de: 386, Asche 8 %) |
+| Perfect Fit Adult 1+ Lachs | trocken | 387 | Hersteller | 379,2 | perfect-fit.de (rossmann.de: 386) |
+| Perfect Fit Adult 1+ Rind | trocken | 385 | Hersteller | 377,4 | perfect-fit.de, rossmann.de |
+| Perfect Fit Anti Hairball Adult 1+ Huhn | trocken | 377 | Hersteller | 370,1 | perfect-fit.de |
+| Perfect Fit Sensitive 1+ Truthahn | trocken | 383 | Hersteller | 375,3 | perfect-fit.de, dm.de (750 g) |
+| Perfect Fit Natural Vitality Huhn & Truthahn | trocken | 395 | Hersteller | 388,1 | perfect-fit.de, dm.de |
+| Perfect Fit Natural Vitality Rind & Huhn | trocken | 395 | Hersteller | 387,3 | perfect-fit.de, dm.de |
+| Perfect Fit Natural Vitality Lachs & Weißfisch | trocken | 393 | Hersteller | 385,5 | dm.de (nicht auf perfect-fit.de) |
+| Perfect Fit Senior 7+ Huhn | trocken | 379 | Hersteller | 372,1 | perfect-fit.de, rossmann.de |
+| Perfect Fit Senior 11+ Huhn | trocken | 387 | Hersteller | 379,3 | perfect-fit.de |
+| Perfect Fit Indoor 1+ Huhn (Korrektur) | trocken | 370 (bis 0.90.3: 369) | Hersteller | 362,5 | perfect-fit.de |
+| Perfect Fit Sterile 1+ Huhn (Korrektur) | trocken | 373 (bis 0.90.3: 374) | Hersteller | 366,1 | perfect-fit.de |
+| **Nassfutter** | | | | | |
+| Perfect Fit Adult 1+ in Sauce (4 Varietäten, 85 g ≈ 63,8 kcal) | nass | 75 | Hersteller | 75,1 | perfect-fit.de |
+| Perfect Fit Sensitive 1+ in Sauce (85 g ≈ 63,8 kcal) | nass | 75 | Hersteller | 75,1 | perfect-fit.de, dm.de |
+| Perfect Fit Natural Vitality (50 g ≈ 40 kcal) | nass | 80 | Hersteller (40 kcal/50 g) | 80,5 | perfect-fit.de, rossmann.de, dm.de |
+| Perfect Fit Senior 7+ in Sauce (85 g ≈ 63,8 kcal) | nass | 75 | Hersteller | 75,1 | perfect-fit.de |
+
+**Widersprüche zwischen den Quellen (festgehalten, Herstellerseite gilt):**
+- Sensitive 1+ trocken: perfect-fit.de und dm.de (750 g) 34 / 14,5 / 10 / 2,1 und 383 kcal; die großen Säcke haben andere
+  Werte: dm.de 7 kg (4008429160646) 34 / 14,5 / 8,5 / 2,3 und 387, rossmann.de zur selben Nummer 34 / 15 / 9 / 2,5 und 387,
+  rossmann.de 4008429160240 34 / 14,5 / 8,5 / 2,3 und 387. Der Hinweis in der App sagt „Packung prüfen“.
+- Adult 1+ Huhn, Senior 7+ und Sterile 1+: perfect-fit.de zeigt je zwei Sätze Analysewerte (vermutlich zwei Packungsgrößen),
+  Senior 7+ mit 379 und 377 kcal, die anderen mit gleichen kcal. In der Liste steht jeweils der erste Satz.
+- Indoor in Sauce: Auch der Hersteller schreibt „Rohasche: 83,8“, gemeint ist die Feuchte (wie schon in Runde 5 notiert).
+
+**Schon in der Liste, nicht doppelt aufgenommen:** Indoor Adult 1+ Huhn & Gemüse in Sauce (Einzelbeutel, gleiche Werte wie
+„Indoor in Sauce“), Sensitive Huhn & Karotte und Sensitive Lachs als Einzelbeutel (beim Eintrag „Sensitive 1+ in Sauce“),
+Senior 7+ Truthahn & Karotten als Einzelbeutel (beim Eintrag „Senior 7+ in Sauce“), die drei Natural-Vitality-Multipacks
+(ein Eintrag, gleiche Werte).
+
+**Nicht aufgenommen:** Perfect Fit Junior (trocken, 395 kcal): für Kätzchen, nicht zum Abnehmen.

@@ -264,8 +264,8 @@ test("0.37.0: liegt ein gemessener Energiewert unter dem Packungswert, steht er 
 // ---------- 0.80.0: fünfte Runde, Breite (docs/futter-recherche.md) ----------
 
 test("0.80.0 bis 0.86.0: Runde 5 bringt 39 Sorten, Runde 6 34, Runde 7 (Leckerlis) 32, Runde 8 (Nass und Haupt) 12, Runde 9 (Diät) 6, zusammen 181 (mit Runde 10 seit 0.87.0: 202)", () => {
-  assert.equal(FUTTERLISTE.length, 181 + 21);
-  assert.equal(FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-08").length, 39 + 34 + 32 + 12 + 6);
+  assert.equal(FUTTERLISTE.length, 181 + 21 + 14); // + 14 aus Runde 11 (0.91.0)
+  assert.equal(FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-08").length, 39 + 34 + 32 + 12 + 6 - 1); // Perfect Fit Indoor trocken seit 0.91.0 mit Stand 16.11.
 });
 
 test("0.81.0: Runde 6 mit Herstellerwerten (Josera, Bozita in kJ, Royal Canin, Kitekat in Gelee)", () => {
@@ -470,7 +470,7 @@ test("0.83.0: keine Paste über der Leckerli-Grenze in der Liste (GimCat- und Tr
 test("0.84.0 und 0.86.0: Runde 8 bringt 5 Trockenfutter und 7 Nassfutter, Runde 9 sechs Diätfutter, die Gruppen zählen 24/71/44/42", () => {
   assert.deepEqual(
     listenGruppen(FUTTERLISTE).map((g) => g.eintraege.length),
-    [18 + 6, 64 + 7 + 10, 39 + 5 + 4, 42 + 7] // + Runde 10 (0.87.0): 10 nass, 4 trocken, 7 Leckerli
+    [18 + 6, 64 + 7 + 10 + 4, 39 + 5 + 4 + 10, 42 + 7] // + Runde 10 (0.87.0): 10 nass, 4 trocken, 7 Leckerli; + Runde 11 (0.91.0): 4 nass, 10 trocken
   );
 });
 
@@ -494,7 +494,7 @@ test("0.84.0: zwei neue Nummern, je von Fressnapf und zooplus bestätigt", () =>
   for (const ean of ["9003579309544", "9003579308738", "4002633758132", "4250839505641", "7613036730358", "7613033057991"]) {
     assert.equal(findeNachEan(ean, []), null, ean);
   }
-  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 69 + 5 + 2 + 2 + 3); // + 2 aus Runde 9 (0.86.0), + 3 Sorten aus Runde 10 (0.87.0)
+  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 69 + 5 + 2 + 2 + 3 + 4); // + 2 aus Runde 9 (0.86.0), + 3 Sorten aus Runde 10 (0.87.0), + 4 aus Runde 11 (0.91.0)
 });
 
 // ---------- 0.86.0: neunte Runde, Diätfutter aus der Medpets-Liste „Übergewicht“ (docs/futter-recherche.md) ----------
@@ -601,7 +601,7 @@ test("0.87.0: Runde 10 bringt 21 Sorten von Gourmet und Felix (10 nass, 7 Lecker
     assert.match(e.name, /^(Gourmet|Felix) /, id);
   }
   assert.equal(FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-09").length, 21);
-  assert.equal(FUTTERLISTE.length, 202);
+  assert.equal(FUTTERLISTE.length, 202 + 14); // + 14 aus Runde 11 (0.91.0)
 });
 
 test("0.87.0: nur Sauce Time hat einen Herstellerwert (10 kcal je 40-g-Beutel, zooplus.de und rossmann.de)", () => {
@@ -645,7 +645,7 @@ test("0.87.0: fünf neue Nummern, je von rossmann.de und zooplus.de bestätigt",
   for (const ean of ["7613287068798", "7613287611864", "7613287334497", "7613287762962", "7613036894623", "8445290502438", "8445291678637", "8445290518200"]) {
     assert.equal(findeNachEan(ean, []), null, ean);
   }
-  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 69 + 5 + 2 + 2 + 3);
+  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 69 + 5 + 2 + 2 + 3 + 4); // + 4 aus Runde 11 (0.91.0)
 });
 
 test("0.87.0: Suche findet die neuen Sorten über ein Wort, Stefans zwei Suppen zuerst", () => {
@@ -658,4 +658,105 @@ test("0.87.0: Suche findet die neuen Sorten über ein Wort, Stefans zwei Suppen 
   assert.equal(sucheFutter("mousse")[0]?.id, "hills-metabolic-mousse-nass"); // Diätfutter bleibt vorn
   assert.equal(sucheFutter("gourmet").length, 7 + 7);
   assert.equal(sucheFutter("felix").length, 9 + 14);
+});
+
+// ---------- 0.91.0: elfte Runde, Perfect Fit (docs/futter-recherche.md) ----------
+
+const RUNDE_11 = {
+  // Trockenfutter, Werte von perfect-fit.de (Lachs & Weißfisch nur bei dm.de)
+  "perfect-fit-adult-huhn-trocken": ["trocken", 386],
+  "perfect-fit-adult-lachs-trocken": ["trocken", 387],
+  "perfect-fit-adult-rind-trocken": ["trocken", 385],
+  "perfect-fit-anti-hairball-huhn-trocken": ["trocken", 377],
+  "perfect-fit-sensitive-truthahn-trocken": ["trocken", 383],
+  "perfect-fit-natural-vitality-huhn-truthahn-trocken": ["trocken", 395],
+  "perfect-fit-natural-vitality-rind-huhn-trocken": ["trocken", 395],
+  "perfect-fit-natural-vitality-lachs-weissfisch-trocken": ["trocken", 393],
+  "perfect-fit-senior-7-huhn-trocken": ["trocken", 379],
+  "perfect-fit-senior-11-huhn-trocken": ["trocken", 387],
+  // Nassfutter
+  "perfect-fit-adult-sauce": ["nass", 75],
+  "perfect-fit-sensitive-sauce": ["nass", 75],
+  "perfect-fit-natural-vitality-nass": ["nass", 80],
+  "perfect-fit-senior-7-sauce": ["nass", 75],
+};
+
+test("0.91.0: Runde 11 bringt 14 Sorten von Perfect Fit (10 trocken, 4 nass), alle mit Herstellerwert, zusammen 216", () => {
+  for (const [id, [typ, kcal]] of Object.entries(RUNDE_11)) {
+    const e = FUTTERLISTE.find((x) => x.id === id);
+    assert.ok(e, id);
+    assert.equal(e.typ, typ, id);
+    assert.equal(e.kcalPro100g, kcal, id);
+    assert.equal(e.kcalQuelle, "hersteller", id);
+    assert.equal(e.diaet, false, id);
+    assert.equal(e.abgerufen, "2026-11-16", id);
+    assert.match(e.name, /^Perfect Fit /, id);
+  }
+  // + 2 korrigierte alte Einträge (Indoor und Sterile trocken) mit neuem Abrufdatum
+  assert.equal(FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-16").length, 14 + 2);
+  assert.equal(FUTTERLISTE.length, 216);
+  assert.equal(FUTTERLISTE.filter((e) => /^Perfect Fit /.test(e.name)).length, 3 + 14);
+});
+
+test("0.91.0: Nachrechnung von Hand (NRC 2006, Trockenfutter mit 8 % Feuchte) liegt 1 bis 2 % unter dem Herstellerwert", () => {
+  const nach = (id) => Math.round(nachrechnung(FUTTERLISTE.find((e) => e.id === id)) * 10) / 10;
+  assert.equal(nach("perfect-fit-adult-huhn-trocken"), 378.8);
+  assert.equal(nach("perfect-fit-natural-vitality-rind-huhn-trocken"), 387.3);
+  assert.equal(nach("perfect-fit-senior-11-huhn-trocken"), 379.3);
+  assert.equal(nach("perfect-fit-adult-sauce"), 75.1);
+  assert.equal(nach("perfect-fit-natural-vitality-nass"), 80.5);
+});
+
+test("0.91.0: Indoor und Sterile trocken mit den Werten von perfect-fit.de (370 statt 369, 373 statt 374)", () => {
+  const e = (id) => FUTTERLISTE.find((x) => x.id === id);
+  assert.equal(e("perfect-fit-indoor-huhn-trocken").kcalPro100g, 370);
+  assert.deepEqual(e("perfect-fit-indoor-huhn-trocken").analyse, { protein: 37, fett: 12, asche: 8.9, faser: 3.7, feuchte: null });
+  assert.equal(e("perfect-fit-sterile-huhn-trocken").kcalPro100g, 373);
+  assert.deepEqual(e("perfect-fit-sterile-huhn-trocken").analyse, { protein: 34, fett: 12, asche: 8.5, faser: 2.8, feuchte: null });
+  for (const id of ["perfect-fit-indoor-huhn-trocken", "perfect-fit-sterile-huhn-trocken"]) {
+    assert.equal(e(id).abgerufen, "2026-11-16", id);
+    assert.match(e(id).quelle, /perfect-fit\.de/, id);
+  }
+  assert.equal(e("perfect-fit-indoor-sauce").kcalPro100g, 74); // passt schon
+});
+
+test("0.91.0: Beutel-kcal im Hinweis (von Hand: 85 × 0,75 = 63,75; 50 × 0,80 = 40)", () => {
+  const hinweis = (id) => FUTTERLISTE.find((e) => e.id === id).hinweis;
+  for (const id of ["perfect-fit-adult-sauce", "perfect-fit-sensitive-sauce", "perfect-fit-senior-7-sauce"]) {
+    assert.match(hinweis(id), /85-g-Beutel ≈ 63,8 kcal/, id);
+  }
+  assert.match(hinweis("perfect-fit-natural-vitality-nass"), /50-g-Beutel ≈ 40 kcal/);
+  assert.match(hinweis("perfect-fit-sensitive-truthahn-trocken"), /387 kcal/); // große Säcke
+  assert.match(hinweis("perfect-fit-adult-rind-trocken"), /Active 1\+/);
+});
+
+test("0.91.0: fünf neue Nummern, je von rossmann.de und dm.de bestätigt", () => {
+  const neu = {
+    "5900951307775": "perfect-fit-adult-rind-trocken", // 750 g, „Active 1+ mit Rind“
+    "5900951307546": "perfect-fit-senior-7-huhn-trocken", // 750 g
+    "8410136052248": "perfect-fit-sensitive-sauce", // 12 × 85 g
+    "4770608259549": "perfect-fit-natural-vitality-nass", // 6 × 50 g Truthahn & Huhn
+    "4770608259556": "perfect-fit-natural-vitality-nass", // 6 × 50 g Hochseefisch & Lachs
+  };
+  for (const [ean, id] of Object.entries(neu)) assert.equal(findeNachEan(ean, []).eintrag.id, id, ean);
+  for (const id of new Set(Object.values(neu))) {
+    assert.equal(FUTTERLISTE.find((e) => e.id === id).eanQuelle, "rossmann.de, dm.de", id);
+  }
+  // Nur bei einer Firma gefunden, deshalb ohne Nummer: Adult Huhn und Lachs (Rossmann), Natural Vitality trocken,
+  // Sensitive 750 g (dm), Indoor trocken (Rossmann 4008429159404 und 4008429159411, dm 5900951307553).
+  for (const ean of ["4008429159473", "4008429159497", "4008429136030", "4008429136061", "4008429135996", "4008429160318", "4008429159404", "5900951307553"]) {
+    assert.equal(findeNachEan(ean, []), null, ean);
+  }
+  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 69 + 5 + 2 + 2 + 3 + 4);
+});
+
+test("0.91.0: Suche findet die neuen Sorten über ein Wort, Junior bleibt draußen", () => {
+  assert.equal(sucheFutter("perfect fit").length, 17);
+  assert.equal(sucheFutter("natural vitality").length, 4);
+  assert.deepEqual(sucheFutter("anti hairball").map((e) => e.id), ["whiskas-knuspertaschen-anti-hairball", "perfect-fit-anti-hairball-huhn-trocken"]);
+  assert.equal(sucheFutter("perfect fit junior").length, 0);
+  assert.deepEqual(
+    listenGruppen(FUTTERLISTE).map((g) => g.eintraege.length),
+    [24, 81 + 4, 48 + 10, 49]
+  );
 });
