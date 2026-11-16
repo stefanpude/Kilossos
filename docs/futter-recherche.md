@@ -821,3 +821,52 @@ Senior 7+ Truthahn & Karotten als Einzelbeutel (beim Eintrag „Senior 7+ in Sau
 (ein Eintrag, gleiche Werte).
 
 **Nicht aufgenommen:** Perfect Fit Junior (trocken, 395 kcal): für Kätzchen, nicht zum Abnehmen.
+
+# Kilossos-Futterliste, zwölfte Runde: Eigenmarken über Packungsfotos (Stand 16.11.2026, Version 0.92.0)
+
+Auftrag von Stefan: Eigenmarken von Discountern, Supermärkten und Drogerien. **10 neue Sorten, zusammen 226**
+(Diätfutter 24, Nassfutter 93, Trockenfutter 58, Leckerlis 51). **Bei Abweichung gilt die Packung.**
+
+**Warum Fotos:** Lidl, Aldi, Edeka, Netto, Penny und Kaufland veröffentlichen keine Analysewerte (Runde 2 und 4, am 16.11.
+erneut geprüft: nur Nutzereinträge bei Codecheck und Tests hinter Bezahlschranke). Quelle sind deshalb **Packungsfotos aus
+Open Pet Food Facts** (world.openpetfoodfacts.org). Abgeschrieben wurde vom Foto der Rückseite, nicht aus den eingetippten
+Werten der Sammlung. Regeln (Stefan, 16.11.):
+- nur Fotos **ab 2023** (Eigenmarken wechseln Rezeptur und Lieferanten), Fotodatum steht in der Quelle;
+- nur deutsche Etiketten (griechische Coshida-Packung 20302498 und belgische Aldi-Snacks „Juliet“ 4061458007184 verworfen);
+- kcal immer „geschätzt“ (NRC 2006), keine der Packungen nennt kcal;
+- EAN nur, wenn der Strichcode auf dem Foto lesbar ist (`eanQuelle: "Strichcode auf dem Packungsfoto"`), weil die Packung
+  selbst die Nummer zeigt; die übliche Zwei-Firmen-Prüfung entfällt hier;
+- jeder Eintrag mit dem Hinweis, die Werte mit der eigenen Packung zu vergleichen.
+
+Gelesen von einem Helfer, Stichproben selbst gegengelesen (Attica Senior Lamm, dm Knabberstäbchen, Coshida MSC-Seelachs,
+Attica Huhn): alle gleich.
+
+| Sorte | Art | kcal/100 g | Status | NRC | Foto vom | EAN |
+|---|---|---|---|---|---|---|
+| Lidl Coshida Zarte Stückchen mit MSC-Seelachs in Tomatengelee | nass | 91 | geschätzt | 90,6 | 15.05.2026 | – (nicht im Bild) |
+| Lidl Coshida Bällchen mit Rind & Leber in Sauce (Dose) | nass | 89 | geschätzt | 88,7 | 27.03.2025 | – (angeschnitten) |
+| Netto Attica Feine Pastete mit Huhn | nass | 88 | geschätzt | 87,7 | 08.05.2023 | 4311596627899 |
+| Netto Attica Feines Ragout mit Pute | nass | 89 | geschätzt | 89,4 | 01.11.2024 | 4311596621545 |
+| Netto Attica Feine Pastete mit Wild | nass | 88 | geschätzt | 87,7 | 31.10.2024 | 4311596621637 |
+| Netto Attica Senior Pastete mit Lamm | nass | 84 | geschätzt | 83,6 | 01.11.2024 | 4311596621750 |
+| Kaufland K-Classic Stückige Pastete mit Thunfisch | nass | 85 | geschätzt | 84,8 | 03.01.2026 | 4063367509315 |
+| Edeka Bio Pastete Huhn mit Pute | nass | 88 | geschätzt | 88,3 | 02.08.2024 | 4311501751893 |
+| dm Dein Bestes Knabberstäbchen mit Huhn, Ente & Katzengras (5 g/Stück) | Leckerli | 328 | geschätzt | 327,8 | 02.04.2026 | 4067796248586 |
+| dm Dein Bestes Pudding mit Käse (15 g/Stück) | Leckerli | 62 | geschätzt | 62,5 | 26.10.2026 | 4058172590399 |
+
+**Anmerkungen:**
+- Attica: Auf dem Etikett steht nur EUCO GmbH Hamburg (Edeka-Gruppe), der Markenname „Attica“ steht auf der Vorderseite.
+  Codecheck führt Attica als Netto Marken-Discount.
+- Alle Nassfutter liegen bei 84 bis 91 kcal/100 g, also eher über Kitos Sheba (77).
+
+**Nicht aufgenommen:**
+- **Aldi Cachet:** ab 2023 kein Foto mit vollständigen Analysewerten (Cachet Classic in Sauce 4061462514685: Werte am
+  Bildrand abgeschnitten; Cachet Premium Seelachs 4061458240123: nur Zusammensetzung). → Packungsfotos von Stefan.
+- Penny, Gut & Günstig, Norma: keine Fotos ab 2023 mit Rückseite. Edeka Feines Soufflé: nur Vorderseiten.
+- „… mit Lachs in Sahnesauce“ 4305615279718 (vermutlich Rossmann Winston): Marke nicht im Bild, Protein 8,0 oder 8,5 unsicher.
+- Fotos vor 2023 (z. B. K-Classic Zarte Häppchen 2020, Coshida Selection 2019): zu alt.
+
+**Einkaufsliste für Stefan (Aldi, Fotos reichen, nichts kaufen):** Rückseite mit „Analytische Bestandteile“ scharf, dazu
+Strichcode und Packungsgröße. Am besten: Cachet Classic in Sauce (12 × 100 g), Cachet Classic in Gelee, Cachet Premium
+Pastete, Cachet Trockenfutter (Light oder Sterilised, falls vorhanden), ein Cachet-Snack. Gern auch Penny und Edeka
+Gut & Günstig, falls er dort ist.

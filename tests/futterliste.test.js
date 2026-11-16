@@ -264,7 +264,7 @@ test("0.37.0: liegt ein gemessener Energiewert unter dem Packungswert, steht er 
 // ---------- 0.80.0: fünfte Runde, Breite (docs/futter-recherche.md) ----------
 
 test("0.80.0 bis 0.86.0: Runde 5 bringt 39 Sorten, Runde 6 34, Runde 7 (Leckerlis) 32, Runde 8 (Nass und Haupt) 12, Runde 9 (Diät) 6, zusammen 181 (mit Runde 10 seit 0.87.0: 202)", () => {
-  assert.equal(FUTTERLISTE.length, 181 + 21 + 14); // + 14 aus Runde 11 (0.91.0)
+  assert.equal(FUTTERLISTE.length, 181 + 21 + 14 + 10); // + 14 aus Runde 11 (0.91.0), + 10 aus Runde 12 (0.92.0)
   assert.equal(FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-08").length, 39 + 34 + 32 + 12 + 6 - 1); // Perfect Fit Indoor trocken seit 0.91.0 mit Stand 16.11.
 });
 
@@ -281,7 +281,7 @@ test("0.81.0: Runde 6 mit Herstellerwerten (Josera, Bozita in kJ, Royal Canin, K
 });
 
 test("0.81.0: Eigenmarken von dm und Rossmann sind über die Suche zu finden", () => {
-  assert.equal(sucheFutter("dein bestes").length, 6); // 1 aus Runde 2, 5 aus Runde 6 (mit Leckerli)
+  assert.equal(sucheFutter("dein bestes").length, 6 + 2); // 1 aus Runde 2, 5 aus Runde 6 (mit Leckerli), 2 Leckerlis aus Runde 12
   assert.equal(sucheFutter("winston").length, 6); // 1 aus Runde 2, 5 aus Runde 6
 });
 
@@ -401,7 +401,7 @@ test("0.82.0: Werte vom Hersteller statt veralteter Händlerangaben", () => {
 
 test("0.83.0: 42 Leckerlis, jedes sagt, was ein Stück oder ein Beutel bringt, oder dass das Stückgewicht fehlt", () => {
   const leckerlis = FUTTERLISTE.filter((e) => e.typ === "leckerli");
-  assert.equal(leckerlis.length, 10 + 32 + 7); // + 7 aus Runde 10 (0.87.0)
+  assert.equal(leckerlis.length, 10 + 32 + 7 + 2); // + 7 aus Runde 10 (0.87.0), + 2 aus Runde 12 (0.92.0)
   for (const e of leckerlis) {
     assert.match(e.hinweis, /≈ [\d,]+ kcal|Stückgewicht nicht angegeben/, e.id);
   }
@@ -409,7 +409,7 @@ test("0.83.0: 42 Leckerlis, jedes sagt, was ein Stück oder ein Beutel bringt, o
 
 test("0.83.0: jedes neue Leckerli sagt, dass es nur zusätzlich zu einem Alleinfutter gehört", () => {
   const neu = FUTTERLISTE.filter((e) => e.typ === "leckerli" && FUTTERLISTE.indexOf(e) > FUTTERLISTE.findIndex((x) => x.id === "dm-dein-bestes-dental-knabbertaschen"));
-  assert.equal(neu.length, 32 + 7); // + 7 aus Runde 10 (0.87.0), stehen am Ende der Liste
+  assert.equal(neu.length, 32 + 7 + 2); // + 7 aus Runde 10 (0.87.0), + 2 aus Runde 12, stehen am Ende der Liste
   for (const e of neu) assert.match(e.hinweis, /Ergänzungsfuttermittel, kein Alleinfutter/, e.id);
 });
 
@@ -456,7 +456,7 @@ test("0.83.0: der Scanner findet die neuen Whiskas-Nummern (whiskas.de und zoopl
 test("0.83.0: Suche findet den Felix Party Mix auch als KnabberMix, Leckerli-Gruppe zeigt alle 42", () => {
   assert.deepEqual(sucheFutter("knabbermix").map((e) => e.id), ["felix-party-mix"]);
   const gruppe = listenGruppen(FUTTERLISTE).find((g) => g.id === "liste-leckerli");
-  assert.equal(gruppe.eintraege.length, 42 + 7); // + 7 aus Runde 10 (0.87.0)
+  assert.equal(gruppe.eintraege.length, 42 + 7 + 2); // + 7 aus Runde 10 (0.87.0), + 2 aus Runde 12
 });
 
 test("0.83.0: keine Paste über der Leckerli-Grenze in der Liste (GimCat- und Trixie-Malzpasten bleiben draußen)", () => {
@@ -470,7 +470,7 @@ test("0.83.0: keine Paste über der Leckerli-Grenze in der Liste (GimCat- und Tr
 test("0.84.0 und 0.86.0: Runde 8 bringt 5 Trockenfutter und 7 Nassfutter, Runde 9 sechs Diätfutter, die Gruppen zählen 24/71/44/42", () => {
   assert.deepEqual(
     listenGruppen(FUTTERLISTE).map((g) => g.eintraege.length),
-    [18 + 6, 64 + 7 + 10 + 4, 39 + 5 + 4 + 10, 42 + 7] // + Runde 10 (0.87.0): 10 nass, 4 trocken, 7 Leckerli; + Runde 11 (0.91.0): 4 nass, 10 trocken
+    [18 + 6, 64 + 7 + 10 + 4 + 8, 39 + 5 + 4 + 10, 42 + 7 + 2] // + Runde 12 (0.92.0): 8 nass, 2 Leckerli; + Runde 10 (0.87.0): 10 nass, 4 trocken, 7 Leckerli; + Runde 11 (0.91.0): 4 nass, 10 trocken
   );
 });
 
@@ -494,7 +494,7 @@ test("0.84.0: zwei neue Nummern, je von Fressnapf und zooplus bestätigt", () =>
   for (const ean of ["9003579309544", "9003579308738", "4002633758132", "4250839505641", "7613036730358", "7613033057991"]) {
     assert.equal(findeNachEan(ean, []), null, ean);
   }
-  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 69 + 5 + 2 + 2 + 3 + 4); // + 2 aus Runde 9 (0.86.0), + 3 Sorten aus Runde 10 (0.87.0), + 4 aus Runde 11 (0.91.0)
+  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 69 + 5 + 2 + 2 + 3 + 4 + 8); // + 2 aus Runde 9 (0.86.0), + 3 Sorten aus Runde 10 (0.87.0), + 4 aus Runde 11 (0.91.0)
 });
 
 // ---------- 0.86.0: neunte Runde, Diätfutter aus der Medpets-Liste „Übergewicht“ (docs/futter-recherche.md) ----------
@@ -601,7 +601,7 @@ test("0.87.0: Runde 10 bringt 21 Sorten von Gourmet und Felix (10 nass, 7 Lecker
     assert.match(e.name, /^(Gourmet|Felix) /, id);
   }
   assert.equal(FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-09").length, 21);
-  assert.equal(FUTTERLISTE.length, 202 + 14); // + 14 aus Runde 11 (0.91.0)
+  assert.equal(FUTTERLISTE.length, 202 + 14 + 10); // + 14 aus Runde 11 (0.91.0), + 10 aus Runde 12
 });
 
 test("0.87.0: nur Sauce Time hat einen Herstellerwert (10 kcal je 40-g-Beutel, zooplus.de und rossmann.de)", () => {
@@ -645,7 +645,7 @@ test("0.87.0: fünf neue Nummern, je von rossmann.de und zooplus.de bestätigt",
   for (const ean of ["7613287068798", "7613287611864", "7613287334497", "7613287762962", "7613036894623", "8445290502438", "8445291678637", "8445290518200"]) {
     assert.equal(findeNachEan(ean, []), null, ean);
   }
-  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 69 + 5 + 2 + 2 + 3 + 4); // + 4 aus Runde 11 (0.91.0)
+  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 69 + 5 + 2 + 2 + 3 + 4 + 8); // + 4 aus Runde 11 (0.91.0)
 });
 
 test("0.87.0: Suche findet die neuen Sorten über ein Wort, Stefans zwei Suppen zuerst", () => {
@@ -693,8 +693,8 @@ test("0.91.0: Runde 11 bringt 14 Sorten von Perfect Fit (10 trocken, 4 nass), al
     assert.match(e.name, /^Perfect Fit /, id);
   }
   // + 2 korrigierte alte Einträge (Indoor und Sterile trocken) mit neuem Abrufdatum
-  assert.equal(FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-16").length, 14 + 2);
-  assert.equal(FUTTERLISTE.length, 216);
+  assert.equal(FUTTERLISTE.filter((e) => e.abgerufen === "2026-11-16").length, 14 + 2 + 10); // + 10 aus Runde 12, gleicher Tag
+  assert.equal(FUTTERLISTE.length, 216 + 10); // + 10 aus Runde 12
   assert.equal(FUTTERLISTE.filter((e) => /^Perfect Fit /.test(e.name)).length, 3 + 14);
 });
 
@@ -747,7 +747,7 @@ test("0.91.0: fünf neue Nummern, je von rossmann.de und dm.de bestätigt", () =
   for (const ean of ["4008429159473", "4008429159497", "4008429136030", "4008429136061", "4008429135996", "4008429160318", "4008429159404", "5900951307553"]) {
     assert.equal(findeNachEan(ean, []), null, ean);
   }
-  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 69 + 5 + 2 + 2 + 3 + 4);
+  assert.equal(FUTTERLISTE.filter((e) => e.ean).length, 69 + 5 + 2 + 2 + 3 + 4 + 8);
 });
 
 test("0.91.0: Suche findet die neuen Sorten über ein Wort, Junior bleibt draußen", () => {
@@ -757,6 +757,57 @@ test("0.91.0: Suche findet die neuen Sorten über ein Wort, Junior bleibt drauß
   assert.equal(sucheFutter("perfect fit junior").length, 0);
   assert.deepEqual(
     listenGruppen(FUTTERLISTE).map((g) => g.eintraege.length),
-    [24, 81 + 4, 48 + 10, 49]
+    [24, 81 + 4 + 8, 48 + 10, 49 + 2]
   );
+});
+
+// ---------- 0.92.0: zwölfte Runde, Eigenmarken über Packungsfotos (docs/futter-recherche.md) ----------
+
+const RUNDE_12 = [
+  ["lidl-coshida-msc-seelachs-tomatengelee", 91],
+  ["lidl-coshida-baellchen-rind-leber-sauce", 89],
+  ["netto-attica-pastete-huhn", 88],
+  ["netto-attica-ragout-pute", 89],
+  ["netto-attica-pastete-wild", 88],
+  ["netto-attica-senior-pastete-lamm", 84],
+  ["kaufland-k-classic-pastete-thunfisch", 85],
+  ["edeka-bio-pastete-huhn-pute", 88],
+  ["dm-dein-bestes-knabberstaebchen-huhn-ente", 328],
+  ["dm-dein-bestes-pudding-kaese", 62],
+];
+
+test("0.92.0: Runde 12 bringt 10 Eigenmarken, alle geschätzt aus einem Packungsfoto ab 2023, zusammen 226", () => {
+  assert.equal(FUTTERLISTE.length, 226);
+  for (const [id, kcal] of RUNDE_12) {
+    const e = FUTTERLISTE.find((x) => x.id === id);
+    assert.ok(e, id);
+    assert.equal(e.kcalQuelle, "geschaetzt", id);
+    assert.equal(e.kcalPro100g, kcal, id);
+    assert.equal(e.kcalPro100g, Math.round(nachrechnung(e)), id);
+    assert.equal(e.abgerufen, "2026-11-16", id);
+    assert.match(e.url, /^https:\/\/world\.openpetfoodfacts\.org\/product\/\d+$/, id);
+    const foto = e.quelle.match(/^Packungsfoto vom \d{2}\.\d{2}\.(\d{4}) \(Open Pet Food Facts\)$/);
+    assert.ok(foto, id);
+    assert.ok(Number(foto[1]) >= 2023, `${id}: Foto zu alt`);
+    assert.match(e.hinweis, /mit deiner Packung vergleichen/, id);
+  }
+});
+
+test("0.92.0: acht Eigenmarken haben die Nummer vom Strichcode auf dem Foto, der Scanner findet sie", () => {
+  const mitNummer = RUNDE_12.map(([id]) => FUTTERLISTE.find((x) => x.id === id)).filter((e) => e.ean);
+  assert.equal(mitNummer.length, 8);
+  for (const e of mitNummer) {
+    assert.equal(e.eanQuelle, "Strichcode auf dem Packungsfoto", e.id);
+    assert.equal(findeNachEan(e.ean[0], []).eintrag.id, e.id);
+  }
+  // Coshida: Strichcode auf dem Foto nicht lesbar bzw. nicht im Bild
+  assert.equal(FUTTERLISTE.find((x) => x.id === "lidl-coshida-baellchen-rind-leber-sauce").ean, undefined);
+});
+
+test("0.92.0: Suche findet die Eigenmarken über den Laden", () => {
+  assert.equal(sucheFutter("lidl").length, 2);
+  assert.equal(sucheFutter("netto").length, 4);
+  assert.equal(sucheFutter("kaufland").length, 1);
+  assert.equal(sucheFutter("edeka").length, 1);
+  assert.equal(sucheFutter("aldi").length, 0); // Cachet erst mit Stefans Packungsfotos
 });
