@@ -48,6 +48,12 @@ In der App unter „Mehr“ → „Wissen“, auf Wunsch als Ausdruck.
 - [ ] Spielen **Zucker oder Getreide** beim Abnehmen eine Rolle, oder zählen nur die kcal? Ist ein neutraler Eintrag
       „Zutatenliste“ sinnvoll?
 - [ ] Soll die App bei **rohem Fleisch / BARF** einen Hinweis zeigen, und wenn ja, welchen?
+- [ ] **Nutzungsbedingungen, Punkt 1 „Was Kilossos nicht ersetzt“:** „Die App ersetzt keine tierärztliche Untersuchung und
+      ist kein Medizinprodukt. Zielgewicht und Tagesmenge legt immer die Praxis fest, die deine Katze behandelt.“ Dazu der
+      Rat, bei Warnung, Krankheit oder schlechtem Fressen die Praxis zu fragen. Ist das fachlich richtig und vollständig?
+- [ ] **Leckerli-Grenze für Pasten:** Die App fragt bei Leckerlis über 450 kcal pro 100 g nach, ob der Wert stimmt.
+      Malzpasten (z. B. gegen Haarballen) liegen bei etwa 470 kcal pro 100 g und stehen deshalb noch nicht in der Liste.
+      Sind Malzpasten beim Abnehmen in Ordnung, in welcher Menge, und darf die Grenze auf 500 kcal steigen?
 
 ## Antworten
 | Frage | Antwort |
@@ -66,3 +72,5 @@ In der App unter „Mehr“ → „Wissen“, auf Wunsch als Ausdruck.
 | Waage | |
 | Texte gegengelesen | |
 | Vegan, Zucker/Getreide, BARF-Hinweis | |
+| Nutzungsbedingungen Punkt 1 | |
+| Malzpasten, Grenze 500 kcal? | |
