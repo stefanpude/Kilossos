@@ -1243,3 +1243,7 @@ dialog .wert-eingabe input:not([type="hidden"]) { padding-right: calc(12px + 1.4
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001s !important; animation-delay: 0s !important; transition-duration: 0.001s !important; }
 }
+/* Diätfutter-Hinweis (0.93.0): Knopf im aufgeklappten Hinweis, Zeile unter der Freigabe-Tafel */
+.hinweis [data-aktion="diaetfutter-besprochen"] { width: 100%; min-height: 48px; margin-top: 8px; }
+.hinweis .aufklapp-inhalt > div > p.leise { margin: 6px 0 4px; font-size: 0.8125rem; }
+.diaet-besprochen { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; margin: 10px 0 0; }

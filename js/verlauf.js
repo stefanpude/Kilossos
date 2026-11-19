@@ -4,7 +4,7 @@
 // Farben kommen aus styles.css (--reihe-1, --reihe-2, --akzent, --gut, --rand, --text-leise).
 
 import { GRENZEN, gewichteSortiert, tagesSumme, leckerliKcal, tagSchluessel, aktuelleFreigabe, kcalFuer } from "./rechnen.js";
-import { zeitraumStart, wochenRaten, abnahmeZusammenfassung, futterTage, futterZusammenfassung, wochenGruppen, tempoZahl } from "./zusammenfassung.js";
+import { zeitraumStart, wochenRaten, abnahmeZusammenfassung, futterTage, futterZusammenfassung, futterUeberText, wochenGruppen, tempoZahl } from "./zusammenfassung.js";
 import { aufklappKarte } from "./aufklappen.js";
 import { befundText } from "./daten.js";
 import { SYMBOL } from "./symbole.js";
@@ -847,7 +847,7 @@ function futterKarte(mahlzeiten, futterNachId, freigaben, von, heute) {
   const mitFreigabe = tage.some((t) => t.freigabeKcal !== null);
   const kopf =
     `${z.durchschnitt === null ? "noch kein ganzer Tag" : `Ø ${zahl(z.durchschnitt)} kcal`} · ${z.anzahl} ${z.anzahl === 1 ? "Tag" : "Tage"}` +
-    (mitFreigabe ? ` · ${z.ueber}× über der Freigabe` : "");
+    (mitFreigabe ? ` · ${futterUeberText(z)}` : "");
   const hoechster = Math.max(...tage.map((t) => t.kcal), 1);
   // Tage und Mahlzeiten erst beim Aufklappen bauen (0.60.1): bei „Alles“ über ein Jahr sonst tausende Elemente,
   // die zugeklappt niemand sieht; am Handy fehlte dabei sekundenlang die Gewichtslinie.

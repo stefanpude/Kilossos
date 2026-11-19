@@ -407,3 +407,15 @@ test("0.73.1: Karte unter „Tierarztpraxis“ heißt „Aktuelle tierärztliche
   assert.match(karte, /<h4 class="label">Aktuelle tierärztliche Freigabe<\/h4>/);
   assert.match(html, /<h2 id="freigabe-titel">Tierärztliche Freigabe<\/h2>/);
 });
+
+test("freigabeAendern: „Diätfutter besprochen“ bleibt bei gleichen Werten, fällt bei neuem Ziel oder neuen kcal weg", () => {
+  const basis = { datum: "2026-11-13", zielgewichtKg: 5.5, kcalProTag: 210, tierarzt: "Praxis", notiz: "" };
+  const f = fr("a", "2026-11-13", 5.5, 210, { diaetfutterBesprochen: true });
+  freigabeAendern(f, { ...basis, notiz: "nur Notiz" });
+  assert.equal(f.diaetfutterBesprochen, true);
+  freigabeAendern(f, { ...basis, kcalProTag: 200 });
+  assert.equal("diaetfutterBesprochen" in f, false);
+  const g = fr("b", "2026-11-13", 5.5, 210, { diaetfutterBesprochen: true });
+  freigabeAendern(g, { ...basis, zielgewichtKg: 5.2 });
+  assert.equal("diaetfutterBesprochen" in g, false);
+});

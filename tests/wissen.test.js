@@ -129,7 +129,7 @@ test("hinweisKnopf: nur der Hinweis „Abnahme stockt“ führt zur Erklärseite
     hinweisKnopf("stillstand"),
     '<button type="button" class="knopf-text" data-aktion="warum-nicht-ab">Warum nimmt meine Katze nicht ab?</button>'
   );
-  assert.equal(hinweisKnopf("diaetfutter"), "");
+  assert.equal(hinweisKnopf("ueber-freigabe"), "");
   assert.equal(hinweisKnopf(undefined), "");
 });
 
@@ -180,7 +180,7 @@ test("app.js: öffnet beide Blätter, setzt die Begriffe ein, Knopf im Hinweis",
   assert.match(js, /case "warum-nicht-ab":\s*return \$\("dialog-nicht-ab"\)\.showModal\(\);/);
   // Fehlt der Platz (zum Beispiel alte index.html aus einem Zwischenspeicher), darf der Start nicht abbrechen.
   assert.match(js, /const ort = \$\("begriffe-liste"\);\s*if \(ort\) ort\.innerHTML = begriffeHtml\(\);/);
-  assert.match(js, /hinweisKnopf\(w\.id\)/);
+  assert.match(js, /hinweisKnopf\(w\.id, freigabe\?\.id\)/);
 });
 
 test("Willkommensseite verspricht nichts, was die App nicht halten kann (Stefan, 04.11.2026)", () => {
@@ -190,9 +190,9 @@ test("Willkommensseite verspricht nichts, was die App nicht halten kann (Stefan,
   assert.doesNotMatch(html, /ohne Fettleber-Risiko|für jede Sorte/);
 });
 
-test("Version 0.92.0: Cache v165 mit js/profilbild.js, js/zurueck.js, js/rueckfrage.js, js/nachtragen.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
+test("Version 0.93.0: Cache v166 mit js/profilbild.js, js/zurueck.js, js/rueckfrage.js, js/nachtragen.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
   const sw = lies("sw.js");
-  assert.match(sw, /const CACHE_NAME = "kilossos-v165";/);
+  assert.match(sw, /const CACHE_NAME = "kilossos-v166";/);
   assert.match(sw, /"js\/profilbild\.js",/);
   assert.match(sw, /"js\/zurueck\.js",/);
   assert.match(sw, /"js\/nachtragen\.js",/);
@@ -202,7 +202,7 @@ test("Version 0.92.0: Cache v165 mit js/profilbild.js, js/zurueck.js, js/rueckfr
   assert.match(sw, /"js\/besondere-tage\.js",/);
   assert.match(sw, /"js\/freigaben\.js",/);
   assert.match(sw, /"js\/heute-grafiken\.js",/);
-  assert.match(lies("index.html"), /id="version">Version 0.92.0</);
+  assert.match(lies("index.html"), /id="version">Version 0.93.0</);
 });
 
 // 0.42.7: Wiege-Tipp Transportbox im Bereich „Auf dem Arm gewogen?“ (Ideen-Tafel, Halter 06.11.2026).
@@ -286,4 +286,12 @@ test("0.36.8: die neuen Formulierungen mit „gewogen“", () => {
   assert.match(html, /und das Gewicht schwankt von Mal zu Mal\./);
   assert.match(lies("js/speicher.js"), /Foto in der Liste unter „Gewicht“ antippen/);
   assert.match(lies("js/verlauf.js"), /Jeder Punkt steht für ein Wiegen, verglichen mit der Messung mindestens 7 Tage davor und auf 7 Tage umgerechnet\./);
+});
+
+test("hinweisKnopf: Diätfutter-Hinweis hat „Mit der Praxis besprochen“ mit Kennung der Freigabe (0.93.0)", () => {
+  const html = hinweisKnopf("diaetfutter", "f1");
+  assert.match(html, /data-aktion="diaetfutter-besprochen" data-id="f1"/);
+  assert.match(html, /Mit der Praxis besprochen/);
+  assert.match(html, /Bei einer neuen Freigabe prüft Kilossos neu\./);
+  assert.equal(hinweisKnopf("diaetfutter"), "");
 });

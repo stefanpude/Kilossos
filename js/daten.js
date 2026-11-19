@@ -19,6 +19,9 @@
 //               bcs: optional, Body Condition Score aus der Tierarztpraxis, ganze Zahl 1–9 (seit 0.12.0)
 //               mcs: optional, Muscle Condition Score aus der Tierarztpraxis, Schlüssel aus MCS (seit 0.12.0)
 //               Ältere Freigaben haben beide Felder nicht – sie bleiben ohne Umwandlung gültig.
+//               diaetfutterBesprochen: optional, nur true; der Diätfutter-Hinweis auf „Heute“ ist für diese Freigabe
+//               ausgeblendet (seit 0.93.0). Fehlt in älteren Freigaben = nicht besprochen. Fällt weg, wenn sich Ziel
+//               oder kcal ändern (freigabeAendern in js/freigaben.js).
 //   besondereTage: { id, tierId, art, von ("JJJJ-MM-TT"), bis ("JJJJ-MM-TT" | null), notiz } (seit 0.33.0)
 //               Ereignis oder Phase, z. B. krank oder genascht; ohne kcal und Gramm, ohne Einfluss auf Rechnungen.
 //               bis gleich von: ein Tag; bis später: abgeschlossene Phase; bis null: Phase läuft noch.
@@ -232,6 +235,10 @@ export function freigabenBereinigen(daten) {
     }
     if ("mcs" in freigabe && !Object.hasOwn(MCS, freigabe.mcs)) {
       delete freigabe.mcs;
+      entfernt += 1;
+    }
+    if ("diaetfutterBesprochen" in freigabe && freigabe.diaetfutterBesprochen !== true) {
+      delete freigabe.diaetfutterBesprochen;
       entfernt += 1;
     }
   }

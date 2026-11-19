@@ -394,3 +394,14 @@ test("waegungAendern: fehlende Notiz wird leer, wie beim Eintragen", () => {
   waegungAendern(waegung, { kg: 9.3, datum: "2026-10-28", notiz: null });
   assert.deepEqual(waegung, { id: "g2", tierId: "k", kg: 9.3, datum: "2026-10-28", notiz: "" });
 });
+
+test("freigabenBereinigen: diaetfutterBesprochen bleibt nur als true, alte Freigaben ohne Feld bleiben gültig (0.93.0)", () => {
+  const daten = laden(testSpeicher());
+  daten.freigaben.push(fr({ id: "a", diaetfutterBesprochen: true }), fr({ id: "b", diaetfutterBesprochen: "ja" }), fr({ id: "c" }));
+  assert.ok(istGueltig(daten));
+  assert.equal(freigabenBereinigen(daten), 1);
+  const [a, b, c] = daten.freigaben;
+  assert.equal(a.diaetfutterBesprochen, true);
+  assert.equal("diaetfutterBesprochen" in b, false);
+  assert.equal("diaetfutterBesprochen" in c, false);
+});

@@ -89,6 +89,7 @@ export function futterTage(mahlzeiten, futterNachId, freigaben) {
         unsicher: summe.unsicher,
         leckerli: leckerliKcal(liste, futterNachId),
         freigabeKcal,
+        drueber: freigabeKcal !== null && summe.kcal > freigabeKcal,
         ueber: freigabeKcal !== null && summe.kcal > (1 + GRENZEN.spielraum) * freigabeKcal,
         mahlzeiten: [...liste].sort((a, b) => a.zeitpunkt.localeCompare(b.zeitpunkt)),
       };
@@ -101,8 +102,16 @@ export function futterZusammenfassung(tage, heute) {
   return {
     durchschnitt: fertig.length ? fertig.reduce((s, t) => s + t.kcal, 0) / fertig.length : null,
     anzahl: fertig.length,
+    drueber: fertig.filter((t) => t.drueber).length,
     ueber: fertig.filter((t) => t.ueber).length,
   };
+}
+
+// Kopf von „Futter pro Tag“: alle Tage über der Freigabe, davon die über dem Spielraum (0.93.0). Vorher zählte
+// „über der Freigabe“ nur Tage mit mehr als 10 % – auf „Heute“ heißt aber schon 1 kcal mehr „über“.
+export function futterUeberText({ drueber, ueber }) {
+  if (drueber === 0) return "nie über der Freigabe";
+  return `${drueber}× über der Freigabe, davon ${ueber}× mehr als ${Math.round(GRENZEN.spielraum * 100)} %`;
 }
 
 // Kalenderwoche nach ISO 8601: Woche 1 ist die mit dem ersten Donnerstag des Jahres.

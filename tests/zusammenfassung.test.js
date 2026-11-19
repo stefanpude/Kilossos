@@ -6,6 +6,7 @@ import {
   abnahmeZusammenfassung,
   futterTage,
   futterZusammenfassung,
+  futterUeberText,
   kalenderwoche,
   wochenGruppen,
   monatsGruppen,
@@ -81,6 +82,7 @@ test("futterZusammenfassung lässt den heutigen Tag weg", () => {
   assert.deepEqual(futterZusammenfassung(futterTage(mahlzeiten, futter, [freigabeOkt]), "2026-10-22"), {
     durchschnitt: 230,
     anzahl: 2,
+    drueber: 1,
     ueber: 1,
   });
   assert.equal(futterZusammenfassung(futterTage(mahlzeiten, futter, []), "2026-10-22").ueber, 0);
@@ -459,4 +461,26 @@ test("0.40.1: tempoZahl: nahe an den Grenzen zwei Stellen, in Richtung des Urtei
     else if (p >= GRENZEN.abnahmeMin) assert.ok(z >= GRENZEN.abnahmeMin && z <= GRENZEN.abnahmeMax, `${p} → ${z}`);
     else assert.ok(z < GRENZEN.abnahmeMin, `${p} → ${z}`);
   }
+});
+
+test("futterUeberText: alle Tage über der Freigabe, davon die mit mehr als 10 % (0.93.0)", () => {
+  assert.equal(futterUeberText({ drueber: 0, ueber: 0 }), "nie über der Freigabe");
+  assert.equal(futterUeberText({ drueber: 3, ueber: 0 }), "3× über der Freigabe, davon 0× mehr als 10 %");
+  assert.equal(futterUeberText({ drueber: 2, ueber: 1 }), "2× über der Freigabe, davon 1× mehr als 10 %");
+});
+
+test("futterTage/futterZusammenfassung: drueber zählt schon 1 kcal über der Freigabe, ueber erst ab +10 %", () => {
+  const f = new Map([["n", { id: "n", typ: "nass", kcalPro100g: 100 }]]);
+  const m = (id, tag, gramm) => ({ id, tierId: "t", futterId: "n", gramm, zeitpunkt: `${tag}T08:00:00` });
+  const freigabe = { id: "f", tierId: "t", datum: "2026-11-01", zielgewichtKg: 7.2, kcalProTag: 283 };
+  // 293 (über, aber unter 311,3), 283 (genau), 320 (mehr als 10 %), heute 400 zählt nicht
+  const tage = futterTage(
+    [m("a", "2026-11-14", 293), m("b", "2026-11-15", 283), m("c", "2026-11-16", 320), m("d", "2026-11-17", 400)],
+    f,
+    [freigabe]
+  );
+  const z = futterZusammenfassung(tage, "2026-11-17");
+  assert.equal(z.drueber, 2);
+  assert.equal(z.ueber, 1);
+  assert.equal(futterZusammenfassung(futterTage([m("a", "2026-11-14", 293)], f, []), "2026-11-17").drueber, 0);
 });

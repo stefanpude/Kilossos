@@ -507,7 +507,7 @@ function zeichneHeute(vonNull = false) {
     gewichte,
     fruehereMahlzeiten: daten.mahlzeiten.some((m) => m.tierId === tier.id && tagSchluessel(new Date(m.zeitpunkt)) < tag),
     normalesFutterKcal: normalesFutterKcal(mahlzeiten, futter),
-  });
+  }).filter((w) => !(w.id === "diaetfutter" && freigabe?.diaetfutterBesprochen === true)); // „Mit der Praxis besprochen“ (0.93.0)
   // Auf „Heute“ zusätzlich gestern: Hat die Katze kaum etwas gefressen, steht das oben – nicht erst beim
   // Zurückblättern (Sicherheits-Review 05.11.2026).
   if (tag === heute) {
@@ -546,7 +546,7 @@ function zeichneHeute(vonNull = false) {
             id: "hinweis-" + w.id,
             klasse: "hinweis",
             kopf: `<span class="punkt" aria-hidden="true">i</span><span class="zusammen">${sicher(HINWEIS_TITEL[w.id] ?? "Hinweis")}</span>`,
-            inhalt: `<p>${sicher(w.text)}</p>${hinweisKnopf(w.id)}${w.quelle ? `<span class="quelle">Quelle: ${sicher(w.quelle)}</span>` : ""}`,
+            inhalt: `<p>${sicher(w.text)}</p>${hinweisKnopf(w.id, freigabe?.id)}${w.quelle ? `<span class="quelle">Quelle: ${sicher(w.quelle)}</span>` : ""}`,
           })}</li>`
         : `<li class="warnung warnung-${w.art}">${sicher(w.text)}<span class="quelle">Quelle: ${sicher(w.quelle)}</span></li>`
     )
@@ -747,7 +747,12 @@ function zeichneFreigabe() {
           .map((f) => `<span><span class="label">${sicher(f.titel)}</span><strong>${sicher(f.wert)}</strong></span>`)
           .join("")}</span>
         <span class="leise">${[tafel.zeile, tafel.befund, tafel.notiz].filter(Boolean).map(sicher).join(" · ")}</span>
-        <span class="freigabe-hinweis">${SYMBOL.stift}Korrigieren oder löschen</span></button>`
+        <span class="freigabe-hinweis">${SYMBOL.stift}Korrigieren oder löschen</span></button>` +
+      // Ausgeblendeter Diätfutter-Hinweis (0.93.0): hier sichtbar und zurückholbar, falls aus Versehen getippt.
+      (freigabe.diaetfutterBesprochen === true
+        ? `<p class="diaet-besprochen leise">✓ Diätfutter mit der Praxis besprochen
+            <button type="button" class="knopf-text" data-aktion="diaetfutter-wieder" data-id="${sicher(freigabe.id)}">Hinweis wieder anzeigen</button></p>`
+        : "")
     : '<p class="leise">Noch keine Freigabe eingetragen.</p>';
   const frueher = fruehereFreigaben(eigeneFreigaben());
   $("freigaben-frueher").innerHTML = frueher.length
@@ -3170,6 +3175,17 @@ document.addEventListener("click", (ereignis) => {
       return $("dialog-begriffe").showModal();
     case "warum-nicht-ab":
       return $("dialog-nicht-ab").showModal();
+    case "diaetfutter-besprochen":
+    case "diaetfutter-wieder": {
+      const f = daten.freigaben.find((x) => x.id === id);
+      if (!f) return;
+      const besprochen = ziel.dataset.aktion === "diaetfutter-besprochen";
+      if (besprochen) f.diaetfutterBesprochen = true;
+      else delete f.diaetfutterBesprochen;
+      if (sichern())
+        zeigeToast(besprochen ? "✓ Hinweis ausgeblendet. Zurückholen unter „Mehr“ bei der Freigabe." : "✓ Hinweis wird wieder angezeigt");
+      return;
+    }
     case "anleitung-erklaerung":
       return $("dialog-anleitung").showModal();
     case "alltag-erklaerung":

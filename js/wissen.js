@@ -174,7 +174,15 @@ const HINWEIS_KNOEPFE = {
   "abend-nichts-eingetragen": { aktion: "mahlzeit-neu", text: "Mahlzeit eintragen" },
 };
 
-export function hinweisKnopf(id) {
+// Diätfutter-Hinweis (0.93.0): eigener Knopf mit der Kennung der Freigabe, für die er ausgeblendet wird.
+export function hinweisKnopf(id, freigabeId) {
+  if (id === "diaetfutter") {
+    if (!freigabeId) return "";
+    return (
+      `<button type="button" class="knopf-zweit" data-aktion="diaetfutter-besprochen" data-id="${sicher(freigabeId)}">Mit der Praxis besprochen</button>` +
+      '<p class="leise">Blendet den Hinweis für diese Freigabe aus. Bei einer neuen Freigabe prüft Kilossos neu.</p>'
+    );
+  }
   if (!Object.hasOwn(HINWEIS_KNOEPFE, id ?? "")) return "";
   const { aktion, text } = HINWEIS_KNOEPFE[id];
   return `<button type="button" class="knopf-text" data-aktion="${sicher(aktion)}">${sicher(text)}</button>`;

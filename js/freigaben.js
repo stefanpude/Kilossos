@@ -21,6 +21,8 @@ export const TEXT_ZIEL_PRUEFEN = "Nicht gespeichert: Bitte das Zielgewicht prüf
 
 // Ändert die Freigabe an Ort und Stelle; id und tierId bleiben. BCS/MCS ohne Angabe fehlen danach ganz.
 export function freigabeAendern(freigabe, { datum, zielgewichtKg, kcalProTag, tierarzt, notiz, bcs, mcs }) {
+  // „Diätfutter besprochen“ gilt für genau diese Werte: neues Ziel oder neue kcal heißt neu prüfen (0.93.0).
+  if (freigabe.zielgewichtKg !== zielgewichtKg || freigabe.kcalProTag !== kcalProTag) delete freigabe.diaetfutterBesprochen;
   Object.assign(freigabe, {
     datum,
     zielgewichtKg,
