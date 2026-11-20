@@ -8,9 +8,11 @@ import { eintraegeAm, artVon } from "./besondere-tage.js";
 
 const hhmm = (zeit) => `${String(zeit.getHours()).padStart(2, "0")}:${String(zeit.getMinutes()).padStart(2, "0")}`;
 
-// tag: gezeigter Tag "JJJJ-MM-TT". → { vorlageTag: "JJJJ-MM-TT" | null, offen: [{ futterId, gramm, uhrzeit }] }
-// Je Mahlzeit am gezeigten Tag mit gleicher Sorte und Menge fällt genau eine Zeile weg, auch wenn sie von Hand kam.
-export function wieGestern({ mahlzeiten, futterNachId, besondereTage, tierId, tag }) {
+// tag: gezeigter Tag "JJJJ-MM-TT"; ausgeblendet: Ids der Vorlage-Mahlzeiten, die für diesen Tag weggeixt wurden.
+// → { vorlageTag: "JJJJ-MM-TT" | null, offen: [{ futterId, gramm, uhrzeit, quelle }] } (quelle = Id der Vorlage-Mahlzeit)
+// Je Mahlzeit am gezeigten Tag fällt genau eine Zeile derselben Sorte weg, auch wenn sie von Hand kam (seit 0.94.1 auch
+// bei anderer Menge): zuerst eine mit genau dieser Menge, sonst die früheste dieser Sorte.
+export function wieGestern({ mahlzeiten, futterNachId, besondereTage, tierId, tag, ausgeblendet = new Set() }) {
   const eigene = mahlzeiten.filter((m) => m.tierId === tierId);
   const nachTag = new Map();
   for (const m of eigene) {
@@ -29,11 +31,39 @@ export function wieGestern({ mahlzeiten, futterNachId, besondereTage, tierId, ta
     .get(vorlageTag)
     .slice()
     .sort((a, b) => a.zeitpunkt.localeCompare(b.zeitpunkt))
-    .map((m) => ({ futterId: m.futterId, gramm: m.gramm, uhrzeit: hhmm(new Date(m.zeitpunkt)) }));
+    .map((m) => ({ futterId: m.futterId, gramm: m.gramm, uhrzeit: hhmm(new Date(m.zeitpunkt)), quelle: m.id }));
   for (const m of eigene) {
     if (tagSchluessel(new Date(m.zeitpunkt)) !== tag) continue;
-    const i = offen.findIndex((z) => z.futterId === m.futterId && z.gramm === m.gramm);
+    let i = offen.findIndex((z) => z.futterId === m.futterId && z.gramm === m.gramm);
+    if (i < 0) i = offen.findIndex((z) => z.futterId === m.futterId);
     if (i >= 0) offen.splice(i, 1);
   }
-  return { vorlageTag, offen };
+  return { vorlageTag, offen: offen.filter((z) => !ausgeblendet.has(z.quelle)) };
+}
+
+// Ausgeblendete Zeilen (0.94.1): nur auf diesem Gerät unter eigenem Schlüssel, nicht in den Daten und nicht in der
+// Sicherung. Gilt nur für den Tag, an dem ausgeblendet wurde; ein neuer Tag fängt leer an und räumt den alten weg.
+// Format: { tag: "JJJJ-MM-TT", tiere: { [tierId]: [Mahlzeit-Ids der Vorlage] } }
+export const AUS_SCHLUESSEL = "kilossos-wie-gestern-aus";
+
+function lesen(roh) {
+  try {
+    const d = JSON.parse(roh);
+    return d && typeof d.tag === "string" && d.tiere && typeof d.tiere === "object" ? d : null;
+  } catch {
+    return null;
+  }
+}
+
+export function ausgeblendet(roh, tierId, tag) {
+  const d = lesen(roh);
+  const ids = d && d.tag === tag ? d.tiere[tierId] : null;
+  return new Set(Array.isArray(ids) ? ids : []);
+}
+
+export function blendeAus(roh, tierId, tag, ids) {
+  const alt = lesen(roh);
+  const d = alt && alt.tag === tag ? alt : { tag, tiere: {} };
+  d.tiere[tierId] = [...ausgeblendet(JSON.stringify(d), tierId, tag), ...ids];
+  return JSON.stringify(d);
 }

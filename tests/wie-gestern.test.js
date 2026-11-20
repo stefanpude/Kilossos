@@ -4,7 +4,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { wieGestern } from "../js/wie-gestern.js";
+import { wieGestern, ausgeblendet, blendeAus } from "../js/wie-gestern.js";
 
 const lies = (datei) => readFileSync(new URL(`../${datei}`, import.meta.url), "utf8");
 const abschnitt = (quelle, anfang, ende) => {
@@ -26,8 +26,13 @@ const m = (tag, uhr, futterId, gramm, tierId = KITO) => {
   const [h, min] = uhr.split(":").map(Number);
   return { id: `m${++zaehler}`, tierId, futterId, gramm, zeitpunkt: new Date(2026, 10, tag, h, min).toISOString() };
 };
-const rechne = (mahlzeiten, tag = "2026-11-20", { besondereTage = [], tierId = KITO } = {}) =>
-  wieGestern({ mahlzeiten, futterNachId, besondereTage, tierId, tag });
+// Die alten Tests vergleichen ohne das Feld „quelle“ (Id der Vorlage-Mahlzeit, seit 0.94.1 fürs Ausblenden).
+const rechneRoh = (mahlzeiten, tag = "2026-11-20", { besondereTage = [], tierId = KITO, ausgeblendet } = {}) =>
+  wieGestern({ mahlzeiten, futterNachId, besondereTage, tierId, tag, ausgeblendet });
+const rechne = (...args) => {
+  const e = rechneRoh(...args);
+  return { ...e, offen: e.offen.map(({ quelle, ...z }) => z) };
+};
 
 const VORTAG = [m(19, "07:30", "sheba", 50), m(19, "07:30", "purina", 12), m(19, "10:30", "sheba", 50)];
 
@@ -55,8 +60,46 @@ test("wieGestern: heute eingetragene Mahlzeit nimmt genau eine passende Zeile we
   ]);
 });
 
-test("wieGestern: andere Menge nimmt keine Zeile weg", () => {
-  assert.equal(rechne([...VORTAG, m(20, "08:00", "sheba", 45)]).offen.length, 3);
+// 0.94.1 (Stefan 20.11.): Abgleich nach Sorte. Andere Menge derselben Sorte nimmt trotzdem eine Zeile weg;
+// gibt es eine Zeile mit genau der Menge, geht die, sonst die früheste dieser Sorte.
+test("wieGestern: andere Menge derselben Sorte nimmt die früheste Zeile dieser Sorte weg", () => {
+  assert.deepEqual(rechne([...VORTAG, m(20, "08:00", "sheba", 45)]).offen, [
+    { futterId: "purina", gramm: 12, uhrzeit: "07:30" },
+    { futterId: "sheba", gramm: 50, uhrzeit: "10:30" },
+  ]);
+});
+
+test("wieGestern: genau passende Menge geht vor der frühesten Zeile", () => {
+  const vortag = [m(19, "07:30", "sheba", 30), m(19, "10:30", "sheba", 50)];
+  assert.deepEqual(rechne([...vortag, m(20, "08:00", "sheba", 50)]).offen, [{ futterId: "sheba", gramm: 30, uhrzeit: "07:30" }]);
+});
+
+test("wieGestern: andere Sorte nimmt keine Zeile weg", () => {
+  const vortag = [m(19, "07:30", "sheba", 50)];
+  futterNachId.set("felix", { id: "felix", name: "Felix", typ: "nass", kcalPro100g: 80 });
+  assert.equal(rechne([...vortag, m(20, "08:00", "felix", 50)]).offen.length, 1);
+});
+
+test("wieGestern: ausgeblendete Zeilen fehlen, jede Zeile nennt ihre Vorlage-Mahlzeit", () => {
+  const { offen } = rechneRoh(VORTAG, "2026-11-20", { ausgeblendet: new Set([VORTAG[0].id]) });
+  assert.deepEqual(offen.map((z) => z.quelle), [VORTAG[1].id, VORTAG[2].id]);
+});
+
+test("ausgeblendet/blendeAus: gilt nur für Tier und Tag, neuer Tag fängt leer an", () => {
+  let roh = blendeAus(null, KITO, "2026-11-20", ["a"]);
+  roh = blendeAus(roh, KITO, "2026-11-20", ["b"]);
+  roh = blendeAus(roh, ZUKI, "2026-11-20", ["c"]);
+  assert.deepEqual([...ausgeblendet(roh, KITO, "2026-11-20")], ["a", "b"]);
+  assert.deepEqual([...ausgeblendet(roh, ZUKI, "2026-11-20")], ["c"]);
+  assert.equal(ausgeblendet(roh, KITO, "2026-11-21").size, 0);
+  // Ein neuer Tag räumt den alten weg, damit der Schlüssel nicht wächst.
+  assert.deepEqual(JSON.parse(blendeAus(roh, KITO, "2026-11-21", ["d"])), { tag: "2026-11-21", tiere: { [KITO]: ["d"] } });
+});
+
+test("ausgeblendet: kaputter oder fremder Inhalt → nichts ausgeblendet", () => {
+  for (const roh of [null, "", "{", "[]", '{"tag":"2026-11-20","tiere":{"kito":"x"}}']) {
+    assert.equal(ausgeblendet(roh, KITO, "2026-11-20").size, 0);
+  }
 });
 
 test("wieGestern: Leckerlis nicht in der Vorlage", () => {
@@ -114,6 +157,16 @@ test("Vorlage füllt Sorte und Gramm, die Uhrzeit bleibt wie beim Nachtragen", (
   const fn = abschnitt(lies("app.js"), "function oeffneMahlzeit(", "\n}\n");
   assert.match(fn, /vorlage/);
   assert.match(fn, /uhrzeitVorbelegung\(\{ mahlzeit, gewaehlterTag/);
+});
+
+test("0.94.1: Kreuz je Zeile und „Alle für heute ausblenden“, gespeichert unter eigenem Schlüssel", () => {
+  const app = lies("app.js");
+  assert.match(app, /data-aktion="wie-gestern-aus"/);
+  assert.match(app, /data-aktion="wie-gestern-alle-aus"/);
+  assert.match(app, /Alle für heute ausblenden/);
+  assert.match(app, /case "wie-gestern-aus":/);
+  assert.match(app, /case "wie-gestern-alle-aus":/);
+  assert.match(lies("js/wie-gestern.js"), /"kilossos-wie-gestern-aus"/);
 });
 
 test("Service Worker kennt die neue Datei", () => {

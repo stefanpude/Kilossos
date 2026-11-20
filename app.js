@@ -89,7 +89,7 @@ import { belegteZeichen, speicherAnzeige } from "./js/speicher.js";
 import { sicherungPruefen, einleseFrage } from "./js/sicherung.js";
 import { frage, bestaetigt } from "./js/rueckfrage.js";
 import { uhrzeitVorbelegung, tagAusKalender } from "./js/nachtragen.js";
-import { wieGestern } from "./js/wie-gestern.js";
+import { wieGestern, ausgeblendet, blendeAus, AUS_SCHLUESSEL } from "./js/wie-gestern.js";
 import { zuruecktaste } from "./js/zurueck.js";
 import { profilAktion, zoomVon } from "./js/profilbild.js";
 
@@ -616,6 +616,7 @@ function zeichneWieGestern(tag, futter) {
     besondereTage: daten.besondereTage,
     tierId: tier.id,
     tag,
+    ausgeblendet: ausgeblendet(wieGesternAusLesen(), tier.id, tag),
   });
   if (offen.length === 0) {
     $("heute-wie-gestern").innerHTML = "";
@@ -630,12 +631,32 @@ function zeichneWieGestern(tag, futter) {
       return `<li><button type="button" class="protokoll-knopf tippbar" data-aktion="wie-gestern" data-futter="${sicher(z.futterId)}" data-gramm="${z.gramm}">
           <span class="zeit">${z.uhrzeit}</span>
           <span class="was">${sicher(f.name)}<small>${TYP_NAMEN[f.typ]}</small></span>
-          <span class="wert">${zahl(z.gramm)} g</span><span class="nur-vorlesen">, übernehmen</span></button></li>`;
+          <span class="wert">${zahl(z.gramm)} g</span><span class="nur-vorlesen">, übernehmen</span></button>
+          <button type="button" class="knopf-loeschen" data-aktion="wie-gestern-aus" data-id="${sicher(z.quelle)}" aria-label="${z.uhrzeit}, ${sicher(f.name)}, für heute ausblenden">${SYMBOL.loeschen}</button></li>`;
     })
     .join("");
+  const ids = sicher(offen.map((z) => z.quelle).join(" "));
   $("heute-wie-gestern").innerHTML = `<h3>${sicher(titel)}</h3>
-    <p class="tipp">Antippen übernimmt Sorte und Menge. Bitte trotzdem abwiegen.</p>
-    <ul class="protokoll wie-gestern-liste">${zeilen}</ul>`;
+    <p class="tipp">Antippen übernimmt Sorte und Menge. Bitte trotzdem abwiegen. Das Kreuz blendet eine Zeile für heute aus.</p>
+    <ul class="protokoll wie-gestern-liste">${zeilen}</ul>
+    <button type="button" class="knopf-text" data-aktion="wie-gestern-alle-aus" data-ids="${ids}">Alle für heute ausblenden</button>`;
+}
+
+// Ausgeblendete Zeilen nur auf diesem Gerät (0.94.1). Speicher gesperrt: dann eben nichts ausgeblendet.
+function wieGesternAusLesen() {
+  try {
+    return localStorage.getItem(AUS_SCHLUESSEL);
+  } catch {
+    return null;
+  }
+}
+function wieGesternAusblenden(ids) {
+  try {
+    localStorage.setItem(AUS_SCHLUESSEL, blendeAus(wieGesternAusLesen(), tier.id, tagSchluessel(gewaehlterTag), ids));
+  } catch {
+    // Speicher gesperrt oder voll: Zeilen bleiben stehen, an den Daten ändert sich nichts.
+  }
+  zeichneHeute();
 }
 
 // ---------- Besonderer Tag (0.33.0, .planning/besonderer-tag.md) ----------
@@ -3203,6 +3224,10 @@ document.addEventListener("click", (ereignis) => {
       return oeffneMahlzeit(daten.mahlzeiten.find((m) => m.id === id));
     case "wie-gestern":
       return oeffneMahlzeit(null, { futterId: ziel.dataset.futter, gramm: Number(ziel.dataset.gramm) });
+    case "wie-gestern-aus":
+      return wieGesternAusblenden([id]);
+    case "wie-gestern-alle-aus":
+      return wieGesternAusblenden(ziel.dataset.ids.split(" "));
     case "warum-kein-ziel":
       return $("dialog-warum").showModal();
     case "bcs-erklaerung":
