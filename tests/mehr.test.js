@@ -80,7 +80,8 @@ test("styles.css: Hinweis als umrandetes Feld, Stift in der Zeile leise", () => 
 test("app.js: neue Mahlzeit wählt keine Sorte vor, außer es gibt nur eine", () => {
   const app = lies("app.js");
   assert.doesNotMatch(app, /futterMenue\(mahlzeit \? mahlzeit\.futterId : daten\.futter\[0\]\?\.id\)/);
-  assert.match(app, /futterMenue\(mahlzeit \? mahlzeit\.futterId : daten\.futter\.length === 1 \? daten\.futter\[0\]\.id : null\)/);
+  // Seit 0.94.0 dazwischen die Vorlage aus „Wie gestern“ (bewusst angetippt, keine Vorauswahl).
+  assert.match(app, /futterMenue\(\s*mahlzeit \? mahlzeit\.futterId : vorlage \? vorlage\.futterId : daten\.futter\.length === 1 \? daten\.futter\[0\]\.id : null\s*\)/);
 });
 
 // 0.42.5: Im Freigabe-Fenster stehen Plan (Ziel, Tagesmenge) und Befund (BCS, MCS) unter eigenen Überschriften.

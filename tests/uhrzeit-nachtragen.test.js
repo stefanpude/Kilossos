@@ -82,7 +82,7 @@ test("oeffneMahlzeit: nutzt uhrzeitVorbelegung, Hinweis nur sichtbar, wenn es ei
 test("oeffneMahlzeit: neue Mahlzeit holt einen Tageswechsel nach, Ändern nicht", () => {
   const app = lies("app.js");
   const block = abschnitt(app, "function oeffneMahlzeit(", "\n}\n");
-  assert.match(block, /^function oeffneMahlzeit\(mahlzeit = null\) \{\n  if \(!mahlzeit\) tagwechselNachholen\(\);/);
+  assert.match(block, /^function oeffneMahlzeit\(mahlzeit = null, vorlage = null\) \{\n  if \(!mahlzeit\) tagwechselNachholen\(\);/);
   const nachholen = abschnitt(app, "function tagwechselNachholen()", "\n}\n");
   assert.match(nachholen, /if \(jetzt === tagBeimZeichnen\) return;/);
   // Nur wer auf dem damaligen „Heute“ stand, springt mit; ein bewusst zurückgeblätterter Tag bleibt.

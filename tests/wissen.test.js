@@ -190,9 +190,10 @@ test("Willkommensseite verspricht nichts, was die App nicht halten kann (Stefan,
   assert.doesNotMatch(html, /ohne Fettleber-Risiko|für jede Sorte/);
 });
 
-test("Version 0.93.0: Cache v166 mit js/profilbild.js, js/zurueck.js, js/rueckfrage.js, js/nachtragen.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
+test("Version 0.94.0: Cache v167 mit js/wie-gestern.js, js/profilbild.js, js/zurueck.js, js/rueckfrage.js, js/nachtragen.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
   const sw = lies("sw.js");
-  assert.match(sw, /const CACHE_NAME = "kilossos-v166";/);
+  assert.match(sw, /const CACHE_NAME = "kilossos-v167";/);
+  assert.match(sw, /"js\/wie-gestern\.js",/);
   assert.match(sw, /"js\/profilbild\.js",/);
   assert.match(sw, /"js\/zurueck\.js",/);
   assert.match(sw, /"js\/nachtragen\.js",/);
@@ -202,7 +203,7 @@ test("Version 0.93.0: Cache v166 mit js/profilbild.js, js/zurueck.js, js/rueckfr
   assert.match(sw, /"js\/besondere-tage\.js",/);
   assert.match(sw, /"js\/freigaben\.js",/);
   assert.match(sw, /"js\/heute-grafiken\.js",/);
-  assert.match(lies("index.html"), /id="version">Version 0.93.0</);
+  assert.match(lies("index.html"), /id="version">Version 0.94.0</);
 });
 
 // 0.42.7: Wiege-Tipp Transportbox im Bereich „Auf dem Arm gewogen?“ (Ideen-Tafel, Halter 06.11.2026).

@@ -652,6 +652,12 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .protokoll small { display: block; color: var(--text-leise); font-size: 0.8125rem; font-family: var(--sans); }
 .protokoll li .knopf-loeschen { margin: -6px -10px -6px -4px; }
 
+/* Wie gestern (0.94.0): Vorlage unter „Mahlzeit eintragen“, leiser als die echten Mahlzeiten, ohne Löschknopf. */
+#heute-wie-gestern:not(:empty) { margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--rand); }
+#heute-wie-gestern h3 { margin: 0 0 2px; font-size: 1.0625rem; }
+#heute-wie-gestern .tipp { margin-bottom: 4px; }
+.wie-gestern-liste li { grid-template-columns: 1fr; }
+.wie-gestern-liste .protokoll-knopf { color: var(--text-leise); }
 /* Besonderer Tag auf „Heute“ (0.33.0): Art fett, darunter Zeitraum und Notiz; Beenden-Knopf in eigener Zeile. */
 .besonders-liste .protokoll-knopf { grid-template-columns: 1fr; padding: 6px 0; }
 .besonders-liste .was b { font-weight: 700; }

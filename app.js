@@ -89,6 +89,7 @@ import { belegteZeichen, speicherAnzeige } from "./js/speicher.js";
 import { sicherungPruefen, einleseFrage } from "./js/sicherung.js";
 import { frage, bestaetigt } from "./js/rueckfrage.js";
 import { uhrzeitVorbelegung, tagAusKalender } from "./js/nachtragen.js";
+import { wieGestern } from "./js/wie-gestern.js";
 import { zuruecktaste } from "./js/zurueck.js";
 import { profilAktion, zoomVon } from "./js/profilbild.js";
 
@@ -590,6 +591,7 @@ function zeichneHeute(vonNull = false) {
       .join("");
     $("heute-mahlzeiten").innerHTML = `<ul class="protokoll">${zeilen}</ul>`;
   }
+  zeichneWieGestern(tag, futter);
 
   // Letzte Messung (ab 0.39.0): Gewicht, Gramm seit der Messung davor, Kurve der letzten 8 Wochen, Tempo-Skala.
   // Alles bis zum gewählten Tag (gewichte ist schon bis „tag“ gefiltert, Freigaben ebenso).
@@ -603,6 +605,37 @@ function zeichneHeute(vonNull = false) {
   $("heute-gewicht").innerHTML = messungHtml(messung);
 
   zeichneBesondereTage(tag, heute);
+}
+
+// ---------- Wie gestern (0.94.0, Entwurf docs/superpowers/specs/2026-11-20-wie-gestern-design.md) ----------
+// Mahlzeiten des letzten Tags mit Einträgen als Vorlage; Antippen öffnet „Mahlzeit“ vorbelegt (nie ein ganzer Tag).
+function zeichneWieGestern(tag, futter) {
+  const { vorlageTag, offen } = wieGestern({
+    mahlzeiten: daten.mahlzeiten,
+    futterNachId: futter,
+    besondereTage: daten.besondereTage,
+    tierId: tier.id,
+    tag,
+  });
+  if (offen.length === 0) {
+    $("heute-wie-gestern").innerHTML = "";
+    return;
+  }
+  const vortag = new Date(`${tag}T12:00`);
+  vortag.setDate(vortag.getDate() - 1);
+  const titel = vorlageTag === tagSchluessel(vortag) ? "Wie gestern" : `Wie am ${datumText(vorlageTag)}`;
+  const zeilen = offen
+    .map((z) => {
+      const f = futter.get(z.futterId);
+      return `<li><button type="button" class="protokoll-knopf tippbar" data-aktion="wie-gestern" data-futter="${sicher(z.futterId)}" data-gramm="${z.gramm}">
+          <span class="zeit">${z.uhrzeit}</span>
+          <span class="was">${sicher(f.name)}<small>${TYP_NAMEN[f.typ]}</small></span>
+          <span class="wert">${zahl(z.gramm)} g</span><span class="nur-vorlesen">, übernehmen</span></button></li>`;
+    })
+    .join("");
+  $("heute-wie-gestern").innerHTML = `<h3>${sicher(titel)}</h3>
+    <p class="tipp">Antippen übernimmt Sorte und Menge. Bitte trotzdem abwiegen.</p>
+    <ul class="protokoll wie-gestern-liste">${zeilen}</ul>`;
 }
 
 // ---------- Besonderer Tag (0.33.0, .planning/besonderer-tag.md) ----------
@@ -1394,7 +1427,8 @@ function tagwechselNachholen() {
   zeichneAlles();
 }
 
-function oeffneMahlzeit(mahlzeit = null) {
+// vorlage: { futterId, gramm } aus „Wie gestern“ (0.94.0); belegt Sorte und Gramm einer neuen Mahlzeit vor.
+function oeffneMahlzeit(mahlzeit = null, vorlage = null) {
   if (!mahlzeit) tagwechselNachholen();
   bearbeiteteMahlzeit = mahlzeit;
   const form = $("form-mahlzeit");
@@ -1403,7 +1437,9 @@ function oeffneMahlzeit(mahlzeit = null) {
   $("mahlzeit-titel").textContent = mahlzeit ? `Mahlzeit von ${tier.name} ändern` : `Mahlzeit für ${tier.name}`;
   // Neue Mahlzeit: keine Sorte vorgewählt, damit niemand aus Versehen die falsche einträgt (seit 0.36.4;
   // vorher stand die erste Sorte drin). Gibt es nur eine Sorte, bleibt sie vorgewählt.
-  futterMenue(mahlzeit ? mahlzeit.futterId : daten.futter.length === 1 ? daten.futter[0].id : null);
+  futterMenue(
+    mahlzeit ? mahlzeit.futterId : vorlage ? vorlage.futterId : daten.futter.length === 1 ? daten.futter[0].id : null
+  );
   // Nachtragen für einen anderen Tag (seit 0.54.0): Uhrzeit leer statt „jetzt“, Hinweis mit Datum (0.54.1). Sonst lagen
   // mehrere Fütterungen, auf einmal nachgetragen, Minuten auseinander und zählten im PDF als eine Mahlzeit.
   const { uhrzeit, tipp } = uhrzeitVorbelegung({ mahlzeit, gewaehlterTag, jetzt: new Date() });
@@ -1414,7 +1450,7 @@ function oeffneMahlzeit(mahlzeit = null) {
   // Mit dem Fehlerfeld, damit die Vorlesefunktion „Bitte die Uhrzeit …“ nach dem Fokus mitliest (wie beim Rest-Feld).
   if (nachtragen) form.uhrzeit.setAttribute("aria-describedby", "uhrzeit-tipp mahlzeit-fehler");
   else form.uhrzeit.removeAttribute("aria-describedby");
-  if (mahlzeit) form.gramm.value = String(mahlzeit.gramm).replace(".", ",");
+  if (mahlzeit ?? vorlage) form.gramm.value = String((mahlzeit ?? vorlage).gramm).replace(".", ",");
   restZuruecksetzen(mahlzeit);
   zeigeMahlzeitVorschau();
   $("dialog-mahlzeit").showModal();
@@ -3165,6 +3201,8 @@ document.addEventListener("click", (ereignis) => {
       return oeffneMahlzeit();
     case "mahlzeit-bearbeiten":
       return oeffneMahlzeit(daten.mahlzeiten.find((m) => m.id === id));
+    case "wie-gestern":
+      return oeffneMahlzeit(null, { futterId: ziel.dataset.futter, gramm: Number(ziel.dataset.gramm) });
     case "warum-kein-ziel":
       return $("dialog-warum").showModal();
     case "bcs-erklaerung":

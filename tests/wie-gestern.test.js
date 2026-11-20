@@ -97,3 +97,25 @@ test("wieGestern: alles übernommen → nichts offen, Vorlage bleibt", () => {
   const heute = VORTAG.map((x, i) => m(20, `1${i}:00`, x.futterId, x.gramm));
   assert.deepEqual(rechne([...VORTAG, ...heute]), { vorlageTag: "2026-11-19", offen: [] });
 });
+
+// Oberfläche (Quelltext-Prüfungen wie in tests/uhrzeit-nachtragen.test.js)
+test("Heute zeichnet die Karte „Wie gestern“", () => {
+  assert.match(lies("app.js"), /wieGestern\(/);
+  assert.match(lies("app.js"), /heute-wie-gestern/);
+  assert.match(lies("index.html"), /id="heute-wie-gestern"/);
+});
+
+test("Antippen einer Zeile öffnet das Fenster mit Vorlage", () => {
+  const fall = abschnitt(lies("app.js"), 'case "wie-gestern":', "case ");
+  assert.match(fall, /oeffneMahlzeit\(null, \{/);
+});
+
+test("Vorlage füllt Sorte und Gramm, die Uhrzeit bleibt wie beim Nachtragen", () => {
+  const fn = abschnitt(lies("app.js"), "function oeffneMahlzeit(", "\n}\n");
+  assert.match(fn, /vorlage/);
+  assert.match(fn, /uhrzeitVorbelegung\(\{ mahlzeit, gewaehlterTag/);
+});
+
+test("Service Worker kennt die neue Datei", () => {
+  assert.match(lies("sw.js"), /"js\/wie-gestern\.js"/);
+});
