@@ -12,6 +12,9 @@ Kurz mündlich im Termin, falls es passt:
 - [ ] Welche **Diätfutter** verordnen Sie zum Abnehmen am häufigsten (2–3 Sorten)? Darf ich hier im Regal die Rückseite
       und den Strichcode eines **einzelnen** Beutels oder einer Dose fotografieren? (Damit die App diese Sorten beim
       Scannen erkennt; bisher kennt sie bei Nassfutter oft nur den Code des Kartons.)
+- [ ] **Mahlzeiten pro Tag:** Geben Sie beim Abnehmen vor, **wie oft am Tag** gefüttert wird (und ungefähr wann), oder
+      nur die kcal pro Tag? Wie oft raten Sie bei Kito und Zuki? (Idee für die App: ein freiwilliger Fütterungsplan zur
+      Freigabe, z. B. 4 kleine Portionen statt 2 großer, auf Wunsch mit Erinnerung.)
 
 ## 1. Grenzwerte und Warnungen
 - [ ] Würden Sie sich die **Grenzwerte** der App ansehen? (Quellen: AAHA- und WSAVA-Leitlinien, Unterlage liegt bei.)
@@ -60,6 +63,7 @@ In der App unter „Mehr“ → „Wissen“, auf Wunsch als Ausdruck.
 |---|---|
 | Aushang / Zettel | |
 | Diätfutter (häufigste Sorten), Fotos erlaubt? | |
+| Mahlzeiten pro Tag: vorgegeben? Wie oft bei Kito/Zuki? | |
 | Grenzwerte angesehen | |
 | „Zu schnell“: 1 oder 2 Wochen, ab wie viel | |
 | Zu wenig gefressen: Grenzen | |
