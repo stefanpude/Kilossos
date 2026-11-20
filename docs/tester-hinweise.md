@@ -76,6 +76,9 @@ Am meisten hilft uns ein **Screenshot** mit ein, zwei Sätzen dazu, was du gerad
 5. Gab es einen Fehler oder eine Zahl, die nicht stimmte? (gern mit Screenshot)
 6. Hast du die Demo angesehen? War klar, wie Freigabe, Grenzen und Warnungen zusammenspielen?
 7. Würdest du Kilossos jemandem mit einer übergewichtigen Katze empfehlen? Warum (nicht)?
+8. Wie fütterst du: viele kleine Portionen, die du einzeln einträgst, oder morgens die Tagesmenge in eine Dose abwiegen, über den Tag daraus füttern und abends den Rest wiegen? Würdest du dir dafür eine eigene „Tagesportion“ in der App wünschen?
+9. Füttern bei euch mehrere Personen? Wenn ja: Wie habt ihr deren Mahlzeiten in die App bekommen (Zettel, Zuruf, gar nicht)?
+10. Wie viel Zeit hat das Eintragen ungefähr pro Tag gekostet? War es dir irgendwann zu viel?
 
 **Rückmeldung an:** _[Kontaktadresse für Tester eintragen]_
 
