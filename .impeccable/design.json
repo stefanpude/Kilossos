@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-21T21:30:00+01:00",
+  "title": "Design System: Kilossos",
+  "extensions": {
+    "colorMeta": {
+      "tanne": { "role": "primary", "displayName": "Tanne", "canonical": "#2f6b5e", "tonalRamp": ["#0f2620", "#173a32", "#224f45", "#2f6b5e", "#4f8f80", "#7cc0ad", "#c9ddcf", "#eaf3ee"] },
+      "salbei": { "role": "primary", "displayName": "Salbei", "canonical": "#c9ddcf" },
+      "bernstein": { "role": "secondary", "displayName": "Bernstein", "canonical": "#a65a12", "tonalRamp": ["#2e1a06", "#4a2b0b", "#6e400f", "#a65a12", "#c97f33", "#e3a35e", "#f0cfa6", "#f6ead9"] },
+      "gefahr": { "role": "tertiary", "displayName": "Sofort-Rot", "canonical": "#b3261e", "tonalRamp": ["#2e0907", "#4a2523", "#7a1a14", "#b3261e", "#d6564e", "#f2b8b5", "#f9dedc", "#fdf1f0"] },
+      "papier": { "role": "neutral", "displayName": "Papier", "canonical": "#f3f5f2" },
+      "blatt": { "role": "neutral", "displayName": "Blatt", "canonical": "#fbfcfa" },
+      "tinte": { "role": "neutral", "displayName": "Tinte", "canonical": "#1d2b2a", "tonalRamp": ["#131b1a", "#1d2b2a", "#2c3a38", "#465755", "#5b6b68", "#7a8a85", "#a2b1ad", "#dbe3dd"] },
+      "raster": { "role": "neutral", "displayName": "Raster", "canonical": "#dbe3dd" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Große Tageszahl und Messwerte, Literata mit gleich breiten Ziffern." },
+      "headline": { "displayName": "Headline", "purpose": "Tiername im Kopf von Heute, Fenstertitel." },
+      "title": { "displayName": "Title", "purpose": "Kartentitel und Zwischenüberschriften." },
+      "body": { "displayName": "Body", "purpose": "Fließtext, Listen, Eingaben in Atkinson Hyperlegible Next." },
+      "label": { "displayName": "Label", "purpose": "Beschriftungen, Einheiten, Quellen, Leistentext." }
+    },
+    "shadows": [
+      { "name": "menue", "value": "0 12px 32px rgb(29 43 42 / 0.18)", "purpose": "Nur aufgeklappte Auswahlmenüs; dunkel rgb(0 0 0 / 0.45)." },
+      { "name": "bildrahmen", "value": "0 0 0 1px var(--rand-stark)", "purpose": "1px Ring um Profilbilder, Logo, Fotos." },
+      { "name": "fenster-hintergrund", "value": "rgb(29 43 42 / 0.4)", "purpose": "Abgedunkelte Seite hinter offenen Blättern." }
+    ],
+    "motion": [
+      { "name": "feder", "value": "cubic-bezier(0.3, 0.9, 0.3, 1)", "purpose": "Aufklappen (0.35s), Symbol in der Leiste." },
+      { "name": "hereinfahren", "value": "0.3s cubic-bezier(0.2, 0.8, 0.2, 1)", "purpose": "Bereichswechsel, 8px von unten oder 32px von der Seite nach Wischen." },
+      { "name": "blatt-rein", "value": "0.35s cubic-bezier(0.2, 0.9, 0.25, 1)", "purpose": "Fenster fahren von unten ein." },
+      { "name": "druck", "value": "transform 0.12s scale(0.98)", "purpose": "Rückmeldung beim Antippen von Knöpfen." }
+    ],
+    "breakpoints": [
+      { "name": "spalte", "value": "560px" },
+      { "name": "fenster", "value": "520px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Hauptknopf",
+      "kind": "button",
+      "refersTo": "knopf-haupt",
+      "description": "Eine Hauptaktion pro Ort, Tanne voll.",
+      "html": "<button class=\"ds-knopf-haupt\">Speichern</button>",
+      "css": ".ds-knopf-haupt { min-height: 50px; padding: 0 20px; border: none; border-radius: 6px; background: var(--akzent-stark, #2f6b5e); color: var(--akzent-text, #fff); font: 700 1rem 'Atkinson Hyperlegible Next', system-ui, sans-serif; cursor: pointer; transition: transform 0.12s, background 0.2s; } .ds-knopf-haupt:active { transform: scale(0.98); } .ds-knopf-haupt:focus-visible { outline: 3px solid var(--fokus, #8fb8ad); outline-offset: 2px; }"
+    },
+    {
+      "name": "Zweitknopf",
+      "kind": "button",
+      "refersTo": "knopf-zweit",
+      "description": "Nebenaktion, Tanne als Rand.",
+      "html": "<button class=\"ds-knopf-zweit\">Abbrechen</button>",
+      "css": ".ds-knopf-zweit { min-height: 50px; padding: 0 20px; border: 1px solid var(--akzent-stark, #2f6b5e); border-radius: 6px; background: transparent; color: var(--akzent-stark, #2f6b5e); font: 700 1rem 'Atkinson Hyperlegible Next', system-ui, sans-serif; cursor: pointer; transition: transform 0.12s; } .ds-knopf-zweit:active { transform: scale(0.98); } .ds-knopf-zweit:focus-visible { outline: 3px solid var(--fokus, #8fb8ad); outline-offset: 2px; }"
+    },
+    {
+      "name": "Gefahrknopf",
+      "kind": "button",
+      "refersTo": "knopf-gefahr",
+      "description": "Löschen und Unumkehrbares, eigene Zeile.",
+      "html": "<button class=\"ds-knopf-gefahr\">Löschen</button>",
+      "css": ".ds-knopf-gefahr { min-height: 50px; padding: 0 20px; border: 1px solid var(--gefahr, #b3261e); border-radius: 6px; background: transparent; color: var(--gefahr, #b3261e); font: 700 1rem 'Atkinson Hyperlegible Next', system-ui, sans-serif; cursor: pointer; } .ds-knopf-gefahr:active { transform: scale(0.98); } .ds-knopf-gefahr:focus-visible { outline: 3px solid var(--fokus, #8fb8ad); outline-offset: 2px; }"
+    },
+    {
+      "name": "Karte",
+      "kind": "card",
+      "refersTo": "karte",
+      "description": "Flaches Blatt mit feinem Rand, ohne Schatten.",
+      "html": "<div class=\"ds-karte\"><h2 class=\"ds-karte-titel\">Heute gefüttert</h2><p class=\"ds-karte-wert\">214 <small>kcal</small></p></div>",
+      "css": ".ds-karte { background: var(--flaeche, #fbfcfa); border: 1px solid var(--rand, #dbe3dd); border-radius: 12px; padding: 14px 16px; display: grid; gap: 8px; color: var(--text, #1d2b2a); font-family: 'Atkinson Hyperlegible Next', system-ui, sans-serif; } .ds-karte-titel { margin: 0; font: 500 1.1875rem/1.25 Literata, Georgia, serif; } .ds-karte-wert { margin: 0; font: 500 2rem/1 Literata, Georgia, serif; font-variant-numeric: tabular-nums lining-nums; } .ds-karte-wert small { font: 400 1rem 'Atkinson Hyperlegible Next', system-ui, sans-serif; color: var(--text-leise, #5b6b68); }"
+    },
+    {
+      "name": "Eingabefeld",
+      "kind": "input",
+      "refersTo": "eingabe",
+      "description": "48px hoch, Beschriftung darüber.",
+      "html": "<label class=\"ds-feld\">Gewicht in kg<input class=\"ds-eingabe\" inputmode=\"decimal\" value=\"9,32\"></label>",
+      "css": ".ds-feld { display: grid; gap: 4px; font: 400 0.875rem 'Atkinson Hyperlegible Next', system-ui, sans-serif; color: var(--text-leise, #5b6b68); } .ds-eingabe { min-height: 48px; padding: 0 12px; border: 1px solid var(--feldrand, #7a8a85); border-radius: 6px; background: var(--hintergrund, #f3f5f2); color: var(--text, #1d2b2a); font: 400 1.0625rem 'Atkinson Hyperlegible Next', system-ui, sans-serif; } .ds-eingabe:focus-visible { outline: 3px solid var(--fokus, #8fb8ad); outline-offset: 1px; border-color: var(--akzent, #2f6b5e); }"
+    },
+    {
+      "name": "Untere Leiste",
+      "kind": "nav",
+      "refersTo": "leiste",
+      "description": "Fünf Bereiche, aktiver in Tanne.",
+      "html": "<nav class=\"ds-leiste\"><button aria-current=\"page\">Heute</button><button>Gewicht</button><button>Verlauf</button><button>Futter</button><button>Mehr</button></nav>",
+      "css": ".ds-leiste { display: grid; grid-template-columns: repeat(5, 1fr); background: var(--flaeche, #fbfcfa); border-top: 1px solid var(--rand, #dbe3dd); padding: 4px; } .ds-leiste button { min-height: 60px; border: none; background: transparent; color: var(--text-leise, #5b6b68); font: 400 0.8125rem 'Atkinson Hyperlegible Next', system-ui, sans-serif; cursor: pointer; transition: color 0.2s; } .ds-leiste button[aria-current=\"page\"] { color: var(--akzent-stark, #2f6b5e); font-weight: 700; } .ds-leiste button:focus-visible { outline: 3px solid var(--fokus, #8fb8ad); outline-offset: -3px; }"
+    },
+    {
+      "name": "Warnung",
+      "kind": "custom",
+      "refersTo": "warnung-achtung",
+      "description": "Achtung (Bernstein) und Sofort (Rot), Text immer in Tinte, Balken links.",
+      "html": "<div class=\"ds-warnung\">Kito nimmt gerade schneller ab als 2 % pro Woche.<span class=\"ds-quelle\">Quelle: AAHA/WSAVA</span></div><div class=\"ds-warnung ds-sofort\">Frisst deine Katze nichts oder kaum etwas, gehört sie sofort in die Tierarztpraxis.</div>",
+      "css": ".ds-warnung { padding: 12px 14px; border-radius: 6px; background: var(--warnung-hell, #f6ead9); border-left: 4px solid var(--warnung, #a65a12); color: var(--text, #1d2b2a); font: 400 0.9375rem/1.45 'Atkinson Hyperlegible Next', system-ui, sans-serif; margin-bottom: 10px; } .ds-sofort { background: var(--gefahr-hell, #f9dedc); border-left-color: var(--gefahr, #b3261e); font-weight: 700; } .ds-quelle { display: block; margin-top: 4px; color: var(--text-leise, #5b6b68); font-size: 0.8125rem; font-weight: 400; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Das Wiegeprotokoll",
+    "overview": "Kilossos sieht aus wie eine gut geführte Gewichtskarte in der Tierarztpraxis: Papier, Tinte, Millimeterpapier. Die Oberfläche ist sachlich und ruhig, weil sie täglich am Napf benutzt wird, oft mit einer Hand und einer drängelnden Katze daneben. Nichts soll ablenken, nichts soll aufregen; Aufmerksamkeit bekommen nur Zahlen, die nächste Aktion und echte Warnungen.",
+    "keyCharacteristics": [
+      "Flache Blätter auf Papier, feine Ränder, keine Schatten (Ausnahme: aufgeklappte Menüs)",
+      "Serifen-Ziffern mit tabular-nums für alle Messwerte",
+      "Eine Akzentfarbe (Tanne), zwei Warnstufen (Bernstein, Rot) mit festem Sinn",
+      "Große Tippflächen (mindestens 48 px), untere Leiste mit fünf Bereichen",
+      "Fenster als Blatt von unten mit Griff zum Herunterziehen",
+      "Millimeterpapier-Raster nur in Diagrammen"
+    ],
+    "rules": [
+      { "name": "Die Bedeutungs-Regel", "body": "Tanne, Bernstein und Rot tragen Bedeutung und werden nie dekorativ eingesetzt. Eine neue Funktion bekommt keine eigene Farbe.", "section": "colors" },
+      { "name": "Die Tinte-auf-Hell-Regel", "body": "Auf den hellen Signalflächen steht Text immer in Tinte, nie in der Signalfarbe selbst. Die Signalfarbe sitzt im 4 px breiten Rand links.", "section": "colors" },
+      { "name": "Die Nicht-nur-Farbe-Regel", "body": "Jede Warnung sagt in Worten, was los ist; Farbe allein reicht nie.", "section": "colors" },
+      { "name": "Die Ziffern-Regel", "body": "Jede Messzahl steht in Literata mit tabular-nums lining-nums. Einheiten daneben klein in Atkinson und in Tinte leise.", "section": "typography" },
+      { "name": "Die Zwei-Schriften-Regel", "body": "Keine dritte Schrift, auch nicht für Diagramme oder das PDF.", "section": "typography" },
+      { "name": "Die Flach-Regel", "body": "Karten, Knöpfe und Fenster haben keinen Schatten. Was schweben muss (Menü), bekommt den einen Menüschatten, sonst nichts.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do neue Flächen als Blatt (blatt, 1px raster, 12px Ecken) auf Papier bauen.",
+      "Do jede Messzahl in Literata mit tabular-nums setzen, die Einheit klein daneben.",
+      "Do Tippflächen mindestens 48px hoch machen, Hauptknöpfe 50px.",
+      "Do jede neue Farbe in Hell und Dunkel festlegen und mit der WCAG-Formel prüfen (Text 4,5 : 1, Ränder 3 : 1).",
+      "Do neue Fenster als Blatt von unten mit Griff bauen und Bewegungen bei prefers-reduced-motion abschalten lassen.",
+      "Do Profilbilder und quadratische Bedienelemente mit 21 % Ecken und 1px Ring statt Rand zeigen."
+    ],
+    "donts": [
+      "Don't Schatten auf Karten, Knöpfe oder Fenster legen; nur das Auswahlmenü schwebt.",
+      "Don't Tanne, Bernstein oder Rot zur Dekoration nutzen oder eine weitere Akzentfarbe einführen.",
+      "Don't Signalfarbe als Textfarbe auf hellen Signalflächen verwenden; Text bleibt Tinte.",
+      "Don't Kreise für Profilbilder oder Pfeil-Knöpfe nutzen (seit 0.74.0 eckig rund).",
+      "Don't für neue Rückfragen Browser-Dialoge (confirm) verwenden; es gibt die eigene Rückfrage (js/rueckfrage.js). Einige seltene Fehlermeldungen beim Einlesen einer Sicherung nutzen noch alert.",
+      "Don't Schriften aus dem Netz laden oder eine dritte Schrift einführen."
+    ]
+  }
+}
