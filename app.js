@@ -67,7 +67,7 @@ import { leseAnzeige, merkeAnzeige, aufgeloest } from "./js/anzeige.js";
 import { aufklappKarte, merkeZustand, zustandVon, zustandVergessen, aufklappenAnmelden } from "./js/aufklappen.js";
 import { begriffeHtml, hinweisKnopf, kcalSpanne } from "./js/wissen.js";
 import { auswahlFeld, auswahlAnmelden } from "./js/auswahl.js";
-import { alterText, telefonLink, telefonGueltig, istWiegetag, wiegetagAusAuswahl, WOCHENTAGE, HALTUNG, kartenLink, praxisVorschlag } from "./js/profil.js";
+import { alterText, telefonLink, telefonGueltig, istWiegetag, wiegetagAusAuswahl, wiegezeitGueltig, wiegezeitText,WOCHENTAGE, HALTUNG, kartenLink, praxisVorschlag } from "./js/profil.js";
 import { aktivesTier, leseAktivesTier, merkeAktivesTier, vergissDemoTier, neuesTier, eintraegeVon, tierEntfernen } from "./js/tiere.js";
 import { wischenAnmelden } from "./js/wischen.js";
 import { datumText, freigabeTafel } from "./js/mehr.js";
@@ -491,7 +491,7 @@ function zeichneHeute(vonNull = false) {
   $("wiegetag-hinweis").hidden = !wiegen;
   if (wiegen)
     $("wiegetag-hinweis-text").textContent =
-      `Heute ist Wiegetag für ${tier.name}. Am besten zur gewohnten Uhrzeit mit der gleichen Waage.` +
+      `Heute ist Wiegetag für ${tier.name}. Am besten ${wiegezeitText(tier)} mit der gleichen Waage.` +
       (istFotoTag(heute, tier.wiegetag) ? " Heute ist auch Foto-Tag: Wenn du magst, mach das Monatsfoto." : "");
   $("kopf-datum").textContent = new Date().toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "short" });
   $("tag-titel").textContent = tagTitel(gewaehlterTag);
@@ -980,6 +980,7 @@ function oeffneProfil(einTier) {
   });
   form.geburtsdatum.value = p.geburtsdatum ?? "";
   form.geburtsdatum.max = tagSchluessel(new Date());
+  form.wiegezeit.value = wiegezeitGueltig(p.wiegezeit) ? p.wiegezeit : "";
   form.koerperbau.value = p.koerperbau ?? "";
   form.schlank.value = p.schlankKg ? String(p.schlankKg).replace(".", ",") : "";
   // Neues Tier (0.49.0): Praxis, Telefon und Adresse vom gerade gewählten Tier vorschlagen, frei änderbar.
@@ -1022,6 +1023,8 @@ beimSpeichern("form-profil", "profil-fehler", (werte) => {
   setze("haltung", werte.get("haltung"));
   setze("schlankKg", schlank);
   setze("wiegetag", wiegetagAusAuswahl(werte.get("profil-wiegetag")));
+  const wiegezeit = werte.get("wiegezeit");
+  setze("wiegezeit", wiegezeitGueltig(wiegezeit) ? wiegezeit : null);
   const tierarzt = { ...(praxis && { praxis }), ...(telefon && { telefon }), ...(adresse && { adresse }) };
   setze("tierarzt", Object.keys(tierarzt).length ? tierarzt : null);
   const fotoNeu = bearbeitetesTier ? profilFoto !== (fotoGueltig(bearbeitetesTier.foto) ? bearbeitetesTier.foto : null) : Boolean(profilFoto);

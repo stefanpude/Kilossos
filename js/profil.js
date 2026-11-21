@@ -1,7 +1,8 @@
 // Profil eines Tiers und tierbezogene Einstellungen (alles optional außer Name):
 //   geburtsdatum "JJJJ-MM-TT", koerperbau (Freitext), haltung "wohnung" | "freigang" | "beides",
 //   schlankKg (Gewicht aus der schlanken Zeit, nur als Information für den Tierarzt),
-//   tierarzt { praxis?, telefon?, adresse? }, wiegetag 0–6 (0 = Sonntag, wie Date.getDay()).
+//   tierarzt { praxis?, telefon?, adresse? }, wiegetag 0–6 (0 = Sonntag, wie Date.getDay()),
+//   wiegezeit "HH:MM" (seit 0.95.0; ältere Daten ohne Feld bleiben gültig, ältere App-Versionen lassen es stehen).
 //   adresse seit 0.49.0 (freiwillig, Datenformat bleibt Version 1). Eine ältere App-Version entfernt sie still
 //   beim Einlesen einer Sicherung und beim Speichern des Profils (harmlos, nur eine Komfort-Angabe).
 // Zielgewicht und Tagesmenge gehören NICHT hierher: die legt nur die Tierarztpraxis fest (Freigabe).
@@ -58,6 +59,7 @@ export function profilBereinigen(daten, heute) {
     if ("wiegetag" in tier && !(Number.isInteger(tier.wiegetag) && tier.wiegetag >= 0 && tier.wiegetag <= 6)) {
       weg(tier, "wiegetag");
     }
+    if ("wiegezeit" in tier && !wiegezeitGueltig(tier.wiegezeit)) weg(tier, "wiegezeit");
     if ("tierarzt" in tier) {
       const ta = tier.tierarzt;
       if (ta === null || typeof ta !== "object" || Array.isArray(ta)) {
@@ -124,6 +126,16 @@ export function praxisVorschlag(tier) {
 export function wiegetagAusAuswahl(wert) {
   if (typeof wert !== "string" || !/^[0-6]$/.test(wert)) return null;
   return Number(wert);
+}
+
+// Uhrzeit zum Wiegen (0.95.0, Idee von Stefan): "HH:MM" wie aus <input type="time">. Steht nur im Wiegetag-Hinweis,
+// eine Erinnerung bei geschlossener App gibt es nicht (kein Server).
+export function wiegezeitGueltig(zeit) {
+  return typeof zeit === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(zeit);
+}
+
+export function wiegezeitText(tier) {
+  return wiegezeitGueltig(tier.wiegezeit) ? `gegen ${tier.wiegezeit.replace(/^0/, "")} Uhr` : "zur gewohnten Uhrzeit";
 }
 
 export function istWiegetag(tier, tag) {

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { profilBereinigen, alterText, telefonLink, istWiegetag, WOCHENTAGE, kartenLink, praxisVorschlag } from "../js/profil.js";
+import { profilBereinigen, alterText, telefonLink, istWiegetag, wiegezeitGueltig, wiegezeitText, WOCHENTAGE, kartenLink, praxisVorschlag } from "../js/profil.js";
 
 const kito = () => ({ id: "kito", name: "Kito", art: "katze", geschlecht: "kater", kastriert: true });
 
@@ -187,4 +187,30 @@ test("istWiegetag vergleicht den Wochentag (0 = Sonntag)", () => {
   assert.equal(istWiegetag({ wiegetag: 1 }, "2026-11-02"), true);
   assert.equal(istWiegetag({ wiegetag: 0 }, "2026-11-02"), false);
   assert.equal(istWiegetag({}, "2026-11-02"), false);
+});
+
+test("wiegezeitGueltig: nur HH:MM von 00:00 bis 23:59 (0.95.0)", () => {
+  for (const ok of ["08:00", "00:00", "23:59", "19:30"]) assert.equal(wiegezeitGueltig(ok), true, ok);
+  for (const falsch of ["8:00", "24:00", "12:60", "", "08:00:00", 800, null, "<b>"]) assert.equal(wiegezeitGueltig(falsch), false, String(falsch));
+});
+
+test("wiegezeitText: Uhrzeit ohne führende Null, sonst „zur gewohnten Uhrzeit“", () => {
+  assert.equal(wiegezeitText({ wiegezeit: "08:00" }), "gegen 8:00 Uhr");
+  assert.equal(wiegezeitText({ wiegezeit: "19:30" }), "gegen 19:30 Uhr");
+  assert.equal(wiegezeitText({}), "zur gewohnten Uhrzeit");
+  assert.equal(wiegezeitText({ wiegezeit: "kaputt" }), "zur gewohnten Uhrzeit");
+});
+
+test("profilBereinigen: gültige wiegezeit bleibt, ungültige wird entfernt, ohne Feld alles wie vorher", () => {
+  const daten = {
+    tiere: [
+      { id: "a", name: "Kito", kastriert: true, wiegetag: 1, wiegezeit: "08:00" },
+      { id: "b", name: "Zuki", kastriert: true, wiegezeit: "25:00" },
+      { id: "c", name: "Ohne", kastriert: true },
+    ],
+  };
+  assert.equal(profilBereinigen(daten, "2026-11-21"), 1);
+  assert.equal(daten.tiere[0].wiegezeit, "08:00");
+  assert.equal("wiegezeit" in daten.tiere[1], false);
+  assert.equal("wiegezeit" in daten.tiere[2], false);
 });
