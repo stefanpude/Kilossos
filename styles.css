@@ -659,6 +659,8 @@ label.eintrag:has(input:focus-visible) { outline: 3px solid var(--fokus); outlin
 .wie-gestern-liste li { grid-template-columns: 1fr auto; } /* seit 0.94.1 mit Kreuz „für heute ausblenden“ */
 #heute-wie-gestern > .knopf-text { margin-top: 4px; }
 .wie-gestern-liste .protokoll-knopf { color: var(--text-leise); }
+.wie-gestern-versteckt { margin-top: 10px; } /* Aufklappmenü „Ausgeblendet“ (0.95.1) */
+.wie-gestern-versteckt .wie-gestern-liste li { grid-template-columns: 1fr; }
 /* Besonderer Tag auf „Heute“ (0.33.0): Art fett, darunter Zeitraum und Notiz; Beenden-Knopf in eigener Zeile. */
 .besonders-liste .protokoll-knopf { grid-template-columns: 1fr; padding: 6px 0; }
 .besonders-liste .was b { font-weight: 700; }

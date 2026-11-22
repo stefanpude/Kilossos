@@ -89,7 +89,7 @@ import { belegteZeichen, speicherAnzeige } from "./js/speicher.js";
 import { sicherungPruefen, einleseFrage } from "./js/sicherung.js";
 import { frage, bestaetigt } from "./js/rueckfrage.js";
 import { uhrzeitVorbelegung, tagAusKalender } from "./js/nachtragen.js";
-import { wieGestern, ausgeblendet, blendeAus, AUS_SCHLUESSEL } from "./js/wie-gestern.js";
+import { wieGestern, ausgeblendet, blendeAus, blendeEin, AUS_SCHLUESSEL } from "./js/wie-gestern.js";
 import { zuruecktaste } from "./js/zurueck.js";
 import { profilAktion, zoomVon } from "./js/profilbild.js";
 
@@ -610,7 +610,7 @@ function zeichneHeute(vonNull = false) {
 // ---------- Wie gestern (0.94.0, Entwurf docs/superpowers/specs/2026-11-20-wie-gestern-design.md) ----------
 // Mahlzeiten des letzten Tags mit Einträgen als Vorlage; Antippen öffnet „Mahlzeit“ vorbelegt (nie ein ganzer Tag).
 function zeichneWieGestern(tag, futter) {
-  const { vorlageTag, offen } = wieGestern({
+  const { vorlageTag, offen, versteckt } = wieGestern({
     mahlzeiten: daten.mahlzeiten,
     futterNachId: futter,
     besondereTage: daten.besondereTage,
@@ -618,28 +618,49 @@ function zeichneWieGestern(tag, futter) {
     tag,
     ausgeblendet: ausgeblendet(wieGesternAusLesen(), tier.id, tag),
   });
-  if (offen.length === 0) {
+  // Aufklappmenü bleibt nach dem Zurückholen offen, solange noch etwas darin steht.
+  const warOffen = $("wie-gestern-versteckt")?.open === true;
+  if (offen.length === 0 && versteckt.length === 0) {
     $("heute-wie-gestern").innerHTML = "";
     return;
   }
   const vortag = new Date(`${tag}T12:00`);
   vortag.setDate(vortag.getDate() - 1);
   const titel = vorlageTag === tagSchluessel(vortag) ? "Wie gestern" : `Wie am ${datumText(vorlageTag)}`;
+  const zeile = (z) => {
+    const f = futter.get(z.futterId);
+    return `<span class="zeit">${z.uhrzeit}</span>
+          <span class="was">${sicher(f.name)}<small>${TYP_NAMEN[f.typ]}</small></span>
+          <span class="wert">${zahl(z.gramm)} g</span>`;
+  };
   const zeilen = offen
     .map((z) => {
       const f = futter.get(z.futterId);
       return `<li><button type="button" class="protokoll-knopf tippbar" data-aktion="wie-gestern" data-futter="${sicher(z.futterId)}" data-gramm="${z.gramm}">
-          <span class="zeit">${z.uhrzeit}</span>
-          <span class="was">${sicher(f.name)}<small>${TYP_NAMEN[f.typ]}</small></span>
-          <span class="wert">${zahl(z.gramm)} g</span><span class="nur-vorlesen">, übernehmen</span></button>
+          ${zeile(z)}<span class="nur-vorlesen">, übernehmen</span></button>
           <button type="button" class="knopf-loeschen" data-aktion="wie-gestern-aus" data-id="${sicher(z.quelle)}" aria-label="${z.uhrzeit}, ${sicher(f.name)}, für heute ausblenden">${SYMBOL.loeschen}</button></li>`;
     })
     .join("");
   const ids = sicher(offen.map((z) => z.quelle).join(" "));
-  $("heute-wie-gestern").innerHTML = `<h3>${sicher(titel)}</h3>
-    <p class="tipp">Antippen übernimmt Sorte und Menge. Bitte trotzdem abwiegen. Das Kreuz blendet eine Zeile für heute aus.</p>
+  // Ausgeblendet (0.95.1): Antippen holt die Zeile zurück, an den Daten ändert sich nichts.
+  const einblendZeilen = versteckt
+    .map(
+      (z) => `<li><button type="button" class="protokoll-knopf tippbar" data-aktion="wie-gestern-ein" data-id="${sicher(z.quelle)}">
+          ${zeile(z)}<span class="nur-vorlesen">, wieder einblenden</span></button></li>`
+    )
+    .join("");
+  const liste = offen.length
+    ? `<p class="tipp">Antippen übernimmt Sorte und Menge. Bitte trotzdem abwiegen. Das Kreuz blendet eine Zeile für heute aus.</p>
     <ul class="protokoll wie-gestern-liste">${zeilen}</ul>
-    <button type="button" class="knopf-text" data-aktion="wie-gestern-alle-aus" data-ids="${ids}">Alle für heute ausblenden</button>`;
+    <button type="button" class="knopf-text" data-aktion="wie-gestern-alle-aus" data-ids="${ids}">Alle für heute ausblenden</button>`
+    : "";
+  const menue = versteckt.length
+    ? `<details class="arm wie-gestern-versteckt" id="wie-gestern-versteckt"${warOffen ? " open" : ""}>
+      <summary>Ausgeblendet (${versteckt.length})<span class="pfeil" aria-hidden="true">${SYMBOL.runter}</span></summary>
+      <div class="arm-inhalt"><p class="tipp">Antippen holt die Zeile zurück.</p>
+      <ul class="protokoll wie-gestern-liste">${einblendZeilen}</ul></div></details>`
+    : "";
+  $("heute-wie-gestern").innerHTML = `<h3>${sicher(titel)}</h3>${liste}${menue}`;
 }
 
 // Ausgeblendete Zeilen nur auf diesem Gerät (0.94.1). Speicher gesperrt: dann eben nichts ausgeblendet.
@@ -650,9 +671,10 @@ function wieGesternAusLesen() {
     return null;
   }
 }
-function wieGesternAusblenden(ids) {
+function wieGesternAusblenden(ids, einblenden = false) {
+  const aendern = einblenden ? blendeEin : blendeAus;
   try {
-    localStorage.setItem(AUS_SCHLUESSEL, blendeAus(wieGesternAusLesen(), tier.id, tagSchluessel(gewaehlterTag), ids));
+    localStorage.setItem(AUS_SCHLUESSEL, aendern(wieGesternAusLesen(), tier.id, tagSchluessel(gewaehlterTag), ids));
   } catch {
     // Speicher gesperrt oder voll: Zeilen bleiben stehen, an den Daten ändert sich nichts.
   }
@@ -3229,6 +3251,8 @@ document.addEventListener("click", (ereignis) => {
       return oeffneMahlzeit(null, { futterId: ziel.dataset.futter, gramm: Number(ziel.dataset.gramm) });
     case "wie-gestern-aus":
       return wieGesternAusblenden([id]);
+    case "wie-gestern-ein":
+      return wieGesternAusblenden([id], true);
     case "wie-gestern-alle-aus":
       return wieGesternAusblenden(ziel.dataset.ids.split(" "));
     case "warum-kein-ziel":

@@ -4,7 +4,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { wieGestern, ausgeblendet, blendeAus } from "../js/wie-gestern.js";
+import { wieGestern, ausgeblendet, blendeAus, blendeEin } from "../js/wie-gestern.js";
 
 const lies = (datei) => readFileSync(new URL(`../${datei}`, import.meta.url), "utf8");
 const abschnitt = (quelle, anfang, ende) => {
@@ -31,7 +31,7 @@ const rechneRoh = (mahlzeiten, tag = "2026-11-20", { besondereTage = [], tierId 
   wieGestern({ mahlzeiten, futterNachId, besondereTage, tierId, tag, ausgeblendet });
 const rechne = (...args) => {
   const e = rechneRoh(...args);
-  return { ...e, offen: e.offen.map(({ quelle, ...z }) => z) };
+  return { vorlageTag: e.vorlageTag, offen: e.offen.map(({ quelle, ...z }) => z) };
 };
 
 const VORTAG = [m(19, "07:30", "sheba", 50), m(19, "07:30", "purina", 12), m(19, "10:30", "sheba", 50)];
@@ -94,6 +94,28 @@ test("ausgeblendet/blendeAus: gilt nur für Tier und Tag, neuer Tag fängt leer 
   assert.equal(ausgeblendet(roh, KITO, "2026-11-21").size, 0);
   // Ein neuer Tag räumt den alten weg, damit der Schlüssel nicht wächst.
   assert.deepEqual(JSON.parse(blendeAus(roh, KITO, "2026-11-21", ["d"])), { tag: "2026-11-21", tiere: { [KITO]: ["d"] } });
+});
+
+// 0.95.1: Ausgeblendete Zeilen lassen sich im Aufklappmenü „Ausgeblendet“ zurückholen (Wunsch von Stefan, 22.11.2026).
+test("wieGestern: ausgeblendete Zeilen stehen in „versteckt“, schon gefütterte nicht", () => {
+  const heute = m(20, "07:40", "purina", 12);
+  const { offen, versteckt } = rechneRoh([...VORTAG, heute], "2026-11-20", {
+    ausgeblendet: new Set([VORTAG[0].id, VORTAG[1].id]),
+  });
+  assert.deepEqual(offen.map((z) => z.quelle), [VORTAG[2].id]);
+  assert.deepEqual(versteckt.map((z) => z.quelle), [VORTAG[0].id]);
+  assert.deepEqual(rechneRoh([]).versteckt, []);
+});
+
+test("blendeEin: holt eine Zeile zurück, andere Tiere und Zeilen bleiben ausgeblendet", () => {
+  let roh = blendeAus(null, KITO, "2026-11-20", ["a", "b"]);
+  roh = blendeAus(roh, ZUKI, "2026-11-20", ["a"]);
+  roh = blendeEin(roh, KITO, "2026-11-20", ["a"]);
+  assert.deepEqual([...ausgeblendet(roh, KITO, "2026-11-20")], ["b"]);
+  assert.deepEqual([...ausgeblendet(roh, ZUKI, "2026-11-20")], ["a"]);
+  // Alter Tag oder kaputter Inhalt: nichts zu tun, nichts ausgeblendet.
+  assert.equal(ausgeblendet(blendeEin(roh, KITO, "2026-11-21", ["b"]), KITO, "2026-11-21").size, 0);
+  assert.equal(ausgeblendet(blendeEin("{", KITO, "2026-11-20", ["b"]), KITO, "2026-11-20").size, 0);
 });
 
 test("ausgeblendet: kaputter oder fremder Inhalt → nichts ausgeblendet", () => {

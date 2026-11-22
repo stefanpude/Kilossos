@@ -1,6 +1,6 @@
 // Speichert die App-Dateien auf dem Gerät, damit Kilossos auch ohne Internet startet.
 // Bei jeder Änderung an den Dateien CACHE_NAME hochzählen.
-const CACHE_NAME = "kilossos-v169";
+const CACHE_NAME = "kilossos-v170";
 const DATEIEN = [
   "./",
   "index.html",
