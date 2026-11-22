@@ -43,6 +43,7 @@ Weitere Blätter: [Zuki](tierarzt-fragen-zuki.md) und [Fragen zur App](tierarzt-
 ### Kontrolle
 - [ ] Wann ist der **nächste Kontrolltermin**, und in welchem Abstand danach?
       Darf ich zwischendurch zum Wiegen in die Praxis kommen?
+      Kann ich eine Liste aller bisherigen Gewichte mit Datum bekommen?
 
 ## Antworten
 | Frage | Antwort |
@@ -57,3 +58,4 @@ Weitere Blätter: [Zuki](tierarzt-fragen-zuki.md) und [Fragen zur App](tierarzt-
 | Tatar | |
 | Sofort anrufen bei | |
 | Nächster Termin, Abstand | |
+| Bisherige Gewichte (Liste) | |
