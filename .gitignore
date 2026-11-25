@@ -10,3 +10,5 @@ logo-quelle/
 HANDOFF.md
 HANDOFF-archiv-*.md
 checklisten/
+playwright-report/
+test-results/
