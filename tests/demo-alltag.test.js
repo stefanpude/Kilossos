@@ -111,3 +111,13 @@ for (const tierId of ["kito", "zuki"]) {
     assert.ok(abstaende.filter((a) => a !== 7).length >= 4, "Wiegetag verschiebt sich manchmal");
   });
 }
+
+// 0.96.2: Übersicht ohne Dateipfad, Kitos Demo-Notizen passen dazu, dass er bis Ende Oktober nicht rausgeht (Stefan 26.11.2026).
+test("0.96.2: Übersicht nennt keinen Dateipfad, Kito ist in der Demo vor „wieder draußen“ nicht im Garten", () => {
+  const bericht = fs.readFileSync(new URL("../js/bericht.js", import.meta.url), "utf8");
+  assert.doesNotMatch(bericht, /beruhen auf den Sicherheitsgrenzen in docs\//);
+  assert.match(bericht, /beruhen auf festen Sicherheitsgrenzen aus der Fachliteratur/);
+  const kito = demo.besondereTage.filter((b) => b.tierId === "kito");
+  const draussen = kito.find((b) => /wieder draußen/.test(b.notiz)).von;
+  for (const b of kito.filter((x) => x.von < draussen)) assert.doesNotMatch(b.notiz, /Garten|Maus|draußen/, b.notiz);
+});

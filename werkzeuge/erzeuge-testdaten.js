@@ -231,8 +231,8 @@ const kito = simuliere({
   besondereTage: (letzterTag) => [
     { art: "genascht", von: 40, bis: 40, notiz: "Simulation: ein paar Stücke vom Hundefutter" },
     { art: "genascht", von: 47, bis: 47, notiz: "Simulation: Grillabend, vom Teller genascht" },
-    { art: "mehr-bewegung", von: 61, bis: 61, notiz: "Simulation: lange im Garten gewesen" },
-    { art: "genascht", von: 75, bis: 75, notiz: "Simulation: Maus gefangen" },
+    { art: "mehr-bewegung", von: 61, bis: 61, notiz: "Simulation: lange mit dem Laserpunkt gespielt" },
+    { art: "genascht", von: 75, bis: 75, notiz: "Simulation: Fliege gefangen und gefressen" },
     { art: "krank", von: 15 * 7 + 2, bis: 15 * 7 + 4, notiz: "Simulation: Magen verstimmt, Tierarzt angerufen" },
     { art: "genascht", von: 130, bis: 130, notiz: "Simulation: vom Teller stibitzt" },
     { art: "futterumstellung", von: 20 * 7, bis: 20 * 7 + 6, notiz: "Simulation: neue Sorte langsam untergemischt" },

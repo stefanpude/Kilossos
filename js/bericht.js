@@ -361,7 +361,7 @@ export function berichtHtml(b, { tier, gewichte, mahlzeiten, freigaben, futterNa
     ${demo ? `<p class="bericht-demo">DEMO – simulierte Daten, nicht von ${sicher(tier.name)}</p>` : ""}
     <p class="bericht-klein">Alle Werte hat der Halter zu Hause erfasst: Futter mit der Küchenwaage, Gewicht mit der eigenen Waage
       (andere Wiegeart steht als Anmerkung beim jeweiligen Gewicht, z. B. „auf dem Arm gewogen“). Die Warnregeln der App
-      beruhen auf den Sicherheitsgrenzen in docs/sicherheitsgrenzen.md (AAHA 2014, WSAVA 2011, Flanagan et al. 2018)
+      beruhen auf festen Sicherheitsgrenzen aus der Fachliteratur (AAHA 2014, WSAVA 2011, Flanagan et al. 2018)
       und gelten erst nach tierärztlicher Prüfung. Kilossos ist kein Medizinprodukt.</p>
   </header>`);
 
