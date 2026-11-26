@@ -191,23 +191,25 @@ test("0.47.0: Jeder Eintrag der Demo gehört zu einem vorhandenen Tier, Kennunge
   assert.ok(demo.gewichte.every((g) => !("foto" in g)), "keine Fotos in der Demo-Datei");
 });
 
-// 0.55.0: Demo für den Tierarzttermin, ein ganzes Jahr. Zielgewichte sind Stefans Beispiele (Kito 6,0, Zuki 4,0 kg).
-for (const { id, startKg, zielKg, startBcs } of [
-  { id: "kito", startKg: 9.32, zielKg: 6.0, startBcs: 8 },
-  { id: "zuki", startKg: 7.0, zielKg: 4.0, startBcs: 9 },
+// 0.96.0: Demo über ein halbes Jahr, beide heute noch 1 kg über dem Ziel (Stefan 26.11.2026). Zielgewichte sind Stefans
+// Beispiele (Kito 6,0, Zuki 4,0 kg).
+for (const { id, startKg, endKg, zielKg, startBcs, endBcs } of [
+  { id: "kito", startKg: 9.32, endKg: 7.0, zielKg: 6.0, startBcs: 8, endBcs: 6 },
+  { id: "zuki", startKg: 7.0, endKg: 5.0, zielKg: 4.0, startBcs: 9, endBcs: 7 },
 ]) {
-  test(`0.55.0: ${id} in der Demo: ein Jahr ${startKg} → ${zielKg} kg, Kontrolle alle 12 Wochen, kcal nie unter RER(Ziel)`, () => {
+  test(`0.96.0: ${id} in der Demo: ein halbes Jahr ${startKg} → ${endKg} kg, Ziel ${zielKg} kg offen, Kontrolle alle 12 Wochen, kcal nie unter RER(Ziel)`, () => {
     const demo = demoDaten();
     const gewichte = demo.gewichte.filter((g) => g.tierId === id).sort((a, b) => a.datum.localeCompare(b.datum));
     const freigaben = demo.freigaben.filter((f) => f.tierId === id).sort((a, b) => a.datum.localeCompare(b.datum));
     assert.equal(gewichte[0].kg, startKg);
-    assert.equal(gewichte.at(-1).kg, zielKg, "Ziel am Ende erreicht");
-    assert.equal(tageZwischen(gewichte[0].datum, gewichte.at(-1).datum), 52 * 7, "ein Jahr");
+    assert.equal(gewichte.at(-1).kg, endKg, "heute 1 kg über dem Ziel");
+    assert.equal(Math.round((endKg - zielKg) * 100), 100);
+    assert.equal(tageZwischen(gewichte[0].datum, gewichte.at(-1).datum), 26 * 7, "ein halbes Jahr");
     assert.equal(freigaben[0].datum, gewichte[0].datum);
-    assert.equal(freigaben.length, 5);
+    assert.equal(freigaben.length, 3);
     assert.ok(freigaben.every((f) => f.zielgewichtKg === zielKg));
     assert.equal(freigaben[0].bcs, startBcs);
-    assert.equal(freigaben.at(-1).bcs, 5);
+    assert.equal(freigaben.at(-1).bcs, endBcs);
     // kcal sinken mit dem Gewicht, bleiben aber über dem Ruhebedarf beim Ziel (sonst Diätfutter-Hinweis).
     for (let i = 1; i < freigaben.length; i++) assert.ok(freigaben[i].kcalProTag <= freigaben[i - 1].kcalProTag);
     assert.ok(freigaben.every((f) => f.kcalProTag >= rer(zielKg)), "über RER(Ziel)");

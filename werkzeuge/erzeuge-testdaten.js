@@ -1,6 +1,7 @@
 // Erzeugt eine SIMULIERTE Kilossos-Sicherung mit zwei Katzen, innerhalb aller Grenzen aus docs/sicherheitsgrenzen.md:
-// seit 0.55.0 ein ganzes Jahr (52 Wochen) für den Tierarzttermin: Kito 9,32 → 6,0 kg, Zuki 7,0 → 4,0 kg, beide Ziele
-// am Ende erreicht. Die Zielgewichte sind Beispiele von Stefan, kein Wert vom Tierarzt. Alle Zahlen sind ausgedacht.
+// seit 0.96.0 ein halbes Jahr (26 Wochen, Stefan 26.11.2026: realistischer als ein erreichtes Ziel): Kito 9,32 → 7,0 kg,
+// Zuki 7,0 → 5,0 kg, beide heute noch 1 kg über dem Ziel (6,0 bzw. 4,0 kg). Die Zielgewichte sind Beispiele von Stefan,
+// kein Wert vom Tierarzt. Alle Zahlen sind ausgedacht.
 // Die App zeigt die Sicherung im Demo-Modus (Link mit "?demo") in einem eigenen Speicherplatz an.
 // Nie über "Sicherung einlesen" laden – das würde die echten Einträge ersetzen.
 // Aufruf: node werkzeuge/erzeuge-testdaten.js  →  demo/kito-simulation.json (Name bleibt, enthält Kito und Zuki)
@@ -93,9 +94,9 @@ function simuliere(p) {
     mcs: f.mcs,
   }));
 
-  // Wochenabnahme in %; mit "zielGenau" so skaliert, dass am Ende genau das Ziel herauskommt.
+  // Wochenabnahme in %; mit "zielGenau" so skaliert, dass am Ende genau "endKg" herauskommt.
   const roh = Array.from({ length: p.wochen }, (_, w) => p.rate(w) + zwischen(-0.1, 0.1));
-  const faktor = p.zielGenau ? Math.log(p.zielKg / p.startKg) / roh.reduce((s, r) => s + Math.log(1 - r / 100), 0) : 1;
+  const faktor = p.zielGenau ? Math.log(p.endKg / p.startKg) / roh.reduce((s, r) => s + Math.log(1 - r / 100), 0) : 1;
   let wahr = p.startKg;
   const gewichte = [];
   // Wiegetag (seit 0.76.0): ab und zu einen Tag früher oder später, nie zwei Wochen nacheinander (Abstand bleibt 6–8
@@ -106,7 +107,7 @@ function simuliere(p) {
     verschoben = w === 0 || w === p.wochen || verschoben !== 0 || wuerfel >= 0.2 ? 0 : wuerfel < 0.1 ? -1 : 1;
     if (w > 0) wahr *= Math.exp(faktor * Math.log(1 - roh[w - 1] / 100));
     // Waage auf 10 g genau, dazu eine kleine Messschwankung; der Start (Tierarzt) exakt, bei "zielGenau" auch das Ende.
-    const exakt = w === 0 ? p.startKg : p.zielGenau && w === p.wochen ? p.zielKg : null;
+    const exakt = w === 0 ? p.startKg : p.zielGenau && w === p.wochen ? p.endKg : null;
     const gemessen = exakt ?? Math.round((wahr + zwischen(-p.schwankung, p.schwankung)) * 100) / 100;
     gewichte.push({
       id: `${p.praefix}gewicht-${w}`,
@@ -200,17 +201,18 @@ function simuliere(p) {
   return { tier: p.tier, start, freigaben, gewichte, mahlzeiten, besondereTage, fehler };
 }
 
-// Kito (seit 0.55.0): ein Jahr, 9,32 → 6,0 kg (im Mittel gut 0,8 % pro Woche). Kontrolle alle 12 Wochen mit neuer
+// Kito (seit 0.96.0): ein halbes Jahr, 9,32 → 7,0 kg (im Mittel gut 1 % pro Woche), Ziel 6,0 kg noch offen. Kontrolle alle 12 Wochen mit neuer
 // Freigabe; die kcal sinken mit dem Gewicht, bleiben aber über RER(6,0 kg) ≈ 268 kcal, damit normales Futter reicht
-// (sonst Diätfutter-Hinweis, AAHA 2021). Realistisch: anfangs schneller, über die Feiertage (Wochen 6–8) langsamer,
-// später langsamer. BCS sinkt von 8 auf 5.
+// (sonst Diätfutter-Hinweis, AAHA 2021). Realistisch: anfangs schneller, in den Wochen 6–8 (Sommerhitze, Grillabende)
+// langsamer, später langsamer. BCS sinkt von 8 auf 6.
 const kito = simuliere({
   tier: { id: "kito", name: "Kito", art: "katze", geschlecht: "kater", kastriert: true },
   praefix: "",
   zufall: zufallsStrom(20261101),
-  wochen: 52,
+  wochen: 26,
   versatz: 0,
   startKg: 9.32,
+  endKg: 7.0,
   zielKg: 6.0,
   zielGenau: true,
   rate: (w) => (w >= 6 && w <= 8 ? 0.65 : w < 12 ? 1.05 : w < 24 ? 0.95 : w < 36 ? 0.8 : 0.7),
@@ -218,9 +220,7 @@ const kito = simuliere({
   freigaben: [
     { woche: 0, kcalProTag: 300, bcs: 8, mcs: "normal", notiz: "Simulation: Start, Ziel 6,0 kg als Beispiel" },
     { woche: 12, kcalProTag: 290, bcs: 8, mcs: "normal", notiz: "Simulation: Kontrolle, Abnahme gut, etwas weniger" },
-    { woche: 24, kcalProTag: 280, bcs: 7, mcs: "normal", notiz: "Simulation: Kontrolle, an das neue Gewicht angepasst" },
-    { woche: 36, kcalProTag: 275, bcs: 6, mcs: "normal", notiz: "Simulation: Kontrolle, Plan bleibt fast gleich" },
-    { woche: 48, kcalProTag: 270, bcs: 5, mcs: "normal", notiz: "Simulation: Ziel fast erreicht, danach Gewicht halten besprechen" },
+    { woche: 24, kcalProTag: 280, bcs: 6, mcs: "normal", notiz: "Simulation: Kontrolle, gut 1 kg fehlt noch, Plan bleibt" },
   ],
   leckerli: { anteil: 3 / 7, von: 2, bis: 5 },
   // Tatar (seit 0.76.0): an 5 von 7 Tagen 18–23 g, 137 kcal/100 g (USDA FDC 171790), zählt in die Tageskalorien.
@@ -230,29 +230,30 @@ const kito = simuliere({
   // „Heute“ den Knopf „Beendet“.
   besondereTage: (letzterTag) => [
     { art: "genascht", von: 40, bis: 40, notiz: "Simulation: ein paar Stücke vom Hundefutter" },
-    { art: "genascht", von: 47, bis: 47, notiz: "Simulation: Feiertage, vom Festessen genascht" },
+    { art: "genascht", von: 47, bis: 47, notiz: "Simulation: Grillabend, vom Teller genascht" },
     { art: "mehr-bewegung", von: 61, bis: 61, notiz: "Simulation: lange im Garten gewesen" },
     { art: "genascht", von: 75, bis: 75, notiz: "Simulation: Maus gefangen" },
     { art: "krank", von: 15 * 7 + 2, bis: 15 * 7 + 4, notiz: "Simulation: Magen verstimmt, Tierarzt angerufen" },
     { art: "genascht", von: 130, bis: 130, notiz: "Simulation: vom Teller stibitzt" },
     { art: "futterumstellung", von: 20 * 7, bis: 20 * 7 + 6, notiz: "Simulation: neue Sorte langsam untergemischt" },
-    { art: "mehr-bewegung", von: 30 * 7, bis: 32 * 7, notiz: "Simulation: Baustelle fertig, wieder draußen" },
+    { art: "mehr-bewegung", von: 22 * 7, bis: 23 * 7, notiz: "Simulation: Baustelle fertig, wieder draußen" },
     { art: "genascht", von: letzterTag - 12, bis: letzterTag - 12, notiz: "Simulation: ein paar Stücke vom Hundefutter" },
     { art: "weniger-bewegung", von: letzterTag - 9, bis: null, notiz: "Simulation: Regenwetter, nur drinnen" },
   ],
 });
 
-// Zuki (seit 0.55.0): zierlich, im Verhältnis dicker als Kito, ein Jahr 7,0 → 4,0 kg (im Mittel gut 1 % pro Woche).
-// Freigaben sinken von 230 auf 200 kcal, bleiben über RER(4,0 kg) ≈ 198 kcal. BCS 9 → 5. Gewogen 2 Tage vor Kito,
+// Zuki (seit 0.96.0): zierlich, im Verhältnis dicker als Kito, ein halbes Jahr 7,0 → 5,0 kg (im Mittel knapp 1,3 % pro
+// Woche), Ziel 4,0 kg noch offen. Freigaben sinken von 230 auf 210 kcal, bleiben über RER(4,0 kg) ≈ 198 kcal. BCS 9 → 7. Gewogen 2 Tage vor Kito,
 // damit die Demo beim Verschieben auf heute (neuestes Gewicht über alle Tiere = Kitos) beide sinnvoll zeigt.
 // Kleinere Leckerlis, damit sie bei der kleineren Tagesmenge unter 10 % bleiben. Getrennt gefüttert, eigene Zeiten.
 const zuki = simuliere({
   tier: { id: "zuki", name: "Zuki", art: "katze", geschlecht: "katze", kastriert: true, koerperbau: "zierlich" },
   praefix: "zuki-",
   zufall: zufallsStrom(20261106),
-  wochen: 52,
+  wochen: 26,
   versatz: 2,
   startKg: 7.0,
+  endKg: 5.0,
   zielKg: 4.0,
   zielGenau: true,
   rate: (w) => (w >= 6 && w <= 8 ? 0.8 : w < 12 ? 1.3 : w < 24 ? 1.15 : w < 36 ? 1.0 : 0.9),
@@ -260,18 +261,16 @@ const zuki = simuliere({
   freigaben: [
     { woche: 0, kcalProTag: 230, bcs: 9, mcs: "normal", notiz: "Simulation: Start, Ziel 4,0 kg als Beispiel" },
     { woche: 12, kcalProTag: 220, bcs: 8, mcs: "normal", notiz: "Simulation: Kontrolle, Abnahme gut, etwas weniger" },
-    { woche: 24, kcalProTag: 210, bcs: 7, mcs: "normal", notiz: "Simulation: Kontrolle, an das neue Gewicht angepasst" },
-    { woche: 36, kcalProTag: 205, bcs: 6, mcs: "normal", notiz: "Simulation: Kontrolle, Plan bleibt fast gleich" },
-    { woche: 48, kcalProTag: 200, bcs: 5, mcs: "normal", notiz: "Simulation: Ziel fast erreicht, danach Gewicht halten besprechen" },
+    { woche: 24, kcalProTag: 210, bcs: 7, mcs: "normal", notiz: "Simulation: Kontrolle, 1 kg fehlt noch, Plan bleibt" },
   ],
   leckerli: { anteil: 2 / 7, von: 1, bis: 3 },
   tatar: null, // Zuki bekommt kein Tatar
   zeiten: { nassMorgens: [6, 45], nassAbends: [17, 50], trockenAbends: [21, 15] },
   besondereTage: () => [
-    { art: "genascht", von: 48, bis: 48, notiz: "Simulation: Feiertage, Sahne vom Tisch geschleckt" },
+    { art: "genascht", von: 48, bis: 48, notiz: "Simulation: Sahne vom Tisch geschleckt" },
     { art: "mehr-bewegung", von: 9 * 7 + 3, bis: 9 * 7 + 3, notiz: "Simulation: lange mit der Federangel gespielt" },
     { art: "futterumstellung", von: 20 * 7, bis: 20 * 7 + 6, notiz: "Simulation: neue Sorte langsam untergemischt" },
-    { art: "genascht", von: 33 * 7 + 4, bis: 33 * 7 + 4, notiz: "Simulation: am Napf von Kito genascht" },
+    { art: "genascht", von: 23 * 7 + 4, bis: 23 * 7 + 4, notiz: "Simulation: am Napf von Kito genascht" },
   ],
 });
 

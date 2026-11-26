@@ -12,7 +12,7 @@ test("index.html: Eintrag „Demo ansehen“ in „Über Kilossos“ führt zu .
   const ueber = html.slice(html.indexOf('<h3 class="gruppe-titel">Über Kilossos</h3>'), html.indexOf("</section>", html.indexOf("Über Kilossos</h3>")));
   assert.match(
     ueber,
-    /<a class="eintrag" id="demo-oeffnen" href="\.\/\?demo">\s*<span data-symbol="katzenkopf"><\/span><span class="text">Demo ansehen<small>Beispieldaten von Kito und Zuki über ein Jahr\. Deine Einträge bleiben, wie sie sind\.<\/small><\/span><span class="weiter" data-symbol="weiter"><\/span>\s*<\/a>/,
+    /<a class="eintrag" id="demo-oeffnen" href="\.\/\?demo">\s*<span data-symbol="katzenkopf"><\/span><span class="text">Demo ansehen<small>Beispieldaten von Kito und Zuki über ein halbes Jahr\. Deine Einträge bleiben, wie sie sind\.<\/small><\/span><span class="weiter" data-symbol="weiter"><\/span>\s*<\/a>/,
   );
   assert.ok(ueber.indexOf('id="demo-oeffnen"') < ueber.indexOf('id="version"'));
   // Zurück aus der Demo geht weiter über die Leiste oben.

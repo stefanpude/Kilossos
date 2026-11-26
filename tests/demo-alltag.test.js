@@ -38,7 +38,7 @@ test("0.76.0: Kito bekommt in jeder vollen Woche an genau 5 Tagen 15–25 g Tata
     const woche = Math.floor(tageZwischen(start, tag) / 7);
     proWoche.set(woche, (proWoche.get(woche) ?? 0) + 1);
   }
-  for (let w = 0; w < 52; w++) assert.equal(proWoche.get(w), 5, `Woche ${w + 1}`);
+  for (let w = 0; w < 26; w++) assert.equal(proWoche.get(w), 5, `Woche ${w + 1}`);
   assert.ok(vonTier("mahlzeiten", "zuki").every((m) => typVon(m) !== "frischfleisch"));
 });
 
@@ -46,7 +46,7 @@ test("0.76.0: Kitos Tage halten die Freigabe ein (±10 %), Leckerli unter 10 %",
   const mahlzeiten = vonTier("mahlzeiten", "kito");
   const freigaben = vonTier("freigaben", "kito");
   const tage = [...new Set(mahlzeiten.map(tagVon))];
-  assert.ok(tage.length >= 52 * 7);
+  assert.ok(tage.length >= 26 * 7);
   for (const tag of tage) {
     const amTag = mahlzeitenAm(mahlzeiten, tag);
     const soll = aktuelleFreigabe(freigaben, tag).kcalProTag;
