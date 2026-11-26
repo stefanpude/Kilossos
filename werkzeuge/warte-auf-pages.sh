@@ -9,7 +9,7 @@ repo="stefanpude/Kilossos"
 [ -z "$ziel" ] && { echo "Bitte den neuen CACHE_NAME angeben, z. B. kilossos-v122"; exit 2; }
 start=$(date +%s)
 for i in $(seq 1 40); do
-  if curl -s "https://stefanpude.github.io/Kilossos/sw.js?x=$RANDOM" | grep -q "\"$ziel\""; then
+  if curl -s "https://kilossos.de/sw.js?x=$RANDOM" | grep -q "\"$ziel\""; then
     echo "live: $ziel nach $(( $(date +%s) - start )) s"; date; exit 0
   fi
   lauf=$(gh run list -R "$repo" -L 1 --json databaseId,status,conclusion,createdAt --jq '.[0] | "\(.databaseId) \(.status) \(if .conclusion == "" then "-" else .conclusion end) \(.createdAt)"')

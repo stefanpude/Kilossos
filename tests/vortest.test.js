@@ -18,8 +18,8 @@ test("0.78.1: Datenschutz Abschnitt 2 nennt Monatsfotos, Befunde und besondere T
 
 test("0.78.1: Tester-Blatt für den Web-Vortest: Link, Startbildschirm, iPhone-Hinweis, Sicherung, keine Kontaktdaten", () => {
   const blatt = lies("docs/tester-hinweise-web.md");
-  assert.ok(blatt.includes("https://stefanpude.github.io/Kilossos/"));
-  assert.ok(blatt.includes("https://stefanpude.github.io/Kilossos/?demo"));
+  assert.ok(blatt.includes("https://kilossos.de/"));
+  assert.ok(blatt.includes("https://kilossos.de/?demo"));
   assert.match(blatt, /Zum Startbildschirm hinzufügen/);
   assert.match(blatt, /Zum Home-Bildschirm/);
   assert.match(blatt, /Keine ausgedachte „tierärztliche Freigabe“/);

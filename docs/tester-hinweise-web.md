@@ -27,7 +27,7 @@ die App zwei Wochen lang wirklich benutzt und sagst, was dir auffällt.
 Kilossos ist eine Web-App: Du öffnest sie im Browser und legst sie auf den Startbildschirm. Danach startet sie wie
 jede andere App, auch ohne Internet.
 
-**Adresse:** https://stefanpude.github.io/Kilossos/
+**Adresse:** https://kilossos.de/
 
 **Android** (Chrome, Opera, Samsung Internet oder ein anderer Browser):
 
@@ -68,7 +68,7 @@ Du musst nicht alles machen. Jede Aufgabe hilft.
    darauf, ob die Zahlen auf „Heute“ zu dem passen, was du eingetragen hast.
 3. **Gewicht (1× pro Woche):** Katze wiegen und unter „Gewicht“ mit „Gewicht eintragen“ eintragen, am besten am
    gleichen Tag zur gleichen Uhrzeit.
-4. **Demo ansehen (einmal, ca. 10 Minuten):** https://stefanpude.github.io/Kilossos/?demo (oder unter „Mehr“ →
+4. **Demo ansehen (einmal, ca. 10 Minuten):** https://kilossos.de/?demo (oder unter „Mehr“ →
    „Demo ansehen“). Die Demo zeigt ein ganzes Jahr Abnehmen mit tierärztlicher Freigabe und ändert deine eigenen Daten
    nicht. Schau dir dort „Heute“, „Verlauf“ und unter „Mehr“ die „Übersicht für die Praxis“ an.
 5. **Sicherung (einmal):** Unter „Mehr“ auf „Sicherung speichern“ tippen und nachsehen, ob die Datei auf dem Handy
