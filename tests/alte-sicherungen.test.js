@@ -145,12 +145,12 @@ test("Sheba-Kopie aus der alten Futterliste (0.6 bis 0.18, 71 laut zooplus) wird
   assert.equal(sheba.kcalQuelle, "geschaetzt");
 });
 
-test("Demo-Simulation hat besondere Tage: abgeschlossene Phase „Krank“, mehrmals genascht, eine laufende Phase", () => {
+test("Demo-Simulation hat besondere Tage: abgeschlossene Phase „Krank“, mehrmals genascht, seit 0.96.1 keine offene Phase", () => {
   const demo = JSON.parse(fs.readFileSync(new URL("../demo/kito-simulation.json", import.meta.url), "utf8"));
   const arten = demo.besondereTage.map((b) => b.art);
   assert.ok(demo.besondereTage.some((b) => b.art === "krank" && b.bis !== null && b.bis > b.von));
   assert.ok(arten.filter((a) => a === "genascht").length >= 3);
-  assert.equal(demo.besondereTage.filter((b) => b.bis === null).length, 1);
+  assert.equal(demo.besondereTage.filter((b) => b.bis === null).length, 0);
   assert.ok(!arten.includes("futter-verweigert"));
   assert.ok(demo.besondereTage.every((b) => b.notiz.startsWith("Simulation:")));
 });

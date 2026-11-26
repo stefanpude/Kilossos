@@ -226,8 +226,8 @@ const kito = simuliere({
   // Tatar (seit 0.76.0): an 5 von 7 Tagen 18–23 g, 137 kcal/100 g (USDA FDC 171790), zählt in die Tageskalorien.
   tatar: { tage: 5, von: 18, bis: 23 },
   zeiten: { nassMorgens: [7, 10], tatar: [12, 30], nassAbends: [18, 5], trockenAbends: [21, 30] },
-  // Kein „Futter verweigert“, sonst stünde in der Demo der rote Notfall-Kasten. Eine laufende Phase zeigt auf
-  // „Heute“ den Knopf „Beendet“.
+  // Kein „Futter verweigert“, sonst stünde in der Demo der rote Notfall-Kasten. Seit 0.96.1 keine offene Phase mehr
+  // (Stefan 26.11.2026: „Beendet“ kam bei jedem Öffnen der Demo wieder), das Regenwetter dauert 2 Tage.
   besondereTage: (letzterTag) => [
     { art: "genascht", von: 40, bis: 40, notiz: "Simulation: ein paar Stücke vom Hundefutter" },
     { art: "genascht", von: 47, bis: 47, notiz: "Simulation: Grillabend, vom Teller genascht" },
@@ -238,7 +238,7 @@ const kito = simuliere({
     { art: "futterumstellung", von: 20 * 7, bis: 20 * 7 + 6, notiz: "Simulation: neue Sorte langsam untergemischt" },
     { art: "mehr-bewegung", von: 22 * 7, bis: 23 * 7, notiz: "Simulation: Baustelle fertig, wieder draußen" },
     { art: "genascht", von: letzterTag - 12, bis: letzterTag - 12, notiz: "Simulation: ein paar Stücke vom Hundefutter" },
-    { art: "weniger-bewegung", von: letzterTag - 9, bis: null, notiz: "Simulation: Regenwetter, nur drinnen" },
+    { art: "weniger-bewegung", von: letzterTag - 9, bis: letzterTag - 8, notiz: "Simulation: Regenwetter, nur drinnen" },
   ],
 });
 
