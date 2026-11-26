@@ -190,9 +190,22 @@ test("Willkommensseite verspricht nichts, was die App nicht halten kann (Stefan,
   assert.doesNotMatch(html, /ohne Fettleber-Risiko|für jede Sorte/);
 });
 
-test("Version 0.96.2: Cache v173 mit js/wie-gestern.js, js/profilbild.js, js/zurueck.js, js/rueckfrage.js, js/nachtragen.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
+// 0.96.3: Impressum und Datenschutz mit Anschrift (Akteno, c/o) und Kontakt-E-Mail statt Platzhaltern (Stefan 26.11.2026).
+test("0.96.3: Impressum und Datenschutz ohne Platzhalter, mit c/o-Anschrift und E-Mail", () => {
+  for (const datei of ["impressum.html", "datenschutz.html"]) {
+    const html = lies(datei);
+    assert.doesNotMatch(html, /platzhalter/, datei);
+    assert.match(html, /Stefan Pude/, datei);
+    assert.match(html, /c\/o MDC#2689/, datei);
+    assert.match(html, /87463 Dietmannsried/, datei);
+    assert.match(html, /mailto:kilossos@ewe\.net/, datei);
+    assert.doesNotMatch(html, /Zweigstraße|26135|gmx/i, datei);
+  }
+});
+
+test("Version 0.96.3: Cache v174 mit js/wie-gestern.js, js/profilbild.js, js/zurueck.js, js/rueckfrage.js, js/nachtragen.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
   const sw = lies("sw.js");
-  assert.match(sw, /const CACHE_NAME = "kilossos-v173";/);
+  assert.match(sw, /const CACHE_NAME = "kilossos-v174";/);
   assert.match(sw, /"js\/wie-gestern\.js",/);
   assert.match(sw, /"js\/profilbild\.js",/);
   assert.match(sw, /"js\/zurueck\.js",/);
@@ -203,7 +216,7 @@ test("Version 0.96.2: Cache v173 mit js/wie-gestern.js, js/profilbild.js, js/zur
   assert.match(sw, /"js\/besondere-tage\.js",/);
   assert.match(sw, /"js\/freigaben\.js",/);
   assert.match(sw, /"js\/heute-grafiken\.js",/);
-  assert.match(lies("index.html"), /id="version">Version 0.96.2</);
+  assert.match(lies("index.html"), /id="version">Version 0.96.3</);
 });
 
 // 0.42.7: Wiege-Tipp Transportbox im Bereich „Auf dem Arm gewogen?“ (Ideen-Tafel, Halter 06.11.2026).

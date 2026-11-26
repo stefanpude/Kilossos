@@ -13,7 +13,7 @@ test("0.78.1: Datenschutz Abschnitt 2 nennt Monatsfotos, Befunde und besondere T
   assert.match(teil, /Gewichte mit Monatsfoto, wenn du eins aufnimmst/);
   assert.match(teil, /tierärztliche Freigaben mit Befunden \(BCS, Muskelzustand\)/);
   assert.match(teil, /besondere Tage \(zum Beispiel krank oder Futter verweigert\) mit Notiz/);
-  assert.match(ds, /Stand: 7\. November 2026/);
+  assert.match(ds, /Stand: 26\. November 2026/); // seit 0.96.3 mit Anschrift
 });
 
 test("0.78.1: Tester-Blatt für den Web-Vortest: Link, Startbildschirm, iPhone-Hinweis, Sicherung, keine Kontaktdaten", () => {
