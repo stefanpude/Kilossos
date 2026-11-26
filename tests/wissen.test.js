@@ -198,14 +198,15 @@ test("0.96.3: Impressum und Datenschutz ohne Platzhalter, mit c/o-Anschrift und 
     assert.match(html, /Stefan Pude/, datei);
     assert.match(html, /c\/o MDC#2689/, datei);
     assert.match(html, /87463 Dietmannsried/, datei);
-    assert.match(html, /mailto:kilossos@ewe\.net/, datei);
-    assert.doesNotMatch(html, /Zweigstraße|26135|gmx/i, datei);
+    // seit 0.96.4: Adresse auf der eigenen Domain (Weiterleitung bei IONOS, Stefan 26.11.2026)
+    assert.match(html, /mailto:kontakt@kilossos\.de/, datei);
+    assert.doesNotMatch(html, /Zweigstraße|26135|gmx|ewe\.net/i, datei);
   }
 });
 
-test("Version 0.96.3: Cache v174 mit js/wie-gestern.js, js/profilbild.js, js/zurueck.js, js/rueckfrage.js, js/nachtragen.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
+test("Version 0.96.4: Cache v175 mit js/wie-gestern.js, js/profilbild.js, js/zurueck.js, js/rueckfrage.js, js/nachtragen.js und der Demo (Kito und Zuki), Versionszeile unter „Mehr“", () => {
   const sw = lies("sw.js");
-  assert.match(sw, /const CACHE_NAME = "kilossos-v174";/);
+  assert.match(sw, /const CACHE_NAME = "kilossos-v175";/);
   assert.match(sw, /"js\/wie-gestern\.js",/);
   assert.match(sw, /"js\/profilbild\.js",/);
   assert.match(sw, /"js\/zurueck\.js",/);
@@ -216,7 +217,7 @@ test("Version 0.96.3: Cache v174 mit js/wie-gestern.js, js/profilbild.js, js/zur
   assert.match(sw, /"js\/besondere-tage\.js",/);
   assert.match(sw, /"js\/freigaben\.js",/);
   assert.match(sw, /"js\/heute-grafiken\.js",/);
-  assert.match(lies("index.html"), /id="version">Version 0.96.3</);
+  assert.match(lies("index.html"), /id="version">Version 0.96.4</);
 });
 
 // 0.42.7: Wiege-Tipp Transportbox im Bereich „Auf dem Arm gewogen?“ (Ideen-Tafel, Halter 06.11.2026).
